@@ -1,0 +1,28 @@
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_PATH=/app/data/resume.db
+      - RESUMES_DIR=resumes
+      - ADMIN_USERNAME=${ADMIN_USERNAME:?ADMIN_USERNAME required}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?ADMIN_PASSWORD required}
+    volumes:
+      - ./resumes:/app/resumes:ro
+      - resume_data:/app/data
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  resume_data:

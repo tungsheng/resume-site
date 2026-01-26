@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+
+# Dependencies (reinstalled in container)
+node_modules
+
+# Environment & secrets
+.env
+.env.*
+
+# Database
+data/
+*.db
+
+# Tests
+tests/
+*.test.ts
+
+# Documentation
+*.md
+
+# IDE
+.cursor
+.claude
+.idea
+.vscode
+
+# Docker (not needed inside container)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Build artifacts
+*.tgz
+out/
+dist/
+
+# Misc
+.DS_Store
+Thumbs.db
