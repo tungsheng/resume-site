@@ -70,13 +70,13 @@ export function ResumeView({ data, themeColor }: ResumeViewProps) {
           <section style={resumeStyles.section}>
             <h2 style={{ ...resumeStyles.sectionTitle, borderBottomColor: themeColor }}>Skills</h2>
             <div style={resumeStyles.skills}>
-              {(["frontend", "backend", "management"] as const).map((cat) => (
+              {Object.entries(data.skills).map(([cat, items]) => (
                 <div key={cat} style={resumeStyles.skillCat}>
                   <div style={resumeStyles.skillTitle}>
                     {cat.charAt(0).toUpperCase() + cat.slice(1)}
                   </div>
                   <div style={resumeStyles.skillItems}>
-                    {data.skills[cat].map(escapeHtml).join(" • ")}
+                    {items.map(escapeHtml).join(" • ")}
                   </div>
                 </div>
               ))}

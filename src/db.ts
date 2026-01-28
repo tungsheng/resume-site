@@ -38,6 +38,13 @@ export function initDatabase(): void {
       CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)
     `);
 
+    // Periodically clean up expired sessions
+    setInterval(() => {
+      try {
+        db?.exec("DELETE FROM sessions WHERE expires_at < unixepoch()");
+      } catch {}
+    }, 60 * 60 * 1000); // every hour
+
     console.log("Database connected");
   } catch (err) {
     console.error("Database connection failed:", err);

@@ -1,21 +1,33 @@
 // PDF generation
 
-import puppeteer from "puppeteer-core";
+import puppeteer, { type Browser } from "puppeteer-core";
 
-export async function generatePDF(html: string): Promise<Buffer> {
-  const browser = await puppeteer.launch({
+const BROWSER_ARGS = [
+  "--no-sandbox",
+  "--disable-setuid-sandbox",
+  "--disable-dev-shm-usage",
+  "--disable-gpu",
+];
+
+let browser: Browser | null = null;
+
+async function getBrowser(): Promise<Browser> {
+  if (browser && browser.connected) return browser;
+
+  browser = await puppeteer.launch({
     headless: true,
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-    ],
+    args: BROWSER_ARGS,
   });
 
+  return browser;
+}
+
+export async function generatePDF(html: string): Promise<Buffer> {
+  const b = await getBrowser();
+  const page = await b.newPage();
+
   try {
-    const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
     const pdf = await page.pdf({
       format: "Letter",
@@ -24,6 +36,6 @@ export async function generatePDF(html: string): Promise<Buffer> {
     });
     return Buffer.from(pdf);
   } finally {
-    await browser.close();
+    await page.close();
   }
 }

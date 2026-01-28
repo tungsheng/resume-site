@@ -18,11 +18,7 @@ export interface ResumeData {
     endDate: string;
     highlights: string[];
   }>;
-  skills: {
-    frontend: string[];
-    backend: string[];
-    management: string[];
-  };
+  skills: Record<string, string[]>;
   education: Array<{
     school: string;
     degree: string;

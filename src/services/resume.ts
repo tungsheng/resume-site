@@ -48,12 +48,14 @@ function validateResumeData(data: unknown): data is ResumeData {
     if (!Array.isArray(e.highlights)) return false;
   }
 
-  // Validate skills
+  // Validate skills (dynamic categories)
   if (!d.skills || typeof d.skills !== "object") return false;
   const s = d.skills as Record<string, unknown>;
-  if (!Array.isArray(s.frontend)) return false;
-  if (!Array.isArray(s.backend)) return false;
-  if (!Array.isArray(s.management)) return false;
+  const skillKeys = Object.keys(s);
+  if (skillKeys.length === 0) return false;
+  for (const key of skillKeys) {
+    if (!Array.isArray(s[key])) return false;
+  }
 
   // Validate education array
   if (!Array.isArray(d.education)) return false;
@@ -132,19 +134,15 @@ export function generateHTML(
     )
     .join("");
 
-  const skillsHTML = `
+  const skillsHTML = Object.entries(data.skills)
+    .map(
+      ([category, items]) => `
     <div class="skill-category">
-      <div class="skill-category-title">Frontend</div>
-      <div class="skill-items">${data.skills.frontend.map(escapeHtml).join(" • ")}</div>
-    </div>
-    <div class="skill-category">
-      <div class="skill-category-title">Backend</div>
-      <div class="skill-items">${data.skills.backend.map(escapeHtml).join(" • ")}</div>
-    </div>
-    <div class="skill-category">
-      <div class="skill-category-title">Management</div>
-      <div class="skill-items">${data.skills.management.map(escapeHtml).join(" • ")}</div>
-    </div>`;
+      <div class="skill-category-title">${escapeHtml(category.charAt(0).toUpperCase() + category.slice(1))}</div>
+      <div class="skill-items">${items.map(escapeHtml).join(" • ")}</div>
+    </div>`
+    )
+    .join("");
 
   const certificatesHTML = data.certificates
     .map(

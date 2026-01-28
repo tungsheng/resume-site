@@ -23,6 +23,16 @@ import resumePage from "../public/resume.html";
 
 initDatabase();
 
+// Wrap handler to apply security headers to all API responses
+function withHeaders<T extends (...args: any[]) => Response | Promise<Response>>(
+  handler: T
+): T {
+  return (async (...args: any[]) => {
+    const res = await handler(...args);
+    return addSecurityHeaders(res);
+  }) as unknown as T;
+}
+
 Bun.serve({
   port: config.port,
   routes: {
@@ -32,30 +42,29 @@ Bun.serve({
     "/resume/:name": resumePage,
 
     // Auth API routes
-    "/api/login": { POST: handleLogin },
-    "/api/logout": { POST: handleLogout },
-    "/api/session": { GET: handleSession },
+    "/api/login": { POST: withHeaders(handleLogin) },
+    "/api/logout": { POST: withHeaders(handleLogout) },
+    "/api/session": { GET: withHeaders(handleSession) },
 
     // Resume API routes
-    "/api/resumes": { GET: handleListResumes },
-    "/api/resume/:name": { GET: handleGetResume },
+    "/api/resumes": { GET: withHeaders(handleListResumes) },
+    "/api/resume/:name": { GET: withHeaders(handleGetResume) },
 
     // Settings API routes
     "/api/settings/:name": {
-      GET: handleGetSettings,
-      POST: handleSaveSettings,
+      GET: withHeaders(handleGetSettings),
+      POST: withHeaders(handleSaveSettings),
     },
 
     // PDF export routes
-    "/api/export-pdf": { POST: handleExportPDF },
-    "/api/public-pdf": { POST: handlePublicPDF },
+    "/api/export-pdf": { POST: withHeaders(handleExportPDF) },
+    "/api/public-pdf": { POST: withHeaders(handlePublicPDF) },
   },
 
   // Fallback for static files
   async fetch(req): Promise<Response> {
     const staticResponse = await handleStaticFile(req);
-    if (staticResponse) return staticResponse;
-
+    if (staticResponse) return addSecurityHeaders(staticResponse);
     return addSecurityHeaders(new Response("Not Found", { status: 404 }));
   },
 
