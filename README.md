@@ -26,9 +26,15 @@ Default login: `admin` / `changeme`
 Create `resumes/your-name.yaml`:
 
 ```yaml
-header:
+meta:
+  version: 2
+  slug: your-name
+  updatedAt: "2026-02-17"
+
+profile:
   name: Your Name
-  badges: [Software Engineer]
+  headline:
+    - Software Engineer
   contacts:
     phone: 555-1234
     linkedin: yourname
@@ -36,29 +42,36 @@ header:
   summary: Brief professional summary.
 
 experience:
-  - title: Senior Developer
+  - role: Senior Developer
     company: Tech Corp
-    startDate: "2020"
-    endDate: Present
+    period:
+      start: "2020"
+      end: Present
     highlights:
       - Led development of key features
 
 skills:
-  frontend: [React, TypeScript]
-  backend: [Node.js, PostgreSQL]
-  management: [Agile]
+  - category: Frontend
+    items: [React, TypeScript]
+  - category: Backend
+    items: [Node.js, PostgreSQL]
+  - category: Management
+    items: [Agile]
 
 education:
   - school: University
     degree: BS Computer Science
-    startDate: "2012"
-    endDate: "2016"
+    period:
+      start: "2012"
+      end: "2016"
 
-certificates:
-  - title: AWS Certified
+certifications:
+  - name: AWS Certified
     issuer: Amazon
     date: "2023"
 ```
+
+Legacy format (`header`, `title`, `startDate/endDate`, skills as object) is still supported and normalized at load time.
 
 Then visit: http://localhost:3000/resume/your-name
 

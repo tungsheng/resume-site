@@ -41,6 +41,18 @@ export function isValidColor(color: string): boolean {
 }
 
 /**
+ * Convert #RRGGBB to rgba(r, g, b, alpha). Returns original color if invalid.
+ */
+export function hexToRgba(color: string, alpha: number): string {
+  if (!isValidColor(color)) return color;
+  const clampedAlpha = Math.max(0, Math.min(1, alpha));
+  const r = Number.parseInt(color.slice(1, 3), 16);
+  const g = Number.parseInt(color.slice(3, 5), 16);
+  const b = Number.parseInt(color.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`;
+}
+
+/**
  * Parse JSON body from request safely
  */
 export async function parseJsonBody<T>(req: Request): Promise<T | null> {

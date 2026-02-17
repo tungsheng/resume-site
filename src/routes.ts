@@ -18,7 +18,8 @@ import {
   getSessionCSRFToken,
   updateSessionCSRFToken,
 } from "./services/auth";
-import { getThemeColor, saveThemeColor } from "./services/settings";
+import { isResumeLayoutTemplate } from "./layouts";
+import { getResumeSettings, saveResumeSettings } from "./services/settings";
 import { listResumes, loadResume, generateHTML } from "./services/resume";
 import { generatePDF } from "./services/pdf";
 
@@ -157,8 +158,8 @@ export async function handleGetResume(req: Request & { params?: Record<string, s
 
 export async function handleGetSettings(req: Request & { params?: Record<string, string> }): Promise<Response> {
   const name = req.params?.name ?? new URL(req.url).pathname.replace("/api/settings/", "");
-  const themeColor = getThemeColor(name);
-  return Response.json({ themeColor });
+  const settings = getResumeSettings(name);
+  return Response.json(settings);
 }
 
 export async function handleSaveSettings(req: Request): Promise<Response> {
@@ -173,17 +174,35 @@ export async function handleSaveSettings(req: Request): Promise<Response> {
   const name = (req as Request & { params?: Record<string, string> }).params?.name
     ?? new URL(req.url).pathname.replace("/api/settings/", "");
 
-  const body = await parseJsonBody<{ themeColor?: string }>(req);
+  const body = await parseJsonBody<{ themeColor?: string; layoutTemplate?: string }>(req);
   if (!body) {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { themeColor } = body;
-  if (typeof themeColor !== "string" || !isValidColor(themeColor)) {
+  if (body.themeColor === undefined && body.layoutTemplate === undefined) {
+    return Response.json({ error: "No settings provided" }, { status: 400 });
+  }
+
+  if (body.themeColor !== undefined && !isValidColor(body.themeColor)) {
     return Response.json({ error: "Invalid theme color" }, { status: 400 });
   }
 
-  saveThemeColor(name, themeColor);
+  if (
+    body.layoutTemplate !== undefined &&
+    !isResumeLayoutTemplate(body.layoutTemplate)
+  ) {
+    return Response.json({ error: "Invalid layout template" }, { status: 400 });
+  }
+
+  const current = getResumeSettings(name);
+  const themeColor = body.themeColor ?? current.themeColor;
+  const layoutTemplate = body.layoutTemplate ?? current.layoutTemplate;
+
+  const saved = saveResumeSettings(name, themeColor, layoutTemplate);
+  if (!saved) {
+    return Response.json({ error: "Failed to save settings" }, { status: 400 });
+  }
+
   return Response.json({ success: true });
 }
 
@@ -213,14 +232,26 @@ export async function handlePublicPDF(req: Request): Promise<Response> {
 }
 
 async function handlePDFGeneration(req: Request): Promise<Response> {
-  const body = await parseJsonBody<{ name?: string; themeColor?: string }>(req);
+  const body = await parseJsonBody<{
+    name?: string;
+    themeColor?: string;
+    layoutTemplate?: string;
+  }>(req);
   if (!body) {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { name, themeColor } = body;
+  const { name, themeColor, layoutTemplate } = body;
   if (typeof name !== "string") {
     return Response.json({ error: "Resume name required" }, { status: 400 });
+  }
+
+  if (themeColor !== undefined && !isValidColor(themeColor)) {
+    return Response.json({ error: "Invalid theme color" }, { status: 400 });
+  }
+
+  if (layoutTemplate !== undefined && !isResumeLayoutTemplate(layoutTemplate)) {
+    return Response.json({ error: "Invalid layout template" }, { status: 400 });
   }
 
   const data = await loadResume(name);
@@ -228,8 +259,10 @@ async function handlePDFGeneration(req: Request): Promise<Response> {
     return Response.json({ error: "Resume not found" }, { status: 404 });
   }
 
-  const color = themeColor || getThemeColor(name);
-  const html = generateHTML(data, color);
+  const settings = getResumeSettings(name);
+  const color = themeColor ?? settings.themeColor;
+  const template = layoutTemplate ?? settings.layoutTemplate;
+  const html = generateHTML(data, color, template);
   const pdf = await generatePDF(html);
 
   return new Response(new Uint8Array(pdf), {

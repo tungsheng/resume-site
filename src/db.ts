@@ -30,9 +30,19 @@ export function initDatabase(): void {
       CREATE TABLE IF NOT EXISTS settings (
         resume_name TEXT PRIMARY KEY,
         theme_color TEXT NOT NULL DEFAULT '#c9a86c',
+        layout_template TEXT NOT NULL DEFAULT '${config.defaultLayoutTemplate}',
         updated_at INTEGER DEFAULT (unixepoch())
       )
     `);
+
+    // Migration: Add layout_template column if it doesn't exist.
+    try {
+      db.exec(
+        `ALTER TABLE settings ADD COLUMN layout_template TEXT NOT NULL DEFAULT '${config.defaultLayoutTemplate}'`
+      );
+    } catch {
+      // Column already exists, ignore error
+    }
 
     db.exec(`
       CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)

@@ -1,119 +1,109 @@
-header:
+meta:
+  version: 2
+  slug: "tony-lee"
+  updatedAt: "2026-02-17"
+  targetRole: "Staff / Principal Software Engineer"
+
+profile:
   name: "Tony Lee"
-  badges:
-    - "Cross-functional Engineering Leader"
+  headline:
+    - "Staff Software Engineer"
+    - "Full-Stack"
+    - "Infrastructure"
   contacts:
     email: "tungsheng@gmail.com"
     linkedin: "tonyslee8"
   summary: |
-    Staff Software Engineer with a proven track record of delivering high-impact, complex technical projects across cross-functional teams. Expert in modernizing legacy systems, driving feature launches, and improving developer productivity by implementing scalable engineering solutions. Recognized for mentoring engineers, aligning stakeholders, and translating strategic vision into measurable results.
+    Staff Software Engineer with 10+ years of experience leading architecture, modernization, and infrastructure initiatives across enterprise SaaS platforms. Proven track record of unblocking critical launches, designing scalable API systems, and improving engineering velocity by 20–50%. Recognized for translating ambiguous business goals into reliable production systems while elevating engineering standards across teams.
 
 experience:
-  - title: "Staff Software Engineer"
+  - role: "Staff Software Engineer"
     company: "DTEX Systems"
-    startDate: "Sep 2024"
-    endDate: "Present"
+    period:
+      start: "Sep 2024"
+      end: "Present"
     highlights:
-      - "Delivered the OpenSearch Dashboards migration for DAS 7.0.0 FedRAMP, meeting ATO requirements, removing a critical launch blocker, and driving upstream fixes through strategic collaboration with AWS/OpenSearch engineering."
-      - "Led delivery of the Data Loss Prevention (DLP) feature, owning UI/UX workflows, data model and API design, and cross-team alignment to enable a major go-to-market initiative."
-      - "Increased developer productivity by 20% through local-development tooling and automation that accelerated dev/test cycles; recognized as a key driver of engineering velocity improvements."
+      - "Led end-to-end OpenSearch Dashboards migration that removed a critical product launch blocker; partnered directly with AWS/OpenSearch engineering to identify root causes, drive upstream fixes, and stabilize production deployments across environments."
+      - "Architected and delivered the Data Loss Prevention (DLP) feature spanning UI workflows, API design, and data modeling; aligned cross-functional teams (PM, backend, frontend, infra) to support a major go-to-market initiative."
+      - "Designed and implemented local development tooling and automation that reduced dev/test cycle time by 20%, improving engineering velocity and lowering onboarding friction for new team members."
+      - "Led UI service containerization and dependency decoupling initiative, enabling independent deployments and improving release reliability; reduced cross-service coupling that previously slowed iteration."
+      - "Served as technical escalation point for ambiguous or high-risk engineering challenges, translating loosely defined product requirements into production-ready systems."
 
-  - title: "Senior Technical Lead"
+  - role: "Senior Technical Lead"
     company: "Cisco System Inc."
-    startDate: "Aug 2019"
-    endDate: "Apr 2024"
+    period:
+      start: "Aug 2019"
+      end: "Apr 2024"
     highlights:
-      - "Drive high-level/detailed technical designs and facilitate design reviews in the Onboarding Experience project that helps customers onboard in 30 minutes."
-      - "Promote clean and maintainable code to facilitate collaboration among US, European, and Indian engineering teams."
-      - "Work with Engineers, Directors, Architects, PM, and UX to establish solution requirements and devise technical approaches for high-demand projects."
-      - "Mentor junior engineers and contribute to their growth of becoming feature owners."
-      - "Initiated AngularJS-to-React migration to address unsupported vulnerabilities, introduced the Cypress testing framework, and accelerated test development by 50%."
+      - "Led end-to-end architecture and technical strategy for the Onboarding Experience platform, enabling enterprise customers to complete complex onboarding workflows within 30 minutes."
+      - "Drove high-level and detailed system design across frontend, backend, and integration layers; facilitated design reviews and resolved cross-team architectural tradeoffs across US, European, and Indian engineering teams."
+      - "Initiated and led AngularJS-to-React modernization to eliminate security vulnerabilities and improve maintainability; introduced Cypress-based end-to-end testing infrastructure, reducing test development time by 50% and increasing deployment confidence."
+      - "Partnered with Directors, Architects, PM, and UX to translate ambiguous business requirements into scalable API contracts and state-driven UI workflows."
+      - "Mentored engineers toward feature ownership and design leadership; raised overall code quality standards and strengthened cross-team engineering practices."
+      - "Contributed to CI/CD pipeline improvements and test automation strategy to reduce regression risk in high-visibility customer-facing flows."
 
-  - title: "Senior Software Engineer"
+  - role: "Senior Software Engineer"
     company: "Tico Co., Ltd."
-    startDate: "Jan 2019"
-    endDate: "Aug 2019"
+    period:
+      start: "Jan 2019"
+      end: "Aug 2019"
     highlights:
-      - "Oversee all software development projects and ensure multiple on-time releases."
-      - "Improve message loading time by 60%."
-      - "Enforce efficient coding style. Reduce the codebase size by 30%."
+      - "Led software development initiatives ensuring multiple on-time releases across product lines."
+      - "Improved message loading performance by 60% through frontend and API optimization."
+      - "Reduced codebase size by 30% by enforcing modular design and eliminating redundant logic, improving maintainability and build performance."
 
-  - title: "Co-founder / CTO"
+  - role: "Co-founder / CTO"
     company: "Popup Technology Co., Ltd."
-    startDate: "Apr 2016"
-    endDate: "Oct 2018"
+    period:
+      start: "Apr 2016"
+      end: "Oct 2018"
     highlights:
-      - "Interview and hire a talented 5-person team from scratch."
-      - "Carry out product demo sessions in regional events that contribute to 10% of new users."
-      - "Implement Scrum. Improve team productivity by 30%."
-      - "Deliver on-demand features that yield 100% revenue growth."
-
-  - title: "Senior Engineer"
-    company: "Taiwan Mobile Co., Ltd."
-    startDate: "Dec 2013"
-    endDate: "Feb 2015"
-    highlights: []
-
-  - title: "iOS Developer"
-    company: "AXIM Communications, Inc."
-    startDate: "Dec 2011"
-    endDate: "Aug 2012"
-    highlights: []
+      - "Architected and built the company’s core platform from scratch (backend services, APIs, frontend workflows)."
+      - "Hired and led a 5-person engineering team; established development standards, agile processes, and code review practices."
+      - "Delivered revenue-generating features that drove 100% revenue growth within 12 months."
+      - "Represented the company in regional demo events contributing to 10% of new user acquisition."
 
 skills:
-  frontend:
-    - "React"
-    - "AngularJS"
-    - "TypeScript"
-    - "Cypress"
-    - "Jest"
-    - "Protractor"
-    - "Karma"
-    - "HTML"
-    - "CSS"
-    - "Git"
-    - "Webpack"
-    - "React Native"
-    - "Objective-C"
-
-  backend:
-    - "Ruby on Rails"
-    - "Rspec"
-    - "Node.js"
-    - "MongoDB"
-    - "Go"
-    - "Golang"
-    - "Python"
-    - "GraphQL"
-    - "SQL"
-    - "Docker"
-    - "Jenkins"
-    - "Machine Learning"
-    - "AI"
-
-  management:
-    - "Cross-functional Collaboration"
-    - "Engineering Management"
-    - "Project Management"
-    - "Leadership"
-    - "Problem Solving"
+  - category: "Languages"
+    items:
+      - "Go"
+      - "Python"
+      - "Ruby"
+      - "TypeScript"
+      - "SQL"
+  - category: "Frontend"
+    items:
+      - "React"
+      - "AngularJS"
+      - "Cypress"
+      - "Jest"
+  - category: "Backend"
+    items:
+      - "Node.js"
+      - "Ruby on Rails"
+      - "GraphQL"
+      - "REST"
+  - category: "Infrastructure"
+    items:
+      - "Docker"
+      - "CI/CD"
+      - "Jenkins"
+      - "OpenSearch"
+  - category: "Leadership"
+    items:
+      - "Architecture Design"
+      - "Cross-Functional Alignment"
+      - "Technical Mentorship"
 
 education:
   - school: "University of California, San Diego"
     degree: "M. E. Electrical Engineering"
-    startDate: "Sep 2006"
-    endDate: "Jun 2008"
+    period:
+      start: "Sep 2006"
+      end: "Jun 2008"
 
   - school: "University of Illinois at Urbana-Champaign"
     degree: "B. S. Electrical Engineering"
-    startDate: "Sep 2003"
-    endDate: "Dec 2005"
-
-certificates:
-  - title: "Neural Networks and Deep Learning"
-    issuer: "Coursera"
-    date: "Dec 2023"
-
-  - title: "Neural Networks Regularization and Optimization"
-    issuer: "Coursera"
-    date: "Jan 2024"
+    period:
+      start: "Sep 2003"
+      end: "Dec 2005"

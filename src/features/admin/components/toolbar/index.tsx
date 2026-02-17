@@ -2,6 +2,10 @@
 
 import React from "react";
 import { COLOR_PRESETS, buttonStyles } from "../../../../styles";
+import {
+  RESUME_TEMPLATE_OPTIONS,
+  type ResumeLayoutTemplate,
+} from "../../../../layouts";
 import { Spinner, DownloadIcon } from "../../../../components";
 import { styles } from "./style";
 
@@ -9,8 +13,10 @@ interface ToolbarProps {
   resumes: string[];
   currentResume: string;
   currentColor: string;
+  currentTemplate: ResumeLayoutTemplate;
   onResumeChange: (name: string) => void;
   onColorChange: (color: string) => void;
+  onTemplateChange: (template: ResumeLayoutTemplate) => void;
   onExport: () => void;
   onLogout: () => void;
   exporting: boolean;
@@ -20,8 +26,10 @@ export function Toolbar({
   resumes,
   currentResume,
   currentColor,
+  currentTemplate,
   onResumeChange,
   onColorChange,
+  onTemplateChange,
   onExport,
   onLogout,
   exporting,
@@ -48,6 +56,23 @@ export function Toolbar({
               </option>
             ))
           )}
+        </select>
+      </div>
+
+      <div style={styles.group}>
+        <label htmlFor="template-select" style={styles.label}>Template:</label>
+        <select
+          id="template-select"
+          value={currentTemplate}
+          onChange={(e) => onTemplateChange(e.target.value as ResumeLayoutTemplate)}
+          style={styles.select}
+          aria-label="Select layout template"
+        >
+          {RESUME_TEMPLATE_OPTIONS.map((template) => (
+            <option key={template.id} value={template.id}>
+              {template.label}
+            </option>
+          ))}
         </select>
       </div>
 

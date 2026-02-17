@@ -3,6 +3,7 @@ import {
   sanitizeName,
   escapeHtml,
   isValidColor,
+  hexToRgba,
   checkRateLimit,
   generateCSRFToken,
   validateCSRFToken,
@@ -14,7 +15,14 @@ import {
   deleteSession,
   isAuthenticated,
 } from "../src/services/auth";
-import { getThemeColor, saveThemeColor } from "../src/services/settings";
+import {
+  getLayoutTemplate,
+  getResumeSettings,
+  getThemeColor,
+  saveLayoutTemplate,
+  saveThemeColor,
+} from "../src/services/settings";
+import { RESUME_TEMPLATE_OPTIONS } from "../src/layouts";
 import type { ResumeData } from "../src/types";
 
 // ============================================
@@ -70,6 +78,16 @@ describe("isValidColor", () => {
     expect(isValidColor("red")).toBe(false);
     expect(isValidColor("#fff")).toBe(false);
     expect(isValidColor("#GGGGGG")).toBe(false);
+  });
+});
+
+describe("hexToRgba", () => {
+  test("converts hex to rgba with given alpha", () => {
+    expect(hexToRgba("#c9a86c", 0.45)).toBe("rgba(201, 168, 108, 0.45)");
+  });
+
+  test("returns original value for invalid hex", () => {
+    expect(hexToRgba("invalid", 0.45)).toBe("invalid");
   });
 });
 
@@ -199,6 +217,21 @@ describe("Resume Service", () => {
     expect(data).toBeNull();
   });
 
+  test("loadResume supports v2 profile schema", async () => {
+    const data = await loadResume("tony-lee");
+    expect(data).not.toBeNull();
+    expect(data?.header.name).toBe("Tony Lee");
+    expect(data?.skills["Languages"]).toBeArray();
+    expect(data?.certificates).toBeArray();
+  });
+
+  test("loadResume supports legacy string-based skills", async () => {
+    const data = await loadResume("tony-lee-1");
+    expect(data).not.toBeNull();
+    expect(data?.skills["languages"]).toContain("Python");
+    expect(data?.certificates).toBeArray();
+  });
+
   test("generateHTML creates valid HTML", () => {
     const mockData: ResumeData = {
       header: {
@@ -250,6 +283,97 @@ describe("Resume Service", () => {
     const html = generateHTML(xssData);
     expect(html).not.toContain("<script>");
     expect(html).toContain("&lt;script&gt;");
+  });
+
+  test("generateHTML single-column template uses ATS section order", () => {
+    const mockData: ResumeData = {
+      header: {
+        name: "John Doe",
+        badges: ["Badge1"],
+        contacts: {
+          phone: "555-1234",
+          linkedin: "johndoe",
+          email: "john@example.com",
+        },
+        summary: "A summary.",
+      },
+      experience: [
+        {
+          title: "Developer",
+          company: "TechCorp",
+          startDate: "2020",
+          endDate: "2023",
+          highlights: ["Built things"],
+        },
+      ],
+      skills: { frontend: ["React"], backend: ["Node.js"], management: ["Agile"] },
+      education: [
+        { school: "University", degree: "BS CS", startDate: "2016", endDate: "2020" },
+      ],
+      certificates: [{ title: "AWS", issuer: "Amazon", date: "2022" }],
+    };
+
+    const html = generateHTML(mockData, "#c9a86c", "single-column-ats");
+    const summaryIndex = html.indexOf("<h2 class=\"section-title\">Professional Summary</h2>");
+    const skillsIndex = html.indexOf("<h2 class=\"section-title\">Skills</h2>");
+    const experienceIndex = html.indexOf("<h2 class=\"section-title\">Work Experience</h2>");
+    const educationIndex = html.indexOf("<h2 class=\"section-title\">Education</h2>");
+    const certificationsIndex = html.indexOf("<h2 class=\"section-title\">Certifications</h2>");
+
+    expect(html).toContain("<div class=\"single-column-flow\">");
+    expect(summaryIndex).toBeGreaterThan(-1);
+    expect(skillsIndex).toBeGreaterThan(summaryIndex);
+    expect(experienceIndex).toBeGreaterThan(skillsIndex);
+    expect(educationIndex).toBeGreaterThan(experienceIndex);
+    expect(certificationsIndex).toBeGreaterThan(educationIndex);
+    expect(html).toContain("class=\"education-line\">BS CS • University • 2016 - 2020</div>");
+    expect(html).toContain("class=\"skill-line\"><span class=\"skill-category-inline\">Frontend:</span>");
+  });
+
+  test("generateHTML timeline template includes connected rail and job dots", () => {
+    const mockData: ResumeData = {
+      header: {
+        name: "John Doe",
+        badges: [],
+        contacts: {
+          phone: "555-1234",
+          linkedin: "johndoe",
+          email: "john@example.com",
+        },
+        summary: "A summary.",
+      },
+      experience: [
+        {
+          title: "Lead Engineer",
+          company: "TechCorp",
+          startDate: "2021",
+          endDate: "Present",
+          highlights: ["Built platform"],
+        },
+        {
+          title: "Engineer",
+          company: "BuildCo",
+          startDate: "2019",
+          endDate: "2021",
+          highlights: ["Improved performance"],
+        },
+      ],
+      skills: { frontend: ["React"], backend: ["Node.js"], management: ["Agile"] },
+      education: [
+        { school: "University", degree: "BS CS", startDate: "2016", endDate: "2020" },
+      ],
+      certificates: [],
+    };
+
+    const html = generateHTML(mockData, "#c9a86c", "minimal-timeline");
+    const dotCount = html.match(/class="experience-dot"/g)?.length ?? 0;
+
+    expect(html).toContain("<div class=\"experience-list\">");
+    expect(html).toContain("<div class=\"experience-rail\"></div>");
+    expect(dotCount).toBe(mockData.experience.length);
+    expect(html).toContain(".page.layout-minimal-timeline .experience-item {\n  padding-left: 22px;");
+    expect(html).toContain(".page.layout-minimal-timeline .badge {\n  border-radius: 999px;");
+    expect(html).toContain(".page.layout-minimal-timeline .experience-title,\n.page.layout-minimal-timeline .education-degree,\n.page.layout-minimal-timeline .certificate-title {");
   });
 });
 
@@ -309,10 +433,32 @@ describe("Settings Service", () => {
     expect(color).toBe("#ff0000");
   });
 
+  test("returns default layout template for unknown resume", () => {
+    const template = getLayoutTemplate("unknown-xyz");
+    expect(template).toBe("single-column-ats");
+  });
+
+  test("save layout template keeps existing theme color", () => {
+    const name = getUniqueName();
+    saveThemeColor(name, "#2c3e50");
+    const saved = saveLayoutTemplate(name, "single-column-ats");
+    expect(saved).toBe(true);
+    const settings = getResumeSettings(name);
+    expect(settings.themeColor).toBe("#2c3e50");
+    expect(settings.layoutTemplate).toBe("single-column-ats");
+  });
+
   test("rejects invalid color", () => {
     const name = getUniqueName();
     const result = saveThemeColor(name, "invalid");
     expect(result).toBe(false);
+  });
+
+  test("only keeps supported layout templates", () => {
+    expect(RESUME_TEMPLATE_OPTIONS.map((item) => item.id)).toEqual([
+      "single-column-ats",
+      "minimal-timeline",
+    ]);
   });
 });
 

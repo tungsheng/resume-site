@@ -3,6 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import type { ResumeData } from "../../types";
+import {
+  DEFAULT_RESUME_TEMPLATE,
+  isResumeLayoutTemplate,
+  type ResumeLayoutTemplate,
+} from "../../layouts";
 import { downloadBlob, useToast } from "../../hooks";
 import { spinKeyframes } from "../../styles";
 import { ResumeView, Spinner, ToastContainer } from "../../components";
@@ -17,6 +22,9 @@ function getResumeName(): string {
 function Resume() {
   const [data, setData] = useState<ResumeData | null>(null);
   const [themeColor, setThemeColor] = useState("#c9a86c");
+  const [layoutTemplate, setLayoutTemplate] = useState<ResumeLayoutTemplate>(
+    DEFAULT_RESUME_TEMPLATE
+  );
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +42,9 @@ function Resume() {
       if (settingsRes.ok) {
         const settings = await settingsRes.json();
         if (settings.themeColor) setThemeColor(settings.themeColor);
+        if (isResumeLayoutTemplate(settings.layoutTemplate)) {
+          setLayoutTemplate(settings.layoutTemplate);
+        }
       }
 
       const res = await fetch(`/api/resume/${encodeURIComponent(resumeName)}`);
@@ -60,7 +71,11 @@ function Resume() {
       const res = await fetch("/api/public-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: resumeName }),
+        body: JSON.stringify({
+          name: resumeName,
+          themeColor,
+          layoutTemplate,
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to generate PDF");
@@ -121,7 +136,11 @@ function Resume() {
       />
 
       <main style={styles.pageWrapper} className="page-wrapper">
-        <ResumeView data={data} themeColor={themeColor} />
+        <ResumeView
+          data={data}
+          themeColor={themeColor}
+          layoutTemplate={layoutTemplate}
+        />
       </main>
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />

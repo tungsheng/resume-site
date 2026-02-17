@@ -13,6 +13,7 @@ export const styles: Record<string, React.CSSProperties> = {
     padding: "12px 24px",
     display: "flex",
     alignItems: "center",
+    flexWrap: "wrap",
     gap: 20,
     zIndex: 1000,
     boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
@@ -40,7 +41,7 @@ export const styles: Record<string, React.CSSProperties> = {
     borderRadius: 4,
     fontSize: 14,
     cursor: "pointer",
-    minWidth: 180,
+    minWidth: 165,
   },
   colorWrapper: {
     display: "flex",

@@ -3,6 +3,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import type { ResumeData } from "../../types";
+import {
+  DEFAULT_RESUME_TEMPLATE,
+  isResumeLayoutTemplate,
+  type ResumeLayoutTemplate,
+} from "../../layouts";
 import { getCSRFToken, setCSRFToken, clearCSRFToken, downloadBlob, useToast } from "../../hooks";
 import { colors, spinKeyframes } from "../../styles";
 import { ToastContainer } from "../../components";
@@ -14,6 +19,9 @@ function Admin() {
   const [resumes, setResumes] = useState<string[]>([]);
   const [currentResume, setCurrentResume] = useState("");
   const [currentColor, setCurrentColor] = useState(colors.themeColor);
+  const [currentTemplate, setCurrentTemplate] = useState<ResumeLayoutTemplate>(
+    DEFAULT_RESUME_TEMPLATE
+  );
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -80,11 +88,36 @@ function Admin() {
       if (res.ok) {
         const data = await res.json();
         if (data.themeColor) setCurrentColor(data.themeColor);
+        if (isResumeLayoutTemplate(data.layoutTemplate)) {
+          setCurrentTemplate(data.layoutTemplate);
+        } else {
+          setCurrentTemplate(DEFAULT_RESUME_TEMPLATE);
+        }
       }
     } catch (err) {
       console.error("Failed to load settings:", err);
     }
   };
+
+  const saveSettings = useCallback(
+    async (themeColor: string, layoutTemplate: ResumeLayoutTemplate) => {
+      if (!currentResume) return;
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        const csrfToken = getCSRFToken();
+        if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
+        await fetch(`/api/settings/${encodeURIComponent(currentResume)}`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ themeColor, layoutTemplate }),
+        });
+      } catch (err) {
+        console.error("Failed to save settings:", err);
+        showToast("Failed to save settings", "error");
+      }
+    },
+    [currentResume, showToast]
+  );
 
   const handleColorChange = useCallback(
     (color: string) => {
@@ -93,23 +126,18 @@ function Admin() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
 
       debounceRef.current = setTimeout(async () => {
-        if (!currentResume) return;
-        try {
-          const headers: Record<string, string> = { "Content-Type": "application/json" };
-          const csrfToken = getCSRFToken();
-          if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
-          await fetch(`/api/settings/${encodeURIComponent(currentResume)}`, {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ themeColor: color }),
-          });
-        } catch (err) {
-          console.error("Failed to save settings:", err);
-          showToast("Failed to save theme color", "error");
-        }
+        await saveSettings(color, currentTemplate);
       }, 500);
     },
-    [currentResume, showToast]
+    [currentTemplate, saveSettings]
+  );
+
+  const handleTemplateChange = useCallback(
+    (template: ResumeLayoutTemplate) => {
+      setCurrentTemplate(template);
+      void saveSettings(currentColor, template);
+    },
+    [currentColor, saveSettings]
   );
 
   const handleExport = async () => {
@@ -124,7 +152,11 @@ function Admin() {
       const res = await fetch("/api/export-pdf", {
         method: "POST",
         headers,
-        body: JSON.stringify({ name: currentResume, themeColor: currentColor }),
+        body: JSON.stringify({
+          name: currentResume,
+          themeColor: currentColor,
+          layoutTemplate: currentTemplate,
+        }),
       });
 
       if (res.status === 401) {
@@ -170,14 +202,21 @@ function Admin() {
             resumes={resumes}
             currentResume={currentResume}
             currentColor={currentColor}
+            currentTemplate={currentTemplate}
             onResumeChange={setCurrentResume}
             onColorChange={handleColorChange}
+            onTemplateChange={handleTemplateChange}
             onExport={handleExport}
             onLogout={handleLogout}
             exporting={exporting}
           />
           <main style={styles.mainContent}>
-            <ResumePreview data={resumeData} themeColor={currentColor} loading={loading} />
+            <ResumePreview
+              data={resumeData}
+              themeColor={currentColor}
+              layoutTemplate={currentTemplate}
+              loading={loading}
+            />
           </main>
         </>
       )}
