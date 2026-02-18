@@ -16,6 +16,47 @@ interface ResumeViewProps {
   layoutTemplate?: ResumeLayoutTemplate;
 }
 
+function MailMiniIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+      focusable="false"
+      width="11"
+      height="11"
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <polyline points="3,7 12,13 21,7" />
+    </svg>
+  );
+}
+
+function LinkedinMiniIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+      focusable="false"
+      width="11"
+      height="11"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <circle cx="8" cy="8" r="1" />
+      <line x1="8" y1="11" x2="8" y2="16.5" />
+      <line x1="12" y1="11" x2="12" y2="16.5" />
+      <path d="M12 13.1a2.4 2.4 0 0 1 4.8 0v3.4" />
+    </svg>
+  );
+}
+
 export function ResumeView({
   data,
   themeColor,
@@ -24,6 +65,12 @@ export function ResumeView({
   const resumeStyles = getResumeStyles(layoutTemplate);
   const view = buildResumeViewModel(data, layoutTemplate);
   const timelineRailColor = hexToRgba(themeColor, 0.45);
+  const headlineText = view.hasBadges ? view.header.badges.join(" • ") : "";
+  const hasContacts = Boolean(
+    view.header.contacts.phone ||
+      view.header.contacts.email ||
+      view.header.contacts.linkedin
+  );
 
   const summarySection = view.hasSummary ? (
     <section style={resumeStyles.section}>
@@ -153,43 +200,47 @@ export function ResumeView({
 
   return (
     <div style={resumeStyles.page}>
-      <header style={{ ...resumeStyles.header, borderBottomColor: themeColor }}>
+      <header style={resumeStyles.header}>
         <div style={resumeStyles.headerContent}>
           <div style={resumeStyles.headerLeft}>
-            <h1 style={resumeStyles.name}>{view.header.name}</h1>
-            {view.hasBadges && (
-              <div style={resumeStyles.badges}>
-                {view.header.badges.map((badge, i) => (
-                  <span key={i} style={{ ...resumeStyles.badge, background: themeColor }}>
-                    {badge}
+            <h1 style={{ ...resumeStyles.name, color: themeColor }}>{view.header.name}</h1>
+            {headlineText && <p style={resumeStyles.headerSubtitle}>{headlineText}</p>}
+          </div>
+          {hasContacts && (
+            <div style={resumeStyles.contact}>
+              {view.header.contacts.phone && (
+                <div style={resumeStyles.contactRow}>
+                  <span style={resumeStyles.contactLabel}>Phone</span>
+                  <span style={resumeStyles.contactValue}>{view.header.contacts.phone}</span>
+                </div>
+              )}
+              {view.header.contacts.email && (
+                <div style={{ ...resumeStyles.contactRow, ...resumeStyles.contactRowIcon }}>
+                  <a href={`mailto:${view.header.contacts.email}`} style={resumeStyles.contactLink}>
+                    {view.header.contacts.email}
+                  </a>
+                  <span style={resumeStyles.contactIcon}>
+                    <MailMiniIcon />
                   </span>
-                ))}
-              </div>
-            )}
-          </div>
-          <div style={resumeStyles.contact}>
-            {view.header.contacts.phone && (
-              <div>{view.header.contacts.phone}</div>
-            )}
-            {view.header.contacts.email && (
-              <div>
-                <a href={`mailto:${view.header.contacts.email}`} style={resumeStyles.link}>
-                  {view.header.contacts.email}
-                </a>
-              </div>
-            )}
-            {view.header.contacts.linkedin && (
-              <div>
-                <a
-                  href={`https://linkedin.com/in/${encodeURIComponent(view.header.contacts.linkedin)}`}
-                  style={resumeStyles.link}
-                >
-                  {`linkedin.com/in/${view.header.contacts.linkedin}`}
-                </a>
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+              {view.header.contacts.linkedin && (
+                <div style={{ ...resumeStyles.contactRow, ...resumeStyles.contactRowIcon }}>
+                  <a
+                    href={`https://linkedin.com/in/${encodeURIComponent(view.header.contacts.linkedin)}`}
+                    style={resumeStyles.contactLink}
+                  >
+                    {`linkedin.com/in/${view.header.contacts.linkedin}`}
+                  </a>
+                  <span style={resumeStyles.contactIcon}>
+                    <LinkedinMiniIcon />
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+        <div style={{ ...resumeStyles.headerDivider, borderTopColor: themeColor }} />
       </header>
 
       <div style={resumeStyles.body}>

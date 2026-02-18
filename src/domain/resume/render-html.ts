@@ -11,10 +11,23 @@ export function generateHTML(
 ): string {
   const css = generateCSS(themeColor);
   const view = buildResumeViewModel(data, layoutTemplate);
+  const headlineText = view.hasBadges ? view.header.badges.join(" • ") : "";
+  const emailIconSVG =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><polyline points="3,7 12,13 21,7"></polyline></svg>';
+  const linkedinIconSVG =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="8" cy="8" r="1"></circle><line x1="8" y1="11" x2="8" y2="16.5"></line><line x1="12" y1="11" x2="12" y2="16.5"></line><path d="M12 13.1a2.4 2.4 0 0 1 4.8 0v3.4"></path></svg>';
 
-  const badgesHTML = view.header.badges
-    .map((badge) => `<span class="badge">${escapeHtml(badge)}</span>`)
-    .join("");
+  const contactRowsHTML = [
+    view.header.contacts.phone
+      ? `<div class="contact-row"><span class="contact-label">Phone</span><span class="contact-value">${escapeHtml(view.header.contacts.phone)}</span></div>`
+      : "",
+    view.header.contacts.email
+      ? `<div class="contact-row contact-row-icon"><a class="contact-link" href="mailto:${escapeHtml(view.header.contacts.email)}">${escapeHtml(view.header.contacts.email)}</a><span class="contact-icon">${emailIconSVG}</span></div>`
+      : "",
+    view.header.contacts.linkedin
+      ? `<div class="contact-row contact-row-icon"><a class="contact-link" href="https://linkedin.com/in/${encodeURIComponent(view.header.contacts.linkedin)}">linkedin.com/in/${escapeHtml(view.header.contacts.linkedin)}</a><span class="contact-icon">${linkedinIconSVG}</span></div>`
+      : "",
+  ].join("");
 
   const educationHTML = view.education
     .map(
@@ -127,14 +140,11 @@ export function generateHTML(
       <div class="header-content">
         <div class="header-left">
           <h1 class="name">${escapeHtml(view.header.name)}</h1>
-          ${view.hasBadges ? `<div class="badges">${badgesHTML}</div>` : ""}
+          ${headlineText ? `<p class="header-subtitle">${escapeHtml(headlineText)}</p>` : ""}
         </div>
-        <div class="contact-info">
-          ${view.header.contacts.phone ? `<div>${escapeHtml(view.header.contacts.phone)}</div>` : ""}
-          ${view.header.contacts.email ? `<div><a href="mailto:${escapeHtml(view.header.contacts.email)}">${escapeHtml(view.header.contacts.email)}</a></div>` : ""}
-          ${view.header.contacts.linkedin ? `<div><a href="https://linkedin.com/in/${encodeURIComponent(view.header.contacts.linkedin)}">linkedin.com/in/${escapeHtml(view.header.contacts.linkedin)}</a></div>` : ""}
-        </div>
+        ${contactRowsHTML ? `<div class="contact-info">${contactRowsHTML}</div>` : ""}
       </div>
+      <div class="header-divider"></div>
     </header>
     <div class="main-content">
       ${view.isSingleColumnLayout
@@ -172,40 +182,37 @@ body {
   color: #1f2937;
 }
 .page {
-  --base-font: 'Aptos', 'Calibri', 'Arial', sans-serif;
-  --ui-font: 'Aptos', 'Calibri', 'Arial', sans-serif;
-  --name-font: 'Aptos Display', 'Calibri', 'Arial', sans-serif;
-  --base-font-size: 8.45pt;
-  --base-line-height: 1.32;
-  --header-padding: 0.35in 0.54in 0.21in;
-  --content-padding: 0.24in 0.54in;
-  --content-gap: 0.22in;
-  --sidebar-width: 1.9in;
-  --section-gap: 0.15in;
-  --section-title-size: 7.65pt;
+  --base-font: 'Arial', 'Helvetica', sans-serif;
+  --ui-font: 'Arial', 'Helvetica', sans-serif;
+  --name-font: 'Arial', 'Helvetica', sans-serif;
+  --base-font-size: 9pt;
+  --base-line-height: 1.36;
+  --header-padding: 0.3in 0.48in 0.12in;
+  --content-padding: 0.17in 0.48in;
+  --content-gap: 0.17in;
+  --sidebar-width: 1.85in;
+  --section-gap: 0.22in;
+  --section-title-size: 9.4pt;
   --section-title-spacing: 1.15px;
-  --section-title-gap: 6px;
-  --education-gap: 10px;
-  --skill-gap: 8px;
-  --cert-gap: 9px;
-  --summary-size: 8.2pt;
-  --summary-line-height: 1.33;
+  --section-title-gap: 9px;
+  --education-gap: 9px;
+  --skill-gap: 7px;
+  --cert-gap: 7px;
+  --summary-size: 8.7pt;
+  --summary-line-height: 1.38;
   --summary-align: left;
-  --name-size: 22.4pt;
-  --name-spacing: 0.6px;
+  --name-size: 25.2pt;
+  --name-spacing: 0.28px;
   --name-transform: none;
-  --badge-size: 7.2pt;
-  --badge-padding: 3px 11px;
-  --contact-size: 8.1pt;
-  --experience-gap: 0.12in;
-  --experience-title-size: 8.9pt;
-  --experience-company-size: 7.55pt;
-  --experience-date-size: 7.2pt;
+  --experience-gap: 0.11in;
+  --experience-title-size: 9.6pt;
+  --experience-company-size: 8.1pt;
+  --experience-date-size: 7.7pt;
   --experience-date-min-width: 1.12in;
   --experience-date-text-align: right;
   --experience-header-align: flex-start;
-  --highlight-size: 8.1pt;
-  --highlight-line-height: 1.3;
+  --highlight-size: 8.6pt;
+  --highlight-line-height: 1.33;
   --highlight-gap: 2px;
   --timeline-rail-color: ${timelineRailColor};
   --left-column-order: 0;
@@ -230,23 +237,23 @@ body {
 }
 
 .page.layout-single-column-ats {
-  --base-font: 'Aptos', 'Calibri', 'Arial', sans-serif;
-  --name-font: 'Aptos Display', 'Calibri', 'Arial', sans-serif;
-  --ui-font: 'Aptos', 'Calibri', 'Arial', sans-serif;
-  --base-font-size: 8.45pt;
-  --header-padding: 0.34in 0.52in 0.18in;
-  --content-padding: 0.22in 0.52in;
-  --content-gap: 0.18in;
+  --base-font: 'Arial', 'Helvetica', sans-serif;
+  --name-font: 'Arial', 'Helvetica', sans-serif;
+  --ui-font: 'Arial', 'Helvetica', sans-serif;
+  --base-font-size: 9pt;
+  --header-padding: 0.27in 0.46in 0.1in;
+  --content-padding: 0.16in 0.46in;
+  --content-gap: 0.14in;
   --sidebar-width: auto;
-  --name-size: 22.4pt;
-  --name-spacing: 0.6px;
-  --section-gap: 0.14in;
-  --section-title-size: 7.65pt;
-  --section-title-gap: 6px;
-  --summary-size: 8.2pt;
-  --summary-line-height: 1.33;
-  --experience-gap: 0.12in;
-  --experience-date-size: 7.2pt;
+  --name-size: 24pt;
+  --name-spacing: 0.26px;
+  --section-gap: 0.2in;
+  --section-title-size: 9.4pt;
+  --section-title-gap: 9px;
+  --summary-size: 8.7pt;
+  --summary-line-height: 1.38;
+  --experience-gap: 0.13in;
+  --experience-date-size: 7.7pt;
   --experience-date-min-width: auto;
   --experience-date-text-align: left;
   --experience-header-align: flex-start;
@@ -264,66 +271,127 @@ body {
 }
 
 .page.layout-minimal-timeline {
-  --base-font: 'Aptos', 'Calibri', 'Arial', sans-serif;
-  --name-font: 'Aptos Display', 'Calibri', 'Arial', sans-serif;
-  --ui-font: 'Aptos', 'Calibri', 'Arial', sans-serif;
-  --base-font-size: 8.45pt;
-  --header-padding: 0.35in 0.54in 0.21in;
-  --content-padding: 0.24in 0.54in;
-  --content-gap: 0.22in;
-  --sidebar-width: 1.9in;
-  --name-size: 22.4pt;
-  --section-title-size: 7.65pt;
-  --section-title-gap: 6px;
-  --summary-size: 8.2pt;
-  --summary-line-height: 1.33;
-  --experience-title-size: 8.9pt;
-  --experience-company-size: 7.55pt;
-  --experience-gap: 0.12in;
-  --experience-date-size: 7.2pt;
+  --base-font: 'Arial', 'Helvetica', sans-serif;
+  --name-font: 'Arial', 'Helvetica', sans-serif;
+  --ui-font: 'Arial', 'Helvetica', sans-serif;
+  --base-font-size: 9pt;
+  --header-padding: 0.3in 0.48in 0.12in;
+  --content-padding: 0.17in 0.48in;
+  --content-gap: 0.17in;
+  --sidebar-width: 1.85in;
+  --name-size: 25.2pt;
+  --section-title-size: 9.4pt;
+  --section-title-gap: 9px;
+  --summary-size: 8.7pt;
+  --summary-line-height: 1.38;
+  --experience-title-size: 9.6pt;
+  --experience-company-size: 8.1pt;
+  --experience-gap: 0.13in;
+  --experience-date-size: 7.7pt;
   --experience-date-min-width: 1.12in;
   --experience-date-text-align: right;
   --experience-header-align: flex-start;
-  --highlight-size: 8.1pt;
-  --highlight-line-height: 1.3;
+  --highlight-size: 8.6pt;
+  --highlight-line-height: 1.33;
   --highlight-gap: 2px;
   --timeline-rail-color: ${timelineRailColor};
 }
 .header {
   padding: var(--header-padding);
-  border-bottom: 2px solid ${themeColor};
 }
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 0.21in;
 }
-.header-left { flex: 1; }
+.header-left {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  row-gap: 6px;
+}
+.header-subtitle {
+  margin: 0;
+  font-size: 9.8pt;
+  letter-spacing: 0.14px;
+  color: #3f3b37;
+  font-weight: 500;
+  line-height: 1.24;
+  font-family: var(--ui-font);
+}
 .name {
   font-size: var(--name-size);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: var(--name-spacing);
   text-transform: var(--name-transform);
-  color: #222;
+  color: ${themeColor};
   font-family: var(--name-font);
-  margin-bottom: 8px;
-}
-.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-.badge {
-  background: ${themeColor};
-  color: white;
-  padding: var(--badge-padding);
-  border-radius: 999px;
-  font-size: var(--badge-size);
-  font-family: var(--ui-font);
+  line-height: 1;
+  margin: 0;
 }
 .contact-info {
+  min-width: 2.12in;
+  max-width: 2.28in;
+  padding-top: 4px;
+  display: grid;
+  row-gap: 5px;
   text-align: right;
-  font-size: var(--contact-size);
-  line-height: 1.4;
   font-family: var(--ui-font);
 }
-.contact-info a { color: #333; text-decoration: none; }
+.contact-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 8px;
+}
+.contact-row-icon {
+  align-items: center;
+  gap: 6px;
+}
+.contact-label {
+  font-size: 7pt;
+  text-transform: uppercase;
+  letter-spacing: 0.92px;
+  color: #6b7280;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.contact-value,
+.contact-link {
+  font-size: 8.5pt;
+  color: #1f2937;
+  max-width: 1.95in;
+  line-height: 1.28;
+  text-align: right;
+  word-break: break-word;
+}
+.contact-link {
+  text-decoration: none;
+}
+.contact-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  width: 11px;
+  height: 11px;
+  line-height: 0;
+  flex-shrink: 0;
+}
+.contact-icon svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+}
+.header-divider {
+  margin-top: 12px;
+  border-top: 1px solid ${themeColor};
+}
+.page.layout-single-column-ats .contact-info {
+  min-width: 2in;
+  max-width: 2.18in;
+}
 .main-content {
   display: var(--main-content-display);
   flex-direction: var(--main-content-direction);
@@ -353,46 +421,44 @@ body {
   letter-spacing: var(--section-title-spacing);
   color: #1f2937;
   margin-bottom: var(--section-title-gap);
-  padding-bottom: 4px;
-  border-bottom: 1px solid ${themeColor};
   font-family: var(--ui-font);
 }
 .education-item { margin-bottom: var(--education-gap); }
 .education-line {
   margin-bottom: 6px;
-  font-size: 8.1pt;
-  line-height: 1.3;
+  font-size: 8.6pt;
+  line-height: 1.35;
   color: #374151;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.education-degree { font-weight: 600; font-size: 8.9pt; color: #1f2937; }
-.education-school { font-size: 7.55pt; color: #4b5563; font-weight: 600; letter-spacing: 0.22px; }
-.education-date { font-size: 7.2pt; color: #6b7280; font-style: italic; letter-spacing: 0.18px; }
-.skills-list { font-size: 8.1pt; line-height: 1.32; }
+.education-degree { font-weight: 600; font-size: 9.6pt; color: #4b5563; }
+.education-school { font-size: 8.1pt; color: #4b5563; font-weight: 600; letter-spacing: 0.22px; }
+.education-date { font-size: 7.7pt; color: #4b5563; font-style: italic; letter-spacing: 0.18px; }
+.skills-list { font-size: 8.6pt; line-height: 1.35; }
 .skill-category { margin-bottom: var(--skill-gap); }
 .skill-line {
   margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 8.1pt;
-  line-height: 1.3;
+  font-size: 8.6pt;
+  line-height: 1.35;
 }
-.skill-category-title { font-weight: 600; font-size: 7.55pt; color: #4b5563; letter-spacing: 0.22px; margin-bottom: 2px; }
+.skill-category-title { font-weight: 600; font-size: 8.1pt; color: #4b5563; letter-spacing: 0.22px; margin-bottom: 2px; }
 .skill-category-inline {
   display: inline;
   font-weight: 600;
-  font-size: 7.55pt;
+  font-size: 8.1pt;
   color: #4b5563;
   letter-spacing: 0.22px;
 }
 .skill-items { color: #374151; }
 .certificate-item { margin-bottom: var(--cert-gap); }
-.certificate-title { font-weight: 600; font-size: 8.9pt; color: #1f2937; }
-.certificate-issuer { font-size: 7.55pt; color: #4b5563; font-weight: 600; letter-spacing: 0.22px; }
-.certificate-date { font-size: 7.2pt; color: #6b7280; font-style: italic; letter-spacing: 0.18px; }
+.certificate-title { font-weight: 600; font-size: 9.6pt; color: #1f2937; }
+.certificate-issuer { font-size: 8.1pt; color: #4b5563; font-weight: 600; letter-spacing: 0.22px; }
+.certificate-date { font-size: 7.7pt; color: #6b7280; font-style: italic; letter-spacing: 0.18px; }
 .summary {
   font-size: var(--summary-size);
   line-height: var(--summary-line-height);
@@ -426,8 +492,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: var(--experience-header-align);
-  gap: 8px;
-  margin-bottom: 2px;
+  gap: 10px;
+  margin-bottom: 3px;
 }
 .experience-meta {
   display: inline-flex;
@@ -439,11 +505,11 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.experience-title { font-weight: 600; font-size: var(--experience-title-size); color: #1f2937; }
-.experience-separator { color: #9ca3af; font-size: 7.8pt; }
+.experience-title { font-weight: 600; font-size: var(--experience-title-size); color: #4b5563; }
+.experience-separator { color: #9ca3af; font-size: 8.2pt; }
 .experience-date {
   font-size: var(--experience-date-size);
-  color: #6b7280;
+  color: #4b5563;
   font-style: italic;
   letter-spacing: 0.18px;
   white-space: nowrap;
@@ -475,11 +541,11 @@ body {
 .page.layout-single-column-ats .education-line,
 .page.layout-single-column-ats .skill-line {
   margin-bottom: 6px;
-  font-size: 8.1pt;
-  line-height: 1.3;
+  font-size: 8.6pt;
+  line-height: 1.35;
 }
 .page.layout-single-column-ats .skill-category-inline {
-  font-size: 7.55pt;
+  font-size: 8.1pt;
 }
 .page.layout-minimal-timeline .experience-list {
   padding-left: 0;
@@ -489,7 +555,7 @@ body {
   padding: 3px 11px;
 }
 .page.layout-minimal-timeline .section-title {
-  font-size: 7.65pt;
+  font-size: 9.4pt;
   font-weight: 700;
   letter-spacing: 1.15px;
   color: #1f2937;
@@ -497,7 +563,12 @@ body {
 .page.layout-minimal-timeline .experience-title,
 .page.layout-minimal-timeline .education-degree,
 .page.layout-minimal-timeline .certificate-title {
-  font-size: 8.9pt;
+  font-size: 9.6pt;
+  font-weight: 600;
+  color: #4b5563;
+}
+.page.layout-minimal-timeline .certificate-title {
+  font-size: 9.6pt;
   font-weight: 600;
   color: #1f2937;
 }
@@ -506,33 +577,37 @@ body {
 .page.layout-minimal-timeline .certificate-issuer,
 .page.layout-minimal-timeline .skill-category-title,
 .page.layout-minimal-timeline .skill-category-inline {
-  font-size: 7.55pt;
+  font-size: 8.1pt;
   font-weight: 600;
   color: #4b5563;
   letter-spacing: 0.22px;
 }
 .page.layout-minimal-timeline .summary {
-  font-size: 8.2pt;
-  line-height: 1.33;
+  font-size: 8.7pt;
+  line-height: 1.38;
   color: #374151;
 }
 .page.layout-minimal-timeline .skill-items,
 .page.layout-minimal-timeline .experience-highlights li {
-  font-size: 8.1pt;
-  line-height: 1.3;
+  font-size: 8.6pt;
+  line-height: 1.33;
   color: #374151;
 }
 .page.layout-minimal-timeline .experience-separator {
   color: #9ca3af;
-  font-size: 7.8pt;
+  font-size: 8.2pt;
 }
 .page.layout-minimal-timeline .experience-date,
 .page.layout-minimal-timeline .education-date,
 .page.layout-minimal-timeline .certificate-date {
-  font-size: 7.2pt;
+  font-size: 7.7pt;
   color: #6b7280;
   font-style: italic;
   letter-spacing: 0.18px;
+}
+.page.layout-minimal-timeline .experience-date,
+.page.layout-minimal-timeline .education-date {
+  color: #4b5563;
 }
 .page.layout-minimal-timeline .experience-rail {
   display: block;
@@ -544,7 +619,7 @@ body {
 }
 .page.layout-minimal-timeline .experience-item {
   padding-left: 22px;
-  margin-bottom: 0.12in;
+  margin-bottom: 0.13in;
 }
 .page.layout-minimal-timeline .experience-item:last-child {
   margin-bottom: 0;

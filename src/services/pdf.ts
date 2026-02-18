@@ -80,9 +80,10 @@ export async function generatePDF(html: string): Promise<Buffer> {
       LETTER_HEIGHT_IN,
       Math.ceil(contentHeightIn * 100) / 100
     );
+    const hasOverflow = contentHeightPx > LETTER_HEIGHT_PX + 0.5;
 
     const pdf =
-      pageHeightIn <= LETTER_HEIGHT_IN + 0.01
+      !hasOverflow
         ? await page.pdf({
             format: "Letter",
             printBackground: true,
