@@ -6,7 +6,12 @@
 export function sanitizeName(name: string): string | null {
   if (!name || name.trim() === "") return null;
 
-  const decoded = decodeURIComponent(name);
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(name);
+  } catch {
+    return null;
+  }
   if (
     decoded.includes("..") ||
     decoded.includes("/") ||

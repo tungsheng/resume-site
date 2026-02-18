@@ -164,14 +164,22 @@ function Admin() {
         return;
       }
 
-      if (!res.ok) throw new Error("Failed to export PDF");
+      if (!res.ok) {
+        let message = "Failed to export PDF";
+        try {
+          const errorBody = await res.json() as { error?: string };
+          if (errorBody?.error) message = errorBody.error;
+        } catch {}
+        throw new Error(message);
+      }
 
       const blob = await res.blob();
       downloadBlob(blob, `${currentResume.replace(/\s+/g, "_")}_Resume.pdf`);
       showToast("PDF exported successfully", "success");
     } catch (err) {
       console.error("Failed to export PDF:", err);
-      showToast("Failed to export PDF. Please try again.", "error");
+      const message = err instanceof Error ? err.message : "Failed to export PDF. Please try again.";
+      showToast(message, "error");
     } finally {
       setExporting(false);
     }

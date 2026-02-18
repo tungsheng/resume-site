@@ -7,7 +7,8 @@ import {
   DEFAULT_RESUME_TEMPLATE,
   type ResumeLayoutTemplate,
 } from "../../layouts";
-import { escapeHtml, hexToRgba } from "../../utils";
+import { buildResumeViewModel } from "../../domain/resume/view-model";
+import { hexToRgba } from "../../utils";
 
 interface ResumeViewProps {
   data: ResumeData;
@@ -21,48 +22,41 @@ export function ResumeView({
   layoutTemplate = DEFAULT_RESUME_TEMPLATE,
 }: ResumeViewProps) {
   const resumeStyles = getResumeStyles(layoutTemplate);
-  const isSingleColumnLayout = layoutTemplate === "single-column-ats";
-  const isTimelineLayout = layoutTemplate === "minimal-timeline";
+  const view = buildResumeViewModel(data, layoutTemplate);
   const timelineRailColor = hexToRgba(themeColor, 0.45);
-  const hasBadges = data.header.badges.length > 0;
-  const hasEducation = data.education.length > 0;
-  const hasSkills = Object.keys(data.skills).length > 0;
-  const hasCertificates = data.certificates.length > 0;
-  const hasSummary = data.header.summary.trim().length > 0;
-  const hasExperience = data.experience.length > 0;
 
-  const summarySection = hasSummary ? (
+  const summarySection = view.hasSummary ? (
     <section style={resumeStyles.section}>
       <h2 style={{ ...resumeStyles.sectionTitle, borderBottomColor: themeColor }}>
         Professional Summary
       </h2>
-      <p style={resumeStyles.summary}>{escapeHtml(data.header.summary.trim())}</p>
+      <p style={resumeStyles.summary}>{view.summary}</p>
     </section>
   ) : null;
 
-  const skillsSection = hasSkills ? (
+  const skillsSection = view.hasSkills ? (
     <section style={resumeStyles.section}>
       <h2 style={{ ...resumeStyles.sectionTitle, borderBottomColor: themeColor }}>
         Skills
       </h2>
       <div style={resumeStyles.skills}>
-        {Object.entries(data.skills).map(([cat, items]) => (
+        {view.skills.map((skill) => (
           <div
-            key={cat}
-            style={isSingleColumnLayout ? resumeStyles.skillLine : resumeStyles.skillCat}
+            key={skill.category}
+            style={view.isSingleColumnLayout ? resumeStyles.skillLine : resumeStyles.skillCat}
           >
             <div
               style={
-                isSingleColumnLayout
+                view.isSingleColumnLayout
                   ? resumeStyles.skillCategoryInline
                   : resumeStyles.skillTitle
               }
             >
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              {skill.categoryLabel}
             </div>
-            {isSingleColumnLayout ? ": " : null}
+            {view.isSingleColumnLayout ? ": " : null}
             <span style={resumeStyles.skillItems}>
-              {items.map(escapeHtml).join(" • ")}
+              {skill.itemsText}
             </span>
           </div>
         ))}
@@ -70,87 +64,82 @@ export function ResumeView({
     </section>
   ) : null;
 
-  const educationSection = hasEducation ? (
+  const educationSection = view.hasEducation ? (
     <section style={resumeStyles.section}>
       <h2 style={{ ...resumeStyles.sectionTitle, borderBottomColor: themeColor }}>
         Education
       </h2>
-      {data.education.map((edu, i) => {
-        if (isSingleColumnLayout) {
+      {view.education.map((edu, i) => {
+        if (view.isSingleColumnLayout) {
           return (
             <div key={i} style={resumeStyles.eduLine}>
-              {escapeHtml(edu.degree)} • {escapeHtml(edu.school)} •{" "}
-              {escapeHtml(edu.startDate)} - {escapeHtml(edu.endDate)}
+              {edu.lineText}
             </div>
           );
         }
 
         return (
           <div key={i} style={resumeStyles.eduItem}>
-            <div style={resumeStyles.eduDegree}>{escapeHtml(edu.degree)}</div>
-            <div style={resumeStyles.eduSchool}>{escapeHtml(edu.school)}</div>
-            <div style={resumeStyles.eduDate}>
-              {escapeHtml(edu.startDate)} - {escapeHtml(edu.endDate)}
-            </div>
+            <div style={resumeStyles.eduDegree}>{edu.degree}</div>
+            <div style={resumeStyles.eduSchool}>{edu.school}</div>
+            <div style={resumeStyles.eduDate}>{edu.dateRange}</div>
           </div>
         );
       })}
     </section>
   ) : null;
 
-  const certificatesSection = hasCertificates ? (
+  const certificatesSection = view.hasCertificates ? (
     <section style={resumeStyles.section}>
       <h2 style={{ ...resumeStyles.sectionTitle, borderBottomColor: themeColor }}>
         Certifications
       </h2>
-      {data.certificates.map((cert, i) => (
+      {view.certificates.map((cert, i) => (
         <div key={i} style={resumeStyles.certItem}>
-          <div style={resumeStyles.certTitle}>{escapeHtml(cert.title)}</div>
-          <div style={resumeStyles.certIssuer}>{escapeHtml(cert.issuer)}</div>
-          <div style={resumeStyles.certDate}>{escapeHtml(cert.date)}</div>
+          <div style={resumeStyles.certTitle}>{cert.title}</div>
+          <div style={resumeStyles.certIssuer}>{cert.issuer}</div>
+          <div style={resumeStyles.certDate}>{cert.date}</div>
         </div>
       ))}
     </section>
   ) : null;
 
-  const experienceSection = hasExperience ? (
+  const experienceSection = view.hasExperience ? (
     <section style={resumeStyles.section}>
       <h2 style={{ ...resumeStyles.sectionTitle, borderBottomColor: themeColor }}>
         Work Experience
       </h2>
       <div style={resumeStyles.expList}>
-        {isTimelineLayout && (
+        {view.isTimelineLayout && (
           <div style={{ ...resumeStyles.expRail, background: timelineRailColor }} />
         )}
-        {data.experience.map((exp, i) => (
+        {view.experience.map((exp, i) => (
           <div
             key={i}
             style={
-              isTimelineLayout && i === data.experience.length - 1
+              view.isTimelineLayout && i === view.experience.length - 1
                 ? { ...resumeStyles.expItem, marginBottom: 0 }
                 : resumeStyles.expItem
             }
           >
-            {isTimelineLayout && (
+            {view.isTimelineLayout && (
               <span style={{ ...resumeStyles.expDot, borderColor: themeColor }} />
             )}
             <div style={resumeStyles.expContent}>
               <div style={resumeStyles.expHeader}>
                 <span style={resumeStyles.expMeta}>
-                  <span style={resumeStyles.expTitle}>{escapeHtml(exp.title)}</span>
+                  <span style={resumeStyles.expTitle}>{exp.title}</span>
                   <span style={resumeStyles.expSeparator}> • </span>
-                  <span style={resumeStyles.expCompany}>{escapeHtml(exp.company)}</span>
+                  <span style={resumeStyles.expCompany}>{exp.company}</span>
                 </span>
-                <span style={resumeStyles.expDate}>
-                  {escapeHtml(exp.startDate)} - {escapeHtml(exp.endDate)}
-                </span>
+                <span style={resumeStyles.expDate}>{exp.dateRange}</span>
               </div>
               {exp.highlights.length > 0 && (
                 <ul style={resumeStyles.expHighlights}>
                   {exp.highlights.map((h, j) => (
                     <li key={j}>
                       <span style={{ color: themeColor, marginRight: 8 }}>•</span>
-                      {escapeHtml(h)}
+                      {h}
                     </li>
                   ))}
                 </ul>
@@ -167,35 +156,35 @@ export function ResumeView({
       <header style={{ ...resumeStyles.header, borderBottomColor: themeColor }}>
         <div style={resumeStyles.headerContent}>
           <div style={resumeStyles.headerLeft}>
-            <h1 style={resumeStyles.name}>{escapeHtml(data.header.name)}</h1>
-            {hasBadges && (
+            <h1 style={resumeStyles.name}>{view.header.name}</h1>
+            {view.hasBadges && (
               <div style={resumeStyles.badges}>
-                {data.header.badges.map((badge, i) => (
+                {view.header.badges.map((badge, i) => (
                   <span key={i} style={{ ...resumeStyles.badge, background: themeColor }}>
-                    {escapeHtml(badge)}
+                    {badge}
                   </span>
                 ))}
               </div>
             )}
           </div>
           <div style={resumeStyles.contact}>
-            {data.header.contacts.phone && (
-              <div>{escapeHtml(data.header.contacts.phone)}</div>
+            {view.header.contacts.phone && (
+              <div>{view.header.contacts.phone}</div>
             )}
-            {data.header.contacts.email && (
+            {view.header.contacts.email && (
               <div>
-                <a href={`mailto:${data.header.contacts.email}`} style={resumeStyles.link}>
-                  {escapeHtml(data.header.contacts.email)}
+                <a href={`mailto:${view.header.contacts.email}`} style={resumeStyles.link}>
+                  {view.header.contacts.email}
                 </a>
               </div>
             )}
-            {data.header.contacts.linkedin && (
+            {view.header.contacts.linkedin && (
               <div>
                 <a
-                  href={`https://linkedin.com/in/${data.header.contacts.linkedin}`}
+                  href={`https://linkedin.com/in/${encodeURIComponent(view.header.contacts.linkedin)}`}
                   style={resumeStyles.link}
                 >
-                  linkedin.com/in/{escapeHtml(data.header.contacts.linkedin)}
+                  {`linkedin.com/in/${view.header.contacts.linkedin}`}
                 </a>
               </div>
             )}
@@ -204,7 +193,7 @@ export function ResumeView({
       </header>
 
       <div style={resumeStyles.body}>
-        {isSingleColumnLayout ? (
+        {view.isSingleColumnLayout ? (
           <div style={resumeStyles.singleColumnFlow}>
             {summarySection}
             {skillsSection}

@@ -2,8 +2,10 @@
 
 import { Database } from "bun:sqlite";
 import { config } from "./config";
+import { logger } from "./logger";
 
 let db: Database | null = null;
+let sessionCleanupTimer: ReturnType<typeof setInterval> | null = null;
 
 export function initDatabase(): void {
   try {
@@ -49,15 +51,20 @@ export function initDatabase(): void {
     `);
 
     // Periodically clean up expired sessions
-    setInterval(() => {
-      try {
-        db?.exec("DELETE FROM sessions WHERE expires_at < unixepoch()");
-      } catch {}
-    }, 60 * 60 * 1000); // every hour
+    if (!sessionCleanupTimer) {
+      sessionCleanupTimer = setInterval(() => {
+        try {
+          db?.exec("DELETE FROM sessions WHERE expires_at < unixepoch()");
+        } catch (error) {
+          logger.warn("Session cleanup failed", { error: String(error) });
+        }
+      }, 60 * 60 * 1000); // every hour
+      sessionCleanupTimer.unref?.();
+    }
 
-    console.log("Database connected");
+    logger.info("Database connected");
   } catch (err) {
-    console.error("Database connection failed:", err);
+    logger.error("Database connection failed", { error: String(err) });
     db = null;
   }
 }

@@ -78,14 +78,22 @@ function Resume() {
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to generate PDF");
+      if (!res.ok) {
+        let message = "Failed to generate PDF";
+        try {
+          const errorBody = await res.json() as { error?: string };
+          if (errorBody?.error) message = errorBody.error;
+        } catch {}
+        throw new Error(message);
+      }
 
       const blob = await res.blob();
       downloadBlob(blob, `${resumeName.replace(/\s+/g, "_")}_Resume.pdf`);
       showToast("PDF downloaded successfully", "success");
     } catch (err) {
       console.error("Failed to download PDF:", err);
-      showToast("Failed to download PDF. Please try again.", "error");
+      const message = err instanceof Error ? err.message : "Failed to download PDF. Please try again.";
+      showToast(message, "error");
     } finally {
       setDownloading(false);
     }

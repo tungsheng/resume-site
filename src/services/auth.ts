@@ -35,7 +35,13 @@ function getStatements() {
     stmtUpdateCSRF = db.prepare("UPDATE sessions SET csrf_token = ? WHERE token = ?");
   }
 
-  return { stmtInsert: stmtInsert!, stmtDelete: stmtDelete!, stmtSelect: stmtSelect!, stmtSelectCSRF: stmtSelectCSRF!, stmtUpdateCSRF: stmtUpdateCSRF! };
+  return {
+    stmtInsert: stmtInsert!,
+    stmtDelete: stmtDelete!,
+    stmtSelect: stmtSelect!,
+    stmtSelectCSRF: stmtSelectCSRF!,
+    stmtUpdateCSRF: stmtUpdateCSRF!,
+  };
 }
 
 export function generateToken(): string {

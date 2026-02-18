@@ -2,6 +2,8 @@
 
 import { config } from "./config";
 import { initDatabase } from "./db";
+import { logger } from "./logger";
+import { closePDFBrowser } from "./services/pdf";
 import { addSecurityHeaders } from "./utils";
 import {
   handleLogin,
@@ -33,7 +35,7 @@ function withHeaders<T extends (...args: any[]) => Response | Promise<Response>>
   }) as unknown as T;
 }
 
-Bun.serve({
+const server = Bun.serve({
   port: config.port,
   routes: {
     // Page routes - using Bun's HTML imports for React bundling
@@ -74,7 +76,26 @@ Bun.serve({
   },
 });
 
-console.log(`Resume server running at http://localhost:${config.port}`);
-console.log(`Home: http://localhost:${config.port}/`);
-console.log(`Resume: http://localhost:${config.port}/resume/tony-lee`);
-console.log(`Admin: http://localhost:${config.port}/admin`);
+let shuttingDown = false;
+async function shutdown(signal: string): Promise<void> {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  logger.info("Shutting down server", { signal });
+
+  server.stop();
+  await closePDFBrowser();
+}
+
+process.on("SIGINT", () => {
+  void shutdown("SIGINT");
+});
+process.on("SIGTERM", () => {
+  void shutdown("SIGTERM");
+});
+
+logger.info("Resume server started", {
+  baseUrl: `http://localhost:${config.port}`,
+  home: `http://localhost:${config.port}/`,
+  resume: `http://localhost:${config.port}/resume/tony-lee`,
+  admin: `http://localhost:${config.port}/admin`,
+});

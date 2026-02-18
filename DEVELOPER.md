@@ -15,22 +15,27 @@ Open http://localhost:3000
 |---------|-------------|
 | `bun run dev` | Start with hot reload |
 | `bun run start` | Production start |
-| `bun test` | Run tests |
+| `bun run test:unit` | Run unit tests |
+| `bun run test:integration` | Run integration tests (requires running server) |
+| `bun run check` | Type check + unit tests |
 | `bun run typecheck` | Type check |
 
 ## Project Structure
 
 ```
 src/
+  domain/             # Shared domain logic
+    resume/           # Resume normalization + rendering
+  server/             # HTTP route modules + response helpers
   features/           # Pages (React)
     home/             # Landing page
     resume/           # Public resume view
     admin/            # Admin dashboard
   components/         # Shared React components
   hooks/              # React hooks & utilities
-  services/           # Backend logic
+  services/           # Backend facades and infra services
   styles/             # Shared styles
-  routes.ts           # API endpoints
+  routes.ts           # Route facade
   index.ts            # Server entry
 ```
 
@@ -188,17 +193,9 @@ routes: {
 ## Testing
 
 ```bash
-bun test              # Run all
-bun test --watch      # Watch mode
-```
-
-Add tests in `tests/index.test.ts`:
-```ts
-import { test, expect } from "bun:test";
-
-test("my test", () => {
-  expect(1 + 1).toBe(2);
-});
+bun run test:unit
+bun run test:integration
+bun run check
 ```
 
 ---

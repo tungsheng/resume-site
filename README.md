@@ -21,6 +21,13 @@ Open http://localhost:3000
 
 Default login: `admin` / `changeme`
 
+## Validation Commands
+
+```bash
+bun run check                # typecheck + unit tests
+bun run test:integration     # requires server running on localhost:3000
+```
+
 ## Adding a Resume
 
 Create `resumes/your-name.yaml`:
