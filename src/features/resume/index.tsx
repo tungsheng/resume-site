@@ -101,7 +101,7 @@ function Resume() {
 
   if (loading) {
     return (
-      <div style={styles.app} role="main" aria-busy="true">
+      <div style={styles.app} className="resume-app" role="main" aria-busy="true">
         <div style={styles.loading}>
           <Spinner size={32} />
           <span style={{ marginLeft: 12 }}>Loading resume...</span>
@@ -112,7 +112,7 @@ function Resume() {
 
   if (error || !data) {
     return (
-      <div style={styles.app} role="main">
+      <div style={styles.app} className="resume-app" role="main">
         <div style={styles.loading} role="alert">
           {error || "Resume not found"}
         </div>
@@ -121,12 +121,34 @@ function Resume() {
   }
 
   return (
-    <div style={styles.app}>
+    <div style={styles.app} className="resume-app">
       <style>{`
         ${spinKeyframes}
+        @page {
+          size: Letter;
+          margin: 0;
+        }
         @media print {
-          .toolbar { display: none !important; }
-          body { background: white; }
+          html, body, #root {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+          .resume-app {
+            background: white !important;
+            min-height: auto !important;
+          }
+          .resume-app > :not(.resume-page-wrapper) {
+            display: none !important;
+          }
+          .resume-page-wrapper {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          .resume-page-wrapper > .resume-sheet {
+            margin: 0 !important;
+            box-shadow: none !important;
+          }
         }
         @media (max-width: 900px) {
           .page-wrapper > div {
@@ -143,7 +165,7 @@ function Resume() {
         downloading={downloading}
       />
 
-      <main style={styles.pageWrapper} className="page-wrapper">
+      <main style={styles.pageWrapper} className="page-wrapper resume-page-wrapper">
         <ResumeView
           data={data}
           themeColor={themeColor}

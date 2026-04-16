@@ -48,6 +48,18 @@ const sampleResume: ResumeData = {
 };
 
 describe("ResumeView", () => {
+  test("renders a stable root class for print-specific styling", () => {
+    const html = renderToStaticMarkup(
+      <ResumeView
+        data={sampleResume}
+        themeColor="#c9a86c"
+        layoutTemplate="single-column-ats"
+      />
+    );
+
+    expect(html).toContain("class=\"resume-sheet\"");
+  });
+
   test("escapes text once without double-encoding entities", () => {
     const html = renderToStaticMarkup(
       <ResumeView

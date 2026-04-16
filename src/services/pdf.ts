@@ -11,6 +11,7 @@ const BROWSER_ARGS = [
 const PX_PER_INCH = 96;
 const LETTER_WIDTH_IN = 8.5;
 const LETTER_HEIGHT_IN = 11;
+const LETTER_WIDTH_PX = LETTER_WIDTH_IN * PX_PER_INCH;
 const LETTER_HEIGHT_PX = LETTER_HEIGHT_IN * PX_PER_INCH;
 const EXECUTABLE_CANDIDATES = [
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -22,6 +23,21 @@ const EXECUTABLE_CANDIDATES = [
 ];
 
 let browser: Browser | null = null;
+
+function clampPdfScale(scale: number): number {
+  if (!Number.isFinite(scale)) return 1;
+  return Math.max(0.1, Math.min(1, scale));
+}
+
+export function calculatePdfScale(
+  contentWidthPx: number,
+  contentHeightPx: number
+): number {
+  const widthScale = LETTER_WIDTH_PX / Math.max(contentWidthPx, LETTER_WIDTH_PX);
+  const heightScale = LETTER_HEIGHT_PX / Math.max(contentHeightPx, LETTER_HEIGHT_PX);
+
+  return clampPdfScale(Math.min(1, widthScale, heightScale));
+}
 
 async function resolveExecutablePath(): Promise<string | undefined> {
   if (process.env.PUPPETEER_EXECUTABLE_PATH) {
@@ -62,39 +78,42 @@ export async function generatePDF(html: string): Promise<Buffer> {
   const page = await b.newPage();
 
   try {
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    const contentHeightPx = await page.evaluate(
-      ({ letterHeightPx }) => {
+    await page.setViewport({
+      width: Math.ceil(LETTER_WIDTH_PX),
+      height: Math.ceil(LETTER_HEIGHT_PX),
+      deviceScaleFactor: 1,
+    });
+    await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 0 });
+    const { contentWidthPx, contentHeightPx } = await page.evaluate(
+      ({ letterWidthPx, letterHeightPx }) => {
         const root = document.querySelector(".page");
-        if (!root || !(root instanceof HTMLElement)) return letterHeightPx;
+        if (!root || !(root instanceof HTMLElement)) {
+          return {
+            contentWidthPx: letterWidthPx,
+            contentHeightPx: letterHeightPx,
+          };
+        }
 
-        const rectHeight = root.getBoundingClientRect().height;
+        const rect = root.getBoundingClientRect();
+        const rectWidth = rect.width;
+        const rectHeight = rect.height;
+        const scrollWidth = root.scrollWidth;
         const scrollHeight = root.scrollHeight;
-        return Math.ceil(Math.max(rectHeight, scrollHeight, letterHeightPx));
+        return {
+          contentWidthPx: Math.ceil(Math.max(rectWidth, scrollWidth, letterWidthPx)),
+          contentHeightPx: Math.ceil(Math.max(rectHeight, scrollHeight, letterHeightPx)),
+        };
       },
-      { letterHeightPx: LETTER_HEIGHT_PX }
+      { letterWidthPx: LETTER_WIDTH_PX, letterHeightPx: LETTER_HEIGHT_PX }
     );
 
-    const contentHeightIn = contentHeightPx / PX_PER_INCH;
-    const pageHeightIn = Math.max(
-      LETTER_HEIGHT_IN,
-      Math.ceil(contentHeightIn * 100) / 100
-    );
-    const hasOverflow = contentHeightPx > LETTER_HEIGHT_PX + 0.5;
-
-    const pdf =
-      !hasOverflow
-        ? await page.pdf({
-            format: "Letter",
-            printBackground: true,
-            margin: { top: 0, right: 0, bottom: 0, left: 0 },
-          })
-        : await page.pdf({
-            width: `${LETTER_WIDTH_IN}in`,
-            height: `${pageHeightIn}in`,
-            printBackground: true,
-            margin: { top: 0, right: 0, bottom: 0, left: 0 },
-          });
+    const pdfScale = calculatePdfScale(contentWidthPx, contentHeightPx);
+    const pdf = await page.pdf({
+      format: "Letter",
+      printBackground: true,
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      scale: pdfScale,
+    });
     return Buffer.from(pdf);
   } finally {
     await page.close();

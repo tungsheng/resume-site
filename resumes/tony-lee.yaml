@@ -1,90 +1,32 @@
 meta:
   version: 2
   slug: "tony-lee"
-  updatedAt: "2026-04-15"
+  updatedAt: "2026-04-16"
   targetRole: "Staff / Principal Software Engineer"
 
 profile:
   name: "Tony Lee"
   headline:
     - "Staff Software Engineer"
-    - "Full-Stack"
+    - "Platform"
     - "Infrastructure"
   contacts:
     email: "tungsheng@gmail.com"
     linkedin: "tonyslee8"
   summary: |
-    Staff Software Engineer with 10+ years of experience leading architecture, modernization, and infrastructure initiatives across enterprise SaaS platforms. Proven track record of unblocking critical launches, designing scalable API systems, and improving engineering velocity by 20–50%. Recognized for translating ambiguous business goals into reliable production systems while elevating engineering standards across teams.
-
-experience:
-  - role: "Staff Software Engineer"
-    company: "DTEX Systems"
-    period:
-      start: "Sep 2024"
-      end: "Present"
-    highlights:
-      - "Led end-to-end OpenSearch Dashboards migration that removed a critical product launch blocker; partnered directly with AWS/OpenSearch engineering to identify root causes, drive upstream fixes, and stabilize production deployments across environments."
-      - "Architected and delivered the Data Loss Prevention (DLP) feature spanning UI workflows, API design, and data modeling; aligned cross-functional teams (PM, backend, frontend, infra) to support a major go-to-market initiative."
-      - "Designed and implemented local development tooling and automation that reduced dev/test cycle time by 20%, improving engineering velocity and lowering onboarding friction for new team members."
-      - "Led UI service containerization and dependency decoupling initiative, enabling independent deployments and improving release reliability; reduced cross-service coupling that previously slowed iteration."
-      - "Served as technical escalation point for ambiguous or high-risk engineering challenges, translating loosely defined product requirements into production-ready systems."
-
-  - role: "Senior Technical Lead"
-    company: "Cisco System Inc."
-    period:
-      start: "Aug 2019"
-      end: "Apr 2024"
-    highlights:
-      - "Led end-to-end architecture and technical strategy for the Onboarding Experience platform, enabling enterprise customers to complete complex onboarding workflows within 30 minutes."
-      - "Drove high-level and detailed system design across frontend, backend, and integration layers; facilitated design reviews and resolved cross-team architectural tradeoffs across US, European, and Indian engineering teams."
-      - "Initiated and led AngularJS-to-React modernization to eliminate security vulnerabilities and improve maintainability; introduced Cypress-based end-to-end testing infrastructure, reducing test development time by 50% and increasing deployment confidence."
-      - "Partnered with Directors, Architects, PM, and UX to translate ambiguous business requirements into scalable API contracts and state-driven UI workflows."
-      - "Mentored engineers toward feature ownership and design leadership; raised overall code quality standards and strengthened cross-team engineering practices."
-      - "Contributed to CI/CD pipeline improvements and test automation strategy to reduce regression risk in high-visibility customer-facing flows."
-
-  - role: "Senior Software Engineer"
-    company: "Tico Co., Ltd."
-    period:
-      start: "Jan 2019"
-      end: "Aug 2019"
-    highlights:
-      - "Improved message loading performance by 60% through frontend and API optimization."
-      - "Reduced codebase size by 30% by enforcing modular design and eliminating redundant logic, improving maintainability and build performance."
-
-  - role: "Co-founder / CTO"
-    company: "Popup Technology Co., Ltd."
-    period:
-      start: "Apr 2016"
-      end: "Oct 2018"
-    highlights:
-      - "Architected and built the company’s core platform from scratch (backend services, APIs, frontend workflows)."
-      - "Delivered revenue-generating features that drove 100% revenue growth within 12 months."
-
-projects:
-  title: "ML Infrastructure Projects"
-  items:
-    - title: "GPU Inference Platform on Kubernetes (EKS + Karpenter + vLLM)"
-      highlights:
-        - "Designed and built a production-style GPU inference platform on EKS using Karpenter and vLLM to serve LLM requests with dynamic GPU provisioning."
-        - "Implemented queue-aware autoscaling using the custom metric vllm_requests_running via Prometheus Adapter, driving HPA decisions from serving pressure instead of CPU utilization."
-        - "Built a dynamic GPU compute layer with Karpenter and the NVIDIA device plugin, enabling scale-from-zero behavior and scaling idle GPU capacity back down to reduce cost."
-        - "Developed an evaluate framework to simulate burst traffic and measure cold-start latency, scaling behavior, GPU utilization, and zero-idle versus warm-pool cost and latency tradeoffs."
-        - "Integrated Prometheus, Grafana, and GPU telemetry to analyze request queueing, autoscaling behavior, and bottlenecks; modeled the platform as a closed-loop control system from request load to response latency."
+    Staff Software Engineer with 10+ years leading platform, architecture, and modernization work across enterprise SaaS systems. Proven track record of unblocking launches, improving delivery speed, and building reliable APIs, tooling, and infrastructure.
 
 skills:
   - category: "Languages"
     items:
       - "Go"
       - "Python"
-      - "Ruby"
       - "TypeScript"
       - "SQL"
   - category: "Frontend"
     items:
       - "React"
-      - "AngularJS"
       - "Cypress"
-      - "Jest"
   - category: "Backend"
     items:
       - "Node.js"
@@ -93,17 +35,69 @@ skills:
       - "REST"
   - category: "Infrastructure"
     items:
+      - "Terraform"
       - "Kubernetes (EKS)"
       - "Karpenter"
       - "AWS (VPC, IAM, EC2, ALB)"
       - "Prometheus / Grafana"
       - "GPU Scheduling (NVIDIA Device Plugin)"
-      - "Distributed Systems & Autoscaling Design"
   - category: "Leadership"
     items:
       - "Architecture Design"
-      - "Cross-Functional Alignment"
+      - "Cross-Functional Leadership"
       - "Technical Mentorship"
+
+projects:
+  title: "ML Infrastructure Projects"
+  items:
+    - title: "Elastic GPU Inference Platform (EKS + Karpenter + vLLM)"
+      highlights:
+        - "Built an elastic GPU inference platform on AWS with Terraform-managed VPC/EKS, Karpenter, vLLM, and an ALB-backed OpenAI-compatible /v1 endpoint."
+        - "Designed mixed spot/on-demand GPU capacity with Karpenter NodePools and a warm baseline, eliminating fixed GPU node groups while preserving burst scale-out."
+        - "Implemented custom-metric autoscaling with Prometheus Adapter and vllm_requests_running, allowing HPA scale-out to trigger vLLM replicas and GPU nodes."
+        - "Built verify/evaluate workflows that prove scale-from-zero and return-to-zero cleanup, compare zero-idle vs warm-1 profiles, and report latency, TTFT, GPU utilization, NodeClaims, and cost."
+        - "Instrumented Prometheus, Grafana, DCGM exporter, and Pushgateway reporting to make queue pressure, autoscaling behavior, and GPU utilization visible during burst tests."
+
+experience:
+  - role: "Staff Software Engineer"
+    company: "DTEX Systems"
+    period:
+      start: "Sep 2024"
+      end: "Present"
+    highlights:
+      - "Unblocked a launch-critical OpenSearch Dashboards migration by partnering with AWS/OpenSearch engineers to isolate root causes and stabilize production deployments."
+      - "Delivered the DLP feature end-to-end across UI workflows, APIs, and data modeling, aligning frontend, backend, infra, and product teams for a major go-to-market initiative."
+      - "Built local development tooling and automation that cut dev/test cycle time by 20% and reduced onboarding friction."
+      - "Containerized UI services, removed shared dependency coupling, and led high-risk technical escalations to improve release reliability and execution speed."
+      - "Served as a technical escalation lead for ambiguous, high-risk issues, turning loosely defined problems into production-ready solutions."
+
+  - role: "Senior Technical Lead"
+    company: "Cisco Systems, Inc."
+    period:
+      start: "Aug 2019"
+      end: "Apr 2024"
+    highlights:
+      - "Led architecture and technical strategy for the Onboarding Experience platform, helping enterprise customers complete onboarding in under 30 minutes."
+      - "Drove system design across frontend, backend, and integrations, resolving cross-team tradeoffs across US, Europe, and India engineering groups."
+      - "Led AngularJS-to-React modernization to remove security risk and improve maintainability; introduced Cypress end-to-end testing that cut test creation time by 50%."
+      - "Partnered with architects, PM, UX, and engineering leaders to turn ambiguous requirements into scalable APIs and state-driven workflows."
+      - "Built CI/CD and test automation improvements that reduced regression risk in high-visibility customer onboarding flows."
+
+  - role: "Senior Software Engineer"
+    company: "Tico Co., Ltd."
+    period:
+      start: "Jan 2019"
+      end: "Aug 2019"
+    highlights:
+      - "Improved message loading performance by 60% through frontend and API optimization and reduced codebase size by 30% through modular refactoring."
+
+  - role: "Co-founder / CTO"
+    company: "Popup Technology Co., Ltd."
+    period:
+      start: "Apr 2016"
+      end: "Oct 2018"
+    highlights:
+      - "Built the core platform from scratch, led a 5-person engineering team, and shipped features that doubled revenue within 12 months."
 
 education:
   - school: "University of California, San Diego"

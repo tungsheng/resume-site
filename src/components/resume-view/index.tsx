@@ -224,7 +224,7 @@ export function ResumeView({
   ) : null;
 
   return (
-    <div style={resumeStyles.page}>
+    <div style={resumeStyles.page} className="resume-sheet">
       <header style={resumeStyles.header}>
         <div style={resumeStyles.headerContent}>
           <div style={resumeStyles.headerLeft}>
