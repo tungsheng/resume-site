@@ -36,6 +36,17 @@ function toCommaList(value: unknown): string[] {
   return [];
 }
 
+function toFlatTextList(value: unknown): string[] {
+  if (typeof value === "string") {
+    const text = toText(value);
+    return text ? [text] : [];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => toFlatTextList(item));
+  }
+  return [];
+}
+
 function readPeriod(record: UnknownRecord): {
   startDate: string | null;
   endDate: string | null;
@@ -139,7 +150,10 @@ function normalizeSkills(data: UnknownRecord): ResumeData["skills"] {
       const category = toText(item.category) ?? toText(item.name);
       if (!category) continue;
 
-      const values = toCommaList(item.items ?? item.keywords ?? item.skills);
+      const rawValues = item.items ?? item.keywords ?? item.skills;
+      const values = Array.isArray(rawValues)
+        ? toFlatTextList(rawValues)
+        : toCommaList(rawValues);
       if (values.length > 0) skills[category] = values;
     }
     return skills;
@@ -153,6 +167,48 @@ function normalizeSkills(data: UnknownRecord): ResumeData["skills"] {
   }
 
   return skills;
+}
+
+function normalizeProjects(data: UnknownRecord): ResumeData["projects"] {
+  const projectsSource = data.projects ?? data.sideProjects;
+  const sourceRecord = isRecord(projectsSource) ? projectsSource : null;
+  const rawItems = Array.isArray(projectsSource)
+    ? projectsSource
+    : sourceRecord
+      ? Array.isArray(sourceRecord.items)
+        ? sourceRecord.items
+        : Array.isArray(sourceRecord.entries)
+          ? sourceRecord.entries
+          : []
+      : [];
+
+  const items: NonNullable<ResumeData["projects"]>["items"] = [];
+  for (const item of rawItems) {
+    if (!isRecord(item)) continue;
+
+    const title =
+      toText(item.title) ?? toText(item.name) ?? toText(item.project) ?? toText(item.heading);
+    const highlights = toList(
+      item.highlights ?? item.achievements ?? item.bullets ?? item.summary
+    );
+
+    if (!title) continue;
+
+    items.push({
+      title,
+      highlights,
+    });
+  }
+
+  if (items.length === 0) return undefined;
+
+  return {
+    title:
+      (sourceRecord
+        ? toText(sourceRecord.title) ?? toText(sourceRecord.heading)
+        : null) ?? "Projects",
+    items,
+  };
 }
 
 function normalizeEducation(data: UnknownRecord): ResumeData["education"] {
@@ -217,11 +273,13 @@ export function normalizeResumeData(data: unknown): ResumeData | null {
 
   const experience = normalizeExperience(data);
   const skills = normalizeSkills(data);
+  const projects = normalizeProjects(data);
   const education = normalizeEducation(data);
   const certificates = normalizeCertificates(data);
 
   return {
     header,
+    projects,
     experience,
     skills,
     education,

@@ -24,6 +24,15 @@ const sampleResume: ResumeData = {
       highlights: ["Scaled core services & reduced incidents."],
     },
   ],
+  projects: {
+    title: "Selected Projects",
+    items: [
+      {
+        title: "GPU <Inference> Platform",
+        highlights: ["Measured queue pressure & scaled nodes."],
+      },
+    ],
+  },
   skills: {
     Languages: ["TypeScript", "SQL"],
   },
@@ -64,5 +73,19 @@ describe("ResumeView", () => {
 
     expect(html).toContain("href=\"https://linkedin.com/in/tony%20lee%2Fdev\"");
     expect(html).toContain("linkedin.com/in/tony lee/dev");
+  });
+
+  test("renders project sections with escaped titles", () => {
+    const html = renderToStaticMarkup(
+      <ResumeView
+        data={sampleResume}
+        themeColor="#c9a86c"
+        layoutTemplate="single-column-ats"
+      />
+    );
+
+    expect(html).toContain("Selected Projects");
+    expect(html).toContain("GPU &lt;Inference&gt; Platform");
+    expect(html).toContain("Measured queue pressure &amp; scaled nodes.");
   });
 });

@@ -249,6 +249,24 @@ const baseResumeStyles: Record<string, React.CSSProperties> = {
     color: "#374151",
     margin: 0,
   },
+  projectList: {
+    display: "grid",
+    rowGap: "0.11in",
+  },
+  projectItem: {
+    breakInside: "avoid",
+  },
+  projectTitle: { fontWeight: 600, fontSize: "9.6pt", color: "#4b5563" },
+  projectHighlights: {
+    listStyle: "none",
+    padding: 0,
+    margin: "4px 0 0",
+    display: "grid",
+    rowGap: 2,
+    fontSize: "8.6pt",
+    lineHeight: 1.33,
+    color: "#374151",
+  },
   expList: {
     position: "relative",
   },
@@ -349,6 +367,8 @@ const templateResumeStyleOverrides: Record<
     expDate: { minWidth: "auto", textAlign: "left", marginLeft: 8 },
   },
   "minimal-timeline": {
+    projectTitle: { fontSize: "9.6pt", fontWeight: 600, color: "#4b5563" },
+    projectHighlights: { fontSize: "8.6pt", lineHeight: 1.33, color: "#374151" },
     expList: { position: "relative", paddingLeft: 0 },
     expRail: {
       display: "block",

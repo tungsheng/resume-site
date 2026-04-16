@@ -67,6 +67,21 @@ export function generateHTML(
     )
     .join("");
 
+  const projectsItemsHTML = view.projects
+    .map(
+      (project) => `
+      <div class="project-item">
+        <div class="project-title">${escapeHtml(project.title)}</div>
+        ${project.highlights.length > 0
+          ? `<ul class="project-highlights">
+               ${project.highlights.map((h) => `<li>${escapeHtml(h)}</li>`).join("")}
+             </ul>`
+          : ""
+        }
+      </div>`
+    )
+    .join("");
+
   const experienceItemsHTML = view.experience
     .map(
       (exp) => `
@@ -99,6 +114,13 @@ export function generateHTML(
     ? `<section class="section">
           <h2 class="section-title">Skills</h2>
           <div class="skills-list">${skillsHTML}</div>
+        </section>`
+    : "";
+
+  const projectsSectionHTML = view.hasProjects
+    ? `<section class="section">
+          <h2 class="section-title">${escapeHtml(view.projectsTitle)}</h2>
+          <div class="project-list">${projectsItemsHTML}</div>
         </section>`
     : "";
 
@@ -151,6 +173,7 @@ export function generateHTML(
         ? `<div class="single-column-flow">
              ${summarySectionHTML}
              ${skillsSectionHTML}
+             ${projectsSectionHTML}
              ${experienceSectionHTML}
              ${educationSectionHTML}
              ${certificatesSectionHTML}
@@ -162,6 +185,7 @@ export function generateHTML(
            </div>
            <div class="right-column">
              ${summarySectionHTML}
+             ${projectsSectionHTML}
              ${experienceSectionHTML}
            </div>`
       }
@@ -465,6 +489,37 @@ body {
   text-align: var(--summary-align);
   color: #374151;
 }
+.project-list {
+  display: grid;
+  row-gap: var(--experience-gap);
+}
+.project-item {
+  break-inside: avoid;
+}
+.project-title {
+  font-weight: 600;
+  font-size: var(--experience-title-size);
+  color: #4b5563;
+}
+.project-highlights {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 4px;
+}
+.project-highlights li {
+  font-size: var(--highlight-size);
+  line-height: var(--highlight-line-height);
+  margin-bottom: var(--highlight-gap);
+  padding-left: 12px;
+  position: relative;
+  color: #374151;
+}
+.project-highlights li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: ${themeColor};
+}
 .experience-list { position: relative; }
 .experience-rail {
   display: none;
@@ -560,6 +615,7 @@ body {
   letter-spacing: 1.15px;
   color: #1f2937;
 }
+.page.layout-minimal-timeline .project-title,
 .page.layout-minimal-timeline .experience-title,
 .page.layout-minimal-timeline .education-degree,
 .page.layout-minimal-timeline .certificate-title {
@@ -587,6 +643,7 @@ body {
   line-height: 1.38;
   color: #374151;
 }
+.page.layout-minimal-timeline .project-highlights li,
 .page.layout-minimal-timeline .skill-items,
 .page.layout-minimal-timeline .experience-highlights li {
   font-size: 8.6pt;

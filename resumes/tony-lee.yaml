@@ -1,7 +1,7 @@
 meta:
   version: 2
   slug: "tony-lee"
-  updatedAt: "2026-02-17"
+  updatedAt: "2026-04-15"
   targetRole: "Staff / Principal Software Engineer"
 
 profile:
@@ -48,7 +48,6 @@ experience:
       start: "Jan 2019"
       end: "Aug 2019"
     highlights:
-      - "Led software development initiatives ensuring multiple on-time releases across product lines."
       - "Improved message loading performance by 60% through frontend and API optimization."
       - "Reduced codebase size by 30% by enforcing modular design and eliminating redundant logic, improving maintainability and build performance."
 
@@ -59,9 +58,18 @@ experience:
       end: "Oct 2018"
     highlights:
       - "Architected and built the company’s core platform from scratch (backend services, APIs, frontend workflows)."
-      - "Hired and led a 5-person engineering team; established development standards, agile processes, and code review practices."
       - "Delivered revenue-generating features that drove 100% revenue growth within 12 months."
-      - "Represented the company in regional demo events contributing to 10% of new user acquisition."
+
+projects:
+  title: "ML Infrastructure Projects"
+  items:
+    - title: "GPU Inference Platform on Kubernetes (EKS + Karpenter + vLLM)"
+      highlights:
+        - "Designed and built a production-style GPU inference platform on EKS using Karpenter and vLLM to serve LLM requests with dynamic GPU provisioning."
+        - "Implemented queue-aware autoscaling using the custom metric vllm_requests_running via Prometheus Adapter, driving HPA decisions from serving pressure instead of CPU utilization."
+        - "Built a dynamic GPU compute layer with Karpenter and the NVIDIA device plugin, enabling scale-from-zero behavior and scaling idle GPU capacity back down to reduce cost."
+        - "Developed an evaluate framework to simulate burst traffic and measure cold-start latency, scaling behavior, GPU utilization, and zero-idle versus warm-pool cost and latency tradeoffs."
+        - "Integrated Prometheus, Grafana, and GPU telemetry to analyze request queueing, autoscaling behavior, and bottlenecks; modeled the platform as a closed-loop control system from request load to response latency."
 
 skills:
   - category: "Languages"
@@ -85,10 +93,12 @@ skills:
       - "REST"
   - category: "Infrastructure"
     items:
-      - "Docker"
-      - "CI/CD"
-      - "Jenkins"
-      - "OpenSearch"
+      - "Kubernetes (EKS)"
+      - "Karpenter"
+      - "AWS (VPC, IAM, EC2, ALB)"
+      - "Prometheus / Grafana"
+      - "GPU Scheduling (NVIDIA Device Plugin)"
+      - "Distributed Systems & Autoscaling Design"
   - category: "Leadership"
     items:
       - "Architecture Design"

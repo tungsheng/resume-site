@@ -57,6 +57,13 @@ experience:
     highlights:
       - Led development of key features
 
+projects:
+  title: Selected Projects
+  items:
+    - title: GPU Inference Platform on Kubernetes (EKS + Karpenter + vLLM)
+      highlights:
+        - Built queue-aware autoscaling using custom serving metrics
+
 skills:
   - category: Frontend
     items: [React, TypeScript]

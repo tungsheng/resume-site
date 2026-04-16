@@ -11,6 +11,13 @@ export interface ResumeData {
     };
     summary: string;
   };
+  projects?: {
+    title: string;
+    items: Array<{
+      title: string;
+      highlights: string[];
+    }>;
+  };
   experience: Array<{
     title: string;
     company: string;

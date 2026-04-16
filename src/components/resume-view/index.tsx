@@ -111,6 +111,31 @@ export function ResumeView({
     </section>
   ) : null;
 
+  const projectsSection = view.hasProjects ? (
+    <section style={resumeStyles.section}>
+      <h2 style={{ ...resumeStyles.sectionTitle, borderBottomColor: themeColor }}>
+        {view.projectsTitle}
+      </h2>
+      <div style={resumeStyles.projectList}>
+        {view.projects.map((project, i) => (
+          <div key={`${project.title}-${i}`} style={resumeStyles.projectItem}>
+            <div style={resumeStyles.projectTitle}>{project.title}</div>
+            {project.highlights.length > 0 && (
+              <ul style={resumeStyles.projectHighlights}>
+                {project.highlights.map((highlight, j) => (
+                  <li key={j}>
+                    <span style={{ color: themeColor, marginRight: 8 }}>•</span>
+                    {highlight}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  ) : null;
+
   const educationSection = view.hasEducation ? (
     <section style={resumeStyles.section}>
       <h2 style={{ ...resumeStyles.sectionTitle, borderBottomColor: themeColor }}>
@@ -248,6 +273,7 @@ export function ResumeView({
           <div style={resumeStyles.singleColumnFlow}>
             {summarySection}
             {skillsSection}
+            {projectsSection}
             {experienceSection}
             {educationSection}
             {certificatesSection}
@@ -262,6 +288,7 @@ export function ResumeView({
 
             <div style={resumeStyles.main}>
               {summarySection}
+              {projectsSection}
               {experienceSection}
             </div>
           </>

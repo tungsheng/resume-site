@@ -35,6 +35,11 @@ export interface ResumeExperienceViewModel {
   highlights: string[];
 }
 
+export interface ResumeProjectViewModel {
+  title: string;
+  highlights: string[];
+}
+
 export interface ResumeViewModel {
   layoutTemplate: ResumeLayoutTemplate;
   isSingleColumnLayout: boolean;
@@ -42,12 +47,15 @@ export interface ResumeViewModel {
   header: ResumeData["header"];
   summary: string;
   skills: ResumeSkillViewModel[];
+  projectsTitle: string;
+  projects: ResumeProjectViewModel[];
   education: ResumeEducationViewModel[];
   certificates: ResumeData["certificates"];
   experience: ResumeExperienceViewModel[];
   hasBadges: boolean;
   hasSummary: boolean;
   hasSkills: boolean;
+  hasProjects: boolean;
   hasEducation: boolean;
   hasCertificates: boolean;
   hasExperience: boolean;
@@ -64,6 +72,11 @@ export function buildResumeViewModel(
     categoryLabel: capitalize(category),
     items,
     itemsText: items.join(" • "),
+  }));
+
+  const projectsTitle = data.projects?.title.trim() || "Projects";
+  const projects = (data.projects?.items ?? []).map((entry) => ({
+    ...entry,
   }));
 
   const education = data.education.map((entry) => {
@@ -87,12 +100,15 @@ export function buildResumeViewModel(
     header: data.header,
     summary,
     skills,
+    projectsTitle,
+    projects,
     education,
     certificates: data.certificates,
     experience,
     hasBadges: data.header.badges.length > 0,
     hasSummary: summary.length > 0,
     hasSkills: skills.length > 0,
+    hasProjects: projects.length > 0,
     hasEducation: education.length > 0,
     hasCertificates: data.certificates.length > 0,
     hasExperience: experience.length > 0,

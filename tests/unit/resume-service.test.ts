@@ -23,6 +23,9 @@ describe("Resume Service", () => {
     expect(data).not.toBeNull();
     expect(data?.header.name).toBe("Tony Lee");
     expect(data?.skills["Languages"]).toBeArray();
+    expect(data?.skills["Infrastructure"]).toContain("AWS (VPC, IAM, EC2, ALB)");
+    expect(data?.projects?.title).toBe("ML Infrastructure Projects");
+    expect(data?.projects?.items[0]?.title).toContain("GPU Inference Platform");
     expect(data?.certificates).toBeArray();
   });
 
@@ -54,6 +57,15 @@ describe("Resume Service", () => {
           highlights: ["Built things"],
         },
       ],
+      projects: {
+        title: "Selected Projects",
+        items: [
+          {
+            title: "Inference Platform",
+            highlights: ["Scaled GPU workloads"],
+          },
+        ],
+      },
       skills: { frontend: ["React"], backend: ["Node.js"], management: ["Agile"] },
       education: [
         { school: "University", degree: "BS CS", startDate: "2016", endDate: "2020" },
@@ -65,6 +77,8 @@ describe("Resume Service", () => {
     expect(html).toContain("<!DOCTYPE html>");
     expect(html).toContain("John Doe");
     expect(html).toContain("Developer");
+    expect(html).toContain("Selected Projects");
+    expect(html).toContain("Inference Platform");
   });
 
   test("generateHTML escapes XSS", () => {
@@ -107,6 +121,15 @@ describe("Resume Service", () => {
           highlights: ["Built things"],
         },
       ],
+      projects: {
+        title: "Selected Projects",
+        items: [
+          {
+            title: "Inference Platform",
+            highlights: ["Scaled GPU workloads"],
+          },
+        ],
+      },
       skills: { frontend: ["React"], backend: ["Node.js"], management: ["Agile"] },
       education: [
         { school: "University", degree: "BS CS", startDate: "2016", endDate: "2020" },
@@ -117,6 +140,7 @@ describe("Resume Service", () => {
     const html = generateHTML(mockData, "#c9a86c", "single-column-ats");
     const summaryIndex = html.indexOf("<h2 class=\"section-title\">Professional Summary</h2>");
     const skillsIndex = html.indexOf("<h2 class=\"section-title\">Skills</h2>");
+    const projectsIndex = html.indexOf("<h2 class=\"section-title\">Selected Projects</h2>");
     const experienceIndex = html.indexOf("<h2 class=\"section-title\">Work Experience</h2>");
     const educationIndex = html.indexOf("<h2 class=\"section-title\">Education</h2>");
     const certificationsIndex = html.indexOf("<h2 class=\"section-title\">Certifications</h2>");
@@ -124,11 +148,13 @@ describe("Resume Service", () => {
     expect(html).toContain("<div class=\"single-column-flow\">");
     expect(summaryIndex).toBeGreaterThan(-1);
     expect(skillsIndex).toBeGreaterThan(summaryIndex);
-    expect(experienceIndex).toBeGreaterThan(skillsIndex);
+    expect(projectsIndex).toBeGreaterThan(skillsIndex);
+    expect(experienceIndex).toBeGreaterThan(projectsIndex);
     expect(educationIndex).toBeGreaterThan(experienceIndex);
     expect(certificationsIndex).toBeGreaterThan(educationIndex);
     expect(html).toContain("class=\"education-line\">BS CS • University • 2016 - 2020</div>");
     expect(html).toContain("class=\"skill-line\"><span class=\"skill-category-inline\">Frontend:</span>");
+    expect(html).toContain("class=\"project-title\">Inference Platform</div>");
   });
 
   test("generateHTML timeline template includes connected rail and job dots", () => {
