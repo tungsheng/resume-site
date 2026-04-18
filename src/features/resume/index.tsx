@@ -10,9 +10,14 @@ import {
 } from "../../layouts";
 import { downloadBlob, useToast } from "../../hooks";
 import { spinKeyframes } from "../../styles";
-import { ResumeView, Spinner, ToastContainer } from "../../components";
+import { ResumeView, Spinner, ToastContainer, DownloadIcon } from "../../components";
+import { siteStyles } from "../site/style";
+import { calculateResumePreviewScale } from "./preview-scale";
 import { Toolbar } from "./components";
 import { styles } from "./style";
+
+const LETTER_WIDTH_PX = 8.5 * 96;
+const LETTER_HEIGHT_PX = 11 * 96;
 
 function getResumeName(): string {
   const match = window.location.pathname.match(/\/resume\/(.+)/);
@@ -27,6 +32,7 @@ function Resume() {
   );
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const [previewScale, setPreviewScale] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const { toasts, showToast, removeToast } = useToast();
 
@@ -34,6 +40,17 @@ function Resume() {
 
   useEffect(() => {
     loadResume();
+  }, []);
+
+  useEffect(() => {
+    const updateScale = () => {
+      setPreviewScale(calculateResumePreviewScale(window.innerWidth));
+    };
+
+    updateScale();
+    window.addEventListener("resize", updateScale);
+
+    return () => window.removeEventListener("resize", updateScale);
   }, []);
 
   const loadResume = async () => {
@@ -62,8 +79,6 @@ function Resume() {
       setLoading(false);
     }
   };
-
-  const handlePrint = () => window.print();
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -123,6 +138,7 @@ function Resume() {
   return (
     <div style={styles.app} className="resume-app">
       <style>{`
+        ${siteStyles}
         ${spinKeyframes}
         @page {
           size: Letter;
@@ -144,33 +160,99 @@ function Resume() {
           .resume-page-wrapper {
             margin: 0 !important;
             padding: 0 !important;
+            min-height: auto !important;
           }
-          .resume-page-wrapper > .resume-sheet {
+          .resume-preview-layout {
+            display: block !important;
+            width: auto !important;
+          }
+          .resume-preview-sidebar {
+            display: none !important;
+          }
+          .resume-preview-shell {
+            width: auto !important;
+          }
+          .resume-preview-shell > :not(.resume-sheet) {
+            display: none !important;
+          }
+          .resume-preview-shell > .resume-sheet {
+            margin: 0 !important;
+            min-height: auto !important;
+          }
+          .resume-preview-shell > .resume-sheet > .resume-sheet__page {
             margin: 0 !important;
             box-shadow: none !important;
+            transform: none !important;
           }
         }
-        @media (max-width: 900px) {
-          .page-wrapper > div {
-            transform: scale(0.6);
-            transform-origin: top center;
+        @media (max-width: 720px) {
+          .resume-preview-layout {
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 8px !important;
+          }
+          .resume-preview-sidebar {
+            width: 100% !important;
+            justify-content: flex-end !important;
+            margin-top: 0 !important;
+          }
+          .resume-preview-sidebar .button {
+            min-width: 0 !important;
+            padding: 10px 12px !important;
           }
         }
       `}</style>
 
-      <Toolbar
-        title={`${data.header.name}'s Resume`}
-        onPrint={handlePrint}
-        onDownload={handleDownload}
-        downloading={downloading}
-      />
+      <Toolbar />
 
-      <main style={styles.pageWrapper} className="page-wrapper resume-page-wrapper">
-        <ResumeView
-          data={data}
-          themeColor={themeColor}
-          layoutTemplate={layoutTemplate}
-        />
+      <main
+        style={{
+          ...styles.pageWrapper,
+          minHeight: Math.ceil(LETTER_HEIGHT_PX * previewScale) + 16,
+        }}
+        className="page-wrapper resume-page-wrapper"
+      >
+        <div style={styles.previewLayout} className="resume-preview-layout">
+          <div
+            style={{
+              ...styles.previewShell,
+              width: Math.ceil(LETTER_WIDTH_PX * previewScale),
+            }}
+            className="resume-preview-shell"
+          >
+            <ResumeView
+              data={data}
+              themeColor={themeColor}
+              layoutTemplate={layoutTemplate}
+              scale={previewScale}
+              outerMargin={0}
+            />
+          </div>
+
+          <div style={styles.previewSidebar} className="resume-preview-sidebar">
+            <button
+              type="button"
+              onClick={() => void handleDownload()}
+              disabled={downloading}
+              className="button button--secondary button--compact"
+              aria-label={downloading ? "Generating PDF" : "Download resume as PDF"}
+              aria-busy={downloading}
+              title="Download resume PDF"
+            >
+              {downloading ? (
+                <>
+                  <Spinner size={16} color="#fff" />
+                  PDF
+                </>
+              ) : (
+                <>
+                  <DownloadIcon />
+                  PDF
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </main>
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />

@@ -14,7 +14,12 @@ interface ResumeViewProps {
   data: ResumeData;
   themeColor: string;
   layoutTemplate?: ResumeLayoutTemplate;
+  scale?: number;
+  outerMargin?: number;
 }
+
+const LETTER_WIDTH_PX = 8.5 * 96;
+const LETTER_HEIGHT_PX = 11 * 96;
 
 function MailMiniIcon() {
   return (
@@ -61,6 +66,8 @@ export function ResumeView({
   data,
   themeColor,
   layoutTemplate = DEFAULT_RESUME_TEMPLATE,
+  scale = 1,
+  outerMargin = 20,
 }: ResumeViewProps) {
   const resumeStyles = getResumeStyles(layoutTemplate);
   const view = buildResumeViewModel(data, layoutTemplate);
@@ -224,75 +231,92 @@ export function ResumeView({
   ) : null;
 
   return (
-    <div style={resumeStyles.page} className="resume-sheet">
-      <header style={resumeStyles.header}>
-        <div style={resumeStyles.headerContent}>
-          <div style={resumeStyles.headerLeft}>
-            <h1 style={{ ...resumeStyles.name, color: themeColor }}>{view.header.name}</h1>
-            {headlineText && <p style={resumeStyles.headerSubtitle}>{headlineText}</p>}
-          </div>
-          {hasContacts && (
-            <div style={resumeStyles.contact}>
-              {view.header.contacts.phone && (
-                <div style={resumeStyles.contactRow}>
-                  <span style={resumeStyles.contactLabel}>Phone</span>
-                  <span style={resumeStyles.contactValue}>{view.header.contacts.phone}</span>
-                </div>
-              )}
-              {view.header.contacts.email && (
-                <div style={{ ...resumeStyles.contactRow, ...resumeStyles.contactRowIcon }}>
-                  <a href={`mailto:${view.header.contacts.email}`} style={resumeStyles.contactLink}>
-                    {view.header.contacts.email}
-                  </a>
-                  <span style={resumeStyles.contactIcon}>
-                    <MailMiniIcon />
-                  </span>
-                </div>
-              )}
-              {view.header.contacts.linkedin && (
-                <div style={{ ...resumeStyles.contactRow, ...resumeStyles.contactRowIcon }}>
-                  <a
-                    href={`https://linkedin.com/in/${encodeURIComponent(view.header.contacts.linkedin)}`}
-                    style={resumeStyles.contactLink}
-                  >
-                    {`linkedin.com/in/${view.header.contacts.linkedin}`}
-                  </a>
-                  <span style={resumeStyles.contactIcon}>
-                    <LinkedinMiniIcon />
-                  </span>
-                </div>
-              )}
+    <div
+      style={{
+        width: `${LETTER_WIDTH_PX * scale}px`,
+        minHeight: `${LETTER_HEIGHT_PX * scale}px`,
+        margin: `${outerMargin}px auto`,
+      }}
+      className="resume-sheet"
+    >
+      <div
+        style={{
+          ...resumeStyles.page,
+          margin: 0,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+        className="resume-sheet__page"
+      >
+        <header style={resumeStyles.header}>
+          <div style={resumeStyles.headerContent}>
+            <div style={resumeStyles.headerLeft}>
+              <h1 style={{ ...resumeStyles.name, color: themeColor }}>{view.header.name}</h1>
+              {headlineText && <p style={resumeStyles.headerSubtitle}>{headlineText}</p>}
             </div>
-          )}
-        </div>
-        <div style={{ ...resumeStyles.headerDivider, borderTopColor: themeColor }} />
-      </header>
-
-      <div style={resumeStyles.body}>
-        {view.isSingleColumnLayout ? (
-          <div style={resumeStyles.singleColumnFlow}>
-            {summarySection}
-            {skillsSection}
-            {projectsSection}
-            {experienceSection}
-            {educationSection}
-            {certificatesSection}
+            {hasContacts && (
+              <div style={resumeStyles.contact}>
+                {view.header.contacts.phone && (
+                  <div style={resumeStyles.contactRow}>
+                    <span style={resumeStyles.contactLabel}>Phone</span>
+                    <span style={resumeStyles.contactValue}>{view.header.contacts.phone}</span>
+                  </div>
+                )}
+                {view.header.contacts.email && (
+                  <div style={{ ...resumeStyles.contactRow, ...resumeStyles.contactRowIcon }}>
+                    <a href={`mailto:${view.header.contacts.email}`} style={resumeStyles.contactLink}>
+                      {view.header.contacts.email}
+                    </a>
+                    <span style={resumeStyles.contactIcon}>
+                      <MailMiniIcon />
+                    </span>
+                  </div>
+                )}
+                {view.header.contacts.linkedin && (
+                  <div style={{ ...resumeStyles.contactRow, ...resumeStyles.contactRowIcon }}>
+                    <a
+                      href={`https://linkedin.com/in/${encodeURIComponent(view.header.contacts.linkedin)}`}
+                      style={resumeStyles.contactLink}
+                    >
+                      {`linkedin.com/in/${view.header.contacts.linkedin}`}
+                    </a>
+                    <span style={resumeStyles.contactIcon}>
+                      <LinkedinMiniIcon />
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        ) : (
-          <>
-            <div style={resumeStyles.sidebar}>
-              {educationSection}
-              {skillsSection}
-              {certificatesSection}
-            </div>
+          <div style={{ ...resumeStyles.headerDivider, borderTopColor: themeColor }} />
+        </header>
 
-            <div style={resumeStyles.main}>
+        <div style={resumeStyles.body}>
+          {view.isSingleColumnLayout ? (
+            <div style={resumeStyles.singleColumnFlow}>
               {summarySection}
+              {skillsSection}
               {projectsSection}
               {experienceSection}
+              {educationSection}
+              {certificatesSection}
             </div>
-          </>
-        )}
+          ) : (
+            <>
+              <div style={resumeStyles.sidebar}>
+                {educationSection}
+                {skillsSection}
+                {certificatesSection}
+              </div>
+
+              <div style={resumeStyles.main}>
+                {summarySection}
+                {projectsSection}
+                {experienceSection}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

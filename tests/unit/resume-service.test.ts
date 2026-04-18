@@ -24,8 +24,8 @@ describe("Resume Service", () => {
     expect(data?.header.name).toBe("Tony Lee");
     expect(data?.skills["Languages"]).toBeArray();
     expect(data?.skills["Infrastructure"]).toContain("AWS (VPC, IAM, EC2, ALB)");
-    expect(data?.projects?.title).toBe("ML Infrastructure Projects");
-    expect(data?.projects?.items[0]?.title).toContain("GPU Inference Platform");
+    expect(data?.projects?.title).toBe("Selected Project");
+    expect(data?.projects?.items[0]?.title).toContain("Cloud Inference Platform");
     expect(data?.certificates).toBeArray();
   });
 

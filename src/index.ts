@@ -22,6 +22,9 @@ import {
 import homePage from "../public/index.html";
 import adminPage from "../public/admin.html";
 import resumePage from "../public/resume.html";
+import projectPage from "../public/project.html";
+import experimentsPage from "../public/experiments.html";
+import aboutPage from "../public/about.html";
 
 initDatabase();
 
@@ -40,6 +43,9 @@ const server = Bun.serve({
   routes: {
     // Page routes - using Bun's HTML imports for React bundling
     "/": homePage,
+    "/project/cloud-inference-platform": projectPage,
+    "/experiments": experimentsPage,
+    "/about": aboutPage,
     "/admin": adminPage,
     "/resume/:name": resumePage,
 
@@ -96,6 +102,9 @@ process.on("SIGTERM", () => {
 logger.info("Resume server started", {
   baseUrl: `http://localhost:${config.port}`,
   home: `http://localhost:${config.port}/`,
+  project: `http://localhost:${config.port}/project/cloud-inference-platform`,
+  experiments: `http://localhost:${config.port}/experiments`,
+  about: `http://localhost:${config.port}/about`,
   resume: `http://localhost:${config.port}/resume/tony-lee`,
   admin: `http://localhost:${config.port}/admin`,
 });

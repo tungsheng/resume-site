@@ -30,6 +30,47 @@ describe("API Integration", () => {
     expect(data.resumes).toBeArray();
   });
 
+  itIfIntegration("GET / serves the home page shell", async () => {
+    const res = await fetch(`${BASE_URL}/`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("<div id=\"root\"></div>");
+    expect(html).toContain("ML Inference &amp; Distributed Systems");
+  });
+
+  itIfIntegration("GET /project/cloud-inference-platform serves the project shell", async () => {
+    const res = await fetch(`${BASE_URL}/project/cloud-inference-platform`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Cloud Inference Platform | Tony Lee");
+  });
+
+  itIfIntegration("GET /experiments serves the experiments shell", async () => {
+    const res = await fetch(`${BASE_URL}/experiments`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Experiments | Tony Lee");
+  });
+
+  itIfIntegration("GET /about serves the about shell", async () => {
+    const res = await fetch(`${BASE_URL}/about`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("About Tony Lee");
+  });
+
+  itIfIntegration("GET /resume/tony-lee serves the resume shell", async () => {
+    const res = await fetch(`${BASE_URL}/resume/tony-lee`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("<title>Resume</title>");
+  });
+
   itIfIntegration("GET /api/resume/:name - 404 for missing", async () => {
     const res = await fetch(`${BASE_URL}/api/resume/nonexistent-xyz`);
     expect(res.status).toBe(404);
