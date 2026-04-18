@@ -30,13 +30,13 @@ public/                  HTML entrypoints loaded directly by Bun
 resumes/                 checked-in resume YAML files
 src/
   components/            shared React UI pieces
-  domain/resume/         resume loading, normalization, view model, HTML rendering
+  domain/resume/         resume loading, normalization, and view-model shaping
   features/              page-specific React code
     about/
     experiments/
     home/
     project/
-    resume/
+    resume/              shared resume document, client hooks, and page UI
     site/                shared public-site content, layout, and styles
   server/
     http/                small request/response helpers
@@ -68,8 +68,9 @@ Any other request falls through to `src/server/routes/static.ts`, which serves f
 
 1. Resume files are discovered in `resumes/` by `src/domain/resume/load.ts`.
 2. YAML is parsed and normalized into the internal `ResumeData` shape.
-3. The public resume page fetches `/api/resume/:name` and `/api/settings/:name`.
-4. PDF downloads call `/api/public-pdf`, which renders HTML and hands it to Puppeteer.
+3. `src/features/resume/document.tsx` renders the canonical resume markup for both preview and PDF output.
+4. The public resume page fetches `/api/resume/:name` and `/api/settings/:name`.
+5. PDF downloads call `/api/public-pdf`, which renders the same resume document through React SSR and hands it to Puppeteer.
 
 The checked-in `tony-lee.yaml` uses the current v2-style format. `tony-lee-1.yaml` exists as a legacy fixture to keep backward compatibility covered by tests.
 

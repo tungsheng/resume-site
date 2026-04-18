@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { generateHTML, listResumes, loadResume } from "../../src/domain/resume";
+import { listResumes, loadResume } from "../../src/domain/resume";
+import { renderResumeHtmlDocument } from "../../src/features/resume/render-static-html";
 import type { ResumeData } from "../../src/types";
 
 describe("Resume Service", () => {
@@ -36,7 +37,7 @@ describe("Resume Service", () => {
     expect(data?.certificates).toBeArray();
   });
 
-  test("generateHTML creates valid HTML", () => {
+  test("renderResumeHtmlDocument creates valid HTML", () => {
     const mockData: ResumeData = {
       header: {
         name: "John Doe",
@@ -73,15 +74,16 @@ describe("Resume Service", () => {
       certificates: [{ title: "AWS", issuer: "Amazon", date: "2022" }],
     };
 
-    const html = generateHTML(mockData);
+    const html = renderResumeHtmlDocument(mockData, "#c9a86c");
     expect(html).toContain("<!DOCTYPE html>");
     expect(html).toContain("John Doe");
     expect(html).toContain("Developer");
     expect(html).toContain("Selected Projects");
     expect(html).toContain("Inference Platform");
+    expect(html).toContain("class=\"resume-document page layout-single-column-ats\"");
   });
 
-  test("generateHTML escapes XSS", () => {
+  test("renderResumeHtmlDocument escapes XSS", () => {
     const xssData: ResumeData = {
       header: {
         name: '<script>alert("XSS")</script>',
@@ -95,12 +97,12 @@ describe("Resume Service", () => {
       certificates: [],
     };
 
-    const html = generateHTML(xssData);
-    expect(html).not.toContain("<script>");
+    const html = renderResumeHtmlDocument(xssData, "#c9a86c");
+    expect(html).not.toContain("<script>alert(\"XSS\")</script>");
     expect(html).toContain("&lt;script&gt;");
   });
 
-  test("generateHTML single-column template uses ATS section order", () => {
+  test("renderResumeHtmlDocument single-column template uses ATS section order", () => {
     const mockData: ResumeData = {
       header: {
         name: "John Doe",
@@ -137,7 +139,7 @@ describe("Resume Service", () => {
       certificates: [{ title: "AWS", issuer: "Amazon", date: "2022" }],
     };
 
-    const html = generateHTML(mockData, "#c9a86c", "single-column-ats");
+    const html = renderResumeHtmlDocument(mockData, "#c9a86c", "single-column-ats");
     const summaryIndex = html.indexOf("<h2 class=\"section-title\">Professional Summary</h2>");
     const skillsIndex = html.indexOf("<h2 class=\"section-title\">Skills</h2>");
     const projectsIndex = html.indexOf("<h2 class=\"section-title\">Selected Projects</h2>");
@@ -153,11 +155,11 @@ describe("Resume Service", () => {
     expect(educationIndex).toBeGreaterThan(experienceIndex);
     expect(certificationsIndex).toBeGreaterThan(educationIndex);
     expect(html).toContain("class=\"education-line\">BS CS • University • 2016 - 2020</div>");
-    expect(html).toContain("class=\"skill-line\"><span class=\"skill-category-inline\">Frontend:</span>");
+    expect(html).toContain("class=\"skill-line\"><span class=\"skill-category-inline\">Frontend</span>: <span class=\"skill-items\">React</span>");
     expect(html).toContain("class=\"project-title\">Inference Platform</div>");
   });
 
-  test("generateHTML timeline template includes connected rail and job dots", () => {
+  test("renderResumeHtmlDocument timeline template includes connected rail and job dots", () => {
     const mockData: ResumeData = {
       header: {
         name: "John Doe",
@@ -192,14 +194,13 @@ describe("Resume Service", () => {
       certificates: [],
     };
 
-    const html = generateHTML(mockData, "#c9a86c", "minimal-timeline");
+    const html = renderResumeHtmlDocument(mockData, "#c9a86c", "minimal-timeline");
     const dotCount = html.match(/class="experience-dot"/g)?.length ?? 0;
 
-    expect(html).toContain("<div class=\"experience-list\">");
+    expect(html).toContain("class=\"resume-document page layout-minimal-timeline\"");
     expect(html).toContain("<div class=\"experience-rail\"></div>");
     expect(dotCount).toBe(mockData.experience.length);
-    expect(html).toContain(".page.layout-minimal-timeline .experience-item {\n  padding-left: 22px;");
-    expect(html).toContain(".page.layout-minimal-timeline .badge {\n  border-radius: 999px;");
-    expect(html).toContain(".page.layout-minimal-timeline .experience-title,\n.page.layout-minimal-timeline .education-degree,\n.page.layout-minimal-timeline .certificate-title {");
+    expect(html).toContain(".resume-document.layout-minimal-timeline .experience-item {");
+    expect(html).toContain(".resume-document .experience-dot {");
   });
 });

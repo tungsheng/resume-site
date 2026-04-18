@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { DownloadIcon, ResumeView, Spinner, ToastContainer, type Toast } from "../../components";
-import { downloadBlob, useToast } from "../../hooks";
+import { DownloadIcon, Spinner, ToastContainer, type Toast } from "../../components";
 import type { ResumeLayoutTemplate } from "../../layouts";
 import type { ResumeData } from "../../types";
+import { ResumeDocumentPreview } from "./document";
+import { useResumePdfDownload } from "./use-resume-pdf";
+import { useResumePresentation } from "./use-resume-presentation";
 import { PublicSiteHeader } from "../site/header";
-import {
-  DEFAULT_PUBLIC_RESUME_SETTINGS,
-  loadPublicResumeSettings,
-  requestPublicResumePdf,
-} from "../site/public-resume";
 import { useDocumentTitle } from "../site/use-document-title";
 import { calculateResumePreviewScale } from "./preview-scale";
 import { LETTER_HEIGHT_PX, LETTER_WIDTH_PX, resumePageCss, styles } from "./style";
@@ -60,7 +57,7 @@ export function ResumePageContent({
             }}
             className="resume-preview-shell"
           >
-            <ResumeView
+            <ResumeDocumentPreview
               data={data}
               themeColor={themeColor}
               layoutTemplate={layoutTemplate}
@@ -118,16 +115,18 @@ function ResumeStatusView({ message, busy = false }: { message: string; busy?: b
 
 export function ResumePage() {
   const resumeName = getResumeName();
+  const { themeColor, layoutTemplate } = useResumePresentation(resumeName);
   const [data, setData] = useState<ResumeData | null>(null);
-  const [themeColor, setThemeColor] = useState(DEFAULT_PUBLIC_RESUME_SETTINGS.themeColor);
-  const [layoutTemplate, setLayoutTemplate] = useState(
-    DEFAULT_PUBLIC_RESUME_SETTINGS.layoutTemplate
-  );
   const [loading, setLoading] = useState(true);
-  const [downloading, setDownloading] = useState(false);
   const [previewScale, setPreviewScale] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const { toasts, showToast, removeToast } = useToast();
+  const { downloading, downloadPdf, toasts, removeToast } = useResumePdfDownload({
+    resumeName,
+    themeColor,
+    layoutTemplate,
+    successMessage: "PDF downloaded successfully",
+    failureMessage: "Failed to download PDF. Please try again.",
+  });
 
   useDocumentTitle(data ? `${data.header.name} - Resume` : "Resume");
 
@@ -147,11 +146,10 @@ export function ResumePage() {
   }, []);
 
   async function loadResume(): Promise<void> {
-    try {
-      const settings = await loadPublicResumeSettings(resumeName);
-      setThemeColor(settings.themeColor);
-      setLayoutTemplate(settings.layoutTemplate);
+    setLoading(true);
+    setError(null);
 
+    try {
       const res = await fetch(`/api/resume/${encodeURIComponent(resumeName)}`);
       if (!res.ok) {
         setError("Resume not found");
@@ -165,26 +163,6 @@ export function ResumePage() {
       setError("Failed to load resume");
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleDownload(): Promise<void> {
-    setDownloading(true);
-    try {
-      const blob = await requestPublicResumePdf({
-        name: resumeName,
-        themeColor,
-        layoutTemplate,
-      });
-      downloadBlob(blob, `${resumeName.replace(/\s+/g, "_")}_Resume.pdf`);
-      showToast("PDF downloaded successfully", "success");
-    } catch (err) {
-      console.error("Failed to download PDF:", err);
-      const message =
-        err instanceof Error ? err.message : "Failed to download PDF. Please try again.";
-      showToast(message, "error");
-    } finally {
-      setDownloading(false);
     }
   }
 
@@ -204,7 +182,7 @@ export function ResumePage() {
       previewScale={previewScale}
       downloading={downloading}
       onDownload={() => {
-        void handleDownload();
+        void downloadPdf();
       }}
       toasts={toasts}
       onRemoveToast={removeToast}

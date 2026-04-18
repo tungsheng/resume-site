@@ -3,7 +3,7 @@ import {
   getPublicResumeFallbackSettings,
   loadPublicResumeSettings,
   requestPublicResumePdf,
-} from "../../src/features/site/public-resume";
+} from "../../src/features/resume/presentation";
 
 const originalFetch = globalThis.fetch;
 

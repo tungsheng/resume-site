@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ResumeView } from "../../src/components";
+import { ResumeDocumentPreview } from "../../src/features/resume/document";
 import type { ResumeData } from "../../src/types";
 
 const sampleResume: ResumeData = {
@@ -50,7 +50,7 @@ const sampleResume: ResumeData = {
 describe("ResumeView", () => {
   test("renders a stable root class for print-specific styling", () => {
     const html = renderToStaticMarkup(
-      <ResumeView
+      <ResumeDocumentPreview
         data={sampleResume}
         themeColor="#c9a86c"
         layoutTemplate="single-column-ats"
@@ -62,7 +62,7 @@ describe("ResumeView", () => {
 
   test("escapes text once without double-encoding entities", () => {
     const html = renderToStaticMarkup(
-      <ResumeView
+      <ResumeDocumentPreview
         data={sampleResume}
         themeColor="#c9a86c"
         layoutTemplate="single-column-ats"
@@ -76,7 +76,7 @@ describe("ResumeView", () => {
 
   test("encodes linkedin handle in link href while keeping display readable", () => {
     const html = renderToStaticMarkup(
-      <ResumeView
+      <ResumeDocumentPreview
         data={sampleResume}
         themeColor="#c9a86c"
         layoutTemplate="single-column-ats"
@@ -89,7 +89,7 @@ describe("ResumeView", () => {
 
   test("renders project sections with escaped titles", () => {
     const html = renderToStaticMarkup(
-      <ResumeView
+      <ResumeDocumentPreview
         data={sampleResume}
         themeColor="#c9a86c"
         layoutTemplate="single-column-ats"

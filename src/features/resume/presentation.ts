@@ -7,6 +7,7 @@ import {
   DEFAULT_RESUME_PRESENTATION,
   getReadOnlyResumePresentation,
 } from "../../resume-presentation";
+import { sanitizeName } from "../../utils";
 
 export interface PublicResumeSettings {
   themeColor: string;
@@ -22,7 +23,10 @@ export function getPublicResumeFallbackSettings(
   resumeName: string,
   fallback: PublicResumeSettings = DEFAULT_PUBLIC_RESUME_SETTINGS
 ): PublicResumeSettings {
-  return getReadOnlyResumePresentation(resumeName) ?? fallback;
+  const sanitized = sanitizeName(resumeName);
+  if (!sanitized) return fallback;
+
+  return getReadOnlyResumePresentation(sanitized) ?? fallback;
 }
 
 export async function loadPublicResumeSettings(

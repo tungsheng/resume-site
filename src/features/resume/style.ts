@@ -3,9 +3,9 @@
 import type React from "react";
 import { spinKeyframes } from "../../styles";
 import { siteStyles } from "../site/style";
+import { getResumeDocumentCss, LETTER_HEIGHT_PX, LETTER_WIDTH_PX } from "./document-css";
 
-export const LETTER_WIDTH_PX = 8.5 * 96;
-export const LETTER_HEIGHT_PX = 11 * 96;
+export { LETTER_HEIGHT_PX, LETTER_WIDTH_PX };
 
 export const styles: Record<string, React.CSSProperties> = {
   app: {
@@ -30,18 +30,24 @@ export const styles: Record<string, React.CSSProperties> = {
     gap: 12,
     width: "fit-content",
     maxWidth: "100%",
+    position: "relative",
+    isolation: "isolate",
   },
   previewShell: {
     display: "flex",
     flexDirection: "column",
     alignItems: "stretch",
     flex: "0 0 auto",
+    position: "relative",
+    zIndex: 1,
   },
   previewSidebar: {
     display: "flex",
     justifyContent: "flex-start",
     alignItems: "flex-start",
     flex: "0 0 auto",
+    position: "relative",
+    zIndex: 2,
   },
   loading: {
     display: "flex",
@@ -55,6 +61,7 @@ export const styles: Record<string, React.CSSProperties> = {
 
 export const resumePageCss = `
   ${siteStyles}
+  ${getResumeDocumentCss()}
   ${spinKeyframes}
   @page {
     size: Letter;
@@ -97,8 +104,11 @@ export const resumePageCss = `
     }
     .resume-preview-shell > .resume-sheet > .resume-sheet__page {
       margin: 0 !important;
-      box-shadow: none !important;
       transform: none !important;
+    }
+    .resume-preview-shell > .resume-sheet > .resume-sheet__page > .resume-document {
+      margin: 0 !important;
+      box-shadow: none !important;
     }
   }
   @media (max-width: 720px) {

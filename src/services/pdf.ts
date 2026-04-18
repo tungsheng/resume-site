@@ -86,7 +86,7 @@ export async function generatePDF(html: string): Promise<Buffer> {
     await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 0 });
     const { contentWidthPx, contentHeightPx } = await page.evaluate(
       ({ letterWidthPx, letterHeightPx }) => {
-        const root = document.querySelector(".page");
+        const root = document.querySelector(".resume-document");
         if (!root || !(root instanceof HTMLElement)) {
           return {
             contentWidthPx: letterWidthPx,

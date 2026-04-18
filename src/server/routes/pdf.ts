@@ -1,6 +1,7 @@
 import { isResumeLayoutTemplate } from "../../layouts";
 import { generatePDF } from "../../services/pdf";
-import { generateHTML, loadResume } from "../../domain/resume";
+import { loadResume } from "../../domain/resume";
+import { renderResumeHtmlDocument } from "../../features/resume/render-static-html";
 import { getResumeSettings } from "../../services/settings";
 import { logger } from "../../logger";
 import { config } from "../../config";
@@ -55,7 +56,7 @@ async function handlePDFGeneration(req: Request): Promise<Response> {
   const color = themeColor ?? settings.themeColor;
   const template = layoutTemplate ?? settings.layoutTemplate;
   try {
-    const html = generateHTML(data, color, template);
+    const html = renderResumeHtmlDocument(data, color, template);
     const pdf = await generatePDF(html);
 
     return new Response(new Uint8Array(pdf), {

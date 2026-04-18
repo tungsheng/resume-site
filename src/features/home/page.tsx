@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { DownloadIcon, ToastContainer } from "../../components";
-import { downloadBlob, useToast } from "../../hooks";
 import {
   EXPERIMENTS_PATH,
   PROJECT_PATH,
@@ -8,55 +7,22 @@ import {
   siteProfile,
 } from "../site/content";
 import { PublicSiteLayout } from "../site/layout";
-import {
-  DEFAULT_PUBLIC_RESUME_SETTINGS,
-  loadPublicResumeSettings,
-  requestPublicResumePdf,
-} from "../site/public-resume";
 import { useDocumentTitle } from "../site/use-document-title";
+import { useResumePdfDownload } from "../resume/use-resume-pdf";
+import { useResumePresentation } from "../resume/use-resume-presentation";
 
 const PAGE_TITLE = "Tony Lee | ML Inference & Distributed Systems";
 
 export function HomePage() {
-  const [themeColor, setThemeColor] = useState(DEFAULT_PUBLIC_RESUME_SETTINGS.themeColor);
-  const [layoutTemplate, setLayoutTemplate] = useState(
-    DEFAULT_PUBLIC_RESUME_SETTINGS.layoutTemplate
-  );
-  const [downloading, setDownloading] = useState(false);
-  const { toasts, showToast, removeToast } = useToast();
+  const { themeColor, layoutTemplate } = useResumePresentation(siteProfile.resumeSlug);
+  const { downloading, downloadPdf, toasts, removeToast } = useResumePdfDownload({
+    resumeName: siteProfile.resumeSlug,
+    themeColor,
+    layoutTemplate,
+    filename: "tony_lee_resume.pdf",
+  });
 
   useDocumentTitle(PAGE_TITLE);
-
-  useEffect(() => {
-    void loadResumeSettings();
-  }, []);
-
-  async function loadResumeSettings(): Promise<void> {
-    const settings = await loadPublicResumeSettings(siteProfile.resumeSlug);
-    setThemeColor(settings.themeColor);
-    setLayoutTemplate(settings.layoutTemplate);
-  }
-
-  async function handleDownload(): Promise<void> {
-    setDownloading(true);
-    try {
-      const blob = await requestPublicResumePdf({
-        name: siteProfile.resumeSlug,
-        themeColor,
-        layoutTemplate,
-      });
-      downloadBlob(blob, "tony_lee_resume.pdf");
-      showToast("Resume PDF downloaded", "success");
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to download the resume PDF. Please try again.";
-      showToast(message, "error");
-    } finally {
-      setDownloading(false);
-    }
-  }
 
   return (
     <>
@@ -78,7 +44,7 @@ export function HomePage() {
             </div>
 
             <div className="inline-links">
-              <button type="button" onClick={() => void handleDownload()} disabled={downloading}>
+              <button type="button" onClick={() => void downloadPdf()} disabled={downloading}>
                 <DownloadIcon />
                 {downloading ? "Preparing PDF..." : "Download PDF"}
               </button>
