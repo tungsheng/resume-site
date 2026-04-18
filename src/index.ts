@@ -10,7 +10,7 @@ import {
   handleGetSettings,
   handlePublicPDF,
   handleStaticFile,
-} from "./routes";
+} from "./server/routes";
 
 // Import HTML pages directly - Bun will bundle the TSX imports
 import homePage from "../public/index.html";
@@ -29,7 +29,9 @@ function withHeaders<T extends (...args: any[]) => Response | Promise<Response>>
   }) as unknown as T;
 }
 
-const server = Bun.serve({
+let server: ReturnType<typeof Bun.serve>;
+
+server = Bun.serve({
   port: config.port,
   routes: {
     // Page routes - using Bun's HTML imports for React bundling
@@ -47,7 +49,9 @@ const server = Bun.serve({
     "/api/settings/:name": { GET: withHeaders(handleGetSettings) },
 
     // PDF export routes
-    "/api/public-pdf": { POST: withHeaders(handlePublicPDF) },
+    "/api/public-pdf": {
+      POST: withHeaders((req) => handlePublicPDF(req, server.requestIP(req)?.address ?? null)),
+    },
   },
 
   // Fallback for static files

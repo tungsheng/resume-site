@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React from "react";
 import {
   experimentsContent,
   PROJECT_PATH,
@@ -9,18 +9,14 @@ import {
   formatTimelineSeconds,
 } from "../site/format";
 import { PublicSiteLayout } from "../site/layout";
+import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "Experiments | Tony Lee";
 
 export function ExperimentsPage() {
-  const comparisonRows = useMemo(
-    () => buildExperimentComparisonRows(experimentsContent.profiles),
-    []
-  );
+  const comparisonRows = buildExperimentComparisonRows(experimentsContent.profiles);
 
-  useEffect(() => {
-    document.title = PAGE_TITLE;
-  }, []);
+  useDocumentTitle(PAGE_TITLE);
 
   return (
     <PublicSiteLayout activeNav="experiments">

@@ -15,7 +15,6 @@ interface ResumeViewProps {
   themeColor: string;
   layoutTemplate?: ResumeLayoutTemplate;
   scale?: number;
-  outerMargin?: number;
 }
 
 const LETTER_WIDTH_PX = 8.5 * 96;
@@ -67,7 +66,6 @@ export function ResumeView({
   themeColor,
   layoutTemplate = DEFAULT_RESUME_TEMPLATE,
   scale = 1,
-  outerMargin = 20,
 }: ResumeViewProps) {
   const resumeStyles = getResumeStyles(layoutTemplate);
   const view = buildResumeViewModel(data, layoutTemplate);
@@ -235,7 +233,7 @@ export function ResumeView({
       style={{
         width: `${LETTER_WIDTH_PX * scale}px`,
         minHeight: `${LETTER_HEIGHT_PX * scale}px`,
-        margin: `${outerMargin}px auto`,
+        margin: 0,
       }}
       className="resume-sheet"
     >

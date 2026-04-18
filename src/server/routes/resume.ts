@@ -1,4 +1,4 @@
-import { listResumes, loadResume } from "../../services/resume";
+import { listResumes, loadResume } from "../../domain/resume";
 import type { RequestWithParams } from "../http/request";
 import { readPathParam } from "../http/request";
 import { json, notFound } from "../http/response";

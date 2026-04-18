@@ -1,5 +1,9 @@
 import { config } from "../config";
 import type { ResumeLayoutTemplate } from "../layouts";
+import {
+  DEFAULT_RESUME_PRESENTATION,
+  getReadOnlyResumePresentation,
+} from "../resume-presentation";
 import { sanitizeName } from "../utils";
 
 export interface ResumeSettings {
@@ -7,18 +11,10 @@ export interface ResumeSettings {
   layoutTemplate: ResumeLayoutTemplate;
 }
 
-const READ_ONLY_SETTINGS: Record<string, ResumeSettings> = {
-  // Preserve the current public tony-lee presentation that was configured in admin.
-  "tony-lee": {
-    themeColor: "#27ae60",
-    layoutTemplate: "minimal-timeline",
-  },
-};
-
 function defaultSettings(): ResumeSettings {
   return {
-    themeColor: config.defaultThemeColor,
-    layoutTemplate: config.defaultLayoutTemplate,
+    themeColor: DEFAULT_RESUME_PRESENTATION.themeColor ?? config.defaultThemeColor,
+    layoutTemplate: DEFAULT_RESUME_PRESENTATION.layoutTemplate ?? config.defaultLayoutTemplate,
   };
 }
 
@@ -26,7 +22,7 @@ export function getResumeSettings(resumeName: string): ResumeSettings {
   const sanitized = sanitizeName(resumeName);
   if (!sanitized) return defaultSettings();
 
-  const settings = READ_ONLY_SETTINGS[sanitized];
+  const settings = getReadOnlyResumePresentation(sanitized);
   if (settings) return settings;
 
   return defaultSettings();

@@ -2,75 +2,49 @@ import React, { useEffect, useState } from "react";
 import { DownloadIcon, ToastContainer } from "../../components";
 import { downloadBlob, useToast } from "../../hooks";
 import {
-  DEFAULT_RESUME_TEMPLATE,
-  isResumeLayoutTemplate,
-  type ResumeLayoutTemplate,
-} from "../../layouts";
-import {
   EXPERIMENTS_PATH,
   PROJECT_PATH,
   homeContent,
   siteProfile,
 } from "../site/content";
 import { PublicSiteLayout } from "../site/layout";
+import {
+  DEFAULT_PUBLIC_RESUME_SETTINGS,
+  loadPublicResumeSettings,
+  requestPublicResumePdf,
+} from "../site/public-resume";
+import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "Tony Lee | ML Inference & Distributed Systems";
 
 export function HomePage() {
-  const [themeColor, setThemeColor] = useState("#c9a86c");
-  const [layoutTemplate, setLayoutTemplate] = useState<ResumeLayoutTemplate>(
-    DEFAULT_RESUME_TEMPLATE
+  const [themeColor, setThemeColor] = useState(DEFAULT_PUBLIC_RESUME_SETTINGS.themeColor);
+  const [layoutTemplate, setLayoutTemplate] = useState(
+    DEFAULT_PUBLIC_RESUME_SETTINGS.layoutTemplate
   );
   const [downloading, setDownloading] = useState(false);
   const { toasts, showToast, removeToast } = useToast();
 
+  useDocumentTitle(PAGE_TITLE);
+
   useEffect(() => {
-    document.title = PAGE_TITLE;
     void loadResumeSettings();
   }, []);
 
   async function loadResumeSettings(): Promise<void> {
-    try {
-      const res = await fetch(`/api/settings/${encodeURIComponent(siteProfile.resumeSlug)}`);
-      if (!res.ok) return;
-
-      const settings = await res.json();
-      if (typeof settings.themeColor === "string") {
-        setThemeColor(settings.themeColor);
-      }
-      if (isResumeLayoutTemplate(settings.layoutTemplate)) {
-        setLayoutTemplate(settings.layoutTemplate);
-      }
-    } catch {
-      // Keep defaults if settings are unavailable.
-    }
+    const settings = await loadPublicResumeSettings(siteProfile.resumeSlug);
+    setThemeColor(settings.themeColor);
+    setLayoutTemplate(settings.layoutTemplate);
   }
 
   async function handleDownload(): Promise<void> {
     setDownloading(true);
     try {
-      const res = await fetch("/api/public-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: siteProfile.resumeSlug,
-          themeColor,
-          layoutTemplate,
-        }),
+      const blob = await requestPublicResumePdf({
+        name: siteProfile.resumeSlug,
+        themeColor,
+        layoutTemplate,
       });
-
-      if (!res.ok) {
-        let message = "Failed to generate PDF";
-        try {
-          const errorBody = (await res.json()) as { error?: string };
-          if (errorBody?.error) message = errorBody.error;
-        } catch {
-          // Keep fallback message.
-        }
-        throw new Error(message);
-      }
-
-      const blob = await res.blob();
       downloadBlob(blob, "tony_lee_resume.pdf");
       showToast("Resume PDF downloaded", "success");
     } catch (error) {

@@ -1,26 +1,20 @@
 import React from "react";
-import { ABOUT_PATH, EXPERIMENTS_PATH, PROJECT_PATH } from "./content";
+import { ABOUT_PATH, EXPERIMENTS_PATH, PROJECT_PATH, RESUME_PATH } from "./content";
 import type { PublicNavKey } from "./types";
 
 interface PublicSiteHeaderProps {
   activeNav: PublicNavKey;
-  actions?: React.ReactNode;
-  contextLabel?: string;
 }
 
 const NAV_ITEMS: Array<{ key: PublicNavKey; label: string; href: string }> = [
   { key: "home", label: "Home", href: "/" },
   { key: "project", label: "Project", href: PROJECT_PATH },
   { key: "experiments", label: "Experiments", href: EXPERIMENTS_PATH },
-  { key: "resume", label: "Resume", href: "/resume/tony-lee" },
+  { key: "resume", label: "Resume", href: RESUME_PATH },
   { key: "about", label: "About", href: ABOUT_PATH },
 ];
 
-export function PublicSiteHeader({
-  activeNav,
-  actions,
-  contextLabel,
-}: PublicSiteHeaderProps) {
+export function PublicSiteHeader({ activeNav }: PublicSiteHeaderProps) {
   return (
     <header className="site-header">
       <div className="site-header__inner">
@@ -41,13 +35,6 @@ export function PublicSiteHeader({
               </a>
             ))}
           </nav>
-
-          {(contextLabel || actions) && (
-            <div className="site-header__actions">
-              {contextLabel ? <span className="site-header__context">{contextLabel}</span> : null}
-              {actions}
-            </div>
-          )}
         </div>
       </div>
     </header>

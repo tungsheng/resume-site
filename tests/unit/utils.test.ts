@@ -3,6 +3,7 @@ import {
   addSecurityHeaders,
   checkRateLimit,
   escapeHtml,
+  getClientIP,
   hexToRgba,
   isValidColor,
   sanitizeName,
@@ -98,6 +99,36 @@ describe("checkRateLimit", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 60));
     expect(checkRateLimit(testIP, 1, 50)).toBe(true);
+  });
+});
+
+describe("getClientIP", () => {
+  test("prefers the direct server-reported address over forwarding headers", () => {
+    const req = new Request("http://localhost/", {
+      headers: {
+        "x-forwarded-for": "198.51.100.10",
+        "x-real-ip": "198.51.100.11",
+      },
+    });
+
+    expect(
+      getClientIP(req, {
+        directAddress: "127.0.0.1",
+        trustProxy: false,
+      })
+    ).toBe("127.0.0.1");
+  });
+
+  test("ignores spoofable forwarding headers unless trustProxy is enabled", () => {
+    const req = new Request("http://localhost/", {
+      headers: {
+        "x-forwarded-for": "198.51.100.10",
+        "x-real-ip": "198.51.100.11",
+      },
+    });
+
+    expect(getClientIP(req, { trustProxy: false })).toBe("unknown");
+    expect(getClientIP(req, { trustProxy: true })).toBe("198.51.100.10");
   });
 });
 

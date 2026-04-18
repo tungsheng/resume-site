@@ -1,5 +1,5 @@
 // Components barrel export
-export { DownloadIcon, PrintIcon } from "./icons";
+export { DownloadIcon } from "./icons";
 export { Spinner } from "./spinner";
 export { ResumeView } from "./resume-view";
 export { ToastContainer } from "./toast";

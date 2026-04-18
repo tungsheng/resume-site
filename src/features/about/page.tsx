@@ -1,13 +1,12 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { aboutContent, siteProfile } from "../site/content";
 import { PublicSiteLayout } from "../site/layout";
+import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "About Tony Lee";
 
 export function AboutPage() {
-  useEffect(() => {
-    document.title = PAGE_TITLE;
-  }, []);
+  useDocumentTitle(PAGE_TITLE);
 
   return (
     <PublicSiteLayout activeNav="about">

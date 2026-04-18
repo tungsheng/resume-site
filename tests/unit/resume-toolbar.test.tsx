@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Toolbar } from "../../src/features/resume/components";
+import { PublicSiteHeader } from "../../src/features/site/header";
 
-describe("Resume Toolbar", () => {
+describe("Resume Header", () => {
   test("renders the shared public-site header without extra resume actions", () => {
-    const html = renderToStaticMarkup(<Toolbar />);
+    const html = renderToStaticMarkup(<PublicSiteHeader activeNav="resume" />);
 
     expect(html).toContain("class=\"site-header\"");
     expect(html).toContain(">Tony Lee<");

@@ -116,18 +116,27 @@ export function checkRateLimit(
 /**
  * Get client IP from request
  */
-export function getClientIP(req: Request): string {
-  // Check common proxy headers
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0];
-    return first?.trim() ?? "unknown";
+export function getClientIP(
+  req: Request,
+  options?: { directAddress?: string | null; trustProxy?: boolean }
+): string {
+  if (options?.directAddress) {
+    return options.directAddress;
   }
-  const realIP = req.headers.get("x-real-ip");
-  if (realIP) {
-    return realIP;
+
+  if (options?.trustProxy) {
+    const forwarded = req.headers.get("x-forwarded-for");
+    if (forwarded) {
+      const first = forwarded.split(",")[0];
+      return first?.trim() ?? "unknown";
+    }
+
+    const realIP = req.headers.get("x-real-ip");
+    if (realIP) {
+      return realIP;
+    }
   }
-  // Fallback to unknown
+
   return "unknown";
 }
 

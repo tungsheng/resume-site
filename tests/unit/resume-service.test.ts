@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { generateHTML, listResumes, loadResume } from "../../src/services/resume";
+import { generateHTML, listResumes, loadResume } from "../../src/domain/resume";
 import type { ResumeData } from "../../src/types";
 
 describe("Resume Service", () => {

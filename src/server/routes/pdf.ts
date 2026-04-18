@@ -1,13 +1,20 @@
 import { isResumeLayoutTemplate } from "../../layouts";
 import { generatePDF } from "../../services/pdf";
-import { generateHTML, loadResume } from "../../services/resume";
+import { generateHTML, loadResume } from "../../domain/resume";
 import { getResumeSettings } from "../../services/settings";
 import { logger } from "../../logger";
+import { config } from "../../config";
 import { checkRateLimit, getClientIP, isValidColor, parseJsonBody } from "../../utils";
 import { badRequest, error, notFound, tooManyRequests } from "../http/response";
 
-export async function handlePublicPDF(req: Request): Promise<Response> {
-  const ip = getClientIP(req);
+export async function handlePublicPDF(
+  req: Request,
+  directAddress: string | null = null
+): Promise<Response> {
+  const ip = getClientIP(req, {
+    directAddress,
+    trustProxy: config.trustProxy,
+  });
   if (!checkRateLimit(ip, 3, 60000)) {
     return tooManyRequests("Too many PDF requests. Please try again later.");
   }

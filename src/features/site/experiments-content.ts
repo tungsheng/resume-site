@@ -1,0 +1,86 @@
+import type { ExperimentProfile } from "./types";
+
+export const experimentsContent = {
+  eyebrow: "Evidence and measurements",
+  title: "Zero-Idle vs Warm Baseline",
+  subtitle:
+    "These results come from checked-in evaluate reports dated April 13, 2026 (warm-1) and April 15, 2026 (zero-idle).",
+  profiles: [
+    {
+      id: "zero-idle",
+      label: "Zero Idle",
+      reportDate: "2026-04-15",
+      baselineGpuState: "0 GPU nodes",
+      firstReadySeconds: 430,
+      firstPublicResponseSeconds: 441,
+      secondReadySeconds: 1014,
+      idleCostPerHour: 0,
+      burstCost: 0.588682,
+      burstTimeToFirstTokenSeconds: 0.10708472222222215,
+      timeline: [
+        { label: "First NodeClaim", seconds: 13 },
+        { label: "First GPU node", seconds: 37 },
+        { label: "First ready replica", seconds: 430, emphasis: true },
+        { label: "First public response", seconds: 441, emphasis: true },
+        { label: "HPA desired replicas = 2", seconds: 612 },
+        { label: "Second ready replica", seconds: 1014 },
+        { label: "Cleanup to zero GPU nodes", seconds: 2999 },
+      ],
+      proofExcerpt: {
+        title: "evaluate excerpt",
+        command: "./scripts/evaluate --profile zero-idle",
+        lines: [
+          "[13s] First NodeClaim created",
+          "[37s] First GPU node registered",
+          "[430s] First ready replica",
+          "[441s] First public response",
+          "[612s] HPA desired replicas = 2",
+          "[648s] Second GPU node registered",
+          "[1014s] Second ready replica",
+          "[2999s] Final cleanup to zero GPU nodes",
+        ],
+      },
+    },
+    {
+      id: "warm-1",
+      label: "Warm-1",
+      reportDate: "2026-04-13",
+      baselineGpuState: "1 warm on-demand serving node",
+      firstReadySeconds: 73,
+      firstPublicResponseSeconds: 84,
+      secondReadySeconds: 672,
+      idleCostPerHour: 0.526,
+      burstCost: 0.4208,
+      burstTimeToFirstTokenSeconds: 0.0905,
+      timeline: [
+        { label: "Warm baseline already present", seconds: 0, emphasis: true },
+        { label: "First ready replica", seconds: 73, emphasis: true },
+        { label: "First public response", seconds: 84, emphasis: true },
+        { label: "HPA desired replicas = 2", seconds: 252 },
+        { label: "Second GPU node", seconds: 275 },
+        { label: "Second ready replica", seconds: 672 },
+        { label: "Warm baseline restored", seconds: 1359 },
+      ],
+      proofExcerpt: {
+        title: "evaluate excerpt",
+        command: "./scripts/evaluate --profile warm-1",
+        lines: [
+          "[0s] Warm baseline already present",
+          "[73s] First ready replica",
+          "[84s] First public response",
+          "[252s] HPA desired replicas = 2",
+          "[275s] Second GPU node registered",
+          "[672s] Second ready replica",
+          "[1359s] Warm baseline restored",
+        ],
+      },
+    },
+  ] satisfies ExperimentProfile[],
+  notes: [
+    "Cold start should be evaluated from first ready replica and first public response, not burst TTFT.",
+    "Burst time to first token (TTFT) is still useful, but it reflects serving behavior once the system is already warm enough to process active load.",
+    "The reports show that zero-idle is excellent for idle cost control, while warm-1 materially improves responsiveness.",
+  ],
+  screenshotPlaceholder:
+    "Charts and Grafana screenshots can live here later without changing the structure of the page.",
+};

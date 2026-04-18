@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   capacityModel,
   implementation,
@@ -8,13 +8,12 @@ import {
   siteProfile,
 } from "../site/content";
 import { PublicSiteLayout } from "../site/layout";
+import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "Cloud Inference Platform | Tony Lee";
 
 export function ProjectPage() {
-  useEffect(() => {
-    document.title = PAGE_TITLE;
-  }, []);
+  useDocumentTitle(PAGE_TITLE);
 
   return (
     <PublicSiteLayout activeNav="project">
