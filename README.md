@@ -1,6 +1,6 @@
 # Resume Site
 
-A self-hosted resume builder with PDF export and admin portal.
+A Bun-powered portfolio and resume site for Tony Lee. It serves five public pages, loads resume content from YAML, and can export the public resume to PDF.
 
 ## Quick Start
 
@@ -9,112 +9,36 @@ bun install
 bun run dev
 ```
 
-Open http://localhost:3000
+Open `http://localhost:3000`.
 
-## URLs
+## Main Routes
 
-| Page | URL |
-|------|-----|
-| Home | http://localhost:3000 |
-| Resume | http://localhost:3000/resume/tony-lee |
-| Admin | http://localhost:3000/admin |
+- `/` - portfolio landing page
+- `/project/cloud-inference-platform` - flagship project walkthrough
+- `/experiments` - checked-in experiment results
+- `/about` - profile and contact page
+- `/resume/tony-lee` - public resume view with PDF download
 
-Default login: `admin` / `changeme`
-
-## Validation Commands
+## Checks
 
 ```bash
-bun run check                # typecheck + unit tests
-bun run test:integration     # requires server running on localhost:3000
+bun run check
 ```
 
-## Adding a Resume
-
-Create `resumes/your-name.yaml`:
-
-```yaml
-meta:
-  version: 2
-  slug: your-name
-  updatedAt: "2026-02-17"
-
-profile:
-  name: Your Name
-  headline:
-    - Software Engineer
-  contacts:
-    phone: 555-1234
-    linkedin: yourname
-    email: you@example.com
-  summary: Brief professional summary.
-
-experience:
-  - role: Senior Developer
-    company: Tech Corp
-    period:
-      start: "2020"
-      end: Present
-    highlights:
-      - Led development of key features
-
-projects:
-  title: Selected Projects
-  items:
-    - title: GPU Inference Platform on Kubernetes (EKS + Karpenter + vLLM)
-      highlights:
-        - Built queue-aware autoscaling using custom serving metrics
-
-skills:
-  - category: Frontend
-    items: [React, TypeScript]
-  - category: Backend
-    items: [Node.js, PostgreSQL]
-  - category: Management
-    items: [Agile]
-
-education:
-  - school: University
-    degree: BS Computer Science
-    period:
-      start: "2012"
-      end: "2016"
-
-certifications:
-  - name: AWS Certified
-    issuer: Amazon
-    date: "2023"
-```
-
-Legacy format (`header`, `title`, `startDate/endDate`, skills as object) is still supported and normalized at load time.
-
-Then visit: http://localhost:3000/resume/your-name
-
-## Docker
+To run integration tests, keep the server running in another terminal and then run:
 
 ```bash
-docker compose up --build
+bun run test:integration
 ```
 
-With custom credentials:
-```bash
-ADMIN_USERNAME=myuser ADMIN_PASSWORD=secret docker compose up --build
-```
+## Notes
 
-## Environment Variables
+- Resume files live in `resumes/` and are loaded at request time.
+- PDF export needs a local Chrome or Chromium binary. Set `PUPPETEER_EXECUTABLE_PATH` if Bun cannot find one automatically.
+- The app has no admin portal, login flow, or database-backed settings layer.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | 3000 | Server port |
-| `DATABASE_PATH` | ./data/resume.db | SQLite database |
-| `RESUMES_DIR` | resumes | Resume YAML directory |
-| `ADMIN_USERNAME` | admin | Admin username |
-| `ADMIN_PASSWORD` | changeme | Admin password |
+## More Docs
 
-## Developer Guide
-
-See [DEVELOPER.md](DEVELOPER.md) for:
-- Project structure
-- Adding components & features
-- API endpoints
-- Testing
-- Docker commands
+- [Developer guide](./DEVELOPER.md)
+- [Resume data format](./docs/resume-data.md)
+- [Deployment notes](./docs/deployment.md)

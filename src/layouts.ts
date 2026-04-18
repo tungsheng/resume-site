@@ -26,9 +26,3 @@ export function isResumeLayoutTemplate(
 ): value is ResumeLayoutTemplate {
   return typeof value === "string" && TEMPLATE_ID_SET.has(value);
 }
-
-export function normalizeResumeLayoutTemplate(
-  value: unknown
-): ResumeLayoutTemplate {
-  return isResumeLayoutTemplate(value) ? value : DEFAULT_RESUME_TEMPLATE;
-}

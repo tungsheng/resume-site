@@ -3,15 +3,6 @@ services:
     build: .
     ports:
       - "3000:3000"
-    environment:
-      - DATABASE_PATH=/app/data/resume.db
-      - RESUMES_DIR=resumes
-      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
     volumes:
       - ./resumes:/app/resumes:ro
-      - resume_data:/app/data
     restart: unless-stopped
-
-volumes:
-  resume_data:

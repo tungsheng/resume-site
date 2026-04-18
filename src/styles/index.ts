@@ -17,51 +17,11 @@ export const colors = {
   themeColor: "#c9a86c",
 };
 
-export const COLOR_PRESETS = [
-  { color: "#c9a86c", title: "Gold" },
-  { color: "#2c3e50", title: "Navy" },
-  { color: "#27ae60", title: "Green" },
-  { color: "#e74c3c", title: "Red" },
-  { color: "#9b59b6", title: "Purple" },
-  { color: "#3498db", title: "Blue" },
-];
-
 export const spinKeyframes = `
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 `;
-
-export const buttonStyles: Record<string, React.CSSProperties> = {
-  btn: {
-    background: colors.primary,
-    color: colors.text,
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: 4,
-    fontSize: 14,
-    fontWeight: 500,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  },
-  btnSecondary: {
-    background: "transparent",
-    color: colors.text,
-    border: `1px solid ${colors.primary}`,
-    padding: "8px 16px",
-    borderRadius: 4,
-    fontSize: 14,
-    fontWeight: 500,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  },
-};
 
 const baseResumeStyles: Record<string, React.CSSProperties> = {
   page: {
@@ -410,5 +370,3 @@ export function getResumeStyles(
 
   return merged;
 }
-
-export const resumeStyles = getResumeStyles();

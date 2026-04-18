@@ -15,14 +15,6 @@ export function badRequest(message: string): Response {
   return error(400, message);
 }
 
-export function unauthorized(message: string = "Unauthorized"): Response {
-  return error(401, message);
-}
-
-export function forbidden(message: string = "Forbidden"): Response {
-  return error(403, message);
-}
-
 export function notFound(message: string = "Not found"): Response {
   return error(404, message);
 }

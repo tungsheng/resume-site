@@ -27,11 +27,3 @@ export function getResumeSettings(resumeName: string): ResumeSettings {
 
   return defaultSettings();
 }
-
-export function getThemeColor(resumeName: string): string {
-  return getResumeSettings(resumeName).themeColor;
-}
-
-export function getLayoutTemplate(resumeName: string): ResumeLayoutTemplate {
-  return getResumeSettings(resumeName).layoutTemplate;
-}

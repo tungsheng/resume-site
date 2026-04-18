@@ -1,291 +1,158 @@
 # Developer Guide
 
-## Setup
+This project is a Bun server that serves a public portfolio, a public resume page, and a small JSON API used by the frontend. The source of truth for resume content is YAML under `resumes/`.
+
+## Stack
+
+- Bun for the HTTP server, HTML imports, and test runner
+- React 19 for page rendering
+- YAML for resume content
+- `puppeteer-core` for PDF generation
+
+## Commands
 
 ```bash
 bun install
 bun run dev
-```
-
-Open http://localhost:3000
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `bun run dev` | Start with hot reload |
-| `bun run start` | Production start |
-| `bun run test:unit` | Run unit tests |
-| `bun run test:integration` | Run integration tests (requires running server) |
-| `bun run check` | Type check + unit tests |
-| `bun run typecheck` | Type check |
-
-## Project Structure
-
-```
-src/
-  domain/             # Shared domain logic
-    resume/           # Resume normalization + rendering
-  server/             # HTTP route modules + response helpers
-  features/           # Pages (React)
-    home/             # Landing page
-    resume/           # Public resume view
-    admin/            # Admin dashboard
-  components/         # Shared React components
-  hooks/              # React hooks & utilities
-  services/           # Backend facades and infra services
-  styles/             # Shared styles
-  routes.ts           # Route facade
-  index.ts            # Server entry
-```
-
-## Tech Stack
-
-- **Runtime**: Bun
-- **Frontend**: React 19
-- **Database**: SQLite (bun:sqlite)
-- **PDF**: Puppeteer + Chromium
-
----
-
-## Docker
-
-### Build & Run
-
-```bash
-docker compose up --build
-```
-
-### Custom Credentials
-
-```bash
-ADMIN_USERNAME=myuser ADMIN_PASSWORD=secret docker compose up --build
-```
-
-### Using .env File
-
-Create `.env`:
-```
-ADMIN_USERNAME=myuser
-ADMIN_PASSWORD=secret
-```
-
-Then:
-```bash
-docker compose up --build
-```
-
-### Rebuild After Changes
-
-```bash
-docker compose up --build --force-recreate
-```
-
-### View Logs
-
-```bash
-docker compose logs -f
-```
-
-### Stop
-
-```bash
-docker compose down
-```
-
----
-
-## API Endpoints
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/resumes` | No | List all resumes |
-| GET | `/api/resume/:name` | No | Get resume data |
-| GET | `/api/settings/:name` | No | Get theme settings |
-| POST | `/api/settings/:name` | Yes | Save theme settings |
-| POST | `/api/login` | No | Admin login |
-| POST | `/api/logout` | No | Admin logout |
-| GET | `/api/session` | No | Check auth status |
-| POST | `/api/export-pdf` | Yes | Export PDF (admin) |
-| POST | `/api/public-pdf` | No | Download PDF (public) |
-
----
-
-## Adding Code
-
-### New Component
-
-1. Create folder:
-```
-src/components/my-component/
-  index.tsx    # Component code
-  style.ts     # Styles (optional)
-```
-
-2. Export from `src/components/index.ts`:
-```ts
-export { MyComponent } from "./my-component";
-```
-
-3. Use:
-```tsx
-import { MyComponent } from "../../components";
-```
-
-### New Feature (Page)
-
-1. Create folder:
-```
-src/features/my-feature/
-  index.tsx    # Page + React mount
-  style.ts     # Styles
-```
-
-2. Create `public/my-feature.html`:
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Feature</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #root { height: 100%; }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="../src/features/my-feature/index.tsx"></script>
-</body>
-</html>
-```
-
-3. Add route in `src/index.ts`:
-```ts
-import myFeaturePage from "../public/my-feature.html";
-
-Bun.serve({
-  routes: {
-    "/my-feature": myFeaturePage,
-  }
-});
-```
-
-### New API Endpoint
-
-Add handler in `src/routes.ts`:
-```ts
-export async function handleMyEndpoint(req: Request): Promise<Response> {
-  return Response.json({ message: "Hello" });
-}
-```
-
-Add route in `src/index.ts`:
-```ts
-routes: {
-  "/api/my-endpoint": { GET: handleMyEndpoint },
-}
-```
-
----
-
-## Testing
-
-```bash
+bun run start
+bun run check
 bun run test:unit
 bun run test:integration
-bun run check
+bun run typecheck
 ```
 
----
+`bun run test:integration` expects a running server at `http://localhost:3000` unless `TEST_BASE_URL` is set.
 
-## Security
+## Project Layout
 
-| Feature | Implementation |
-|---------|----------------|
-| CSRF | Token validated on POST requests |
-| XSS | Input escaped via `escapeHtml()` |
-| Rate Limiting | 5 login attempts/minute |
-| Path Traversal | Names sanitized via `sanitizeName()` |
-| Headers | X-Frame-Options, CSP, etc. |
-
----
-
-## Production Deployment
-
-### Using docker-compose.prod.yml
-
-```bash
-# Create .env with required credentials
-echo "ADMIN_USERNAME=myuser" >> .env
-echo "ADMIN_PASSWORD=securepassword123" >> .env
-
-# Deploy
-docker compose -f docker-compose.prod.yml up -d --build
+```text
+public/                  HTML entrypoints loaded directly by Bun
+resumes/                 checked-in resume YAML files
+src/
+  components/            shared React UI pieces
+  domain/resume/         resume loading, normalization, view model, HTML rendering
+  features/              page-specific React code
+    about/
+    experiments/
+    home/
+    project/
+    resume/
+    site/                shared public-site content, layout, and styles
+  server/
+    http/                small request/response helpers
+    routes/              API handlers and static-file fallback
+  services/              PDF and presentation settings helpers
+  index.ts               Bun server entrypoint
+tests/
+  unit/                  Bun unit tests
+  integration/           HTTP-level integration tests
 ```
 
-### Production vs Development
+## Runtime Model
 
-| Feature | Development | Production |
-|---------|-------------|------------|
-| Config file | `docker-compose.yml` | `docker-compose.prod.yml` |
-| NODE_ENV | not set | `production` |
-| Secure cookies | No | Yes |
-| Port binding | `0.0.0.0:3000` | `127.0.0.1:3000` |
-| Credentials | Optional defaults | Required |
-| Restart policy | `unless-stopped` | `always` |
-| Resource limits | None | 1G RAM, 1 CPU |
-| Log rotation | None | 10MB, 3 files |
+`src/index.ts` uses Bun's `routes` API to serve:
 
-### Reverse Proxy (Nginx)
+- `GET /`
+- `GET /project/cloud-inference-platform`
+- `GET /experiments`
+- `GET /about`
+- `GET /resume/:name`
+- `GET /api/resumes`
+- `GET /api/resume/:name`
+- `GET /api/settings/:name`
+- `POST /api/public-pdf`
 
-Production binds to `127.0.0.1:3000`. Use a reverse proxy for HTTPS:
+Any other request falls through to `src/server/routes/static.ts`, which serves files from `public/` after path sanitization.
 
-```nginx
-server {
-    listen 443 ssl;
-    server_name resume.example.com;
+## Resume Content Flow
 
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
+1. Resume files are discovered in `resumes/` by `src/domain/resume/load.ts`.
+2. YAML is parsed and normalized into the internal `ResumeData` shape.
+3. The public resume page fetches `/api/resume/:name` and `/api/settings/:name`.
+4. PDF downloads call `/api/public-pdf`, which renders HTML and hands it to Puppeteer.
 
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+The checked-in `tony-lee.yaml` uses the current v2-style format. `tony-lee-1.yaml` exists as a legacy fixture to keep backward compatibility covered by tests.
 
-### Backup Database
+## Presentation Settings
 
-```bash
-# Copy from Docker volume
-docker compose -f docker-compose.prod.yml exec app cat /app/data/resume.db > backup.db
+Presentation settings are read-only and live in `src/resume-presentation.ts`.
 
-# Or use volume path
-docker cp $(docker compose -f docker-compose.prod.yml ps -q app):/app/data/resume.db backup.db
-```
-
-### Update Deployment
-
-```bash
-docker compose -f docker-compose.prod.yml down
-docker compose -f docker-compose.prod.yml up -d --build
-```
-
----
+- Unknown resumes fall back to the default theme color and layout.
+- `tony-lee` is pinned to the green `minimal-timeline` presentation.
+- There is no admin UI or persistence layer for editing settings at runtime.
 
 ## Environment Variables
 
-| Variable | Default | Required (Prod) | Description |
-|----------|---------|-----------------|-------------|
-| `NODE_ENV` | - | Yes | Set to `production` |
-| `PORT` | 3000 | No | Server port |
-| `DATABASE_PATH` | ./data/resume.db | No | SQLite database |
-| `RESUMES_DIR` | resumes | No | Resume YAML directory |
-| `ADMIN_USERNAME` | admin | Yes | Admin username |
-| `ADMIN_PASSWORD` | changeme | Yes | Admin password |
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `PORT` | `3000` | HTTP port for the Bun server |
+| `RESUMES_DIR` | `resumes` | Directory scanned for `.yaml` and `.yml` resume files |
+| `TRUST_PROXY` | unset | When set to `1`, rate limiting trusts forwarded IP headers |
+| `PUPPETEER_EXECUTABLE_PATH` | unset | Absolute path to Chrome or Chromium for PDF export |
+
+## PDF Export
+
+`POST /api/public-pdf` accepts JSON with:
+
+```json
+{
+  "name": "tony-lee",
+  "themeColor": "#27ae60",
+  "layoutTemplate": "minimal-timeline"
+}
+```
+
+Notes:
+
+- `themeColor` and `layoutTemplate` are optional.
+- Requests are rate-limited per client IP.
+- The route returns `429` when the rate limit is exceeded.
+- If no browser binary can be launched, the route returns `500` with a PDF engine error.
+
+## Docker
+
+Local container run:
+
+```bash
+docker compose up --build
+```
+
+Production-oriented container run:
+
+```bash
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+The production compose file binds to `127.0.0.1:3000` and enables `TRUST_PROXY=1` for reverse-proxy deployments.
+
+## Editing the Site
+
+For a new public page:
+
+1. Add a Bun HTML entrypoint in `public/`.
+2. Add a React entry file in `src/features/<page>/index.tsx`.
+3. Add the page component and any page-local helpers.
+4. Register the route in `src/index.ts`.
+5. Add or update tests if the new page changes routing or content expectations.
+
+For a new resume:
+
+1. Add `resumes/<slug>.yaml`.
+2. Visit `/resume/<slug>`.
+3. If the resume needs a non-default theme or layout, add a read-only entry in `src/resume-presentation.ts`.
+
+## Testing Focus
+
+Current tests cover:
+
+- resume loading and normalization
+- public page rendering
+- PDF scaling helpers
+- settings fallback behavior
+- route security helpers
+- basic end-to-end HTTP behavior
+
+What is not fully covered:
+
+- successful PDF generation against a real Chrome/Chromium binary
+- live browser interaction with the rendered pages

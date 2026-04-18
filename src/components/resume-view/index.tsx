@@ -1,4 +1,4 @@
-// Resume view component - shared between Admin preview and public Resume page
+// Resume view component shared by the public resume page and PDF preview flows.
 
 import React from "react";
 import type { ResumeData } from "../../types";

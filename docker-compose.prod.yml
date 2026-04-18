@@ -5,13 +5,9 @@ services:
       - "127.0.0.1:3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_PATH=/app/data/resume.db
-      - RESUMES_DIR=resumes
-      - ADMIN_USERNAME=${ADMIN_USERNAME:?ADMIN_USERNAME required}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?ADMIN_PASSWORD required}
+      - TRUST_PROXY=1
     volumes:
       - ./resumes:/app/resumes:ro
-      - resume_data:/app/data
     restart: always
     deploy:
       resources:
@@ -23,6 +19,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-volumes:
-  resume_data:
