@@ -76,28 +76,23 @@ describe("API Integration", () => {
     expect(res.status).toBe(404);
   });
 
-  itIfIntegration("POST /api/login - 401 for invalid credentials", async () => {
-    const res = await fetch(`${BASE_URL}/api/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: "wrong", password: "wrong" }),
+  itIfIntegration("GET /api/settings/:name preserves the tony-lee presentation", async () => {
+    const res = await fetch(`${BASE_URL}/api/settings/tony-lee`);
+    expect(res.status).toBe(200);
+
+    const data = (await res.json()) as {
+      themeColor: string;
+      layoutTemplate: string;
+    };
+    expect(data).toEqual({
+      themeColor: "#27ae60",
+      layoutTemplate: "minimal-timeline",
     });
-    expect(res.status).toBe(401);
   });
 
-  itIfIntegration("POST /api/login - 200 for valid credentials", async () => {
-    const username = process.env.ADMIN_USERNAME || "admin";
-    const password = process.env.ADMIN_PASSWORD || "changeme";
-
-    const res = await fetch(`${BASE_URL}/api/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-
-    expect(res.status).toBe(200);
-    expect(res.headers.get("Set-Cookie")).toContain("session=");
-    expect(res.headers.get("X-CSRF-Token")).toBeTruthy();
+  itIfIntegration("GET /admin returns 404 after admin removal", async () => {
+    const res = await fetch(`${BASE_URL}/admin`);
+    expect(res.status).toBe(404);
   });
 
   itIfIntegration("Security headers are present", async () => {
@@ -106,19 +101,19 @@ describe("API Integration", () => {
     expect(res.headers.get("X-Frame-Options")).toBe("DENY");
   });
 
-  itIfIntegration("POST /api/login - 429 after rate limit exceeded", async () => {
+  itIfIntegration("POST /api/public-pdf - 429 after rate limit exceeded", async () => {
     const uniqueHeader = `test-${Date.now()}`;
 
     const requests = [];
     for (let i = 0; i < 6; i++) {
       requests.push(
-        fetch(`${BASE_URL}/api/login`, {
+        fetch(`${BASE_URL}/api/public-pdf`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "X-Forwarded-For": uniqueHeader,
           },
-          body: JSON.stringify({ username: "test", password: "test" }),
+          body: JSON.stringify({ name: "tony-lee" }),
         })
       );
     }

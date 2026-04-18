@@ -3,11 +3,9 @@ import {
   addSecurityHeaders,
   checkRateLimit,
   escapeHtml,
-  generateCSRFToken,
   hexToRgba,
   isValidColor,
   sanitizeName,
-  validateCSRFToken,
 } from "../../src/utils";
 
 describe("sanitizeName", () => {
@@ -100,44 +98,6 @@ describe("checkRateLimit", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 60));
     expect(checkRateLimit(testIP, 1, 50)).toBe(true);
-  });
-});
-
-describe("CSRF Protection", () => {
-  test("generateCSRFToken returns UUID format", () => {
-    const token = generateCSRFToken();
-    expect(token).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    );
-  });
-
-  test("validateCSRFToken returns true for matching token", () => {
-    const token = generateCSRFToken();
-    const req = new Request("http://localhost/", {
-      headers: { "X-CSRF-Token": token },
-    });
-    expect(validateCSRFToken(req, token)).toBe(true);
-  });
-
-  test("validateCSRFToken returns false for mismatched token", () => {
-    const token = generateCSRFToken();
-    const req = new Request("http://localhost/", {
-      headers: { "X-CSRF-Token": "wrong-token" },
-    });
-    expect(validateCSRFToken(req, token)).toBe(false);
-  });
-
-  test("validateCSRFToken returns false for missing header", () => {
-    const token = generateCSRFToken();
-    const req = new Request("http://localhost/");
-    expect(validateCSRFToken(req, token)).toBe(false);
-  });
-
-  test("validateCSRFToken returns false for null stored token", () => {
-    const req = new Request("http://localhost/", {
-      headers: { "X-CSRF-Token": "some-token" },
-    });
-    expect(validateCSRFToken(req, null)).toBe(false);
   });
 });
 

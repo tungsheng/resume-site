@@ -1,32 +1,23 @@
 // Application entry point
 
 import { config } from "./config";
-import { initDatabase } from "./db";
 import { logger } from "./logger";
 import { closePDFBrowser } from "./services/pdf";
 import { addSecurityHeaders } from "./utils";
 import {
-  handleLogin,
-  handleLogout,
-  handleSession,
   handleListResumes,
   handleGetResume,
   handleGetSettings,
-  handleSaveSettings,
-  handleExportPDF,
   handlePublicPDF,
   handleStaticFile,
 } from "./routes";
 
 // Import HTML pages directly - Bun will bundle the TSX imports
 import homePage from "../public/index.html";
-import adminPage from "../public/admin.html";
 import resumePage from "../public/resume.html";
 import projectPage from "../public/project.html";
 import experimentsPage from "../public/experiments.html";
 import aboutPage from "../public/about.html";
-
-initDatabase();
 
 // Wrap handler to apply security headers to all API responses
 function withHeaders<T extends (...args: any[]) => Response | Promise<Response>>(
@@ -46,26 +37,16 @@ const server = Bun.serve({
     "/project/cloud-inference-platform": projectPage,
     "/experiments": experimentsPage,
     "/about": aboutPage,
-    "/admin": adminPage,
     "/resume/:name": resumePage,
-
-    // Auth API routes
-    "/api/login": { POST: withHeaders(handleLogin) },
-    "/api/logout": { POST: withHeaders(handleLogout) },
-    "/api/session": { GET: withHeaders(handleSession) },
 
     // Resume API routes
     "/api/resumes": { GET: withHeaders(handleListResumes) },
     "/api/resume/:name": { GET: withHeaders(handleGetResume) },
 
     // Settings API routes
-    "/api/settings/:name": {
-      GET: withHeaders(handleGetSettings),
-      POST: withHeaders(handleSaveSettings),
-    },
+    "/api/settings/:name": { GET: withHeaders(handleGetSettings) },
 
     // PDF export routes
-    "/api/export-pdf": { POST: withHeaders(handleExportPDF) },
     "/api/public-pdf": { POST: withHeaders(handlePublicPDF) },
   },
 
@@ -106,5 +87,4 @@ logger.info("Resume server started", {
   experiments: `http://localhost:${config.port}/experiments`,
   about: `http://localhost:${config.port}/about`,
   resume: `http://localhost:${config.port}/resume/tony-lee`,
-  admin: `http://localhost:${config.port}/admin`,
 });

@@ -5,14 +5,6 @@ import { getResumeSettings } from "../../services/settings";
 import { logger } from "../../logger";
 import { checkRateLimit, getClientIP, isValidColor, parseJsonBody } from "../../utils";
 import { badRequest, error, notFound, tooManyRequests } from "../http/response";
-import { requireAuthenticatedMutation } from "./security";
-
-export async function handleExportPDF(req: Request): Promise<Response> {
-  const authError = requireAuthenticatedMutation(req);
-  if (authError) return authError;
-
-  return handlePDFGeneration(req);
-}
 
 export async function handlePublicPDF(req: Request): Promise<Response> {
   const ip = getClientIP(req);

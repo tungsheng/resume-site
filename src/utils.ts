@@ -70,16 +70,6 @@ export async function parseJsonBody<T>(req: Request): Promise<T | null> {
   }
 }
 
-/**
- * Get session token from cookie
- */
-export function getSessionToken(req: Request): string | null {
-  const cookie = req.headers.get("cookie");
-  if (!cookie) return null;
-  const match = cookie.match(/session=([^;]+)/);
-  return match ? match[1] ?? null : null;
-}
-
 // ============================================
 // Rate Limiting
 // ============================================
@@ -163,24 +153,4 @@ export function addSecurityHeaders(res: Response): Response {
     statusText: res.statusText,
     headers,
   });
-}
-
-// ============================================
-// CSRF Protection
-// ============================================
-
-/**
- * Generate a CSRF token
- */
-export function generateCSRFToken(): string {
-  return crypto.randomUUID();
-}
-
-/**
- * Validate CSRF token from request header against stored token
- */
-export function validateCSRFToken(req: Request, storedToken: string | null): boolean {
-  if (!storedToken) return false;
-  const headerToken = req.headers.get("X-CSRF-Token");
-  return headerToken === storedToken;
 }
