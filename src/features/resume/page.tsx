@@ -6,6 +6,7 @@ import type { ResumeData } from "../../types";
 import { ResumeDocumentPreview } from "./document";
 import { useResumePdfDownload } from "./use-resume-pdf";
 import { useResumePresentation } from "./use-resume-presentation";
+import { PublicSiteFooter } from "../site/footer";
 import { PublicSiteHeader } from "../site/header";
 import { EXPERIMENTS_PATH, PROJECT_PATH } from "../site/content";
 import { useDocumentTitle } from "../site/use-document-title";
@@ -374,6 +375,8 @@ export function ResumePageContent({
           </div>
         </div>
       </main>
+
+      <PublicSiteFooter />
 
       <ToastContainer toasts={toasts} onRemove={onRemoveToast} />
     </div>

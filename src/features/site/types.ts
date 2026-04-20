@@ -1,4 +1,4 @@
-export type PublicNavKey = "home" | "project" | "experiments" | "resume" | "about";
+export type PublicNavKey = "home" | "project" | "experiments" | "resume";
 
 export interface TimelineEvent {
   label: string;

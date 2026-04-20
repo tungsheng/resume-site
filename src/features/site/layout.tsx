@@ -1,4 +1,5 @@
 import React from "react";
+import { PublicSiteFooter } from "./footer";
 import { PublicSiteHeader } from "./header";
 import { siteStyles } from "./style";
 import type { PublicNavKey } from "./types";
@@ -20,9 +21,7 @@ export function PublicSiteLayout({
 
       <main className="site-main">{children}</main>
 
-      <footer className="site-footer">
-        Guided portfolio for ML inference systems, experiments, and platform work.
-      </footer>
+      <PublicSiteFooter />
     </div>
   );
 }

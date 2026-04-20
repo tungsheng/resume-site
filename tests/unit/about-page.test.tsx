@@ -4,20 +4,21 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { AboutPage } from "../../src/features/about/page";
 
 describe("AboutPage", () => {
-  test("renders the fit and working-style narrative", () => {
+  test("reuses the home experience so about is no longer a separate profile page", () => {
     const html = renderToStaticMarkup(<AboutPage />);
 
-    expect(html).toContain("How I Work");
-    expect(html).toContain("View resume");
-    expect(html).toContain("View case study");
-    expect(html).toContain(">Email<");
-    expect(html).toContain(">LinkedIn<");
+    expect(html).toContain(">Tony Lee<");
+    expect(html).toContain("I design and evaluate GPU-backed inference systems.");
+    expect(html).toContain(
+      "Recently built a cloud inference platform on AWS and Kubernetes with queue-aware autoscaling, mixed-capacity GPU pools, and measured zero-idle vs warm-baseline behavior."
+    );
+    expect(html).toContain("class=\"page-hero page-hero--header page-hero--centered\"");
     expect(html).toContain("class=\"inline-links page-hero__links\"");
-    expect(html).toContain("How I tend to show up on teams");
-    expect(html).toContain("The kinds of problems I like owning");
-    expect(html).toContain("What I’m looking for");
-    expect(html).toContain("href=\"mailto:tungsheng@gmail.com\"");
+    expect(html).toContain("href=\"/project/cloud-inference-platform\"");
+    expect(html).toContain("href=\"/resume/tony-lee\"");
     expect(html).toContain("href=\"https://linkedin.com/in/tonyslee8\"");
-    expect(html).not.toContain("class=\"page-eyebrow\">About<");
+    expect(html).not.toContain("About Tony Lee");
+    expect(html).not.toContain("How I tend to show up on teams");
+    expect(html).not.toContain("Download PDF");
   });
 });

@@ -57,8 +57,12 @@ describe("ResumePageContent", () => {
     );
 
     expect(html).toContain("class=\"site-header\"");
+    expect(html).toContain("class=\"site-footer\"");
     expect(html).toContain("aria-current=\"page\">Resume<");
-    expect(html).toContain(">Tony Lee<");
+    expect(html).toContain("aria-label=\"Tony Lee home\"");
+    expect(html).toContain("class=\"site-brand__logo\"");
+    expect(html).toContain("T│L");
+    expect(html).toContain("ML inference infrastructure");
     expect(html).toContain("Professional Summary");
     expect(html).toContain("Web view");
     expect(html).toContain("Print preview");
@@ -98,6 +102,7 @@ describe("ResumePageContent", () => {
     expect(html).toContain("Print preview");
     expect(html).toContain("class=\"resume-preview-shell\"");
     expect(html).toContain("class=\"page-wrapper resume-page-wrapper resume-page-wrapper--preview\"");
+    expect(html).toContain("class=\"site-footer\"");
     expect(html).not.toContain(
       "class=\"page-wrapper resume-page-wrapper resume-page-wrapper--screen-hidden\""
     );

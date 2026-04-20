@@ -27,12 +27,17 @@ export const shellStyles = `
   }
 
   .site-brand {
+    display: inline-flex;
+    align-items: center;
+    color: var(--ink);
     text-decoration: none;
-    font-size: 0.86rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
     white-space: nowrap;
+  }
+
+  .site-brand__logo {
+    display: block;
+    width: 7rem;
+    height: auto;
   }
 
   .site-nav {
@@ -63,8 +68,25 @@ export const shellStyles = `
   .site-footer {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 0 24px 34px;
+    padding: 18px 24px 34px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-top: 1px solid rgba(22, 34, 45, 0.08);
     color: var(--muted);
-    font-size: 0.94rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .site-footer__name {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .site-footer__divider {
+    color: rgba(22, 34, 45, 0.32);
   }
 `;

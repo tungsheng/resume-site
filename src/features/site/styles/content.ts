@@ -34,6 +34,12 @@ export const contentStyles = `
     max-width: 58rem;
   }
 
+  .page-hero--centered .page-hero__content {
+    max-width: 56rem;
+    margin: 0 auto;
+    text-align: center;
+  }
+
   .page-hero__aside {
     padding: 24px;
     border-radius: var(--radius-lg);
@@ -73,6 +79,31 @@ export const contentStyles = `
     margin-bottom: 10px;
   }
 
+  .page-hero--centered .page-title {
+    font-size: clamp(4rem, 9vw, 7rem);
+    margin-bottom: 14px;
+  }
+
+  .home-hero-title {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    column-gap: 0.5rem;
+    row-gap: 0.2rem;
+  }
+
+  .home-hero-title__lead {
+    font-size: clamp(1.3rem, 2.4vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--accent-deep);
+  }
+
+  .home-hero-title__name {
+    font-size: clamp(4rem, 9vw, 7rem);
+  }
+
   .page-subtitle {
     margin: 0;
     font-size: clamp(1.05rem, 1.8vw, 1.4rem);
@@ -83,6 +114,13 @@ export const contentStyles = `
 
   .page-hero--header .page-subtitle {
     max-width: 46rem;
+  }
+
+  .page-hero--centered .page-subtitle,
+  .page-hero--centered .page-lede,
+  .page-hero--centered .detail-copy {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .page-lede,
@@ -171,6 +209,11 @@ export const contentStyles = `
     font-size: 0.92rem;
   }
 
+  .page-hero--centered .page-hero__links {
+    justify-content: center;
+    margin-top: 18px;
+  }
+
   .inline-links a,
   .inline-links button {
     display: inline-flex;
@@ -199,6 +242,10 @@ export const contentStyles = `
   @media (max-width: 640px) {
     .page-hero--header {
       padding: 24px 22px;
+    }
+
+    .home-hero-title {
+      row-gap: 0.1rem;
     }
 
     .page-hero__actions {
