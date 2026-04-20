@@ -8,8 +8,9 @@ describe("ExperimentsPage", () => {
     const html = renderToStaticMarkup(<ExperimentsPage />);
 
     expect(html).toContain("Experiment Archive");
-    expect(html).toContain("How to use this page");
+    expect(html).toContain("What the current runs show");
     expect(html).toContain("What each run family answers");
+    expect(html).toContain("April 20, 2026");
     expect(html).toContain("Profile baselines");
     expect(html).toContain("Policy compare");
     expect(html).toContain("Target calibration");
@@ -27,8 +28,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("id=\"target-calibration\"");
     expect(html).toContain("href=\"/project/cloud-inference-platform\"");
     expect(html).not.toContain("class=\"page-eyebrow\">Evidence<");
+    expect(html).not.toContain("How to use this page");
     expect(html).not.toContain("Decision summary");
-    expect(html).not.toContain("How to read these runs");
-    expect(html).not.toContain("What these experiments show");
   });
 });

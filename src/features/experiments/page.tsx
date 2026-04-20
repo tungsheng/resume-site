@@ -21,7 +21,7 @@ export function ExperimentsPage() {
 
   return (
     <PublicSiteLayout activeNav="experiments">
-      <section className="page-hero page-hero--split page-hero--header">
+      <section className="page-hero page-hero--header">
         <div className="page-hero__content">
           <h1 className="page-title">{experimentsContent.title}</h1>
           <p className="page-lede">{experimentsContent.subtitle}</p>
@@ -31,15 +31,23 @@ export function ExperimentsPage() {
             <a href={RESUME_PATH}>View resume</a>
           </div>
         </div>
+      </section>
 
-        <aside className="page-hero__aside">
-          <p className="label">How to use this page</p>
-          <ul className="bullet-list">
-            {experimentsContent.decisionBullets.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </aside>
+      <section className="section">
+        <div className="section__header">
+          <p className="section__kicker">Latest readouts</p>
+          <h2 className="section__title">What the current runs show</h2>
+        </div>
+        <p className="detail-copy project-results-meta">{experimentsContent.readoutsMeta}</p>
+        <div className="grid-three">
+          {experimentsContent.conclusionPoints.map((item) => (
+            <article key={item.label} className="metric-card">
+              <h3 className="metric-card__label">{item.label}</h3>
+              <div className="metric-card__value">{item.value}</div>
+              <p className="metric-card__detail">{item.detail}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="section">
@@ -52,30 +60,9 @@ export function ExperimentsPage() {
             <article key={item.title} className="detail-card">
               <h3 className="detail-card__title">{item.title}</h3>
               <p className="detail-copy">{item.summary}</p>
-              <ul className="bullet-list">
-                {item.bullets.map((bullet) => (
-                  <li key={bullet}>{bullet}</li>
-                ))}
-              </ul>
               <div className="inline-links">
                 <a href={item.href}>{item.ctaLabel}</a>
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Latest readouts</p>
-          <h2 className="section__title">What the current runs show</h2>
-        </div>
-        <div className="grid-three">
-          {experimentsContent.conclusionPoints.map((item) => (
-            <article key={item.label} className="metric-card">
-              <h3 className="metric-card__label">{item.label}</h3>
-              <div className="metric-card__value">{item.value}</div>
-              <p className="metric-card__detail">{item.detail}</p>
             </article>
           ))}
         </div>

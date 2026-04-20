@@ -3,7 +3,9 @@ import type { ExperimentProfile, HighlightCard, MetricPoint, NarrativeCard } fro
 export const experimentsContent = {
   title: "Experiment Archive",
   subtitle:
-    "Checked-in evaluate runs across profile baselines, policy compare, and active-pressure target calibration. Latest local artifacts were generated on April 20, 2026 from runs completed on April 18-19, 2026.",
+    "Checked-in evaluation runs for comparing baseline posture, autoscaling policy, and active-pressure target calibration.",
+  readoutsMeta:
+    "Latest local gpu-inference-lab artifacts were generated on April 20, 2026 from runs completed on April 18-19, 2026.",
   conclusionPoints: [
     {
       label: "Warm-1 first public response",
@@ -21,63 +23,29 @@ export const experimentsContent = {
       detail: "Versus 924s for active-target 2 in the zero-idle calibration runs.",
     },
   ] satisfies MetricPoint[],
-  decisionBullets: [
-    "Use the project page for architecture and conclusions; use this page for run-level evidence.",
-    "The current experiment families are profile baselines, policy compare, and target calibration.",
-    "Each section below maps to checked-in evaluate artifacts from the local gpu-inference-lab repo.",
-  ],
   experimentSets: [
     {
       title: "Profile baselines",
-      summary: "Compare zero-idle and warm-1 to understand cold-start latency and standing GPU cost.",
-      bullets: [
-        "First public response: 447s vs 84s",
-        "Idle cost per hour: $0.00 vs $0.526",
-        "Answers whether one warm serving path is worth the steady cost.",
-      ],
+      summary: "Answers whether one warm serving path is worth its steady GPU cost.",
+      bullets: [],
       href: "#profile-comparison",
       ctaLabel: "Open profile comparison",
     },
     {
       title: "Policy compare",
-      summary: "Run running-request and active-pressure HPAs against the same warm-1 burst workload.",
-      bullets: [
-        "Second ready replica: 1002s vs 563s",
-        "Burst cost: $0.401 vs $0.438",
-        "Answers whether queue pressure improves scale-out timing enough to justify the tradeoff.",
-      ],
+      summary: "Answers whether queue pressure improves scale-out timing enough to justify the tradeoff.",
+      bullets: [],
       href: "#policy-compare",
       ctaLabel: "Open policy compare",
     },
     {
       title: "Target calibration",
-      summary: "Sweep active-pressure targets to see how zero-idle scale-out changes under the same burst.",
-      bullets: [
-        "Target 2 second replica: 924s",
-        "Target 4 second replica: 893s",
-        "Answers where active requests per pod start to look healthier for this node shape.",
-      ],
+      summary: "Answers where active requests per pod start to look healthier for this node shape.",
+      bullets: [],
       href: "#target-calibration",
       ctaLabel: "Open target calibration",
     },
   ] satisfies HighlightCard[],
-  methodology: [
-    {
-      title: "What each experiment changes",
-      body:
-        "Profile runs change the baseline capacity posture, policy compare changes the HPA signal, and target calibration changes the active-pressure target while keeping the workload shape the same.",
-    },
-    {
-      title: "Which metrics matter most",
-      body:
-        "For this repo, first public response and second ready replica carry most of the story. TTFT remains useful, but only after capacity is already present to serve work.",
-    },
-    {
-      title: "Why checked-in artifacts matter",
-      body:
-        "Each section below is tied to a specific evaluate artifact, which keeps the evidence page grounded in real runs rather than a restated summary from the case study page.",
-    },
-  ] satisfies NarrativeCard[],
   policyComparison: {
     title: "Warm-1 policy compare",
     subtitle:
