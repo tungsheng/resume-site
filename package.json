@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "bun run src/index.ts",
-    "dev": "bun --hot src/index.ts",
+    "dev": "bun --watch src/index.ts",
     "test": "bun run test:unit",
     "test:unit": "bun test tests/unit",
     "test:integration": "RUN_INTEGRATION_TESTS=1 bun test tests/integration",
