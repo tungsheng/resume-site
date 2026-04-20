@@ -33,7 +33,7 @@ export function ExperimentsPage() {
         </div>
 
         <aside className="page-hero__aside">
-          <p className="label">Decision summary</p>
+          <p className="label">How to use this page</p>
           <ul className="bullet-list">
             {experimentsContent.decisionBullets.map((item) => (
               <li key={item}>{item}</li>
@@ -44,8 +44,31 @@ export function ExperimentsPage() {
 
       <section className="section">
         <div className="section__header">
-          <p className="section__kicker">Headline results</p>
-          <h2 className="section__title">What changed between the two profiles</h2>
+          <p className="section__kicker">Experiment sets</p>
+          <h2 className="section__title">What each run family answers</h2>
+        </div>
+        <div className="grid-three">
+          {experimentsContent.experimentSets.map((item) => (
+            <article key={item.title} className="detail-card">
+              <h3 className="detail-card__title">{item.title}</h3>
+              <p className="detail-copy">{item.summary}</p>
+              <ul className="bullet-list">
+                {item.bullets.map((bullet) => (
+                  <li key={bullet}>{bullet}</li>
+                ))}
+              </ul>
+              <div className="inline-links">
+                <a href={item.href}>{item.ctaLabel}</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section__header">
+          <p className="section__kicker">Latest readouts</p>
+          <h2 className="section__title">What the current runs show</h2>
         </div>
         <div className="grid-three">
           {experimentsContent.conclusionPoints.map((item) => (
@@ -58,32 +81,96 @@ export function ExperimentsPage() {
         </div>
       </section>
 
-      <section className="section">
+      <section id="profile-comparison" className="section">
         <div className="section__header">
-          <p className="section__kicker">Comparison</p>
+          <p className="section__kicker">Profile baselines</p>
           <h2 className="section__title">Zero-idle vs warm-1</h2>
         </div>
         <p className="section__copy">
-          For cold-start behavior, the headline metrics are first ready replica and first public
-          response. TTFT is included as a secondary serving metric once capacity is already warm
-          enough to accept work.
+          This pair answers the baseline question: how much first-response time does one warm
+          serving path buy, and what does it cost to keep online between bursts?
         </p>
+        <div className="evidence-stack">
+          <article className="card">
+            <div className="comparison-table-wrap">
+              <table className="comparison-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Metric</th>
+                    <th scope="col">Zero Idle</th>
+                    <th scope="col">Warm-1</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {comparisonRows.map((row) => (
+                    <tr key={row.label}>
+                      <th scope="row">{row.label}</th>
+                      <td>{row.zeroIdle}</td>
+                      <td>{row.warmOne}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <div className="timeline-grid">
+            {experimentsContent.profiles.map((profile) => (
+              <article key={profile.id} className="timeline-card">
+                <div className="timeline-card__header">
+                  <div>
+                    <h3 className="timeline-card__title">{profile.label}</h3>
+                    <p className="timeline-card__copy">
+                      First public response in{" "}
+                      <strong>{formatDurationLabel(profile.firstPublicResponseSeconds)}</strong>
+                    </p>
+                  </div>
+                </div>
+                <div className="timeline-events">
+                  {profile.timeline.map((event) => (
+                    <div
+                      key={`${profile.id}-${event.label}`}
+                      className={
+                        event.emphasis
+                          ? "timeline-event timeline-event--emphasis"
+                          : "timeline-event"
+                      }
+                    >
+                      <span className="timeline-event__time">
+                        {formatTimelineSeconds(event.seconds)}
+                      </span>
+                      <span>{event.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="policy-compare" className="section">
+        <div className="section__header">
+          <p className="section__kicker">Policy compare</p>
+          <h2 className="section__title">{experimentsContent.policyComparison.title}</h2>
+        </div>
+        <p className="section__copy">{experimentsContent.policyComparison.subtitle}</p>
         <article className="card">
           <div className="comparison-table-wrap">
             <table className="comparison-table">
               <thead>
                 <tr>
                   <th scope="col">Metric</th>
-                  <th scope="col">Zero Idle</th>
-                  <th scope="col">Warm-1</th>
+                  <th scope="col">Running</th>
+                  <th scope="col">Active-pressure</th>
                 </tr>
               </thead>
               <tbody>
-                {comparisonRows.map((row) => (
+                {experimentsContent.policyComparison.rows.map((row) => (
                   <tr key={row.label}>
                     <th scope="row">{row.label}</th>
-                    <td>{row.zeroIdle}</td>
-                    <td>{row.warmOne}</td>
+                    <td>{row.running}</td>
+                    <td>{row.activePressure}</td>
                   </tr>
                 ))}
               </tbody>
@@ -92,55 +179,18 @@ export function ExperimentsPage() {
         </article>
       </section>
 
-      <section className="section">
+      <section id="target-calibration" className="section">
         <div className="section__header">
-          <p className="section__kicker">Methodology</p>
-          <h2 className="section__title">How to read these runs</h2>
+          <p className="section__kicker">Target calibration</p>
+          <h2 className="section__title">{experimentsContent.targetCalibration.title}</h2>
         </div>
-        <div className="grid-three">
-          {experimentsContent.methodology.map((item) => (
-            <article key={item.title} className="detail-card">
-              <h3 className="detail-card__title">{item.title}</h3>
-              <p className="detail-copy">{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Timelines</p>
-          <h2 className="section__title">What changed between profiles</h2>
-        </div>
-        <div className="timeline-grid">
-          {experimentsContent.profiles.map((profile) => (
-            <article key={profile.id} className="timeline-card">
-              <div className="timeline-card__header">
-                <div>
-                  <h3 className="timeline-card__title">{profile.label}</h3>
-                  <p className="timeline-card__copy">
-                    First public response in{" "}
-                    <strong>{formatDurationLabel(profile.firstPublicResponseSeconds)}</strong>
-                  </p>
-                </div>
-              </div>
-              <div className="timeline-events">
-                {profile.timeline.map((event) => (
-                  <div
-                    key={`${profile.id}-${event.label}`}
-                    className={
-                      event.emphasis
-                        ? "timeline-event timeline-event--emphasis"
-                        : "timeline-event"
-                    }
-                  >
-                    <span className="timeline-event__time">
-                      {formatTimelineSeconds(event.seconds)}
-                    </span>
-                    <span>{event.label}</span>
-                  </div>
-                ))}
-              </div>
+        <p className="section__copy">{experimentsContent.targetCalibration.subtitle}</p>
+        <div className="grid-two">
+          {experimentsContent.targetCalibration.runs.map((run) => (
+            <article key={run.label} className="metric-card">
+              <h3 className="metric-card__label">{run.label}</h3>
+              <div className="metric-card__value">{run.value}</div>
+              <p className="metric-card__detail">{run.detail}</p>
             </article>
           ))}
         </div>
@@ -152,32 +202,17 @@ export function ExperimentsPage() {
           <h2 className="section__title">Checked-in evaluate excerpts</h2>
         </div>
         <div className="proof-grid">
-          {experimentsContent.profiles.map((profile) => (
-            <article key={profile.id} className="proof-card">
+          {experimentsContent.evidenceExcerpts.map((excerpt) => (
+            <article key={excerpt.title} className="proof-card">
               <div className="proof-card__header">
                 <div>
-                  <p className="proof-card__title">{profile.label}</p>
-                  <p className="proof-card__subtitle">{profile.proofExcerpt.title}</p>
+                  <p className="proof-card__title">{excerpt.title}</p>
+                  <p className="proof-card__subtitle">{excerpt.subtitle}</p>
                 </div>
-                <span className="report-badge">{profile.reportDate}</span>
+                <span className="report-badge">{excerpt.reportDate}</span>
               </div>
-              <code className="proof-card__command">{profile.proofExcerpt.command}</code>
-              <pre className="proof-card__log">{profile.proofExcerpt.lines.join("\n")}</pre>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Interpretation</p>
-          <h2 className="section__title">What these experiments show</h2>
-        </div>
-        <div className="grid-three">
-          {experimentsContent.notes.map((note) => (
-            <article key={note} className="detail-card">
-              <h3 className="detail-card__title">Observation</h3>
-              <p className="detail-copy">{note}</p>
+              <code className="proof-card__command">{excerpt.command}</code>
+              <pre className="proof-card__log">{excerpt.lines.join("\n")}</pre>
             </article>
           ))}
         </div>

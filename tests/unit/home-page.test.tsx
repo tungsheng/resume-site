@@ -18,11 +18,12 @@ describe("HomePage", () => {
     expect(html).toContain("Project");
     expect(html).toContain("gpu-inference-lab");
     expect(html).toContain(
-      "AWS EKS + Karpenter + vLLM lab for comparing autoscaling policies from real serving pressure."
+      "GPU inference lab for comparing autoscaling policies from real serving pressure."
     );
     expect(html).toContain("View project");
     expect(html).toContain("class=\"card home-project-card home-project-card--link\"");
     expect(html).toContain("class=\"home-project-card__action\"");
+    expect(html).toContain("class=\"home-projects-section__inner\"");
     expect(html).not.toContain("What I bring");
     expect(html).not.toContain("Results from recent platform work");
     expect(html).not.toContain("Measured evidence");

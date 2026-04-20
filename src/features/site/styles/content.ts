@@ -356,16 +356,26 @@ export const contentStyles = `
 
   .home-projects-section {
     margin-top: 12px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .home-projects-section__inner {
+    width: min(100%, 28rem);
+    display: grid;
+    justify-items: center;
   }
 
   .home-projects-section__header {
-    max-width: 28rem;
+    width: 100%;
     margin: 0 0 12px;
+    text-align: center;
   }
 
   .home-project-card {
-    max-width: 28rem;
+    width: 100%;
     margin: 0;
+    text-align: center;
   }
 
   .home-project-card--link {
@@ -383,17 +393,20 @@ export const contentStyles = `
   }
 
   .home-project-card__title {
-    font-size: 1.08rem;
+    font-size: 1.1rem;
   }
 
   .home-project-card .card__copy {
-    max-width: 32rem;
+    max-width: 24rem;
     margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .home-project-card__action {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     margin-top: 14px;
     color: var(--accent-deep);
@@ -411,26 +424,43 @@ export const contentStyles = `
     font-size: 0.92rem;
   }
 
+  .project-results-lead {
+    max-width: 42rem;
+  }
+
   .project-results-layout {
     margin-top: 18px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(18rem, 0.82fr);
+    gap: 18px;
     align-items: start;
   }
 
-  .project-results-secondary,
-  .project-results-followup {
-    margin-top: 18px;
-    align-items: start;
-  }
-
-  .project-stat-list {
-    margin-top: 16px;
+  .project-results-supporting {
     display: grid;
     gap: 16px;
   }
 
-  .project-stat-row + .project-stat-row {
-    padding-top: 16px;
-    border-top: 1px solid rgba(22, 34, 45, 0.08);
+  .project-results-supporting-card {
+    padding: 22px;
+  }
+
+  .project-results-summary {
+    margin-top: 18px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .project-results-summary-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .project-results-next .detail-copy,
+  .project-results-next .inline-links {
+    margin-top: 12px;
   }
 
   .project-stat-label {
@@ -513,5 +543,12 @@ export const contentStyles = `
     margin-top: 6px;
     color: var(--muted);
     line-height: 1.55;
+  }
+
+  @media (max-width: 900px) {
+    .project-results-layout,
+    .project-results-summary-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 `;

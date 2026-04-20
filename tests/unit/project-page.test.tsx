@@ -23,9 +23,10 @@ describe("ProjectPage", () => {
     expect(html).toContain("Active-pressure HPA");
     expect(html).toContain("April 20, 2026");
     expect(html).toContain("What changed");
-    expect(html).toContain("What comes next");
+    expect(html).toContain("Next step");
     expect(html).toContain("Featured result");
-    expect(html).toContain("Supporting readouts");
+    expect(html).toContain("Warm-1 compare cost");
+    expect(html).toContain("Zero-idle first response");
     expect(html).toContain("href=\"/experiments\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
     expect(html).not.toContain("class=\"page-eyebrow\">Case Study<");

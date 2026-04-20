@@ -38,9 +38,9 @@ export function ProjectPage() {
           <p className="section__kicker">Latest evidence</p>
           <h2 className="section__title">What matters most</h2>
         </div>
-        <p className="section__copy">{projectContent.resultsLead}</p>
+        <p className="section__copy project-results-lead">{projectContent.resultsLead}</p>
         <p className="detail-copy project-results-meta">{projectContent.resultsMeta}</p>
-        <div className="grid-two project-results-layout">
+        <div className="project-results-layout">
           <article className="about-card project-results-featured">
             <p className="label">Featured result</p>
             <h3 className="about-card__title">{projectContent.featuredResult.title}</h3>
@@ -48,37 +48,36 @@ export function ProjectPage() {
             <p className="detail-copy">{projectContent.featuredResult.detail}</p>
           </article>
 
-          <article className="card project-results-secondary">
-            <h3 className="card__title">Supporting readouts</h3>
-            <div className="project-stat-list">
-              {projectContent.supportingResults.map((item) => (
-                <div key={item.label} className="project-stat-row">
-                  <p className="project-stat-label">{item.label}</p>
-                  <div className="project-stat-value">{item.value}</div>
-                  <p className="project-stat-detail">{item.detail}</p>
-                </div>
-              ))}
-            </div>
-          </article>
+          <div className="project-results-supporting">
+            {projectContent.supportingResults.map((item) => (
+              <article key={item.label} className="metric-card project-results-supporting-card">
+                <h3 className="metric-card__label">{item.label}</h3>
+                <div className="project-stat-value">{item.value}</div>
+                <p className="project-stat-detail">{item.detail}</p>
+              </article>
+            ))}
+          </div>
         </div>
-        <div className="grid-two project-results-followup">
-          <article className="about-card">
-            <h3 className="about-card__title">What changed</h3>
-            <ul className="bullet-list">
-              {projectContent.resultTakeaways.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </article>
+        <article className="card project-results-summary">
+          <div className="project-results-summary-grid">
+            <section>
+              <h3 className="card__title">What changed</h3>
+              <ul className="bullet-list">
+                {projectContent.resultTakeaways.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
 
-          <article className="about-card">
-            <h3 className="about-card__title">What comes next</h3>
-            <p className="detail-copy">{projectContent.resultsNextStep}</p>
-            <div className="inline-links">
-              <a href={EXPERIMENTS_PATH}>View experiments</a>
-            </div>
-          </article>
-        </div>
+            <section className="project-results-next">
+              <h3 className="card__title">Next step</h3>
+              <p className="detail-copy">{projectContent.resultsNextStep}</p>
+              <div className="inline-links">
+                <a href={EXPERIMENTS_PATH}>View experiments</a>
+              </div>
+            </section>
+          </div>
+        </article>
       </section>
 
       <section className="section">

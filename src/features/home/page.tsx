@@ -30,20 +30,21 @@ export function HomePage() {
       </section>
 
       <section className="section home-projects-section">
-        <div className="section__header home-projects-section__header">
-          <p className="section__kicker">Project</p>
-        </div>
+        <div className="home-projects-section__inner">
+          <div className="section__header home-projects-section__header">
+            <p className="section__kicker">Project</p>
+          </div>
 
-        <a className="card home-project-card home-project-card--link" href={PROJECT_PATH}>
-          <h3 className="card__title home-project-card__title">gpu-inference-lab</h3>
-          <p className="card__copy">
-            AWS EKS + Karpenter + vLLM lab for comparing autoscaling policies from real serving
-            pressure.
-          </p>
-          <span className="home-project-card__action">
-            View project <span aria-hidden="true">→</span>
-          </span>
-        </a>
+          <a className="card home-project-card home-project-card--link" href={PROJECT_PATH}>
+            <h3 className="card__title home-project-card__title">gpu-inference-lab</h3>
+            <p className="card__copy">
+              GPU inference lab for comparing autoscaling policies from real serving pressure.
+            </p>
+            <span className="home-project-card__action">
+              View project <span aria-hidden="true">→</span>
+            </span>
+          </a>
+        </div>
       </section>
     </PublicSiteLayout>
   );

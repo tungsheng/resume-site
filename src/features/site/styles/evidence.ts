@@ -100,6 +100,12 @@ export const evidenceStyles = `
     text-transform: uppercase;
   }
 
+  .evidence-stack {
+    display: grid;
+    gap: 18px;
+    margin-top: 18px;
+  }
+
   .proof-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

@@ -24,8 +24,8 @@ describe("home experiment formatting", () => {
     if (!ttftRow) {
       throw new Error("Expected a TTFT comparison row");
     }
-    expect(ttftRow.zeroIdle).toBe("107 ms");
-    expect(ttftRow.warmOne).toBe("91 ms");
+    expect(ttftRow.zeroIdle).toBe("132 ms");
+    expect(ttftRow.warmOne).toBe("90 ms");
   });
 
   test("formats cold-start timings into readable minute and second labels", () => {
