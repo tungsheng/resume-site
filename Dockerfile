@@ -25,6 +25,7 @@ RUN addgroup -S appuser && adduser -S -G appuser -h /app appuser
 COPY --from=deps /app/node_modules ./node_modules
 
 COPY package.json ./
+COPY tsconfig.json ./
 COPY public ./public
 COPY src ./src
 COPY resumes ./resumes
