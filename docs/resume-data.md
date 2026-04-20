@@ -59,6 +59,8 @@ certifications:
     date: "2024"
 ```
 
+The normalizer turns that source into the internal `ResumeData` shape used by the public resume page, print preview, and PDF renderer.
+
 ## Normalization Rules
 
 The loader intentionally accepts a few equivalent field names.
@@ -68,9 +70,14 @@ Supported aliases include:
 - `profile` or `header`
 - `headline` or `badges`
 - `role`, `title`, `position`, or `jobTitle`
+- `company`, `organization`, `employer`, or `client`
 - `projects.items` or `projects.entries`
+- `education` or `studies`
 - `certifications` or `certificates`
 - `skills` as category arrays or as an object map of comma-separated strings
+- `highlights`, `achievements`, or `bullets`
+- `name`, `title`, `project`, or `heading` for project titles
+- `issuer`, `authority`, or `provider` for certificate issuers
 
 Date ranges can be expressed either as direct fields:
 
@@ -87,6 +94,8 @@ period:
   end: "Present"
 ```
 
+The normalizer also accepts `period.from` / `period.to` and `period.startDate` / `period.endDate`.
+
 ## Slug Rules
 
 The public route is `/resume/:name`, and the loader sanitizes the requested slug.
@@ -97,9 +106,14 @@ The public route is `/resume/:name`, and the loader sanitizes the requested slug
 
 ## Presentation Overrides
 
-Resume-specific presentation settings are not stored in YAML. They live in `src/resume-presentation.ts`.
+Resume-specific presentation settings are not stored in YAML. The checked-in overrides live in `src/resume-presentation.ts`, and the public resume page consumes them through `src/features/resume/presentation.ts`.
 
 Use that file when a resume needs:
 
 - a custom theme color
 - a non-default layout template
+
+## Current Resume-Site Notes
+
+- The checked-in `tony-lee` resume currently uses the `minimal-timeline` layout template.
+- The public resume page defaults to a browser-friendly web view, but print preview and PDF export still use the same canonical print document.

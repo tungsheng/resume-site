@@ -30,6 +30,8 @@ Recommended forwarded headers:
 - `X-Real-IP`
 - `X-Forwarded-Proto`
 
+The app itself only trusts forwarded IP headers when `TRUST_PROXY=1`.
+
 ## PDF Requirements
 
 PDF export depends on a Chrome or Chromium executable.
@@ -47,3 +49,15 @@ GET /api/resumes
 ```
 
 That endpoint is lightweight and works well as a simple readiness probe.
+
+## What the Container Serves
+
+The current container serves these public routes:
+
+- `/`
+- `/project/cloud-inference-platform`
+- `/experiments`
+- `/resume/tony-lee`
+- `/about` as a compatibility alias of `/`
+
+It also serves the public JSON/PDF API routes under `/api/*`.
