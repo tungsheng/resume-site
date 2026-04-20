@@ -11,14 +11,22 @@ This starts the Bun server on `http://localhost:3000` and mounts the local `resu
 ## Production-Style Docker Run
 
 ```bash
-docker compose -f docker-compose.prod.yml up --build -d
+docker compose --env-file deploy.env -f docker-compose.prod.yml up -d
 ```
 
 This variant:
 
 - binds the app to `127.0.0.1:3000`
 - enables `TRUST_PROXY=1`
+- expects an image-based deploy through `IMAGE_REPOSITORY` and `IMAGE_TAG`
 - keeps the restart and log settings intended for a reverse-proxy setup
+
+Example `deploy.env`:
+
+```bash
+IMAGE_REPOSITORY=ghcr.io/your-github-owner/resume-site
+IMAGE_TAG=latest
+```
 
 ## Reverse Proxy
 
@@ -61,3 +69,102 @@ The current container serves these public routes:
 - `/about` as a compatibility alias of `/`
 
 It also serves the public JSON/PDF API routes under `/api/*`.
+
+## Recommended Hostinger VPS Process
+
+This repo is set up for:
+
+1. GitHub Actions CI
+2. Docker image push to GHCR
+3. GitHub Actions SSH deploy to the VPS
+4. Docker Compose on the VPS
+
+That is the recommended path for this app because it already ships with a Dockerfile and does not need Kubernetes.
+
+## VPS Bootstrap
+
+1. Provision the Hostinger VPS with Docker installed.
+2. Put a reverse proxy with TLS in front of the app.
+3. Create the deploy directory:
+
+```bash
+sudo mkdir -p /srv/resume-site
+sudo chown -R "$USER":"$USER" /srv/resume-site
+```
+
+4. Log in to GHCR on the VPS if the package will be private:
+
+```bash
+docker login ghcr.io
+```
+
+5. Place the production compose file in `/srv/resume-site/`.
+6. Create `/srv/resume-site/deploy.env` from `deploy.env.example`.
+7. Run the app:
+
+```bash
+cd /srv/resume-site
+docker compose --env-file deploy.env -f docker-compose.prod.yml pull
+docker compose --env-file deploy.env -f docker-compose.prod.yml up -d
+```
+
+## GitHub Actions Files
+
+The repo includes:
+
+- `.github/workflows/ci.yml`
+- `.github/workflows/deploy.yml`
+
+`ci.yml` runs `bun run check`.
+
+`deploy.yml`:
+
+- runs `bun run check`
+- builds and pushes the Docker image to GHCR
+- uploads `docker-compose.prod.yml` to the VPS
+- writes `deploy.env` on the VPS with the image tag for that commit
+- runs `docker compose pull && docker compose up -d`
+
+## Required GitHub Secrets
+
+Set these in the GitHub repository or `production` environment:
+
+- `VPS_HOST`
+- `VPS_PORT`
+- `VPS_USER`
+- `VPS_SSH_KEY`
+- `VPS_SSH_KNOWN_HOSTS`
+- `GHCR_USERNAME`
+- `GHCR_READ_TOKEN`
+
+Notes:
+
+- `VPS_PORT` can be omitted if your SSH server uses `22`.
+- `GHCR_READ_TOKEN` is only needed on the VPS side when the GHCR package is private.
+- `VPS_SSH_KNOWN_HOSTS` should contain the server host key entry, not a raw private key.
+
+## First Deploy
+
+1. Push the repo changes.
+2. Add the GitHub secrets.
+3. Run the `deploy` workflow manually or push to `main`.
+4. Confirm the health check:
+
+```bash
+curl -fsS http://127.0.0.1:3000/api/resumes
+```
+
+5. Confirm the site through the reverse proxy and domain.
+
+## Rollback
+
+To roll back manually on the VPS:
+
+```bash
+cd /srv/resume-site
+cat > deploy.env <<'EOF'
+IMAGE_REPOSITORY=ghcr.io/your-github-owner/resume-site
+IMAGE_TAG=<older-git-sha>
+EOF
+docker compose --env-file deploy.env -f docker-compose.prod.yml up -d
+```

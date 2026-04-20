@@ -1,0 +1,100 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+env:
+  DEPLOY_PATH: /srv/resume-site
+  VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run repo checks
+        run: bun run check
+
+      - name: Derive image coordinates
+        id: image
+        run: |
+          IMAGE_REPOSITORY="$(printf 'ghcr.io/%s\n' "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
+          echo "repository=${IMAGE_REPOSITORY}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${GITHUB_SHA}" >> "${GITHUB_OUTPUT}"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.image.outputs.repository }}:${{ steps.image.outputs.tag }}
+            ${{ steps.image.outputs.repository }}:latest
+
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.VPS_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Upload deployment manifest
+        run: |
+          ssh -p "${VPS_PORT}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "mkdir -p '${DEPLOY_PATH}'"
+          scp -P "${VPS_PORT}" docker-compose.prod.yml "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${DEPLOY_PATH}/docker-compose.prod.yml"
+
+      - name: Deploy on VPS
+        env:
+          IMAGE_REPOSITORY: ${{ steps.image.outputs.repository }}
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+        run: |
+          ssh -p "${VPS_PORT}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<EOF
+          set -euo pipefail
+          mkdir -p "${DEPLOY_PATH}"
+          cat > "${DEPLOY_PATH}/deploy.env" <<ENVVARS
+          IMAGE_REPOSITORY=${IMAGE_REPOSITORY}
+          IMAGE_TAG=${IMAGE_TAG}
+          ENVVARS
+          cd "${DEPLOY_PATH}"
+          if [ -n "${GHCR_USERNAME}" ] && [ -n "${GHCR_READ_TOKEN}" ]; then
+            printf '%s\n' "${GHCR_READ_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
+          fi
+          docker compose --env-file deploy.env -f docker-compose.prod.yml pull
+          docker compose --env-file deploy.env -f docker-compose.prod.yml up -d --remove-orphans
+          curl -fsS http://127.0.0.1:3000/api/resumes >/dev/null
+          docker image prune -f
+          EOF

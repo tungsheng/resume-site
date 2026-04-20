@@ -1,21 +1,15 @@
 services:
   app:
-    build: .
+    image: "${IMAGE_REPOSITORY:?IMAGE_REPOSITORY is required}:${IMAGE_TAG:-latest}"
+    pull_policy: always
     ports:
       - "127.0.0.1:3000:3000"
     environment:
-      - NODE_ENV=production
-      - TRUST_PROXY=1
-    volumes:
-      - ./resumes:/app/resumes:ro
+      NODE_ENV: production
+      TRUST_PROXY: "1"
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '1'
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
+        max-size: 10m
         max-file: "3"
