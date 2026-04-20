@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  capacityModel,
   implementation,
   projectContent,
   tradeoffs,
@@ -18,11 +17,11 @@ export function ProjectPage() {
 
   return (
     <PublicSiteLayout activeNav="project">
-      <section className="page-hero page-hero--split page-hero--header">
+      <section className="page-hero page-hero--header">
         <div className="page-hero__content">
           <h1 className="page-title">{projectContent.title}</h1>
-          <p className="page-subtitle">{siteProfile.title}</p>
           <p className="page-lede">{projectContent.lede}</p>
+          <p className="detail-copy project-hero-proof">{projectContent.heroProof}</p>
 
           <div className="inline-links page-hero__links">
             <a href={EXPERIMENTS_PATH}>View experiments</a>
@@ -32,53 +31,62 @@ export function ProjectPage() {
             </a>
           </div>
         </div>
-
-        <aside className="page-hero__aside">
-          <p className="label">Case study focus</p>
-          <ul className="bullet-list">
-            {projectContent.heroHighlights.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </aside>
       </section>
 
       <section className="section">
         <div className="section__header">
-          <p className="section__kicker">Problem framing</p>
-          <h2 className="section__title">What the project needed to prove</h2>
+          <p className="section__kicker">Latest evidence</p>
+          <h2 className="section__title">What matters most</h2>
         </div>
-        <div className="grid-three">
-          {projectContent.framing.map((item) => (
-            <article key={item.title} className="detail-card">
-              <h3 className="detail-card__title">{item.title}</h3>
-              <p className="detail-copy">{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+        <p className="section__copy">{projectContent.resultsLead}</p>
+        <p className="detail-copy project-results-meta">{projectContent.resultsMeta}</p>
+        <div className="grid-two project-results-layout">
+          <article className="about-card project-results-featured">
+            <p className="label">Featured result</p>
+            <h3 className="about-card__title">{projectContent.featuredResult.title}</h3>
+            <div className="metric-card__value">{projectContent.featuredResult.value}</div>
+            <p className="detail-copy">{projectContent.featuredResult.detail}</p>
+          </article>
 
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Design choices</p>
-          <h2 className="section__title">Decisions that shaped the system</h2>
+          <article className="card project-results-secondary">
+            <h3 className="card__title">Supporting readouts</h3>
+            <div className="project-stat-list">
+              {projectContent.supportingResults.map((item) => (
+                <div key={item.label} className="project-stat-row">
+                  <p className="project-stat-label">{item.label}</p>
+                  <div className="project-stat-value">{item.value}</div>
+                  <p className="project-stat-detail">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </article>
         </div>
-        <div className="grid-three">
-          {projectContent.designChoices.map((item) => (
-            <article key={item.title} className="detail-card">
-              <h3 className="detail-card__title">{item.title}</h3>
-              <p className="detail-copy">{item.body}</p>
-            </article>
-          ))}
+        <div className="grid-two project-results-followup">
+          <article className="about-card">
+            <h3 className="about-card__title">What changed</h3>
+            <ul className="bullet-list">
+              {projectContent.resultTakeaways.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="about-card">
+            <h3 className="about-card__title">What comes next</h3>
+            <p className="detail-copy">{projectContent.resultsNextStep}</p>
+            <div className="inline-links">
+              <a href={EXPERIMENTS_PATH}>View experiments</a>
+            </div>
+          </article>
         </div>
       </section>
 
       <section className="section">
         <div className="section__header">
           <p className="section__kicker">System design</p>
-          <h2 className="section__title">Separate the serving path from the capacity path</h2>
+          <h2 className="section__title">How the system is organized</h2>
         </div>
-        <div className="grid-three">
+        <div className="grid-two">
           <article className="card">
             <h3 className="card__title">{projectContent.requestPathTitle}</h3>
             <div className="stack-diagram" aria-label="Request path diagram">
@@ -110,126 +118,53 @@ export function ProjectPage() {
               ))}
             </div>
           </article>
-
-          <article className="card">
-            <h3 className="card__title">Why this split matters</h3>
-            {projectContent.architectureExplanation.map((paragraph) => (
-              <p key={paragraph} className="card__copy">
-                {paragraph}
-              </p>
-            ))}
-          </article>
         </div>
-      </section>
-
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Control loop</p>
-          <h2 className="section__title">How autoscaling works</h2>
-        </div>
-        <div className="grid-two">
-          <article className="card">
-            <h3 className="card__title">Scaling path</h3>
-            <div className="flow-row" aria-label="Control loop diagram">
-              {projectContent.controlLoopNodes.map((node, index) => (
-                <React.Fragment key={node}>
-                  <div className="flow-pill">{node}</div>
-                  {index < projectContent.controlLoopNodes.length - 1 && (
-                    <span className="flow-arrow" aria-hidden="true">
-                      →
-                    </span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-          </article>
-
-          <article className="card">
-            <h3 className="card__title">Step-by-step flow</h3>
-            <ol className="steps-list">
-              {projectContent.autoscalingSteps.map((step, index) => (
-                <li key={step} className="steps-list__item">
-                  <span className="steps-list__index" aria-hidden="true">
-                    {index + 1}
-                  </span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
-            <p className="card__copy">{projectContent.autoscalingInsight}</p>
-          </article>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Key results</p>
-          <h2 className="section__title">What happened under load</h2>
-        </div>
-        <p className="section__copy">{projectContent.resultsLead}</p>
-        <div className="grid-three">
-          {projectContent.resultsSummary.map((item) => (
-            <article key={item.label} className="metric-card">
-              <h3 className="metric-card__label">{item.label}</h3>
-              <div className="metric-card__value">{item.value}</div>
-              <p className="metric-card__detail">{item.detail}</p>
-            </article>
+        <div className="project-system-notes">
+          {projectContent.architectureExplanation.map((paragraph) => (
+            <p key={paragraph} className="section__copy">
+              {paragraph}
+            </p>
           ))}
+          <ul className="bullet-list project-inline-list">
+            {projectContent.loadSpikeBullets.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ul>
         </div>
-        <article className="about-card">
-          <h3 className="about-card__title">Read the evidence trail</h3>
-          <p className="detail-copy">
-            The dedicated experiments page keeps the measured comparison, timelines, and raw
-            evaluate excerpts separate from this architectural walkthrough.
-          </p>
-          <div className="button-row">
-            <a className="button button--ghost" href={EXPERIMENTS_PATH}>
-              Open evidence page
-            </a>
-          </div>
-        </article>
       </section>
 
       <section className="section">
         <div className="section__header">
-          <p className="section__kicker">Capacity reasoning</p>
-          <h2 className="section__title">{capacityModel.title}</h2>
+          <p className="section__kicker">Tradeoffs</p>
+          <h2 className="section__title">Where the design is strong and where it still needs work</h2>
         </div>
         <article className="card">
-          <p className="section__copy">{capacityModel.lead}</p>
-          <pre className="proof-card__log">{capacityModel.formula}</pre>
-          <p className="section__copy">{capacityModel.note}</p>
+          <div className="project-compare-list">
+            {tradeoffs.map((item) => (
+              <section key={item.title} className="project-compare-row">
+                <h3 className="card__title">{item.title}</h3>
+                <div className="grid-two project-compare-columns">
+                  <div>
+                    <p className="label">{item.leftLabel}</p>
+                    <p className="detail-copy project-compare-copy">{item.leftBody}</p>
+                  </div>
+                  <div>
+                    <p className="label">{item.rightLabel}</p>
+                    <p className="detail-copy project-compare-copy">{item.rightBody}</p>
+                  </div>
+                </div>
+              </section>
+            ))}
+          </div>
+          <div className="project-next-step">
+            <h3 className="card__title">Current limitation and next step</h3>
+            <ul className="bullet-list">
+              {projectContent.lessons.map((lesson) => (
+                <li key={lesson}>{lesson}</li>
+              ))}
+            </ul>
+          </div>
         </article>
-      </section>
-
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Tradeoffs and lessons</p>
-          <h2 className="section__title">What the system teaches</h2>
-        </div>
-        <div className="grid-three">
-          {tradeoffs.map((item) => (
-            <article key={item.title} className="detail-card">
-              <h3 className="detail-card__title">{item.title}</h3>
-              <ul className="detail-list">
-                <li>
-                  <strong>{item.leftLabel}:</strong> {item.leftBody}
-                </li>
-                <li>
-                  <strong>{item.rightLabel}:</strong> {item.rightBody}
-                </li>
-              </ul>
-            </article>
-          ))}
-        </div>
-        <div className="grid-three">
-          {projectContent.lessons.map((lesson) => (
-            <article key={lesson} className="detail-card">
-              <h3 className="detail-card__title">Lesson</h3>
-              <p className="detail-copy">{lesson}</p>
-            </article>
-          ))}
-        </div>
       </section>
 
       <section className="section">

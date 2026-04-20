@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { HomePage } from "../../src/features/home/page";
 
 describe("HomePage", () => {
-  test("renders the centered personal hero with minimal supporting links", () => {
+  test("renders the centered personal hero and a featured project section", () => {
     const html = renderToStaticMarkup(<HomePage />);
 
     expect(html).toContain(">I&#x27;m<");
@@ -15,9 +15,16 @@ describe("HomePage", () => {
     expect(html).toContain("View System Design");
     expect(html).toContain("View resume");
     expect(html).toContain("class=\"inline-links page-hero__links\"");
+    expect(html).toContain("Project");
+    expect(html).toContain("gpu-inference-lab");
+    expect(html).toContain(
+      "AWS EKS + Karpenter + vLLM lab for comparing autoscaling policies from real serving pressure."
+    );
+    expect(html).toContain("View project");
+    expect(html).toContain("class=\"card home-project-card home-project-card--link\"");
+    expect(html).toContain("class=\"home-project-card__action\"");
     expect(html).not.toContain("What I bring");
     expect(html).not.toContain("Results from recent platform work");
-    expect(html).not.toContain("Cloud inference platform");
     expect(html).not.toContain("Measured evidence");
     expect(html).not.toContain("Warm path proven");
     expect(html).toContain("href=\"https://linkedin.com/in/tonyslee8\"");
@@ -26,5 +33,9 @@ describe("HomePage", () => {
     expect(html).not.toContain("Failure Modes &amp; Limitations");
     expect(html).toContain("href=\"/resume/tony-lee\"");
     expect(html).not.toContain("Download PDF");
+    expect(html).not.toContain("GitHub repo");
+    expect(html).not.toContain("Projects");
+    expect(html).not.toContain("Selected work");
+    expect(html).not.toContain("Featured project");
   });
 });
