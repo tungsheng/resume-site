@@ -143,18 +143,49 @@ Notes:
 - `GHCR_READ_TOKEN` is only needed on the VPS side when the GHCR package is private.
 - `VPS_SSH_KNOWN_HOSTS` should contain the server host key entry, not a raw private key.
 
+## Recommended GitHub Variables
+
+Set these as repository or environment variables when available:
+
+- `PRODUCTION_URL`
+- `REMOTE_DEBUG_LOGS`
+
+Example:
+
+```text
+PRODUCTION_URL=https://tonylee.bio
+REMOTE_DEBUG_LOGS=false
+```
+
+The deploy workflow uses:
+
+- `PRODUCTION_URL` for an optional public smoke test after the VPS deploy succeeds
+- `REMOTE_DEBUG_LOGS=true` only when you intentionally want full remote container logs copied into GitHub Actions output on failures
+
+## GHCR Package Access
+
+Choose one of these two approaches:
+
+1. Make the GHCR package public.
+2. Keep the GHCR package private and provide:
+   - `GHCR_USERNAME`
+   - `GHCR_READ_TOKEN`
+
+For a private package, `GHCR_READ_TOKEN` should be a GitHub personal access token with `read:packages`.
+
 ## First Deploy
 
 1. Push the repo changes.
 2. Add the GitHub secrets.
-3. Run the `deploy` workflow manually or push to `main`.
-4. Confirm the health check:
+3. Add `PRODUCTION_URL` if you want the workflow to check the public domain after deploy.
+4. Run the `deploy` workflow manually or push to `main`.
+5. Confirm the health check:
 
 ```bash
 curl -fsS http://127.0.0.1:3000/api/resumes
 ```
 
-5. Confirm the site through the reverse proxy and domain.
+6. Confirm the site through the reverse proxy and domain.
 
 ## Rollback
 

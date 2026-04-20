@@ -17,6 +17,8 @@ concurrency:
 env:
   DEPLOY_PATH: /srv/resume-site
   VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
+  PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+  REMOTE_DEBUG_LOGS: ${{ vars.REMOTE_DEBUG_LOGS || 'false' }}
 
 jobs:
   build-and-deploy:
@@ -25,10 +27,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -44,17 +46,17 @@ jobs:
           echo "tag=${GITHUB_SHA}" >> "${GITHUB_OUTPUT}"
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Build and push image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
           push: true
@@ -90,11 +92,45 @@ jobs:
           IMAGE_TAG=${IMAGE_TAG}
           ENVVARS
           cd "${DEPLOY_PATH}"
+          chmod 600 deploy.env
           if [ -n "${GHCR_USERNAME}" ] && [ -n "${GHCR_READ_TOKEN}" ]; then
             printf '%s\n' "${GHCR_READ_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
           fi
           docker compose --env-file deploy.env -f docker-compose.prod.yml pull
           docker compose --env-file deploy.env -f docker-compose.prod.yml up -d --remove-orphans
-          curl -fsS http://127.0.0.1:3000/api/resumes >/dev/null
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/api/resumes >/dev/null; then
+              break
+            fi
+            if [ "${attempt}" -eq 30 ]; then
+              echo "App failed readiness check after deploy"
+              docker compose --env-file deploy.env -f docker-compose.prod.yml ps
+              docker compose --env-file deploy.env -f docker-compose.prod.yml logs --tail=120
+              exit 1
+            fi
+            sleep 2
+          done
+          docker compose --env-file deploy.env -f docker-compose.prod.yml ps
           docker image prune -f
+          EOF
+
+      - name: Smoke test public URL
+        if: ${{ env.PRODUCTION_URL != '' }}
+        run: |
+          curl --fail --silent --show-error --location --head \
+            --retry 5 \
+            --retry-all-errors \
+            --retry-delay 2 \
+            "${PRODUCTION_URL}"
+
+      - name: Collect remote diagnostics on failure
+        if: failure()
+        run: |
+          ssh -p "${VPS_PORT}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<EOF
+          set -euo pipefail
+          cd "${DEPLOY_PATH}" || exit 0
+          docker compose --env-file deploy.env -f docker-compose.prod.yml ps || true
+          if [ "${REMOTE_DEBUG_LOGS}" = "true" ]; then
+            docker compose --env-file deploy.env -f docker-compose.prod.yml logs --tail=120 || true
+          fi
           EOF
