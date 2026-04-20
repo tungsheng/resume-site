@@ -17,11 +17,21 @@ export const contentStyles = `
     margin-bottom: 30px;
   }
 
+  .page-hero--header {
+    padding-top: 30px;
+    padding-bottom: 28px;
+    margin-bottom: 24px;
+  }
+
   .page-hero--split {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.8fr);
     gap: 22px;
-    align-items: stretch;
+    align-items: start;
+  }
+
+  .page-hero__content {
+    max-width: 58rem;
   }
 
   .page-hero__aside {
@@ -59,12 +69,20 @@ export const contentStyles = `
     margin-bottom: 14px;
   }
 
+  .page-hero--header .page-title {
+    margin-bottom: 10px;
+  }
+
   .page-subtitle {
     margin: 0;
     font-size: clamp(1.05rem, 1.8vw, 1.4rem);
     font-weight: 600;
     color: #213748;
     line-height: 1.4;
+  }
+
+  .page-hero--header .page-subtitle {
+    max-width: 46rem;
   }
 
   .page-lede,
@@ -83,6 +101,14 @@ export const contentStyles = `
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 24px;
+  }
+
+  .page-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
   }
 
   .button {
@@ -139,6 +165,12 @@ export const contentStyles = `
     font-size: 0.95rem;
   }
 
+  .page-hero__links {
+    gap: 10px 18px;
+    margin-top: 12px;
+    font-size: 0.92rem;
+  }
+
   .inline-links a,
   .inline-links button {
     display: inline-flex;
@@ -150,6 +182,39 @@ export const contentStyles = `
     color: var(--accent-deep);
     text-decoration: none;
     cursor: pointer;
+  }
+
+  .page-hero__links a,
+  .page-hero__links button {
+    color: var(--muted);
+  }
+
+  .page-hero__links a:hover,
+  .page-hero__links a:focus-visible,
+  .page-hero__links button:hover,
+  .page-hero__links button:focus-visible {
+    color: var(--accent-deep);
+  }
+
+  @media (max-width: 640px) {
+    .page-hero--header {
+      padding: 24px 22px;
+    }
+
+    .page-hero__actions {
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .page-hero__actions > .button {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .page-hero__links {
+      gap: 8px 14px;
+      margin-top: 10px;
+    }
   }
 
   .chip-row {

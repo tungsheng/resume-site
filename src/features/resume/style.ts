@@ -41,14 +41,6 @@ export const styles: Record<string, React.CSSProperties> = {
     position: "relative",
     zIndex: 1,
   },
-  previewSidebar: {
-    display: "flex",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    flex: "0 0 auto",
-    position: "relative",
-    zIndex: 2,
-  },
   loading: {
     display: "flex",
     alignItems: "center",
@@ -63,6 +55,214 @@ export const resumePageCss = `
   ${siteStyles}
   ${getResumeDocumentCss()}
   ${spinKeyframes}
+  .resume-view-switch {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .resume-view-switch .button[aria-pressed="true"] {
+    background: var(--ink);
+    color: white;
+    border-color: transparent;
+  }
+
+  .resume-view-switch .button[aria-pressed="false"] {
+    background: rgba(255, 255, 255, 0.82);
+    color: var(--ink);
+    border-color: rgba(22, 34, 45, 0.12);
+  }
+
+  .resume-site-main {
+    padding-bottom: 40px;
+  }
+
+  .resume-site-main--preview {
+    padding-bottom: 14px;
+  }
+
+  .resume-web-view {
+    display: none;
+  }
+
+  .resume-web-view--visible {
+    display: block;
+  }
+
+  .resume-web-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.85fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .resume-web-main,
+  .resume-web-sidebar,
+  .resume-web-stack {
+    display: grid;
+    gap: 16px;
+  }
+
+  .resume-web-main,
+  .resume-web-sidebar {
+    align-content: start;
+  }
+
+  .resume-web-sidebar {
+    align-self: start;
+  }
+
+  .resume-web-section {
+    margin: 0;
+  }
+
+  .resume-web-section__title,
+  .resume-web-card__title {
+    margin: 0;
+    font-size: 1.08rem;
+    line-height: 1.35;
+  }
+
+  .resume-web-section__title {
+    margin-bottom: 14px;
+  }
+
+  .resume-web-card {
+    background: var(--surface);
+    border: 1px solid rgba(22, 34, 45, 0.08);
+    box-shadow: var(--shadow);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+  }
+
+  .resume-web-card--compact {
+    padding: 18px 20px;
+  }
+
+  .resume-web-card--entry {
+    padding: 22px;
+  }
+
+  .resume-web-copy {
+    margin: 12px 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .resume-web-entry__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .resume-web-entry__title {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 1.35;
+  }
+
+  .resume-web-entry__subtitle,
+  .resume-web-entry__date,
+  .resume-web-entry__meta {
+    margin: 6px 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .resume-web-entry__date {
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .resume-web-entry__date--inline {
+    text-align: left;
+  }
+
+  .resume-web-list {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  .resume-web-list li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: start;
+    line-height: 1.6;
+  }
+
+  .resume-web-list .resume-list-bullet {
+    color: var(--accent-deep);
+  }
+
+  .resume-web-contact-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .resume-web-contact-item {
+    display: grid;
+    gap: 4px;
+  }
+
+  .resume-web-contact-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+  }
+
+  .resume-web-contact-value,
+  .resume-web-contact-link {
+    color: var(--ink);
+    text-decoration: none;
+    line-height: 1.55;
+    word-break: break-word;
+  }
+
+  .resume-web-skill-list {
+    display: grid;
+    gap: 14px;
+  }
+
+  .resume-web-skill-row {
+    display: grid;
+    gap: 4px;
+  }
+
+  .resume-web-skill-row + .resume-web-skill-row {
+    padding-top: 14px;
+    border-top: 1px solid rgba(22, 34, 45, 0.08);
+  }
+
+  .resume-web-skill-label {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+
+  .resume-web-skill-items {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .resume-page-wrapper--screen-hidden {
+    display: none !important;
+  }
+
+  .resume-page-wrapper--preview {
+    padding-top: 6px !important;
+  }
+
   @page {
     size: Letter;
     margin: 0;
@@ -85,12 +285,16 @@ export const resumePageCss = `
       padding: 0 !important;
       min-height: auto !important;
     }
+    .resume-page-wrapper--screen-hidden {
+      display: flex !important;
+    }
+    .resume-web-view,
+    .resume-view-switch {
+      display: none !important;
+    }
     .resume-preview-layout {
       display: block !important;
       width: auto !important;
-    }
-    .resume-preview-sidebar {
-      display: none !important;
     }
     .resume-preview-shell {
       width: auto !important;
@@ -111,20 +315,44 @@ export const resumePageCss = `
       box-shadow: none !important;
     }
   }
+  @media (max-width: 980px) {
+    .resume-web-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
   @media (max-width: 720px) {
+    .resume-page-hero__actions > .button,
+    .resume-view-switch {
+      width: 100%;
+    }
+
+    .resume-view-switch {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .resume-view-switch .button {
+      justify-content: center;
+    }
+
+    .resume-site-main {
+      padding-bottom: 24px;
+    }
+    .resume-site-main--preview {
+      padding-bottom: 8px;
+    }
+    .resume-web-entry__header {
+      grid-template-columns: minmax(0, 1fr);
+      display: grid;
+      gap: 8px;
+    }
+    .resume-web-entry__date {
+      text-align: left;
+    }
     .resume-preview-layout {
       flex-direction: column !important;
       align-items: center !important;
       gap: 8px !important;
-    }
-    .resume-preview-sidebar {
-      width: 100% !important;
-      justify-content: flex-end !important;
-      margin-top: 0 !important;
-    }
-    .resume-preview-sidebar .button {
-      min-width: 0 !important;
-      padding: 10px 12px !important;
     }
   }
 `;

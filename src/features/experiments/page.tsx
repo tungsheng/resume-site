@@ -2,6 +2,7 @@ import React from "react";
 import {
   experimentsContent,
   PROJECT_PATH,
+  RESUME_PATH,
 } from "../site/content";
 import {
   buildExperimentComparisonRows,
@@ -20,18 +21,40 @@ export function ExperimentsPage() {
 
   return (
     <PublicSiteLayout activeNav="experiments">
-      <section className="page-hero">
-        <p className="page-eyebrow">{experimentsContent.eyebrow}</p>
-        <h1 className="page-title">{experimentsContent.title}</h1>
-        <p className="page-lede">{experimentsContent.subtitle}</p>
+      <section className="page-hero page-hero--split page-hero--header">
+        <div className="page-hero__content">
+          <h1 className="page-title">{experimentsContent.title}</h1>
+          <p className="page-lede">{experimentsContent.subtitle}</p>
 
-        <div className="button-row">
-          <a className="button button--primary" href={PROJECT_PATH}>
-            View project walkthrough
-          </a>
-          <a className="button button--secondary" href="/resume/tony-lee">
-            View resume
-          </a>
+          <div className="inline-links page-hero__links">
+            <a href={PROJECT_PATH}>View case study</a>
+            <a href={RESUME_PATH}>View resume</a>
+          </div>
+        </div>
+
+        <aside className="page-hero__aside">
+          <p className="label">Decision summary</p>
+          <ul className="bullet-list">
+            {experimentsContent.decisionBullets.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </aside>
+      </section>
+
+      <section className="section">
+        <div className="section__header">
+          <p className="section__kicker">Headline results</p>
+          <h2 className="section__title">What changed between the two profiles</h2>
+        </div>
+        <div className="grid-three">
+          {experimentsContent.conclusionPoints.map((item) => (
+            <article key={item.label} className="metric-card">
+              <h3 className="metric-card__label">{item.label}</h3>
+              <div className="metric-card__value">{item.value}</div>
+              <p className="metric-card__detail">{item.detail}</p>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -40,6 +63,11 @@ export function ExperimentsPage() {
           <p className="section__kicker">Comparison</p>
           <h2 className="section__title">Zero-idle vs warm-1</h2>
         </div>
+        <p className="section__copy">
+          For cold-start behavior, the headline metrics are first ready replica and first public
+          response. TTFT is included as a secondary serving metric once capacity is already warm
+          enough to accept work.
+        </p>
         <article className="card">
           <div className="comparison-table-wrap">
             <table className="comparison-table">
@@ -66,21 +94,14 @@ export function ExperimentsPage() {
 
       <section className="section">
         <div className="section__header">
-          <p className="section__kicker">Proof</p>
-          <h2 className="section__title">Timeline excerpts</h2>
+          <p className="section__kicker">Methodology</p>
+          <h2 className="section__title">How to read these runs</h2>
         </div>
-        <div className="proof-grid">
-          {experimentsContent.profiles.map((profile) => (
-            <article key={profile.id} className="proof-card">
-              <div className="proof-card__header">
-                <div>
-                  <p className="proof-card__title">{profile.label}</p>
-                  <p className="proof-card__subtitle">{profile.proofExcerpt.title}</p>
-                </div>
-                <span className="report-badge">{profile.reportDate}</span>
-              </div>
-              <code className="proof-card__command">{profile.proofExcerpt.command}</code>
-              <pre className="proof-card__log">{profile.proofExcerpt.lines.join("\n")}</pre>
+        <div className="grid-three">
+          {experimentsContent.methodology.map((item) => (
+            <article key={item.title} className="detail-card">
+              <h3 className="detail-card__title">{item.title}</h3>
+              <p className="detail-copy">{item.body}</p>
             </article>
           ))}
         </div>
@@ -127,7 +148,29 @@ export function ExperimentsPage() {
 
       <section className="section">
         <div className="section__header">
-          <p className="section__kicker">Observations</p>
+          <p className="section__kicker">Raw proof</p>
+          <h2 className="section__title">Checked-in evaluate excerpts</h2>
+        </div>
+        <div className="proof-grid">
+          {experimentsContent.profiles.map((profile) => (
+            <article key={profile.id} className="proof-card">
+              <div className="proof-card__header">
+                <div>
+                  <p className="proof-card__title">{profile.label}</p>
+                  <p className="proof-card__subtitle">{profile.proofExcerpt.title}</p>
+                </div>
+                <span className="report-badge">{profile.reportDate}</span>
+              </div>
+              <code className="proof-card__command">{profile.proofExcerpt.command}</code>
+              <pre className="proof-card__log">{profile.proofExcerpt.lines.join("\n")}</pre>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section__header">
+          <p className="section__kicker">Interpretation</p>
           <h2 className="section__title">What these experiments show</h2>
         </div>
         <div className="grid-three">
@@ -138,10 +181,6 @@ export function ExperimentsPage() {
             </article>
           ))}
         </div>
-        <article className="about-card">
-          <h3 className="about-card__title">Charts and screenshots</h3>
-          <p className="detail-copy">{experimentsContent.screenshotPlaceholder}</p>
-        </article>
       </section>
     </PublicSiteLayout>
   );

@@ -1,38 +1,76 @@
-import type { ImplementationLink, TradeoffItem } from "./types";
+import type {
+  ImplementationLink,
+  MetricPoint,
+  NarrativeCard,
+  TradeoffItem,
+} from "./types";
 
 export const projectContent = {
-  eyebrow: "Flagship project",
+  eyebrow: "Flagship case study",
   title: "Cloud Inference Platform",
   lede:
-    "A hands-on ML infrastructure project built to understand how GPU-backed inference behaves under cold start, burst load, and mixed-capacity serving pressure.",
-  explores: [
-    "Scale-from-zero GPU inference on AWS without fixed managed GPU node groups",
-    "Queue-aware autoscaling from vLLM serving metrics rather than CPU saturation",
-    "Measured tradeoffs between zero-idle cost efficiency and warm-baseline responsiveness",
+    "A hands-on ML infrastructure project built to answer a practical systems question: how do you keep GPU inference inexpensive at idle without making first-hit latency unusably slow?",
+  heroHighlights: [
+    "Scale-from-zero GPU inference on AWS without fixed managed GPU node groups.",
+    "Queue-aware autoscaling from vLLM serving metrics instead of CPU saturation.",
+    "Measured tradeoffs between zero-idle cost control and warm-baseline responsiveness.",
   ],
-  architectureTitle: "Architecture",
-  architectureNodes: [
+  framing: [
+    {
+      title: "System question",
+      body:
+        "GPU-backed inference is expensive to keep warm, but the first real request becomes painfully slow if every burst has to wait on node launch and model load.",
+    },
+    {
+      title: "Why defaults fall short",
+      body:
+        "CPU and memory saturation are weak proxies for inference pressure. They miss the queueing behavior that users actually feel when serving starts to back up.",
+    },
+    {
+      title: "What success meant",
+      body:
+        "The goal was to serve through an OpenAI-compatible endpoint, scale capacity from real serving pressure, and make the latency-cost tradeoff measurable.",
+    },
+  ] satisfies NarrativeCard[],
+  designChoices: [
+    {
+      title: "Keep the request path boring",
+      body:
+        "Traffic enters through an ALB-backed ingress, hits the vLLM service, and lands on one-GPU serving pods. Complexity stays out of the user-facing request path.",
+    },
+    {
+      title: "Scale from active work",
+      body:
+        "Prometheus and Prometheus Adapter expose serving pressure as custom metrics so the HPA follows admitted and waiting inference work instead of host utilization.",
+    },
+    {
+      title: "Let pending pods pull capacity in",
+      body:
+        "New replicas request GPUs, remain Pending when none exist, and Karpenter provisions matching nodes from serving NodePools only when the workload demands it.",
+    },
+  ] satisfies NarrativeCard[],
+  requestPathTitle: "Request path",
+  requestPathNodes: [
     "Client",
     "ALB (Application Load Balancer)",
     "Ingress",
     "vLLM Service",
     "GPU Pods (1 GPU each)",
+  ],
+  capacityPathTitle: "Scaling and capacity path",
+  capacityPathNodes: [
+    "Requests",
+    "vLLM queue pressure",
+    "Prometheus Adapter + HPA",
+    "Pending GPU pod",
     "Karpenter NodePools",
-    "EC2 GPU Nodes",
+    "EC2 GPU node",
   ],
   architectureExplanation: [
-    "The public request path is intentionally simple: traffic enters through an ALB-backed ingress, reaches the vLLM service, and lands on GPU-backed serving pods.",
-    "GPU capacity is not pre-allocated. Pods request a GPU, become Pending when none is available, and Karpenter provisions matching nodes from the serving NodePools.",
-    "Prometheus, Prometheus Adapter, Grafana, and DCGM complete the control loop by exposing serving pressure and observability data instead of relying on generic host metrics.",
+    "The architecture separates user-facing request flow from capacity orchestration so the narrative is easier to reason about: one path serves traffic, the other decides when new GPUs need to appear.",
+    "Prometheus, Prometheus Adapter, Grafana, and DCGM complete the loop by turning serving behavior into observable, actionable scaling signals instead of relying on generic infrastructure counters.",
   ],
-  controlLoopNodes: [
-    "Requests",
-    "Queue pressure",
-    "Horizontal Pod Autoscaler",
-    "Pending GPU pod",
-    "Karpenter",
-    "GPU node",
-  ],
+  controlLoopNodes: ["Requests", "Queue pressure", "HPA", "Pending GPU pod", "Karpenter", "GPU node"],
   autoscalingSteps: [
     "Requests arrive through the OpenAI-compatible /v1 endpoint.",
     "Requests enter the vLLM queue and show up as running or waiting workload.",
@@ -43,23 +81,25 @@ export const projectContent = {
   ],
   autoscalingInsight:
     "The key design choice is that the scaling signal follows active inference work, which keeps the control loop tied to the thing that actually matters to users.",
+  resultsLead:
+    "The interesting result is not that autoscaling happened. It is that the warm baseline bought back minutes of first-hit latency, while zero-idle remained the cheapest steady-state posture.",
   resultsSummary: [
-    {
-      label: "Zero-idle first public response",
-      value: "7m 21s",
-      detail: "441 seconds from true zero GPU capacity",
-    },
     {
       label: "Warm-1 first public response",
       value: "1m 24s",
-      detail: "84 seconds with one warm on-demand serving node",
+      detail: "84 seconds with one warm on-demand serving node.",
+    },
+    {
+      label: "Zero-idle first public response",
+      value: "7m 21s",
+      detail: "441 seconds from true zero GPU capacity.",
     },
     {
       label: "Burst cost per run",
       value: "$0.421–$0.589",
-      detail: "Measured across warm-1 and zero-idle profiles",
+      detail: "Measured across warm-1 and zero-idle profiles.",
     },
-  ],
+  ] satisfies MetricPoint[],
   lessons: [
     "Cold-start cost savings are real, but node launch and model load dominate first-response latency.",
     "Queue-aware scaling is directionally better than CPU-based scaling because it follows admitted and waiting inference work.",
@@ -102,7 +142,7 @@ export const capacityModel = {
 };
 
 export const implementation = {
-  title: "Implementation",
+  title: "Implementation trail",
   stack: [
     "Terraform for VPC and EKS provisioning",
     "Karpenter NodePools for dynamic GPU capacity",

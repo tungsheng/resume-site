@@ -1,5 +1,5 @@
 import React from "react";
-import { aboutContent, siteProfile } from "../site/content";
+import { aboutContent, PROJECT_PATH, RESUME_PATH, siteProfile } from "../site/content";
 import { PublicSiteLayout } from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
 
@@ -7,39 +7,79 @@ const PAGE_TITLE = "About Tony Lee";
 
 export function AboutPage() {
   useDocumentTitle(PAGE_TITLE);
+  const [heroIntro, ...supportingBio] = aboutContent.bio;
 
   return (
     <PublicSiteLayout activeNav="about">
-      <section className="page-hero">
-        <p className="page-eyebrow">{aboutContent.eyebrow}</p>
-        <h1 className="page-title">{aboutContent.title}</h1>
-        <p className="page-subtitle">{siteProfile.title}</p>
-        {aboutContent.bio.map((paragraph) => (
-          <p key={paragraph} className="page-lede">
-            {paragraph}
-          </p>
-        ))}
+      <section className="page-hero page-hero--split page-hero--header">
+        <div className="page-hero__content">
+          <h1 className="page-title">{aboutContent.title}</h1>
+          <p className="page-subtitle">{siteProfile.title}</p>
+          {heroIntro ? <p className="page-lede">{heroIntro}</p> : null}
+
+          <div className="inline-links page-hero__links">
+            <a href={RESUME_PATH}>View resume</a>
+            <a href={PROJECT_PATH}>View case study</a>
+            <a href={`mailto:${siteProfile.email}`}>Email</a>
+            <a href={siteProfile.linkedinUrl} target="_blank" rel="noreferrer">
+              LinkedIn
+            </a>
+          </div>
+        </div>
+
+        <aside className="page-hero__aside">
+          <p className="label">Best fit</p>
+          <ul className="bullet-list">
+            <li>{aboutContent.roles}</li>
+            <li>{aboutContent.lookingFor}</li>
+          </ul>
+        </aside>
       </section>
 
       <section className="section">
         <div className="section__header">
-          <p className="section__kicker">Current focus</p>
-          <h2 className="section__title">What I’m working on</h2>
+          <p className="section__kicker">Working style</p>
+          <h2 className="section__title">How I tend to show up on teams</h2>
         </div>
-        <div className="grid-two">
-          <article className="about-card">
-            <h3 className="about-card__title">Focus areas</h3>
-            <ul className="about-list">
-              {aboutContent.currentFocus.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </article>
-          <article className="about-card">
-            <h3 className="about-card__title">Target roles</h3>
-            <p className="detail-copy">{aboutContent.roles}</p>
-          </article>
+        {supportingBio.map((paragraph) => (
+          <p key={paragraph} className="section__copy">
+            {paragraph}
+          </p>
+        ))}
+        <div className="grid-three">
+          {aboutContent.workingStyle.map((item) => (
+            <article key={item.title} className="detail-card">
+              <h3 className="detail-card__title">{item.title}</h3>
+              <p className="detail-copy">{item.body}</p>
+            </article>
+          ))}
         </div>
+      </section>
+
+      <section className="section">
+        <div className="section__header">
+          <p className="section__kicker">Where I add value</p>
+          <h2 className="section__title">The kinds of problems I like owning</h2>
+        </div>
+        <div className="grid-three">
+          {aboutContent.valueAreas.map((item) => (
+            <article key={item.title} className="detail-card">
+              <h3 className="detail-card__title">{item.title}</h3>
+              <p className="detail-copy">{item.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section__header">
+          <p className="section__kicker">Next role</p>
+          <h2 className="section__title">What I’m looking for</h2>
+        </div>
+        <article className="about-card">
+          <p className="detail-copy">{aboutContent.roles}</p>
+          <p className="detail-copy">{aboutContent.lookingFor}</p>
+        </article>
       </section>
 
       <section className="section">

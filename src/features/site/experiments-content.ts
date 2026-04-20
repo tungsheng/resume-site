@@ -1,10 +1,49 @@
-import type { ExperimentProfile } from "./types";
+import type { ExperimentProfile, MetricPoint, NarrativeCard } from "./types";
 
 export const experimentsContent = {
   eyebrow: "Evidence and measurements",
   title: "Zero-Idle vs Warm Baseline",
   subtitle:
     "These results come from checked-in evaluate reports dated April 13, 2026 (warm-1) and April 15, 2026 (zero-idle).",
+  conclusionPoints: [
+    {
+      label: "Warm-1 first public response",
+      value: "1m 24s",
+      detail: "5m 57s faster than the zero-idle profile on first real traffic.",
+    },
+    {
+      label: "Zero-idle idle cost / hour",
+      value: "$0.00",
+      detail: "No standing GPU cost while the queue is empty.",
+    },
+    {
+      label: "Burst TTFT once warm",
+      value: "91–107 ms",
+      detail: "Similar across profiles after capacity is already ready to serve.",
+    },
+  ] satisfies MetricPoint[],
+  decisionBullets: [
+    "Warm-1 is the clear choice when first-hit responsiveness matters.",
+    "Zero-idle is the cost floor when long idle periods dominate.",
+    "Burst TTFT is useful, but it is a secondary metric after capacity is already available.",
+  ],
+  methodology: [
+    {
+      title: "What the reports measure",
+      body:
+        "The key cold-start metrics are first ready replica and first public response. Those capture the real wait a first user feels when capacity has to appear from scratch.",
+    },
+    {
+      title: "How to read TTFT",
+      body:
+        "Burst time to first token is still useful, but it reflects serving behavior once the system is already warm enough to process admitted work.",
+    },
+    {
+      title: "Why the dates matter",
+      body:
+        "Each number shown here comes from a checked-in evaluate run, which keeps the story tied to specific experiment snapshots instead of anecdotal observations.",
+    },
+  ] satisfies NarrativeCard[],
   profiles: [
     {
       id: "zero-idle",
@@ -77,10 +116,8 @@ export const experimentsContent = {
     },
   ] satisfies ExperimentProfile[],
   notes: [
-    "Cold start should be evaluated from first ready replica and first public response, not burst TTFT.",
-    "Burst time to first token (TTFT) is still useful, but it reflects serving behavior once the system is already warm enough to process active load.",
-    "The reports show that zero-idle is excellent for idle cost control, while warm-1 materially improves responsiveness.",
+    "Cold-start evaluation should lead with first ready replica and first public response, not TTFT.",
+    "Warm-1 materially improves first-user responsiveness because one serving path is already online before burst load arrives.",
+    "Zero-idle remains attractive when long idle periods dominate and the business can tolerate multi-minute cold-start latency.",
   ],
-  screenshotPlaceholder:
-    "Charts and Grafana screenshots can live here later without changing the structure of the page.",
 };

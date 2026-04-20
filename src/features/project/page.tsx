@@ -5,6 +5,7 @@ import {
   projectContent,
   tradeoffs,
   EXPERIMENTS_PATH,
+  RESUME_PATH,
   siteProfile,
 } from "../site/content";
 import { PublicSiteLayout } from "../site/layout";
@@ -17,30 +18,25 @@ export function ProjectPage() {
 
   return (
     <PublicSiteLayout activeNav="project">
-      <section className="page-hero page-hero--split">
-        <div>
-          <p className="page-eyebrow">{projectContent.eyebrow}</p>
+      <section className="page-hero page-hero--split page-hero--header">
+        <div className="page-hero__content">
           <h1 className="page-title">{projectContent.title}</h1>
           <p className="page-subtitle">{siteProfile.title}</p>
           <p className="page-lede">{projectContent.lede}</p>
 
-          <div className="button-row">
-            <a className="button button--primary" href={siteProfile.githubUrl} target="_blank" rel="noreferrer">
+          <div className="inline-links page-hero__links">
+            <a href={EXPERIMENTS_PATH}>View experiments</a>
+            <a href={RESUME_PATH}>View resume</a>
+            <a href={siteProfile.githubUrl} target="_blank" rel="noreferrer">
               GitHub repo
-            </a>
-            <a className="button button--secondary" href={EXPERIMENTS_PATH}>
-              View experiments
-            </a>
-            <a className="button button--ghost" href="/resume/tony-lee">
-              View resume
             </a>
           </div>
         </div>
 
         <aside className="page-hero__aside">
-          <p className="label">What this project explores</p>
+          <p className="label">Case study focus</p>
           <ul className="bullet-list">
-            {projectContent.explores.map((item) => (
+            {projectContent.heroHighlights.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
@@ -49,17 +45,47 @@ export function ProjectPage() {
 
       <section className="section">
         <div className="section__header">
-          <p className="section__kicker">Architecture</p>
-          <h2 className="section__title">{projectContent.architectureTitle}</h2>
+          <p className="section__kicker">Problem framing</p>
+          <h2 className="section__title">What the project needed to prove</h2>
         </div>
-        <div className="grid-two">
+        <div className="grid-three">
+          {projectContent.framing.map((item) => (
+            <article key={item.title} className="detail-card">
+              <h3 className="detail-card__title">{item.title}</h3>
+              <p className="detail-copy">{item.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section__header">
+          <p className="section__kicker">Design choices</p>
+          <h2 className="section__title">Decisions that shaped the system</h2>
+        </div>
+        <div className="grid-three">
+          {projectContent.designChoices.map((item) => (
+            <article key={item.title} className="detail-card">
+              <h3 className="detail-card__title">{item.title}</h3>
+              <p className="detail-copy">{item.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section__header">
+          <p className="section__kicker">System design</p>
+          <h2 className="section__title">Separate the serving path from the capacity path</h2>
+        </div>
+        <div className="grid-three">
           <article className="card">
-            <h3 className="card__title">System path</h3>
-            <div className="stack-diagram" aria-label="Architecture diagram">
-              {projectContent.architectureNodes.map((node, index) => (
+            <h3 className="card__title">{projectContent.requestPathTitle}</h3>
+            <div className="stack-diagram" aria-label="Request path diagram">
+              {projectContent.requestPathNodes.map((node, index) => (
                 <React.Fragment key={node}>
                   <div className="stack-diagram__node">{node}</div>
-                  {index < projectContent.architectureNodes.length - 1 && (
+                  {index < projectContent.requestPathNodes.length - 1 && (
                     <div className="stack-diagram__arrow" aria-hidden="true">
                       ↓
                     </div>
@@ -70,7 +96,23 @@ export function ProjectPage() {
           </article>
 
           <article className="card">
-            <h3 className="card__title">Why this shape matters</h3>
+            <h3 className="card__title">{projectContent.capacityPathTitle}</h3>
+            <div className="stack-diagram" aria-label="Capacity path diagram">
+              {projectContent.capacityPathNodes.map((node, index) => (
+                <React.Fragment key={node}>
+                  <div className="stack-diagram__node">{node}</div>
+                  {index < projectContent.capacityPathNodes.length - 1 && (
+                    <div className="stack-diagram__arrow" aria-hidden="true">
+                      ↓
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </article>
+
+          <article className="card">
+            <h3 className="card__title">Why this split matters</h3>
             {projectContent.architectureExplanation.map((paragraph) => (
               <p key={paragraph} className="card__copy">
                 {paragraph}
@@ -83,7 +125,7 @@ export function ProjectPage() {
       <section className="section">
         <div className="section__header">
           <p className="section__kicker">Control loop</p>
-          <h2 className="section__title">How Autoscaling Works</h2>
+          <h2 className="section__title">How autoscaling works</h2>
         </div>
         <div className="grid-two">
           <article className="card">
@@ -124,6 +166,7 @@ export function ProjectPage() {
           <p className="section__kicker">Key results</p>
           <h2 className="section__title">What happened under load</h2>
         </div>
+        <p className="section__copy">{projectContent.resultsLead}</p>
         <div className="grid-three">
           {projectContent.resultsSummary.map((item) => (
             <article key={item.label} className="metric-card">
@@ -133,6 +176,30 @@ export function ProjectPage() {
             </article>
           ))}
         </div>
+        <article className="about-card">
+          <h3 className="about-card__title">Read the evidence trail</h3>
+          <p className="detail-copy">
+            The dedicated experiments page keeps the measured comparison, timelines, and raw
+            evaluate excerpts separate from this architectural walkthrough.
+          </p>
+          <div className="button-row">
+            <a className="button button--ghost" href={EXPERIMENTS_PATH}>
+              Open evidence page
+            </a>
+          </div>
+        </article>
+      </section>
+
+      <section className="section">
+        <div className="section__header">
+          <p className="section__kicker">Capacity reasoning</p>
+          <h2 className="section__title">{capacityModel.title}</h2>
+        </div>
+        <article className="card">
+          <p className="section__copy">{capacityModel.lead}</p>
+          <pre className="proof-card__log">{capacityModel.formula}</pre>
+          <p className="section__copy">{capacityModel.note}</p>
+        </article>
       </section>
 
       <section className="section">
@@ -163,18 +230,6 @@ export function ProjectPage() {
             </article>
           ))}
         </div>
-      </section>
-
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Capacity reasoning</p>
-          <h2 className="section__title">{capacityModel.title}</h2>
-        </div>
-        <article className="card">
-          <p className="section__copy">{capacityModel.lead}</p>
-          <pre className="proof-card__log">{capacityModel.formula}</pre>
-          <p className="section__copy">{capacityModel.note}</p>
-        </article>
       </section>
 
       <section className="section">

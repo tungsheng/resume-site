@@ -1,8 +1,8 @@
 import React from "react";
-import { DownloadIcon, ToastContainer } from "../../components";
+import { DownloadIcon, Spinner, ToastContainer } from "../../components";
 import {
-  EXPERIMENTS_PATH,
   PROJECT_PATH,
+  RESUME_PATH,
   homeContent,
   siteProfile,
 } from "../site/content";
@@ -27,32 +27,43 @@ export function HomePage() {
   return (
     <>
       <PublicSiteLayout activeNav="home">
-        <section className="page-hero page-hero--split">
-          <div>
-            <p className="page-eyebrow">{homeContent.eyebrow}</p>
+        <section className="page-hero page-hero--split page-hero--header">
+          <div className="page-hero__content">
             <h1 className="page-title">{siteProfile.name}</h1>
             <p className="page-subtitle">{siteProfile.title}</p>
             <p className="page-lede">{siteProfile.summary}</p>
+            <p className="detail-copy">{homeContent.positioning}</p>
 
-            <div className="button-row">
-              <a className="button button--primary" href={PROJECT_PATH}>
-                View project
-              </a>
-              <a className="button button--secondary" href={`/resume/${siteProfile.resumeSlug}`}>
-                View resume
-              </a>
+            <div className="page-hero__actions">
+              <button
+                type="button"
+                onClick={() => void downloadPdf()}
+                disabled={downloading}
+                className="button button--secondary"
+                aria-label={downloading ? "Generating PDF" : "Download resume as PDF"}
+                aria-busy={downloading}
+                title="Download resume PDF"
+              >
+                {downloading ? (
+                  <>
+                    <Spinner size={16} color="#213748" />
+                    Preparing PDF...
+                  </>
+                ) : (
+                  <>
+                    <DownloadIcon />
+                    Download PDF
+                  </>
+                )}
+              </button>
             </div>
 
-            <div className="inline-links">
-              <button type="button" onClick={() => void downloadPdf()} disabled={downloading}>
-                <DownloadIcon />
-                {downloading ? "Preparing PDF..." : "Download PDF"}
-              </button>
-              <span aria-hidden="true">•</span>
+            <div className="inline-links page-hero__links">
+              <a href={PROJECT_PATH}>Read case study</a>
+              <a href={RESUME_PATH}>View resume</a>
               <a href={siteProfile.githubUrl} target="_blank" rel="noreferrer">
                 GitHub
               </a>
-              <span aria-hidden="true">•</span>
               <a href={siteProfile.linkedinUrl} target="_blank" rel="noreferrer">
                 LinkedIn
               </a>
@@ -60,19 +71,35 @@ export function HomePage() {
           </div>
 
           <aside className="page-hero__aside">
-            <p className="label">Quick orientation</p>
+            <p className="label">Use this site</p>
             <ul className="bullet-list">
-              <li>Start with the project walkthrough to understand the system.</li>
-              <li>Use the experiments page for measurements and proof.</li>
-              <li>Open the resume only when you want the professional history.</li>
+              {homeContent.orientation.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
             </ul>
           </aside>
         </section>
 
         <section className="section">
           <div className="section__header">
-            <p className="section__kicker">Featured work</p>
-            <h2 className="section__title">Start here</h2>
+            <p className="section__kicker">Proof at a glance</p>
+            <h2 className="section__title">What the work shows</h2>
+          </div>
+          <div className="grid-three">
+            {homeContent.proofPoints.map((item) => (
+              <article key={item.label} className="metric-card">
+                <h3 className="metric-card__label">{item.label}</h3>
+                <div className="metric-card__value">{item.value}</div>
+                <p className="metric-card__detail">{item.detail}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="section__header">
+            <p className="section__kicker">Start here</p>
+            <h2 className="section__title">Choose the level of detail you want</h2>
           </div>
           <div className="grid-two">
             {homeContent.featuredCards.map((card) => (
@@ -96,34 +123,17 @@ export function HomePage() {
 
         <section className="section">
           <div className="section__header">
-            <p className="section__kicker">Credibility</p>
-            <h2 className="section__title">Core stack</h2>
+            <p className="section__kicker">Working focus</p>
+            <h2 className="section__title">What I optimize for</h2>
           </div>
-          <div className="chip-row">
-            {homeContent.credibilityStrip.map((item) => (
-              <span key={item} className="chip">
-                {item}
-              </span>
+          <div className="grid-three">
+            {homeContent.focusAreas.map((item) => (
+              <article key={item.title} className="detail-card">
+                <h3 className="detail-card__title">{item.title}</h3>
+                <p className="detail-copy">{item.body}</p>
+              </article>
             ))}
           </div>
-        </section>
-
-        <section className="section">
-          <div className="section__header">
-            <p className="section__kicker">Current focus</p>
-            <h2 className="section__title">What I’m building toward</h2>
-          </div>
-          <article className="about-card">
-            <p className="detail-copy">{homeContent.currentFocus}</p>
-            <div className="button-row">
-              <a className="button button--ghost" href={PROJECT_PATH}>
-                See architecture and results
-              </a>
-              <a className="button button--ghost" href={EXPERIMENTS_PATH}>
-                See experiment evidence
-              </a>
-            </div>
-          </article>
         </section>
       </PublicSiteLayout>
 

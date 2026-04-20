@@ -12,6 +12,17 @@ export interface ProofExcerpt {
   lines: string[];
 }
 
+export interface NarrativeCard {
+  title: string;
+  body: string;
+}
+
+export interface MetricPoint {
+  label: string;
+  value: string;
+  detail: string;
+}
+
 export interface ExperimentProfile {
   id: string;
   label: string;

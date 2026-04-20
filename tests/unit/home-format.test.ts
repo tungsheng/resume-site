@@ -6,7 +6,7 @@ import {
 } from "../../src/features/site/format";
 
 describe("home experiment formatting", () => {
-  test("builds comparison rows with explicit burst TTFT labeling", () => {
+  test("builds comparison rows with secondary TTFT labeling", () => {
     const rows = buildExperimentComparisonRows(experimentsContent.profiles);
 
     expect(rows.map((row) => row.label)).toEqual([
@@ -16,7 +16,7 @@ describe("home experiment formatting", () => {
       "Second ready replica",
       "Idle cost / hour",
       "Burst cost / run",
-      "Burst time to first token (TTFT)",
+      "Burst TTFT (secondary metric)",
     ]);
 
     const ttftRow = rows[6];

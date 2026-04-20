@@ -39,7 +39,7 @@ const sampleResume: ResumeData = {
 };
 
 describe("ResumePageContent", () => {
-  test("renders the shared header and right-side PDF control around the preview", () => {
+  test("renders the streamlined web resume by default while keeping the print layout mounted", () => {
     const html = renderToStaticMarkup(
       <ResumePageContent
         data={sampleResume}
@@ -47,7 +47,10 @@ describe("ResumePageContent", () => {
         layoutTemplate="minimal-timeline"
         previewScale={0.9}
         downloading={false}
+        showPrintPreview={false}
         onDownload={() => {}}
+        onShowWebResume={() => {}}
+        onShowPrintPreview={() => {}}
         toasts={[]}
         onRemoveToast={() => {}}
       />
@@ -55,9 +58,49 @@ describe("ResumePageContent", () => {
 
     expect(html).toContain("class=\"site-header\"");
     expect(html).toContain("aria-current=\"page\">Resume<");
+    expect(html).toContain(">Tony Lee<");
+    expect(html).toContain("Professional Summary");
+    expect(html).toContain("Web view");
+    expect(html).toContain("Print preview");
+    expect(html).toContain("View case study");
+    expect(html).toContain("View evidence");
+    expect(html).toContain(">Email<");
+    expect(html).toContain(">LinkedIn<");
+    expect(html).toContain("class=\"page-wrapper resume-page-wrapper resume-page-wrapper--screen-hidden\"");
     expect(html).toContain("class=\"resume-preview-shell\"");
-    expect(html).toContain("class=\"resume-preview-sidebar\"");
     expect(html).toContain("title=\"Download resume PDF\"");
+    expect(html).toContain("class=\"inline-links page-hero__links\"");
     expect(html).not.toContain(">Print<");
+    expect(html).not.toContain("class=\"page-eyebrow\">Resume<");
+    expect(html).not.toContain("Web view is the default. Print preview shows the unchanged one-page PDF layout.");
+    expect(html).toContain("Led platform modernization.");
+    expect(html).not.toContain("Preview notes");
+  });
+
+  test("shows the unchanged print preview when the preview toggle is active", () => {
+    const html = renderToStaticMarkup(
+      <ResumePageContent
+        data={sampleResume}
+        themeColor="#27ae60"
+        layoutTemplate="minimal-timeline"
+        previewScale={0.9}
+        downloading={false}
+        showPrintPreview={true}
+        onDownload={() => {}}
+        onShowWebResume={() => {}}
+        onShowPrintPreview={() => {}}
+        toasts={[]}
+        onRemoveToast={() => {}}
+      />
+    );
+
+    expect(html).toContain("Web view");
+    expect(html).toContain("Print preview");
+    expect(html).toContain("class=\"resume-preview-shell\"");
+    expect(html).toContain("class=\"page-wrapper resume-page-wrapper resume-page-wrapper--preview\"");
+    expect(html).not.toContain(
+      "class=\"page-wrapper resume-page-wrapper resume-page-wrapper--screen-hidden\""
+    );
+    expect(html).not.toContain("Professional summary");
   });
 });

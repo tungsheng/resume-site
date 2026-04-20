@@ -78,7 +78,7 @@ export function buildExperimentComparisonRows(
       warmOne: formatCurrencyLabel(warmOne.burstCost),
     },
     {
-      label: "Burst time to first token (TTFT)",
+      label: "Burst TTFT (secondary metric)",
       zeroIdle: formatBurstTtftLabel(zeroIdle.burstTimeToFirstTokenSeconds),
       warmOne: formatBurstTtftLabel(warmOne.burstTimeToFirstTokenSeconds),
     },
