@@ -143,6 +143,25 @@ Notes:
 - `GHCR_READ_TOKEN` is only needed on the VPS side when the GHCR package is private.
 - `VPS_SSH_KNOWN_HOSTS` should contain the server host key entry, not a raw private key.
 
+## Optional Tailscale Secrets
+
+If you want GitHub-hosted runners to reach the VPS through your tailnet instead of public SSH, also set:
+
+- `TS_OAUTH_CLIENT_ID`
+- `TS_AUDIENCE`
+
+These are the federated identity values from the Tailscale GitHub Actions integration.
+
+When these secrets are present, the deploy workflow:
+
+- joins the runner to your tailnet as an ephemeral `tag:ci` node
+- verifies connectivity to `VPS_HOST` with Tailscale before the SSH/SCP steps
+- continues to use your existing SSH key for the deploy itself
+
+For this mode, set `VPS_HOST` to the VPS's Tailscale hostname or Tailscale IP instead of the public IP or public DNS name.
+
+The workflow requires `id-token: write` for this Tailscale federated-identity flow.
+
 ## Recommended GitHub Variables
 
 Set these as repository or environment variables when available:
