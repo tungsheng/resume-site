@@ -12,6 +12,11 @@ export interface ProofExcerpt {
   lines: string[];
 }
 
+export interface EvidenceExcerpt extends ProofExcerpt {
+  subtitle: string;
+  reportDate: string;
+}
+
 export interface NarrativeCard {
   title: string;
   body: string;
@@ -21,6 +26,32 @@ export interface MetricPoint {
   label: string;
   value: string;
   detail: string;
+}
+
+export interface ExperimentSummaryCard extends MetricPoint {
+  eyebrow: string;
+}
+
+export type ExperimentFamilyId =
+  | "profile-baselines"
+  | "policy-compare"
+  | "target-calibration";
+
+export type ComparisonDirection = "lower" | "higher";
+
+export interface ExperimentComparisonMetric {
+  label: string;
+  running: string;
+  activePressure: string;
+  runningValue: number;
+  activePressureValue: number;
+  betterWhen: ComparisonDirection;
+}
+
+export interface ExperimentCalibrationRun extends MetricPoint {
+  secondReadySeconds: number;
+  burstCost: number;
+  peakActiveRequestsPerGpuNode: number;
 }
 
 export interface ExperimentProfile {
@@ -53,11 +84,9 @@ export interface TradeoffItem {
 }
 
 export interface HighlightCard {
+  id: ExperimentFamilyId;
   title: string;
   summary: string;
-  bullets: string[];
-  href: string;
-  ctaLabel: string;
 }
 
 export interface SiteProfile {
