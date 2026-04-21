@@ -132,35 +132,36 @@ Set these in the GitHub repository or `production` environment:
 - `VPS_HOST`
 - `VPS_PORT`
 - `VPS_USER`
-- `VPS_SSH_KEY`
-- `VPS_SSH_KNOWN_HOSTS`
-- `GHCR_USERNAME`
-- `GHCR_READ_TOKEN`
+- `TS_OAUTH_CLIENT_ID`
+- `TS_AUDIENCE`
+
+The deploy workflow is configured for Tailscale SSH with Tailscale federated identity only.
+
+For this setup:
+
+- set `VPS_HOST` to the VPS's Tailscale hostname or Tailscale IP
+- make sure the tailnet policy allows both:
+  - network access from `tag:ci` to the VPS on port `22`
+  - `ssh` access from `tag:ci` to the VPS as the target Linux user, such as `deploy`
+
+The workflow requires `id-token: write` for this Tailscale federated-identity flow.
 
 Notes:
 
 - `VPS_PORT` can be omitted if your SSH server uses `22`.
-- `GHCR_READ_TOKEN` is only needed on the VPS side when the GHCR package is private.
-- `VPS_SSH_KNOWN_HOSTS` should contain the server host key entry, not a raw private key.
+- `VPS_SSH_KEY` and `VPS_SSH_KNOWN_HOSTS` are not used by this repo's deploy workflow
+- if `VPS_HOST`, `VPS_USER`, `TS_OAUTH_CLIENT_ID`, or `TS_AUDIENCE` is missing, the deploy workflow fails before the image build and push steps
 
-## Optional Tailscale Secrets
+## Optional GHCR Secrets
 
-If you want GitHub-hosted runners to reach the VPS through your tailnet instead of public SSH, also set:
+If the GHCR package is private, also set:
 
-- `TS_OAUTH_CLIENT_ID`
-- `TS_AUDIENCE`
+- `GHCR_USERNAME`
+- `GHCR_READ_TOKEN`
 
-These are the federated identity values from the Tailscale GitHub Actions integration.
+For a private package, `GHCR_READ_TOKEN` should be a GitHub personal access token with `read:packages`.
 
-When these secrets are present, the deploy workflow:
-
-- joins the runner to your tailnet as an ephemeral `tag:ci` node
-- verifies connectivity to `VPS_HOST` with Tailscale before the SSH/SCP steps
-- continues to use your existing SSH key for the deploy itself
-
-For this mode, set `VPS_HOST` to the VPS's Tailscale hostname or Tailscale IP instead of the public IP or public DNS name.
-
-The workflow requires `id-token: write` for this Tailscale federated-identity flow.
+If the GHCR package is public, these two secrets are not required.
 
 ## Recommended GitHub Variables
 
@@ -180,17 +181,6 @@ The deploy workflow uses:
 
 - `PRODUCTION_URL` for an optional public smoke test after the VPS deploy succeeds
 - `REMOTE_DEBUG_LOGS=true` only when you intentionally want full remote container logs copied into GitHub Actions output on failures
-
-## GHCR Package Access
-
-Choose one of these two approaches:
-
-1. Make the GHCR package public.
-2. Keep the GHCR package private and provide:
-   - `GHCR_USERNAME`
-   - `GHCR_READ_TOKEN`
-
-For a private package, `GHCR_READ_TOKEN` should be a GitHub personal access token with `read:packages`.
 
 ## First Deploy
 

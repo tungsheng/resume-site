@@ -20,12 +20,15 @@ env:
   VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
   PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
   REMOTE_DEBUG_LOGS: ${{ vars.REMOTE_DEBUG_LOGS || 'false' }}
+  DEPLOY_SSH_OPTS: -o BatchMode=yes -o StrictHostKeyChecking=accept-new
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment: production
     env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
       TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
       TS_AUDIENCE: ${{ secrets.TS_AUDIENCE }}
 
@@ -49,6 +52,29 @@ jobs:
           echo "repository=${IMAGE_REPOSITORY}" >> "${GITHUB_OUTPUT}"
           echo "tag=${GITHUB_SHA}" >> "${GITHUB_OUTPUT}"
 
+      - name: Validate Tailscale deploy configuration
+        run: |
+          if [[ -z "${VPS_HOST}" || -z "${VPS_USER}" ]]; then
+            echo "VPS_HOST and VPS_USER are required for deploy." >&2
+            exit 1
+          fi
+          if [[ -z "${TS_OAUTH_CLIENT_ID}" || -z "${TS_AUDIENCE}" ]]; then
+            echo "TS_OAUTH_CLIENT_ID and TS_AUDIENCE are required for Tailscale deploy." >&2
+            exit 1
+          fi
+
+      - name: Connect runner to Tailscale
+        uses: tailscale/github-action@a392da0a182bba0e9613b6243ebd69529b1878aa # v4.1.0
+        with:
+          oauth-client-id: ${{ env.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ env.TS_AUDIENCE }}
+          tags: tag:ci
+          ping: ${{ env.VPS_HOST }}
+
+      - name: Verify deploy access
+        run: |
+          ssh ${DEPLOY_SSH_OPTS} -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" "true"
+
       - name: Log in to GHCR
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
@@ -68,27 +94,10 @@ jobs:
             ${{ steps.image.outputs.repository }}:${{ steps.image.outputs.tag }}
             ${{ steps.image.outputs.repository }}:latest
 
-      - name: Configure SSH
-        run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "${{ secrets.VPS_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-
-      - name: Connect runner to Tailscale
-        if: ${{ env.TS_OAUTH_CLIENT_ID != '' && env.TS_AUDIENCE != '' }}
-        uses: tailscale/github-action@a392da0a182bba0e9613b6243ebd69529b1878aa # v4.1.0
-        with:
-          oauth-client-id: ${{ env.TS_OAUTH_CLIENT_ID }}
-          audience: ${{ env.TS_AUDIENCE }}
-          tags: tag:ci
-          ping: ${{ secrets.VPS_HOST }}
-
       - name: Upload deployment manifest
         run: |
-          ssh -p "${VPS_PORT}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "mkdir -p '${DEPLOY_PATH}'"
-          scp -P "${VPS_PORT}" docker-compose.prod.yml "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${DEPLOY_PATH}/docker-compose.prod.yml"
+          ssh ${DEPLOY_SSH_OPTS} -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" "mkdir -p '${DEPLOY_PATH}'"
+          scp ${DEPLOY_SSH_OPTS} -P "${VPS_PORT}" docker-compose.prod.yml "${VPS_USER}@${VPS_HOST}:${DEPLOY_PATH}/docker-compose.prod.yml"
 
       - name: Deploy on VPS
         env:
@@ -97,7 +106,7 @@ jobs:
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
         run: |
-          ssh -p "${VPS_PORT}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<EOF
+          ssh ${DEPLOY_SSH_OPTS} -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" <<EOF
           set -euo pipefail
           mkdir -p "${DEPLOY_PATH}"
           cat > "${DEPLOY_PATH}/deploy.env" <<ENVVARS
@@ -115,7 +124,7 @@ jobs:
             if curl -fsS http://127.0.0.1:3000/api/resumes >/dev/null; then
               break
             fi
-            if [ "${attempt}" -eq 30 ]; then
+            if [ "\${attempt}" -eq 30 ]; then
               echo "App failed readiness check after deploy"
               docker compose --env-file deploy.env -f docker-compose.prod.yml ps
               docker compose --env-file deploy.env -f docker-compose.prod.yml logs --tail=120
@@ -139,7 +148,7 @@ jobs:
       - name: Collect remote diagnostics on failure
         if: failure()
         run: |
-          ssh -p "${VPS_PORT}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<EOF
+          ssh ${DEPLOY_SSH_OPTS} -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" <<EOF
           set -euo pipefail
           cd "${DEPLOY_PATH}" || exit 0
           docker compose --env-file deploy.env -f docker-compose.prod.yml ps || true
