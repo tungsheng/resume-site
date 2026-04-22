@@ -119,8 +119,8 @@ export const resumePageCss = `
   .resume-web-section__title,
   .resume-web-card__title {
     margin: 0;
-    font-size: 1.08rem;
-    line-height: 1.35;
+    font-size: var(--type-title-md-size);
+    line-height: var(--type-title-leading);
   }
 
   .resume-web-section__title {
@@ -145,8 +145,9 @@ export const resumePageCss = `
 
   .resume-web-copy {
     margin: 12px 0 0;
+    font-size: var(--type-body-size);
     color: var(--muted);
-    line-height: 1.6;
+    line-height: var(--type-body-compact-leading);
   }
 
   .resume-web-entry__header {
@@ -158,8 +159,8 @@ export const resumePageCss = `
 
   .resume-web-entry__title {
     margin: 0;
-    font-size: 1.02rem;
-    line-height: 1.35;
+    font-size: var(--type-title-sm-size);
+    line-height: var(--type-title-leading);
   }
 
   .resume-web-entry__subtitle,
@@ -167,11 +168,11 @@ export const resumePageCss = `
   .resume-web-entry__meta {
     margin: 6px 0 0;
     color: var(--muted);
-    line-height: 1.6;
+    line-height: var(--type-body-compact-leading);
   }
 
   .resume-web-entry__date {
-    font-size: 0.92rem;
+    font-size: var(--type-meta-size);
     font-weight: 600;
     text-align: right;
     flex-shrink: 0;
@@ -194,7 +195,7 @@ export const resumePageCss = `
     grid-template-columns: auto 1fr;
     gap: 10px;
     align-items: start;
-    line-height: 1.6;
+    line-height: var(--type-body-compact-leading);
   }
 
   .resume-web-list .resume-list-bullet {
@@ -213,18 +214,20 @@ export const resumePageCss = `
   }
 
   .resume-web-contact-label {
-    font-size: 0.78rem;
+    font-size: var(--type-label-size);
     font-weight: 700;
-    letter-spacing: 0.12em;
+    line-height: var(--type-label-leading);
+    letter-spacing: var(--type-label-tracking);
     text-transform: uppercase;
     color: var(--accent-deep);
   }
 
   .resume-web-contact-value,
   .resume-web-contact-link {
+    font-size: var(--type-body-size);
     color: var(--ink);
     text-decoration: none;
-    line-height: 1.55;
+    line-height: var(--type-meta-leading);
     word-break: break-word;
   }
 
@@ -245,14 +248,15 @@ export const resumePageCss = `
 
   .resume-web-skill-label {
     margin: 0;
-    font-size: 0.92rem;
-    line-height: 1.35;
+    font-size: var(--type-meta-size);
+    line-height: var(--type-title-leading);
   }
 
   .resume-web-skill-items {
     margin: 0;
+    font-size: var(--type-body-size);
     color: var(--muted);
-    line-height: 1.6;
+    line-height: var(--type-body-compact-leading);
   }
 
   .resume-page-wrapper--screen-hidden {

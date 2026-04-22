@@ -82,7 +82,7 @@ export const evidenceStyles = `
   .comparison-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.95rem;
+    font-size: var(--type-meta-size);
   }
 
   .comparison-table th,
@@ -95,8 +95,8 @@ export const evidenceStyles = `
 
   .comparison-table thead th {
     color: var(--accent-deep);
-    font-size: 0.82rem;
-    letter-spacing: 0.12em;
+    font-size: var(--type-label-size);
+    letter-spacing: var(--type-label-tracking);
     text-transform: uppercase;
   }
 
@@ -115,8 +115,8 @@ export const evidenceStyles = `
     align-items: center;
     gap: 10px 12px;
     color: var(--muted);
-    font-size: 0.94rem;
-    line-height: 1.55;
+    font-size: var(--type-meta-size);
+    line-height: var(--type-meta-leading);
   }
 
   .experiments-summary-meta__label {
@@ -127,9 +127,10 @@ export const evidenceStyles = `
     background: rgba(22, 34, 45, 0.06);
     border: 1px solid rgba(22, 34, 45, 0.08);
     color: var(--ink);
-    font-size: 0.78rem;
+    font-size: var(--type-label-size);
     font-weight: 700;
-    letter-spacing: 0.12em;
+    line-height: var(--type-label-leading);
+    letter-spacing: var(--type-label-tracking);
     text-transform: uppercase;
   }
 
@@ -154,12 +155,12 @@ export const evidenceStyles = `
 
   .experiments-summary-card__title {
     margin: 0;
-    font-size: 1.18rem;
-    line-height: 1.35;
+    font-size: var(--type-title-md-size);
+    line-height: var(--type-title-leading);
   }
 
   .experiments-summary-card__value {
-    font-size: 2rem;
+    font-size: var(--type-stat-size);
     font-weight: 700;
     line-height: 1;
     color: var(--accent-deep);
@@ -168,7 +169,7 @@ export const evidenceStyles = `
   .experiments-summary-card__detail {
     margin: 0;
     color: var(--muted);
-    line-height: 1.58;
+    line-height: var(--type-body-compact-leading);
   }
 
   .experiments-guide {
@@ -248,9 +249,9 @@ export const evidenceStyles = `
 
   .experiment-tab__title {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: var(--type-meta-size);
     font-weight: 700;
-    line-height: 1.35;
+    line-height: var(--type-title-leading);
   }
 
   .experiment-family-panel {
@@ -265,8 +266,8 @@ export const evidenceStyles = `
 
   .experiment-tab-panel__title {
     margin: 0;
-    font-size: clamp(1.45rem, 2vw, 1.9rem);
-    line-height: 1.15;
+    font-size: var(--type-panel-size);
+    line-height: var(--type-panel-leading);
   }
 
   .experiment-tab-panel__copy {
@@ -301,18 +302,18 @@ export const evidenceStyles = `
 
   .experiment-overview__title {
     margin: 0;
-    font-size: 1.18rem;
-    line-height: 1.35;
+    font-size: var(--type-title-md-size);
+    line-height: var(--type-title-leading);
   }
 
   .experiment-overview__copy {
     margin: 0;
     color: var(--muted);
-    line-height: 1.58;
+    line-height: var(--type-body-compact-leading);
   }
 
   .experiment-overview__copy--question {
-    font-size: 1rem;
+    font-size: var(--type-body-size);
     color: var(--ink);
   }
 
@@ -378,13 +379,15 @@ export const evidenceStyles = `
 
   .comparison-chart__metric {
     margin: 0;
+    font-size: var(--type-title-sm-size);
     font-weight: 700;
+    line-height: var(--type-title-leading);
   }
 
   .comparison-chart__meta {
     margin: 0;
     color: var(--muted);
-    font-size: 0.88rem;
+    font-size: var(--type-meta-size);
   }
 
   .comparison-chart__series-list {
@@ -402,7 +405,7 @@ export const evidenceStyles = `
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 8px 16px;
-    font-size: 0.94rem;
+    font-size: var(--type-meta-size);
   }
 
   .comparison-chart__series-label {
@@ -464,14 +467,17 @@ export const evidenceStyles = `
 
   .proof-entry__title {
     margin: 0;
+    font-size: var(--type-title-sm-size);
     font-weight: 700;
+    line-height: var(--type-title-leading);
   }
 
   .proof-entry__subtitle {
     margin: 6px 0 0;
     color: var(--accent-deep);
-    font-size: 0.78rem;
-    letter-spacing: 0.14em;
+    font-size: var(--type-label-size);
+    line-height: var(--type-label-leading);
+    letter-spacing: var(--type-label-tracking);
     text-transform: uppercase;
   }
 
@@ -481,7 +487,7 @@ export const evidenceStyles = `
     padding: 6px 10px;
     border-radius: 999px;
     background: var(--accent-soft);
-    font-size: 0.78rem;
+    font-size: var(--type-label-size);
     color: var(--accent-deep);
   }
 
@@ -489,7 +495,7 @@ export const evidenceStyles = `
     display: block;
     margin-top: 12px;
     color: var(--accent-deep);
-    font-size: 0.86rem;
+    font-size: var(--type-meta-size);
   }
 
   .proof-entry__log {
@@ -498,7 +504,7 @@ export const evidenceStyles = `
     border-radius: 16px;
     background: rgba(22, 34, 45, 0.94);
     white-space: pre-wrap;
-    font-family: "SFMono-Regular", "Menlo", "Consolas", monospace;
+    font-family: var(--font-mono);
     font-size: 0.88rem;
     line-height: 1.6;
     color: #d8e7f3;

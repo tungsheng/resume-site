@@ -1,122 +1,279 @@
-import type { ImplementationLink, MetricPoint, TradeoffItem } from "./types";
+import type {
+  ImplementationMeasurement,
+  ImplementationSourceLink,
+  ImplementationStep,
+  MetricPoint,
+  NarrativeCard,
+  WorkflowTrack,
+} from "./types";
+
+const GPU_INFERENCE_REPO_LINK = "https://github.com/tungsheng/gpu-inference-lab";
+const GPU_INFERENCE_REPO_BASE = "https://github.com/tungsheng/gpu-inference-lab/blob/main";
+const SETUP_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/up`;
+const VERIFY_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/verify`;
+const EVALUATE_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/evaluate`;
+const INGRESS_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/ingress.yaml`;
+const SERVICE_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/service.yaml`;
+const VLLM_DEPLOYMENT_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/vllm-openai.yaml`;
+const ACTIVE_PRESSURE_HPA_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/hpa-active-pressure.yaml`;
+const SCALING_DOC_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/scaling.md`;
 
 export const projectContent = {
   title: "Cloud Inference Platform",
   lede:
-    "An AWS EKS + Karpenter + vLLM lab for learning how GPU inference should scale from real serving pressure, not generic host saturation.",
-  heroProof:
-    "Today the lab proves three operator paths: zero-GPU cold start, policy comparison, and active-pressure target calibration.",
-  requestPathTitle: "Serving path",
-  requestPathNodes: ["Client", "ALB", "Ingress", "Service", "vLLM pod"],
-  capacityPathTitle: "Scaling path",
-  capacityPathNodes: [
-    "vLLM queue metrics",
-    "Prometheus Adapter",
-    "HPA",
-    "Pending GPU pod",
-    "Karpenter NodePool",
-    "GPU node",
-  ],
-  architectureExplanation: [
-    "Serving traffic and provisioning GPUs are separate paths. That keeps the user-facing request flow simple and makes the control loop easier to reason about.",
-    "The more important milestone is no longer that Karpenter launches nodes. It is that the same deployment can now compare admitted work against total queue pressure without changing the serving path.",
-  ],
-  loadSpikeBullets: [
-    "vLLM exposes both running-request and active-request metrics.",
-    "Prometheus Adapter publishes those metrics to Kubernetes as pod metrics.",
-    "The HPA scales the deployment from one replica to two from custom serving pressure, and pending GPU pods pull new capacity in through Karpenter-managed serving NodePools.",
-  ],
-  resultsLead:
-    "The latest runs show a stronger story than cold-start proof alone: the repo can now compare and tune autoscaling policies.",
-  resultsMeta:
-    "Local gpu-inference-lab artifacts were generated on April 20, 2026 from evaluation runs completed on April 19, 2026.",
-  featuredResult: {
-    title: "Warm-1 scaled the second replica sooner",
-    value: "563s vs 1002s",
-    detail:
-      "In the latest compare run, active-pressure brought the second ready replica online 439s earlier than the running baseline.",
-  },
-  supportingResults: [
+    "A GPU inference lab on EKS that turns vLLM serving pressure into autoscaling and GPU node provisioning, with checked-in runs for cold start, warm capacity, policy comparison, and target tuning.",
+  overviewSummary:
+    "A compact view of what the platform is, how it works, and why the measured results matter.",
+  overviewCards: [
     {
-      label: "Warm-1 compare cost",
-      value: "$0.438",
-      detail: "$0.037 higher than the running baseline.",
+      title: "What",
+      body:
+        "A reproducible GPU inference lab on AWS EKS for measuring cold start, warm capacity, and autoscaling behavior.",
     },
     {
-      label: "Zero-idle first response",
+      title: "How",
+      body:
+        "Serving pressure becomes scaling decisions through Prometheus, the adapter, HPA, pending GPU pods, and Karpenter.",
+    },
+    {
+      title: "Why",
+      body:
+        "It makes response-time tradeoffs and GPU scale-out behavior easy to understand with checked-in runs.",
+    },
+  ] satisfies NarrativeCard[],
+  overviewSignalsLead:
+    "These numbers show cold-start wait, warm-path benefit, and how quickly the platform adds capacity after traffic begins.",
+  overviewMetrics: [
+    {
+      label: "Starting from zero",
       value: "447s",
-      detail: "Measured from a true zero-GPU baseline.",
+      detail: "First public response when no GPU serving path is already running.",
+    },
+    {
+      label: "Keeping one path warm",
+      value: "84s",
+      detail: "First public response when one serving path is already ready.",
+    },
+    {
+      label: "Scaling after traffic starts",
+      value: "563s",
+      detail: "Second ready replica under the current warm-path and active-pressure policy.",
     },
   ] satisfies MetricPoint[],
-  resultTakeaways: [
-    "Compare mode now shows whether a policy changes scale-out timing, not just whether the cluster can add nodes.",
-    "Sweep mode turns the repo into a calibration workflow instead of a single burst demo.",
-  ],
-  resultsNextStep:
-    "The remaining gap is efficiency instrumentation and GPU bin packing, not whether the platform can scale out.",
-  lessons: [
-    "Queue wait in the latest reports is still a derived estimate, not a first-class queue histogram.",
-    "GPU utilization and headroom readouts can still be incomplete when the observability path misses those metrics.",
-    "The next step is per-GPU efficiency and bin packing, which is a better next problem than re-proving basic scale-out.",
-  ],
+  workflowSectionTitle: "How the platform serves and scales",
+  workflowLead:
+    "Requests follow one stable public path. Load signals follow a separate control path that adds GPU capacity only when another replica cannot schedule.",
+  workflowFoundation: {
+    title: "Foundation",
+    summary:
+      "After the ./scripts/up setup step, the cluster already has ingress, observability, and GPU admission pieces in place, while GPU serving node count still stays at zero.",
+    nodes: [
+      {
+        label: "Setup via scripts/up",
+        href: SETUP_SCRIPT_LINK,
+        linkLabel: "Code",
+      },
+      {
+        label: "System nodes",
+      },
+      {
+        label: "Public ingress hostname",
+        href: INGRESS_LINK,
+        linkLabel: "Code",
+      },
+      {
+        label: "Prometheus",
+        href: SCALING_DOC_LINK,
+        linkLabel: "Docs",
+      },
+      {
+        label: "Adapter / custom metrics API",
+        href: SCALING_DOC_LINK,
+        linkLabel: "Docs",
+      },
+      {
+        label: "GPU NodePools",
+        href: SCALING_DOC_LINK,
+        linkLabel: "Docs",
+      },
+      {
+        label: "GPU nodes: 0",
+      },
+    ],
+  } satisfies WorkflowTrack,
+  workflowPaths: [
+    {
+      title: "Serve path",
+      summary:
+        "The public request path stays stable from the internet edge to the first ready inference replica.",
+      nodes: [
+        {
+          label: "Internet",
+        },
+        {
+          label: "ALB",
+        },
+        {
+          label: "Ingress",
+          href: INGRESS_LINK,
+          linkLabel: "Code",
+        },
+        {
+          label: "Service",
+          href: SERVICE_LINK,
+          linkLabel: "Code",
+        },
+        {
+          label: "Ready vLLM pod",
+          href: VLLM_DEPLOYMENT_LINK,
+          linkLabel: "Code",
+        },
+      ],
+    },
+    {
+      title: "Scale path",
+      summary:
+        "Serving pressure is exported as metrics, translated into custom metrics, and turned into an HPA replica target that can create another ready replica.",
+      nodes: [
+        {
+          label: "vLLM metrics",
+          href: VLLM_DEPLOYMENT_LINK,
+          linkLabel: "Code",
+        },
+        {
+          label: "Prometheus",
+          href: SCALING_DOC_LINK,
+          linkLabel: "Docs",
+        },
+        {
+          label: "Adapter",
+          href: SCALING_DOC_LINK,
+          linkLabel: "Docs",
+        },
+        {
+          label: "HPA desired replicas",
+          href: ACTIVE_PRESSURE_HPA_LINK,
+          linkLabel: "Code",
+        },
+        {
+          label: "Pending GPU pod",
+        },
+        {
+          label: "Karpenter / NodeClaim",
+          href: SCALING_DOC_LINK,
+          linkLabel: "Docs",
+        },
+        {
+          label: "GPU node",
+        },
+        {
+          label: "Second Ready vLLM pod",
+          href: VLLM_DEPLOYMENT_LINK,
+          linkLabel: "Code",
+        },
+      ],
+    },
+  ] satisfies WorkflowTrack[],
+  workflowRejoin: {
+    title: "Rejoin point",
+    body:
+      "The added replica rejoins the same in-cluster Service, so the public path stays unchanged while capacity increases underneath it.",
+    nodes: [
+      {
+        label: "Second Ready vLLM pod",
+        href: VLLM_DEPLOYMENT_LINK,
+        linkLabel: "Code",
+      },
+      {
+        label: "Same Service",
+        href: SERVICE_LINK,
+        linkLabel: "Code",
+      },
+    ],
+  },
+  workflowExplainers: [
+    {
+      title: "Stable path",
+      body:
+        "The public ingress hostname and in-cluster Service keep the request path steady while replicas restart, move, or scale.",
+    },
+    {
+      title: "Reactive path",
+      body:
+        "Prometheus, the adapter, and the HPA convert serving pressure into desired replicas instead of guessing from raw infrastructure state.",
+    },
+    {
+      title: "Added capacity",
+      body:
+        "A pending pod creates the capacity signal that turns GPU NodePools into a real NodeClaim, a GPU node, and another ready replica.",
+    },
+  ] satisfies NarrativeCard[],
 };
 
-export const tradeoffs = [
-  {
-    title: "Idle cost vs first response",
-    leftLabel: "Zero-idle",
-    leftBody: "Cheapest steady state, but every first request waits on node launch and model load.",
-    rightLabel: "Warm-1",
-    rightBody: "Keeps one on-demand path ready, which improves first-user responsiveness at a standing hourly cost.",
-  },
-  {
-    title: "Admitted work vs total pressure",
-    leftLabel: "Running policy",
-    leftBody: "Follows admitted requests only, which preserves the older baseline but reacts later to queue growth.",
-    rightLabel: "Active-pressure policy",
-    rightBody: "Scales from waiting plus running work, which reacts earlier when the queue starts to build.",
-  },
-  {
-    title: "Scale-out proof vs efficiency proof",
-    leftLabel: "Current strength",
-    leftBody:
-      "The repo proves zero-idle cold start, mixed-capacity serving, policy compare, and target sweep workflows.",
-    rightLabel: "Next problem",
-    rightBody:
-      "The stronger follow-up question is how much useful work each GPU can sustain before latency or cost break down.",
-  },
-] satisfies TradeoffItem[];
-
 export const implementation = {
-  title: "Implementation trail",
-  stack: [
-    "Terraform-managed VPC and EKS dev environment in us-west-2",
-    "Public ALB-backed /v1 inference edge on Kubernetes Ingress",
-    "vLLM v0.9.0 serving Qwen/Qwen2.5-0.5B-Instruct",
-    "Karpenter-managed gpu-serving-ondemand and gpu-serving-spot NodePools",
-    "Prometheus, Grafana, Prometheus Adapter, Pushgateway, and DCGM exporter",
-    "Scripted verify and evaluate workflows with Markdown and JSON report output",
-  ],
-  links: [
+  title: "Quick start and measure",
+  lead:
+    "Bring the lab up, prove one real public response, and tear it down. Run evaluate only when you want comparison reports and tuning data.",
+  defaultPathTitle: "Default path",
+  defaultPathLead:
+    "This is the shortest path to understand what the repo proves without going straight into the heavier measurement workflow.",
+  defaultPathSteps: [
     {
-      label: "GitHub repository",
-      href: "https://github.com/tungsheng/gpu-inference-lab",
-      detail: "Full project with infrastructure, manifests, scripts, and documentation.",
+      title: "Start the lab",
+      command: "./scripts/up",
+      body:
+        "Provision the VPC, EKS cluster, ingress, observability, and GPU-ready platform pieces so the environment is ready before serving starts.",
     },
     {
-      label: "Active-pressure HPA",
-      href: "https://github.com/tungsheng/gpu-inference-lab/blob/main/platform/inference/hpa-active-pressure.yaml",
-      detail: "Capacity-aware HPA policy that scales from waiting plus running inference work.",
+      title: "Prove the path",
+      command: "./scripts/verify",
+      body:
+        "Run one end-to-end cold-start proof through the real public endpoint instead of a local-only smoke test.",
     },
     {
-      label: "evaluate workflow",
-      href: "https://github.com/tungsheng/gpu-inference-lab/blob/main/scripts/evaluate",
-      detail: "Compare and sweep workflow for burst evaluation, target calibration, and report generation.",
+      title: "Tear it down",
+      command: "./scripts/down",
+      body:
+        "Remove the workload and environment again so the quick-start path ends cleanly after the proof run.",
+    },
+  ] satisfies ImplementationStep[],
+  verifyProofTitle: "What the quick start proves",
+  verifyProofs: [
+    {
+      title: "GPU capacity appears",
+      body:
+        "A real serving GPU node is launched for the workload instead of assuming capacity is already present.",
     },
     {
-      label: "Scaling deep dive",
-      href: "https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/scaling.md",
-      detail: "Mixed-capacity serving model, policy comparison, and the current next-step story.",
+      title: "Public inference works",
+      body:
+        "The deployment reaches Ready and the script waits for one successful public inference response through the real /v1 path.",
     },
-  ] satisfies ImplementationLink[],
+    {
+      title: "Cleanup returns to zero",
+      body:
+        "Cleanup removes the workload and confirms the serving GPU node count falls back to zero.",
+    },
+  ] satisfies NarrativeCard[],
+  measurement: {
+    title: "Go deeper with evaluate",
+    command: "./scripts/evaluate --profile zero-idle|warm-1",
+    body:
+      "Use the heavier measurement path when you want compare and tuning data instead of a single cold-start proof. It runs profile-based workflows and writes report artifacts you can inspect later.",
+    outputs: ["Markdown report", "JSON report"],
+    links: [
+      {
+        label: "Quick start README",
+        href: GPU_INFERENCE_REPO_LINK,
+      },
+      {
+        label: "Verify script",
+        href: VERIFY_SCRIPT_LINK,
+      },
+      {
+        label: "Evaluate script",
+        href: EVALUATE_SCRIPT_LINK,
+      },
+    ] satisfies ImplementationSourceLink[],
+  } satisfies ImplementationMeasurement,
 };

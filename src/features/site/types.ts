@@ -28,6 +28,37 @@ export interface MetricPoint {
   detail: string;
 }
 
+export interface WorkflowNode {
+  label: string;
+  href?: string;
+  linkLabel?: string;
+}
+
+export interface WorkflowTrack {
+  title: string;
+  summary: string;
+  nodes: WorkflowNode[];
+}
+
+export interface ImplementationStep {
+  title: string;
+  command: string;
+  body: string;
+}
+
+export interface ImplementationMeasurement {
+  title: string;
+  command: string;
+  body: string;
+  outputs: string[];
+  links: ImplementationSourceLink[];
+}
+
+export interface ImplementationSourceLink {
+  label: string;
+  href: string;
+}
+
 export interface ExperimentSummaryCard extends MetricPoint {
   eyebrow: string;
 }
@@ -67,20 +98,6 @@ export interface ExperimentProfile {
   burstTimeToFirstTokenSeconds: number;
   timeline: TimelineEvent[];
   proofExcerpt: ProofExcerpt;
-}
-
-export interface ImplementationLink {
-  label: string;
-  href: string;
-  detail: string;
-}
-
-export interface TradeoffItem {
-  title: string;
-  leftLabel: string;
-  leftBody: string;
-  rightLabel: string;
-  rightBody: string;
 }
 
 export interface HighlightCard {
