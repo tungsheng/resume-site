@@ -674,10 +674,11 @@ export const contentStyles = `
   }
 
   .project-implementation-default-flow {
+    --project-implementation-default-flow-gap: 36px;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
-    gap: 22px;
+    gap: var(--project-implementation-default-flow-gap);
   }
 
   .project-implementation-default-step {
@@ -697,14 +698,13 @@ export const contentStyles = `
     content: "→";
     position: absolute;
     top: 50%;
-    right: -22px;
+    right: calc(var(--project-implementation-default-flow-gap) / -2);
     transform: translate(50%, -50%);
     color: var(--accent-deep);
     font-weight: 600;
     font-size: 1.05rem;
     line-height: 1;
-    padding: 0 4px;
-    background: var(--surface-strong);
+    background: transparent;
   }
 
   .project-implementation-default-step__index {
