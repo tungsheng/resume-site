@@ -66,7 +66,6 @@ The current container serves these public routes:
 - `/project/cloud-inference-platform`
 - `/experiments`
 - `/resume/tony-lee`
-- `/about` as a compatibility alias of `/`
 
 It also serves the public JSON/PDF API routes under `/api/*`.
 

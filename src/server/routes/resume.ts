@@ -1,7 +1,6 @@
-import { listResumes, loadResume } from "../../domain/resume";
-import type { RequestWithParams } from "../http/request";
-import { readPathParam } from "../http/request";
-import { json, notFound } from "../http/response";
+import { listResumes, loadResume } from "../../domain/resume/load";
+import type { RequestWithParams } from "../http";
+import { json, notFound, readPathParam } from "../http";
 
 export async function handleListResumes(): Promise<Response> {
   const resumes = await listResumes();

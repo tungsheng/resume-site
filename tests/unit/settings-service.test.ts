@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { RESUME_TEMPLATE_OPTIONS } from "../../src/layouts";
-import { getResumeSettings } from "../../src/services/settings";
+import { getResumeSettings } from "../../src/features/resume/presentation";
 
 describe("Settings Service", () => {
   test("returns default color for unknown resume", () => {
@@ -25,9 +25,6 @@ describe("Settings Service", () => {
   });
 
   test("only keeps supported layout templates", () => {
-    expect(RESUME_TEMPLATE_OPTIONS.map((item) => item.id)).toEqual([
-      "single-column-ats",
-      "minimal-timeline",
-    ]);
+    expect(RESUME_TEMPLATE_OPTIONS).toEqual(["single-column-ats", "minimal-timeline"]);
   });
 });

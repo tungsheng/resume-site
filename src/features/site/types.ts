@@ -108,10 +108,7 @@ export interface HighlightCard {
 
 export interface SiteProfile {
   name: string;
-  title: string;
   summary: string;
-  resumeSlug: string;
   githubUrl: string;
   linkedinUrl: string;
-  email: string;
 }

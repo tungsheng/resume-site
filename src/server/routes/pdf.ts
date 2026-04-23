@@ -1,12 +1,12 @@
 import { isResumeLayoutTemplate } from "../../layouts";
 import { generatePDF } from "../../services/pdf";
-import { loadResume } from "../../domain/resume";
+import { loadResume } from "../../domain/resume/load";
 import { renderResumeHtmlDocument } from "../../features/resume/render-static-html";
-import { getResumeSettings } from "../../services/settings";
+import { getResumeSettings } from "../../features/resume/presentation";
 import { logger } from "../../logger";
 import { config } from "../../config";
 import { checkRateLimit, getClientIP, isValidColor, parseJsonBody } from "../../utils";
-import { badRequest, error, notFound, tooManyRequests } from "../http/response";
+import { badRequest, error, notFound, tooManyRequests } from "../http";
 
 export async function handlePublicPDF(
   req: Request,

@@ -3,36 +3,39 @@ import {
   isResumeLayoutTemplate,
   type ResumeLayoutTemplate,
 } from "../../layouts";
-import {
-  DEFAULT_RESUME_PRESENTATION,
-  getReadOnlyResumePresentation,
-} from "../../resume-presentation";
 import { sanitizeName } from "../../utils";
 
-export interface PublicResumeSettings {
+export interface ResumePresentationSettings {
   themeColor: string;
   layoutTemplate: ResumeLayoutTemplate;
 }
 
-export const DEFAULT_PUBLIC_RESUME_SETTINGS: PublicResumeSettings = {
-  themeColor: DEFAULT_RESUME_PRESENTATION.themeColor,
-  layoutTemplate: DEFAULT_RESUME_PRESENTATION.layoutTemplate ?? DEFAULT_RESUME_TEMPLATE,
+export const DEFAULT_RESUME_SETTINGS: ResumePresentationSettings = {
+  themeColor: "#c9a86c",
+  layoutTemplate: DEFAULT_RESUME_TEMPLATE,
 };
 
-export function getPublicResumeFallbackSettings(
+const READ_ONLY_RESUME_SETTINGS: Record<string, ResumePresentationSettings> = {
+  "tony-lee": {
+    themeColor: "#27ae60",
+    layoutTemplate: "minimal-timeline",
+  },
+};
+
+export function getResumeSettings(
   resumeName: string,
-  fallback: PublicResumeSettings = DEFAULT_PUBLIC_RESUME_SETTINGS
-): PublicResumeSettings {
+  fallback: ResumePresentationSettings = DEFAULT_RESUME_SETTINGS
+): ResumePresentationSettings {
   const sanitized = sanitizeName(resumeName);
   if (!sanitized) return fallback;
 
-  return getReadOnlyResumePresentation(sanitized) ?? fallback;
+  return READ_ONLY_RESUME_SETTINGS[sanitized] ?? fallback;
 }
 
-export async function loadPublicResumeSettings(
+export async function loadResumeSettings(
   resumeName: string,
-  fallback: PublicResumeSettings = getPublicResumeFallbackSettings(resumeName)
-): Promise<PublicResumeSettings> {
+  fallback: ResumePresentationSettings = getResumeSettings(resumeName)
+): Promise<ResumePresentationSettings> {
   try {
     const res = await fetch(`/api/settings/${encodeURIComponent(resumeName)}`);
     if (!res.ok) return fallback;

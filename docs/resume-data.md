@@ -3,7 +3,6 @@
 Resume files live in `resumes/` and are loaded by slug.
 
 - `resumes/tony-lee.yaml` is the current v2-style example
-- `resumes/tony-lee-1.yaml` is a legacy-format fixture kept for compatibility tests
 
 ## Recommended Format
 
@@ -65,6 +64,8 @@ The normalizer turns that source into the internal `ResumeData` shape used by th
 
 The loader intentionally accepts a few equivalent field names.
 
+Those legacy aliases are covered by unit tests, so the public `resumes/` directory only needs the active checked-in resume files.
+
 Supported aliases include:
 
 - `profile` or `header`
@@ -106,7 +107,7 @@ The public route is `/resume/:name`, and the loader sanitizes the requested slug
 
 ## Presentation Overrides
 
-Resume-specific presentation settings are not stored in YAML. The checked-in overrides live in `src/resume-presentation.ts`, and the public resume page consumes them through `src/features/resume/presentation.ts`.
+Resume-specific presentation settings are not stored in YAML. The checked-in overrides and public resume helpers live in `src/features/resume/presentation.ts`.
 
 Use that file when a resume needs:
 

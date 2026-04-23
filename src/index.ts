@@ -2,22 +2,18 @@
 
 import { config } from "./config";
 import { logger } from "./logger";
+import { handlePublicPDF } from "./server/routes/pdf";
+import { handleListResumes, handleGetResume } from "./server/routes/resume";
+import { handleGetSettings } from "./server/routes/settings";
+import { handleStaticFile } from "./server/routes/static";
 import { closePDFBrowser } from "./services/pdf";
 import { addSecurityHeaders } from "./utils";
-import {
-  handleListResumes,
-  handleGetResume,
-  handleGetSettings,
-  handlePublicPDF,
-  handleStaticFile,
-} from "./server/routes";
 
 // Import HTML pages directly - Bun will bundle the TSX imports
 import homePage from "../public/index.html";
 import resumePage from "../public/resume.html";
 import projectPage from "../public/project.html";
 import experimentsPage from "../public/experiments.html";
-import aboutPage from "../public/about.html";
 
 // Wrap handler to apply security headers to all API responses
 function withHeaders<T extends (...args: any[]) => Response | Promise<Response>>(
@@ -38,7 +34,6 @@ server = Bun.serve({
     "/": homePage,
     "/project/cloud-inference-platform": projectPage,
     "/experiments": experimentsPage,
-    "/about": aboutPage,
     "/resume/:name": resumePage,
 
     // Resume API routes
@@ -88,6 +83,5 @@ logger.info("Resume server started", {
   home: `http://localhost:${config.port}/`,
   project: `http://localhost:${config.port}/project/cloud-inference-platform`,
   experiments: `http://localhost:${config.port}/experiments`,
-  about: `http://localhost:${config.port}/about`,
   resume: `http://localhost:${config.port}/resume/tony-lee`,
 });

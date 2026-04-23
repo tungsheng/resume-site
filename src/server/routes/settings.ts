@@ -1,7 +1,6 @@
-import { getResumeSettings } from "../../services/settings";
-import type { RequestWithParams } from "../http/request";
-import { readPathParam } from "../http/request";
-import { json } from "../http/response";
+import { getResumeSettings } from "../../features/resume/presentation";
+import type { RequestWithParams } from "../http";
+import { json, readPathParam } from "../http";
 
 export async function handleGetSettings(req: RequestWithParams): Promise<Response> {
   const name = readPathParam(req, "name", "/api/settings/");

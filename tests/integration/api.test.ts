@@ -55,12 +55,9 @@ describe("API Integration", () => {
     expect(html).toContain("Experiments | Tony Lee");
   });
 
-  itIfIntegration("GET /about serves the about shell", async () => {
+  itIfIntegration("GET /about returns 404 after route removal", async () => {
     const res = await fetch(`${BASE_URL}/about`);
-    expect(res.status).toBe(200);
-
-    const html = await res.text();
-    expect(html).toContain("About Tony Lee");
+    expect(res.status).toBe(404);
   });
 
   itIfIntegration("GET /resume/tony-lee serves the resume shell", async () => {

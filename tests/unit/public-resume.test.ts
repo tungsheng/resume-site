@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import {
-  getPublicResumeFallbackSettings,
-  loadPublicResumeSettings,
+  getResumeSettings,
+  loadResumeSettings,
   requestPublicResumePdf,
 } from "../../src/features/resume/presentation";
 
@@ -28,7 +28,7 @@ describe("public resume helpers", () => {
       );
     }) as unknown as typeof fetch;
 
-    const settings = await loadPublicResumeSettings("tony-lee");
+    const settings = await loadResumeSettings("tony-lee");
 
     expect(requestedUrl).toBe("/api/settings/tony-lee");
     expect(settings).toEqual({
@@ -59,12 +59,12 @@ describe("public resume helpers", () => {
       throw new Error("network failure");
     }) as unknown as typeof fetch;
 
-    const settings = await loadPublicResumeSettings("tony-lee");
+    const settings = await loadResumeSettings("tony-lee");
 
     expect(settings).toEqual({
       themeColor: "#27ae60",
       layoutTemplate: "minimal-timeline",
     });
-    expect(getPublicResumeFallbackSettings("tony-lee")).toEqual(settings);
+    expect(getResumeSettings("tony-lee")).toEqual(settings);
   });
 });

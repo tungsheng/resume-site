@@ -33,16 +33,15 @@ src/
   components/            shared React UI pieces
   domain/resume/         resume loading, normalization, and view-model shaping
   features/              page-specific React code
-    about/               compatibility route that reuses the home page
     experiments/
     home/
     project/
     resume/              shared resume document, client hooks, and page UI
     site/                shared public-site content, layout, and styles
   server/
-    http/                small request/response helpers
+    http/                small HTTP helpers
     routes/              API handlers and static-file fallback
-  services/              PDF and presentation settings helpers
+  services/              PDF generation helpers
   index.ts               Bun server entrypoint
 tests/
   unit/                  Bun unit tests
@@ -56,7 +55,6 @@ tests/
 - `GET /`
 - `GET /project/cloud-inference-platform`
 - `GET /experiments`
-- `GET /about` (currently an alias that renders the home experience)
 - `GET /resume/:name`
 - `GET /api/resumes`
 - `GET /api/resume/:name`
@@ -71,7 +69,6 @@ Any other request falls through to `src/server/routes/static.ts`, which serves f
 - `/project/cloud-inference-platform` is the narrative case study.
 - `/experiments` is the evidence archive for checked-in evaluation runs.
 - `/resume/:name` is the public resume route with a screen-first web view and a preserved print-preview/PDF path.
-- `/about` exists for compatibility, but it does not maintain separate content from `/`.
 
 ## Resume Content Flow
 
@@ -81,11 +78,11 @@ Any other request falls through to `src/server/routes/static.ts`, which serves f
 4. The public resume page fetches `/api/resume/:name` and `/api/settings/:name`, then renders a screen-first resume view while keeping the print-preview document mounted.
 5. PDF downloads call `/api/public-pdf`, which renders the same resume document through React SSR and hands it to Puppeteer.
 
-The checked-in `tony-lee.yaml` uses the current v2-style format. `tony-lee-1.yaml` exists as a legacy fixture to keep backward compatibility covered by tests.
+The checked-in `tony-lee.yaml` uses the current v2-style format. Legacy YAML aliases remain covered by unit tests without exposing an extra public resume fixture.
 
 ## Presentation Settings
 
-The checked-in presentation overrides live in `src/resume-presentation.ts`. Public-page helpers for loading and validating those settings live in `src/features/resume/presentation.ts`.
+The checked-in presentation overrides and public-page helpers live in `src/features/resume/presentation.ts`.
 
 - Unknown resumes fall back to the default theme color and layout.
 - `tony-lee` is pinned to the green `minimal-timeline` presentation.
@@ -149,7 +146,7 @@ For a new resume:
 
 1. Add `resumes/<slug>.yaml`.
 2. Visit `/resume/<slug>`.
-3. If the resume needs a non-default theme or layout, add a read-only entry in `src/resume-presentation.ts`.
+3. If the resume needs a non-default theme or layout, add a read-only entry in `src/features/resume/presentation.ts`.
 
 ## Testing Focus
 
@@ -160,7 +157,7 @@ Current tests cover:
 - PDF scaling helpers
 - settings fallback behavior
 - route security helpers
-- selected HTTP integration behavior for the home, project, experiments, about, and resume routes
+- selected HTTP integration behavior for the home, project, experiments, and resume routes
 
 What is not fully covered:
 

@@ -1,7 +1,6 @@
 // Resume page styles
 
 import type React from "react";
-import { spinKeyframes } from "../../styles";
 import { siteStyles } from "../site/style";
 import { getResumeDocumentCss, LETTER_HEIGHT_PX, LETTER_WIDTH_PX } from "./document-css";
 
@@ -50,6 +49,12 @@ export const styles: Record<string, React.CSSProperties> = {
     fontSize: 16,
   },
 };
+
+const spinKeyframes = `
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+`;
 
 export const resumePageCss = `
   ${siteStyles}

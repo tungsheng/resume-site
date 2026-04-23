@@ -2,10 +2,7 @@ export const contentStyles = `
   .page-hero,
   .card,
   .metric-card,
-  .timeline-card,
-  .proof-card,
-  .detail-card,
-  .about-card {
+  .timeline-card {
     background: var(--surface);
     border: 1px solid rgba(22, 34, 45, 0.08);
     box-shadow: var(--shadow);
@@ -23,13 +20,6 @@ export const contentStyles = `
     margin-bottom: 24px;
   }
 
-  .page-hero--split {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.8fr);
-    gap: 22px;
-    align-items: start;
-  }
-
   .page-hero__content {
     max-width: 58rem;
   }
@@ -40,18 +30,6 @@ export const contentStyles = `
     text-align: center;
   }
 
-  .page-hero__aside {
-    padding: 24px;
-    border-radius: var(--radius-lg);
-    background: linear-gradient(145deg, rgba(22, 34, 45, 0.95), rgba(36, 55, 71, 0.96));
-    color: #eef4f7;
-  }
-
-  .page-hero__aside .label {
-    color: #efcf9d;
-  }
-
-  .page-eyebrow,
   .section__kicker,
   .label {
     margin: 0 0 10px;
@@ -133,13 +111,6 @@ export const contentStyles = `
     font-size: var(--type-body-size);
     color: var(--muted);
     line-height: var(--type-body-leading);
-  }
-
-  .button-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 24px;
   }
 
   .page-hero__actions {
@@ -265,20 +236,6 @@ export const contentStyles = `
     }
   }
 
-  .chip-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .chip {
-    padding: 10px 14px;
-    border-radius: 999px;
-    background: var(--accent-soft);
-    border: 1px solid rgba(173, 123, 58, 0.18);
-    font-weight: 600;
-  }
-
   .section {
     margin-top: 26px;
   }
@@ -309,50 +266,16 @@ export const contentStyles = `
 
   .card,
   .metric-card,
-  .timeline-card,
-  .detail-card,
-  .about-card {
+  .timeline-card {
     border-radius: var(--radius-lg);
     padding: 24px;
   }
 
   .card__title,
-  .metric-card__label,
-  .timeline-card__title,
-  .detail-card__title,
-  .about-card__title {
+  .timeline-card__title {
     margin: 0;
     font-size: var(--type-title-md-size);
     line-height: var(--type-title-leading);
-  }
-
-  .card__list,
-  .detail-list,
-  .about-list,
-  .bullet-list {
-    margin: 16px 0 0;
-    padding-left: 20px;
-    display: grid;
-    gap: 10px;
-    line-height: var(--type-body-compact-leading);
-  }
-
-  .metric-card__value {
-    margin-top: 14px;
-    font-size: var(--type-stat-size);
-    font-weight: 700;
-    color: var(--accent-deep);
-    line-height: 1;
-  }
-
-  .metric-card__detail {
-    margin-top: 10px;
-    color: var(--muted);
-    line-height: var(--type-meta-leading);
-  }
-
-  .project-hero-proof {
-    margin-top: 14px;
   }
 
   .home-projects-section {
@@ -698,13 +621,6 @@ export const contentStyles = `
   .project-workflow-explainers .project-workflow-explainer + .project-workflow-explainer {
     padding-left: 18px;
     border-left: 1px solid rgba(22, 34, 45, 0.08);
-  }
-
-  .project-stat-label {
-    margin: 0;
-    font-size: var(--type-meta-size);
-    font-weight: 700;
-    line-height: 1.4;
   }
 
   .project-stat-value {

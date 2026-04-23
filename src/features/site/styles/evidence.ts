@@ -1,80 +1,4 @@
 export const evidenceStyles = `
-  .stack-diagram {
-    display: grid;
-    gap: 8px;
-    justify-items: center;
-  }
-
-  .stack-diagram__node {
-    width: min(100%, 22rem);
-    padding: 14px 18px;
-    border-radius: 16px;
-    background: var(--surface-strong);
-    border: 1px solid var(--line);
-    text-align: center;
-    font-weight: 600;
-  }
-
-  .stack-diagram__arrow {
-    color: var(--accent-deep);
-    font-size: 1.4rem;
-    line-height: 1;
-  }
-
-  .flow-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .flow-pill {
-    padding: 10px 14px;
-    border-radius: 999px;
-    background: var(--accent-soft);
-    border: 1px solid rgba(173, 123, 58, 0.16);
-    font-weight: 600;
-  }
-
-  .flow-arrow {
-    color: var(--accent-deep);
-    font-weight: 700;
-  }
-
-  .steps-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 12px;
-  }
-
-  .steps-list__item {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 14px;
-    align-items: start;
-    padding: 16px 18px;
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    border: 1px solid rgba(22, 34, 45, 0.08);
-    box-shadow: var(--shadow);
-    line-height: 1.55;
-  }
-
-  .steps-list__index {
-    width: 2rem;
-    height: 2rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: var(--ink);
-    color: white;
-    font-weight: 700;
-    font-size: 0.92rem;
-  }
-
   .comparison-table-wrap {
     overflow-x: auto;
   }
@@ -579,7 +503,6 @@ export const evidenceStyles = `
   }
 
   @media (max-width: 900px) {
-    .page-hero--split,
     .grid-two,
     .grid-three {
       grid-template-columns: minmax(0, 1fr);
@@ -613,23 +536,12 @@ export const evidenceStyles = `
     .page-hero,
     .card,
     .metric-card,
-    .timeline-card,
-    .detail-card,
-    .about-card {
+    .timeline-card {
       padding: 20px;
     }
 
     .page-title {
       font-size: 2.6rem;
-    }
-
-    .flow-arrow {
-      display: none;
-    }
-
-    .flow-pill {
-      width: 100%;
-      border-radius: 16px;
     }
 
     .experiments-summary-meta {

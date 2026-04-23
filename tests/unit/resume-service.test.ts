@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { listResumes, loadResume } from "../../src/domain/resume";
+import { listResumes, loadResume } from "../../src/domain/resume/load";
+import { normalizeResumeData } from "../../src/domain/resume/normalize";
 import { renderResumeHtmlDocument } from "../../src/features/resume/render-static-html";
 import type { ResumeData } from "../../src/types";
 
@@ -30,10 +31,50 @@ describe("Resume Service", () => {
     expect(data?.certificates).toBeArray();
   });
 
-  test("loadResume supports legacy string-based skills", async () => {
-    const data = await loadResume("tony-lee-1");
+  test("normalizeResumeData supports legacy string-based skills", () => {
+    const data = normalizeResumeData({
+      header: {
+        name: "Tony Lee",
+        badges: ["Staff Software Engineer"],
+        contacts: {
+          email: "tungsheng@gmail.com",
+          linkedin: "tonyslee8",
+        },
+        summary: "Legacy-format resume fixture.",
+      },
+      experience: [
+        {
+          title: "Staff Software Engineer",
+          company: "DTEX Systems",
+          startDate: "Sep 2024",
+          endDate: "Present",
+          highlights: ["Delivered production-ready systems."],
+        },
+      ],
+      skills: {
+        languages: "Python, TypeScript, Go",
+        infrastructure: "Docker, Jenkins",
+      },
+      certificates: [
+        {
+          title: "Neural Networks and Deep Learning",
+          issuer: "Coursera",
+          date: "Dec 2023",
+        },
+      ],
+      education: [
+        {
+          school: "University of California, San Diego",
+          degree: "M. E. Electrical Engineering",
+          startDate: "Sep 2006",
+          endDate: "Jun 2008",
+        },
+      ],
+    });
+
     expect(data).not.toBeNull();
     expect(data?.skills["languages"]).toContain("Python");
+    expect(data?.skills["infrastructure"]).toContain("Docker");
     expect(data?.certificates).toBeArray();
   });
 
