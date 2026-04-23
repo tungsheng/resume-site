@@ -71,11 +71,6 @@ const toastKeyframes = `
 
 let toastId = 0;
 
-function getResumeName(): string {
-  const match = window.location.pathname.match(/\/resume\/(.+)/);
-  return match?.[1] ?? "";
-}
-
 function getLinkedinHref(linkedin: string | undefined): string | null {
   if (!linkedin) return null;
   return linkedin.startsWith("http") ? linkedin : `https://linkedin.com/in/${linkedin}`;
@@ -544,8 +539,7 @@ function ResumeStatusView({ message, busy = false }: { message: string; busy?: b
 }
 
 export function ResumePage() {
-  const resumeName = getResumeName();
-  const [presentation, setPresentation] = useState(() => getResumeSettings(resumeName));
+  const [presentation, setPresentation] = useState(() => getResumeSettings());
   const [data, setData] = useState<ResumeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [previewScale, setPreviewScale] = useState(() =>
@@ -560,12 +554,12 @@ export function ResumePage() {
   useDocumentTitle(data ? `${data.header.name} - Resume` : "Resume");
 
   useEffect(() => {
-    const fallback = getResumeSettings(resumeName);
+    const fallback = getResumeSettings();
     setPresentation(fallback);
 
     let cancelled = false;
     void (async () => {
-      const nextPresentation = await loadResumeSettings(resumeName, fallback);
+      const nextPresentation = await loadResumeSettings(fallback);
       if (!cancelled) {
         setPresentation(nextPresentation);
       }
@@ -574,7 +568,7 @@ export function ResumePage() {
     return () => {
       cancelled = true;
     };
-  }, [resumeName]);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -583,7 +577,7 @@ export function ResumePage() {
 
     void (async () => {
       try {
-        const res = await fetch(`/api/resume/${encodeURIComponent(resumeName)}`);
+        const res = await fetch("/api/resume");
         if (!res.ok) {
           if (!cancelled) setError("Resume not found");
           return;
@@ -608,7 +602,7 @@ export function ResumePage() {
     return () => {
       cancelled = true;
     };
-  }, [resumeName]);
+  }, []);
 
   useEffect(() => {
     const updateScale = () => {
@@ -629,6 +623,8 @@ export function ResumePage() {
     return <ResumeStatusView message={error || "Resume not found"} />;
   }
 
+  const resumeData = data;
+
   function showToast(message: string, type: Toast["type"] = "error"): void {
     const id = ++toastId;
     setToasts((currentToasts) => [...currentToasts, { id, message, type }]);
@@ -642,11 +638,10 @@ export function ResumePage() {
     setDownloading(true);
     try {
       const blob = await requestPublicResumePdf({
-        name: resumeName,
         themeColor,
         layoutTemplate,
       });
-      downloadBlob(blob, `${resumeName.replace(/\s+/g, "_")}_Resume.pdf`);
+      downloadBlob(blob, `${resumeData.header.name.replace(/\s+/g, "_")}_Resume.pdf`);
       showToast("PDF downloaded successfully", "success");
     } catch (downloadError) {
       const message =
@@ -661,7 +656,7 @@ export function ResumePage() {
 
   return (
     <ResumePageContent
-      data={data}
+      data={resumeData}
       themeColor={themeColor}
       layoutTemplate={layoutTemplate}
       previewScale={previewScale}

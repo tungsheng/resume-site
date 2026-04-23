@@ -10,7 +10,7 @@ describe("API Integration", () => {
     if (!RUN_INTEGRATION_TESTS) return;
 
     try {
-      const res = await fetch(`${BASE_URL}/api/resumes`, {
+      const res = await fetch(`${BASE_URL}/api/resume`, {
         signal: AbortSignal.timeout(1500),
       });
       if (!res.ok) {
@@ -23,11 +23,11 @@ describe("API Integration", () => {
     }
   });
 
-  itIfIntegration("GET /api/resumes", async () => {
-    const res = await fetch(`${BASE_URL}/api/resumes`);
+  itIfIntegration("GET /api/resume returns the checked-in public resume", async () => {
+    const res = await fetch(`${BASE_URL}/api/resume`);
     expect(res.status).toBe(200);
-    const data = (await res.json()) as { resumes: string[] };
-    expect(data.resumes).toBeArray();
+    const data = (await res.json()) as { header?: { name?: string } };
+    expect(data.header?.name).toBe("Tony Lee");
   });
 
   itIfIntegration("GET / serves the home page shell", async () => {
@@ -60,21 +60,21 @@ describe("API Integration", () => {
     expect(res.status).toBe(404);
   });
 
-  itIfIntegration("GET /resume/tony-lee serves the resume shell", async () => {
-    const res = await fetch(`${BASE_URL}/resume/tony-lee`);
+  itIfIntegration("GET /resume serves the resume shell", async () => {
+    const res = await fetch(`${BASE_URL}/resume`);
     expect(res.status).toBe(200);
 
     const html = await res.text();
     expect(html).toContain("<title>Resume</title>");
   });
 
-  itIfIntegration("GET /api/resume/:name - 404 for missing", async () => {
-    const res = await fetch(`${BASE_URL}/api/resume/nonexistent-xyz`);
+  itIfIntegration("GET /resume/tony-lee returns 404 after single-resume cleanup", async () => {
+    const res = await fetch(`${BASE_URL}/resume/tony-lee`);
     expect(res.status).toBe(404);
   });
 
-  itIfIntegration("GET /api/settings/:name preserves the tony-lee presentation", async () => {
-    const res = await fetch(`${BASE_URL}/api/settings/tony-lee`);
+  itIfIntegration("GET /api/settings preserves the public presentation", async () => {
+    const res = await fetch(`${BASE_URL}/api/settings`);
     expect(res.status).toBe(200);
 
     const data = (await res.json()) as {
@@ -93,7 +93,7 @@ describe("API Integration", () => {
   });
 
   itIfIntegration("Security headers are present", async () => {
-    const res = await fetch(`${BASE_URL}/api/resumes`);
+    const res = await fetch(`${BASE_URL}/api/resume`);
     expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(res.headers.get("X-Frame-Options")).toBe("DENY");
   });
@@ -110,7 +110,7 @@ describe("API Integration", () => {
             "Content-Type": "application/json",
             "X-Forwarded-For": uniqueHeader,
           },
-          body: JSON.stringify({ name: "tony-lee" }),
+          body: JSON.stringify({}),
         })
       );
     }

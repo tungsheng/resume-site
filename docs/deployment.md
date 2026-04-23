@@ -53,10 +53,10 @@ PDF export depends on a Chrome or Chromium executable.
 The container health check calls:
 
 ```text
-GET /api/resumes
+GET /api/resume
 ```
 
-That endpoint is lightweight and works well as a simple readiness probe.
+That endpoint is lightweight and works well as a simple readiness probe for the checked-in public resume.
 
 ## What the Container Serves
 
@@ -65,7 +65,7 @@ The current container serves these public routes:
 - `/`
 - `/project/cloud-inference-platform`
 - `/experiments`
-- `/resume/tony-lee`
+- `/resume`
 
 It also serves the public JSON/PDF API routes under `/api/*`.
 
@@ -190,7 +190,7 @@ The deploy workflow uses:
 5. Confirm the health check:
 
 ```bash
-curl -fsS http://127.0.0.1:3000/api/resumes
+curl -fsS http://127.0.0.1:3000/api/resume
 ```
 
 6. Confirm the site through the reverse proxy and domain.

@@ -28,9 +28,9 @@ describe("public resume helpers", () => {
       );
     }) as unknown as typeof fetch;
 
-    const settings = await loadResumeSettings("tony-lee");
+    const settings = await loadResumeSettings();
 
-    expect(requestedUrl).toBe("/api/settings/tony-lee");
+    expect(requestedUrl).toBe("/api/settings");
     expect(settings).toEqual({
       themeColor: "#27ae60",
       layoutTemplate: "minimal-timeline",
@@ -47,24 +47,23 @@ describe("public resume helpers", () => {
 
     await expect(
       requestPublicResumePdf({
-        name: "tony-lee",
         themeColor: "#27ae60",
         layoutTemplate: "minimal-timeline",
       })
     ).rejects.toThrow("PDF engine unavailable");
   });
 
-  test("preserves the checked-in tony-lee presentation when settings fetch fails", async () => {
+  test("preserves the checked-in public presentation when settings fetch fails", async () => {
     globalThis.fetch = (async () => {
       throw new Error("network failure");
     }) as unknown as typeof fetch;
 
-    const settings = await loadResumeSettings("tony-lee");
+    const settings = await loadResumeSettings();
 
     expect(settings).toEqual({
       themeColor: "#27ae60",
       layoutTemplate: "minimal-timeline",
     });
-    expect(getResumeSettings("tony-lee")).toEqual(settings);
+    expect(getResumeSettings()).toEqual(settings);
   });
 });

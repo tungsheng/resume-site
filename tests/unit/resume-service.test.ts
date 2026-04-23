@@ -1,27 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { listResumes, loadResume } from "../../src/domain/resume/load";
+import { loadResume } from "../../src/domain/resume/load";
 import { normalizeResumeData } from "../../src/domain/resume/normalize";
 import { renderResumeHtmlDocument } from "../../src/features/resume/render-static-html";
 import type { ResumeData } from "../../src/types";
 
 describe("Resume Service", () => {
-  test("listResumes returns array", async () => {
-    const files = await listResumes();
-    expect(files).toBeArray();
-  });
-
-  test("loadResume returns null for missing file", async () => {
-    const data = await loadResume("nonexistent-xyz");
-    expect(data).toBeNull();
-  });
-
-  test("loadResume returns null for path traversal", async () => {
-    const data = await loadResume("../etc/passwd");
-    expect(data).toBeNull();
-  });
-
-  test("loadResume supports v2 profile schema", async () => {
-    const data = await loadResume("tony-lee");
+  test("loadResume supports the checked-in public resume schema", async () => {
+    const data = await loadResume();
     expect(data).not.toBeNull();
     expect(data?.header.name).toBe("Tony Lee");
     expect(data?.skills["Languages"]).toBeArray();

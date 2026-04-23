@@ -1,10 +1,10 @@
 // Application entry point
 
 import { config } from "./config";
+import { loadResume } from "./domain/resume/load";
+import { getResumeSettings } from "./features/resume/presentation";
 import { logger } from "./logger";
 import { handlePublicPDF } from "./server/routes/pdf";
-import { handleListResumes, handleGetResume } from "./server/routes/resume";
-import { handleGetSettings } from "./server/routes/settings";
 import { handleStaticFile } from "./server/routes/static";
 import { closePDFBrowser } from "./services/pdf";
 import { addSecurityHeaders } from "./utils";
@@ -25,6 +25,18 @@ function withHeaders<T extends (...args: any[]) => Response | Promise<Response>>
   }) as unknown as T;
 }
 
+async function handleGetResume(): Promise<Response> {
+  const data = await loadResume();
+  if (!data) {
+    return Response.json({ error: "Resume not found" }, { status: 404 });
+  }
+  return Response.json(data);
+}
+
+function handleGetSettings(): Response {
+  return Response.json(getResumeSettings());
+}
+
 let server: ReturnType<typeof Bun.serve>;
 
 server = Bun.serve({
@@ -34,14 +46,13 @@ server = Bun.serve({
     "/": homePage,
     "/project/cloud-inference-platform": projectPage,
     "/experiments": experimentsPage,
-    "/resume/:name": resumePage,
+    "/resume": resumePage,
 
     // Resume API routes
-    "/api/resumes": { GET: withHeaders(handleListResumes) },
-    "/api/resume/:name": { GET: withHeaders(handleGetResume) },
+    "/api/resume": { GET: withHeaders(handleGetResume) },
 
     // Settings API routes
-    "/api/settings/:name": { GET: withHeaders(handleGetSettings) },
+    "/api/settings": { GET: withHeaders(handleGetSettings) },
 
     // PDF export routes
     "/api/public-pdf": {
@@ -83,5 +94,5 @@ logger.info("Resume server started", {
   home: `http://localhost:${config.port}/`,
   project: `http://localhost:${config.port}/project/cloud-inference-platform`,
   experiments: `http://localhost:${config.port}/experiments`,
-  resume: `http://localhost:${config.port}/resume/tony-lee`,
+  resume: `http://localhost:${config.port}/resume`,
 });

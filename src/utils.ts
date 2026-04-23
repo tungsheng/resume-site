@@ -1,31 +1,6 @@
 // Security utilities
 
 /**
- * Sanitize resume name to prevent path traversal attacks
- */
-export function sanitizeName(name: string): string | null {
-  if (!name || name.trim() === "") return null;
-
-  let decoded: string;
-  try {
-    decoded = decodeURIComponent(name);
-  } catch {
-    return null;
-  }
-  if (
-    decoded.includes("..") ||
-    decoded.includes("/") ||
-    decoded.includes("\\") ||
-    decoded.includes("\0")
-  ) {
-    return null;
-  }
-
-  const sanitized = decoded.replace(/[^a-zA-Z0-9_-]/g, "");
-  return sanitized.length > 0 ? sanitized : null;
-}
-
-/**
  * Escape HTML to prevent XSS attacks
  */
 export function escapeHtml(unsafe: string): string {

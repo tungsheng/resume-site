@@ -2,7 +2,7 @@ import type { SiteProfile } from "./types";
 
 export const PROJECT_PATH = "/project/cloud-inference-platform";
 export const EXPERIMENTS_PATH = "/experiments";
-export const RESUME_PATH = "/resume/tony-lee";
+export const RESUME_PATH = "/resume";
 
 export const siteProfile: SiteProfile = {
   name: "Tony Lee",

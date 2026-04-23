@@ -6,38 +6,7 @@ import {
   getClientIP,
   hexToRgba,
   isValidColor,
-  sanitizeName,
 } from "../../src/utils";
-
-describe("sanitizeName", () => {
-  test("accepts valid names", () => {
-    expect(sanitizeName("tony-lee")).toBe("tony-lee");
-    expect(sanitizeName("john_doe")).toBe("john_doe");
-    expect(sanitizeName("Resume123")).toBe("Resume123");
-  });
-
-  test("rejects path traversal", () => {
-    expect(sanitizeName("../etc/passwd")).toBeNull();
-    expect(sanitizeName("foo/../bar")).toBeNull();
-    expect(sanitizeName("foo/bar")).toBeNull();
-    expect(sanitizeName("foo\\bar")).toBeNull();
-  });
-
-  test("rejects malformed URI encoding", () => {
-    expect(sanitizeName("%")).toBeNull();
-    expect(sanitizeName("%E0%A4%A")).toBeNull();
-  });
-
-  test("rejects empty input", () => {
-    expect(sanitizeName("")).toBeNull();
-    expect(sanitizeName("   ")).toBeNull();
-  });
-
-  test("strips invalid characters", () => {
-    expect(sanitizeName("tony lee")).toBe("tonylee");
-    expect(sanitizeName("tony.lee")).toBe("tonylee");
-  });
-});
 
 describe("escapeHtml", () => {
   test("escapes HTML characters", () => {

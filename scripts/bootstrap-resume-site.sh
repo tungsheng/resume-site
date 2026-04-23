@@ -213,7 +213,7 @@ echo "     docker compose --env-file deploy.env -f docker-compose.prod.yml pull"
 echo "     docker compose --env-file deploy.env -f docker-compose.prod.yml up -d"
 echo
 echo "Verification:"
-echo "  curl -fsS http://127.0.0.1:${APP_PORT}/api/resumes"
+echo "  curl -fsS http://127.0.0.1:${APP_PORT}/api/resume"
 echo "  curl -I https://${DOMAIN}"
 echo
 echo "Logs:"

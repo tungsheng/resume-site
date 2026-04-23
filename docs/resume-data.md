@@ -1,8 +1,6 @@
 # Resume Data Format
 
-Resume files live in `resumes/` and are loaded by slug.
-
-- `resumes/tony-lee.yaml` is the current v2-style example
+The site currently serves one checked-in public resume from `resumes/tony-lee.yaml`.
 
 ## Recommended Format
 
@@ -97,24 +95,13 @@ period:
 
 The normalizer also accepts `period.from` / `period.to` and `period.startDate` / `period.endDate`.
 
-## Slug Rules
-
-The public route is `/resume/:name`, and the loader sanitizes the requested slug.
-
-- Use letters, numbers, `_`, and `-`
-- Avoid spaces and punctuation in filenames
-- `your-name.yaml` is served at `/resume/your-name`
+The public route is `/resume`, and the server always loads `resumes/tony-lee.yaml`.
 
 ## Presentation Overrides
 
-Resume-specific presentation settings are not stored in YAML. The checked-in overrides and public resume helpers live in `src/features/resume/presentation.ts`.
-
-Use that file when a resume needs:
-
-- a custom theme color
-- a non-default layout template
+Resume presentation settings are not stored in YAML. The checked-in public theme and layout live in `src/features/resume/presentation.ts`.
 
 ## Current Resume-Site Notes
 
-- The checked-in `tony-lee` resume currently uses the `minimal-timeline` layout template.
+- The checked-in public resume currently uses the `minimal-timeline` layout template.
 - The public resume page defaults to a browser-friendly web view, but print preview and PDF export still use the same canonical print document.

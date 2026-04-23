@@ -32,7 +32,7 @@ describe("HomePage", () => {
     expect(html).toContain("href=\"/project/cloud-inference-platform\"");
     expect(html).not.toContain("class=\"page-eyebrow\">Home<");
     expect(html).not.toContain("Failure Modes &amp; Limitations");
-    expect(html).toContain("href=\"/resume/tony-lee\"");
+    expect(html).toContain("href=\"/resume\"");
     expect(html).not.toContain("Download PDF");
     expect(html).not.toContain("GitHub repo");
     expect(html).not.toContain("Projects");

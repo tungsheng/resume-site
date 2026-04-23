@@ -6,7 +6,22 @@ import { getResumeSettings } from "../../features/resume/presentation";
 import { logger } from "../../logger";
 import { config } from "../../config";
 import { checkRateLimit, getClientIP, isValidColor, parseJsonBody } from "../../utils";
-import { badRequest, error, notFound, tooManyRequests } from "../http";
+
+function error(status: number, message: string): Response {
+  return Response.json({ error: message }, { status });
+}
+
+function badRequest(message: string): Response {
+  return error(400, message);
+}
+
+function notFound(message: string = "Not found"): Response {
+  return error(404, message);
+}
+
+function tooManyRequests(message: string): Response {
+  return error(429, message);
+}
 
 export async function handlePublicPDF(
   req: Request,
@@ -25,7 +40,6 @@ export async function handlePublicPDF(
 
 async function handlePDFGeneration(req: Request): Promise<Response> {
   const body = await parseJsonBody<{
-    name?: string;
     themeColor?: string;
     layoutTemplate?: string;
   }>(req);
@@ -34,10 +48,7 @@ async function handlePDFGeneration(req: Request): Promise<Response> {
     return badRequest("Invalid JSON");
   }
 
-  const { name, themeColor, layoutTemplate } = body;
-  if (typeof name !== "string") {
-    return badRequest("Resume name required");
-  }
+  const { themeColor, layoutTemplate } = body;
 
   if (themeColor !== undefined && !isValidColor(themeColor)) {
     return badRequest("Invalid theme color");
@@ -47,12 +58,12 @@ async function handlePDFGeneration(req: Request): Promise<Response> {
     return badRequest("Invalid layout template");
   }
 
-  const data = await loadResume(name);
+  const data = await loadResume();
   if (!data) {
     return notFound("Resume not found");
   }
 
-  const settings = getResumeSettings(name);
+  const settings = getResumeSettings();
   const color = themeColor ?? settings.themeColor;
   const template = layoutTemplate ?? settings.layoutTemplate;
   try {
@@ -68,7 +79,7 @@ async function handlePDFGeneration(req: Request): Promise<Response> {
   } catch (pdfError) {
     const message = pdfError instanceof Error ? pdfError.message : "Failed to generate PDF";
     logger.error("PDF generation failed", {
-      resume: name,
+      resume: data.header.name,
       layoutTemplate: template,
       error: message,
     });
