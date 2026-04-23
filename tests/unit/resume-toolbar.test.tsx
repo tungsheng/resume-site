@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { PublicSiteHeader } from "../../src/features/site/header";
+import { PublicSiteHeader } from "../../src/features/site/layout";
 
 describe("Resume Header", () => {
   test("renders the shared public-site header without extra resume actions", () => {

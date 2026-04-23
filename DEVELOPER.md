@@ -1,12 +1,11 @@
 # Developer Guide
 
-This project is a Bun server that serves Tony Lee's public site and a small JSON API used by the frontend. The source of truth for the public resume is `resumes/tony-lee.yaml`.
+This project is a Bun server that serves Tony Lee's public site and one PDF export endpoint. The source of truth for the public resume is `src/features/resume/data.ts`.
 
 ## Stack
 
 - Bun for the HTTP server, HTML imports, and test runner
 - React 19 for page rendering
-- YAML for resume content
 - `puppeteer-core` for PDF generation
 
 ## Commands
@@ -28,14 +27,12 @@ bun run typecheck
 
 ```text
 public/                  HTML entrypoints loaded directly by Bun
-resumes/                 checked-in public resume YAML
 src/
-  domain/resume/         resume loading, normalization, and view-model shaping
   features/              page-specific React code
     experiments/
     home/
     project/
-    resume/              shared resume document, settings helpers, and page UI
+    resume/              typed resume data, shared resume document, and page UI
     site/                shared public-site content, layout, and styles
   server/
     routes/              API handlers and static-file fallback
@@ -54,8 +51,6 @@ tests/
 - `GET /project/cloud-inference-platform`
 - `GET /experiments`
 - `GET /resume`
-- `GET /api/resume`
-- `GET /api/settings`
 - `POST /api/public-pdf`
 
 Any other request falls through to `src/server/routes/static.ts`, which serves files from `public/` after path sanitization.
@@ -69,17 +64,15 @@ Any other request falls through to `src/server/routes/static.ts`, which serves f
 
 ## Resume Content Flow
 
-1. `src/domain/resume/load.ts` loads the checked-in public resume from `resumes/tony-lee.yaml`.
-2. YAML is parsed and normalized into the internal `ResumeData` shape.
-3. `src/features/resume/document.tsx` renders the canonical resume markup for both preview and PDF output.
-4. The public resume page fetches `/api/resume` and `/api/settings`, then renders a screen-first resume view while keeping the print-preview document mounted.
+1. `src/features/resume/data.ts` exports the checked-in public `ResumeData` object and theme color.
+2. `src/features/resume/view-model.ts` prepares display-only fields such as date ranges and skill text.
+3. `src/features/resume/document.tsx` renders the canonical `minimal-timeline` resume markup for both preview and PDF output.
+4. The public resume page imports the same data directly and keeps the print-preview document mounted.
 5. PDF downloads call `/api/public-pdf`, which renders the same resume document through React SSR and hands it to Puppeteer.
-
-The checked-in `tony-lee.yaml` uses the current v2-style format. Legacy YAML aliases remain covered by unit tests without exposing an extra public resume fixture.
 
 ## Presentation Settings
 
-The checked-in presentation overrides and public-page helpers live in `src/features/resume/presentation.ts`.
+The checked-in public theme lives in `src/features/resume/data.ts`; the PDF request helper lives in `src/features/resume/presentation.ts`.
 
 - The public resume is pinned to the green `minimal-timeline` presentation.
 - There is no admin UI or persistence layer for editing settings at runtime.
@@ -94,18 +87,10 @@ The checked-in presentation overrides and public-page helpers live in `src/featu
 
 ## PDF Export
 
-`POST /api/public-pdf` accepts JSON with:
-
-```json
-{
-  "themeColor": "#27ae60",
-  "layoutTemplate": "minimal-timeline"
-}
-```
+`POST /api/public-pdf` uses the checked-in public resume data and theme.
 
 Notes:
 
-- `themeColor` and `layoutTemplate` are optional.
 - Requests are rate-limited per client IP.
 - The route returns `429` when the rate limit is exceeded.
 - If no browser binary can be launched, the route returns `500` with a PDF engine error.
@@ -131,26 +116,23 @@ The production compose file binds to `127.0.0.1:3000` and enables `TRUST_PROXY=1
 For a new public page with its own route:
 
 1. Add a Bun HTML entrypoint in `public/`.
-2. Add a React entry file in `src/features/<page>/index.tsx`.
-3. Add the page component and any page-local helpers.
-4. Register the route in `src/index.ts`.
-5. Add or update tests if the new page changes routing or content expectations.
+2. Add the page component and any page-local helpers.
+3. Register the route in `src/index.ts` and `src/site.tsx`.
+4. Add or update tests if the new page changes routing or content expectations.
 
 To replace the public resume:
 
-1. Update `resumes/tony-lee.yaml`.
+1. Update `src/features/resume/data.ts`.
 2. Visit `/resume`.
-3. If the resume needs a different theme or layout, update `src/features/resume/presentation.ts`.
+3. If the resume needs a different theme, update `PUBLIC_RESUME_THEME_COLOR`.
 
 ## Testing Focus
 
 Current tests cover:
 
-- resume loading and normalization
+- checked-in public resume data
 - public page rendering and route shells
 - PDF scaling helpers
-- settings fallback behavior
-- route security helpers
 - selected HTTP integration behavior for the home, project, experiments, and resume routes
 
 What is not fully covered:

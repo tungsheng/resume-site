@@ -1,17 +1,11 @@
 import React from "react";
-import {
-  DEFAULT_RESUME_TEMPLATE,
-  type ResumeLayoutTemplate,
-} from "../../layouts";
 import type { ResumeData } from "../../types";
-import { hexToRgba } from "../../utils";
-import { buildResumeViewModel } from "../../domain/resume/view-model";
+import { buildResumeViewModel } from "./view-model";
 import { LETTER_HEIGHT_PX, LETTER_WIDTH_PX } from "./document-css";
 
 interface ResumeDocumentProps {
   data: ResumeData;
   themeColor: string;
-  layoutTemplate?: ResumeLayoutTemplate;
 }
 
 interface ResumeDocumentPreviewProps extends ResumeDocumentProps {
@@ -78,12 +72,21 @@ function ResumeBulletList({
   );
 }
 
-export function ResumeDocument({
-  data,
-  themeColor,
-  layoutTemplate = DEFAULT_RESUME_TEMPLATE,
-}: ResumeDocumentProps) {
-  const view = buildResumeViewModel(data, layoutTemplate);
+function isValidColor(color: string): boolean {
+  return /^#[0-9A-Fa-f]{6}$/.test(color);
+}
+
+function hexToRgba(color: string, alpha: number): string {
+  if (!isValidColor(color)) return color;
+  const clampedAlpha = Math.max(0, Math.min(1, alpha));
+  const r = Number.parseInt(color.slice(1, 3), 16);
+  const g = Number.parseInt(color.slice(3, 5), 16);
+  const b = Number.parseInt(color.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`;
+}
+
+export function ResumeDocument({ data, themeColor }: ResumeDocumentProps) {
+  const view = buildResumeViewModel(data);
   const headlineText = view.hasBadges ? view.header.badges.join(" • ") : "";
   const documentStyle = {
     "--resume-accent": themeColor,
@@ -102,18 +105,8 @@ export function ResumeDocument({
       <h2 className="section-title">Skills</h2>
       <div className="skills-list">
         {view.skills.map((skill) => (
-          <div
-            key={skill.category}
-            className={view.isSingleColumnLayout ? "skill-line" : "skill-category"}
-          >
-            <span
-              className={
-                view.isSingleColumnLayout ? "skill-category-inline" : "skill-category-title"
-              }
-            >
-              {skill.categoryLabel}
-            </span>
-            {view.isSingleColumnLayout ? ": " : null}
+          <div key={skill.category} className="skill-category">
+            <span className="skill-category-title">{skill.categoryLabel}</span>
             <span className="skill-items">{skill.itemsText}</span>
           </div>
         ))}
@@ -141,19 +134,13 @@ export function ResumeDocument({
   const educationSection = view.hasEducation ? (
     <section className="section">
       <h2 className="section-title">Education</h2>
-      {view.education.map((education, index) =>
-        view.isSingleColumnLayout ? (
-          <div key={`${education.school}-${index}`} className="education-line">
-            {education.lineText}
-          </div>
-        ) : (
-          <div key={`${education.school}-${index}`} className="education-item">
-            <div className="education-degree">{education.degree}</div>
-            <div className="education-school">{education.school}</div>
-            <div className="education-date">{education.dateRange}</div>
-          </div>
-        )
-      )}
+      {view.education.map((education, index) => (
+        <div key={`${education.school}-${index}`} className="education-item">
+          <div className="education-degree">{education.degree}</div>
+          <div className="education-school">{education.school}</div>
+          <div className="education-date">{education.dateRange}</div>
+        </div>
+      ))}
     </section>
   ) : null;
 
@@ -174,10 +161,10 @@ export function ResumeDocument({
     <section className="section">
       <h2 className="section-title">Work Experience</h2>
       <div className="experience-list">
-        {view.isTimelineLayout ? <div className="experience-rail" /> : null}
+        <div className="experience-rail" />
         {view.experience.map((experience, index) => (
           <div key={`${experience.title}-${index}`} className="experience-item">
-            {view.isTimelineLayout ? <span className="experience-dot" /> : null}
+            <span className="experience-dot" />
             <div className="experience-content">
               <div className="experience-header">
                 <span className="experience-meta">
@@ -200,8 +187,8 @@ export function ResumeDocument({
 
   return (
     <article
-      className={`resume-document page layout-${layoutTemplate}`}
-      data-layout-template={layoutTemplate}
+      className="resume-document page layout-minimal-timeline"
+      data-layout-template="minimal-timeline"
       style={documentStyle}
     >
       <header className="header">
@@ -257,30 +244,17 @@ export function ResumeDocument({
       </header>
 
       <div className="main-content">
-        {view.isSingleColumnLayout ? (
-          <div className="single-column-flow">
-            {summarySection}
-            {skillsSection}
-            {projectsSection}
-            {experienceSection}
-            {educationSection}
-            {certificatesSection}
-          </div>
-        ) : (
-          <>
-            <div className="left-column">
-              {educationSection}
-              {skillsSection}
-              {certificatesSection}
-            </div>
+        <div className="left-column">
+          {educationSection}
+          {skillsSection}
+          {certificatesSection}
+        </div>
 
-            <div className="right-column">
-              {summarySection}
-              {projectsSection}
-              {experienceSection}
-            </div>
-          </>
-        )}
+        <div className="right-column">
+          {summarySection}
+          {projectsSection}
+          {experienceSection}
+        </div>
       </div>
     </article>
   );
@@ -289,7 +263,6 @@ export function ResumeDocument({
 export function ResumeDocumentPreview({
   data,
   themeColor,
-  layoutTemplate = DEFAULT_RESUME_TEMPLATE,
   scale = 1,
 }: ResumeDocumentPreviewProps) {
   return (
@@ -308,11 +281,7 @@ export function ResumeDocumentPreview({
           transformOrigin: "top left",
         }}
       >
-        <ResumeDocument
-          data={data}
-          themeColor={themeColor}
-          layoutTemplate={layoutTemplate}
-        />
+        <ResumeDocument data={data} themeColor={themeColor} />
       </div>
     </div>
   );

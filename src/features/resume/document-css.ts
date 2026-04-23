@@ -47,17 +47,8 @@ export function getResumeDocumentCss(): string {
   --highlight-size: 8.8pt;
   --highlight-line-height: 1.34;
   --highlight-gap: 2px;
-  --left-column-order: 0;
-  --right-column-order: 0;
   --left-column-width: var(--sidebar-width);
   --left-column-shrink: 0;
-  --main-content-display: flex;
-  --main-content-direction: row;
-  --main-content-wrap: nowrap;
-  --left-column-display: block;
-  --left-column-columns: none;
-  --left-column-column-gap: 0;
-  --left-column-row-gap: 0;
 
   width: 8.5in;
   min-height: 11in;
@@ -72,24 +63,6 @@ export function getResumeDocumentCss(): string {
 .resume-sheet__page > .resume-document {
   margin: 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.resume-document.layout-single-column-ats {
-  --header-padding: 0.22in 0.38in 0.09in;
-  --content-padding: 0.12in 0.38in 0.1in;
-  --content-gap: 0.12in;
-  --sidebar-width: auto;
-  --name-size: 25pt;
-  --name-spacing: 0.26px;
-  --section-gap: 0.18in;
-  --experience-gap: 0.13in;
-  --experience-date-min-width: auto;
-  --experience-date-text-align: left;
-  --left-column-order: 2;
-  --right-column-order: 1;
-  --left-column-width: auto;
-  --left-column-shrink: 1;
-  --main-content-direction: column;
 }
 
 .resume-document.layout-minimal-timeline {
@@ -143,11 +116,6 @@ export function getResumeDocumentCss(): string {
   row-gap: 5px;
   text-align: right;
   font-family: var(--ui-font);
-}
-
-.resume-document.layout-single-column-ats .contact-info {
-  min-width: 2in;
-  max-width: 2.18in;
 }
 
 .resume-document .contact-row {
@@ -208,29 +176,20 @@ export function getResumeDocumentCss(): string {
 }
 
 .resume-document .main-content {
-  display: var(--main-content-display);
-  flex-direction: var(--main-content-direction);
-  flex-wrap: var(--main-content-wrap);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   padding: var(--content-padding);
   gap: var(--content-gap);
 }
 
-.resume-document .single-column-flow {
-  width: 100%;
-}
-
 .resume-document .left-column {
-  order: var(--left-column-order);
   width: var(--left-column-width);
   flex-shrink: var(--left-column-shrink);
-  display: var(--left-column-display);
-  grid-template-columns: var(--left-column-columns);
-  column-gap: var(--left-column-column-gap);
-  row-gap: var(--left-column-row-gap);
+  display: block;
 }
 
 .resume-document .right-column {
-  order: var(--right-column-order);
   flex: 1;
 }
 
@@ -253,16 +212,6 @@ export function getResumeDocumentCss(): string {
   margin-bottom: var(--education-gap);
 }
 
-.resume-document .education-line {
-  margin-bottom: 6px;
-  font-size: 8.6pt;
-  line-height: 1.35;
-  color: #374151;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .resume-document .education-degree,
 .resume-document .certificate-title,
 .resume-document .project-title,
@@ -275,8 +224,7 @@ export function getResumeDocumentCss(): string {
 .resume-document .education-school,
 .resume-document .certificate-issuer,
 .resume-document .experience-company,
-.resume-document .skill-category-title,
-.resume-document .skill-category-inline {
+.resume-document .skill-category-title {
   font-size: var(--experience-company-size);
   color: #4b5563;
   font-weight: 600;
@@ -301,22 +249,9 @@ export function getResumeDocumentCss(): string {
   margin-bottom: var(--skill-gap);
 }
 
-.resume-document .skill-line {
-  margin-bottom: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 8.8pt;
-  line-height: 1.34;
-}
-
 .resume-document .skill-category-title {
   display: block;
   margin-bottom: 2px;
-}
-
-.resume-document .skill-category-inline {
-  display: inline;
 }
 
 .resume-document .skill-items {

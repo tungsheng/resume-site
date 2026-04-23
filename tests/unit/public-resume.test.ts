@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import {
-  getResumeSettings,
-  loadResumeSettings,
-  requestPublicResumePdf,
-} from "../../src/features/resume/presentation";
+import { PUBLIC_RESUME_THEME_COLOR } from "../../src/features/resume/data";
+import { requestPublicResumePdf } from "../../src/features/resume/presentation";
 
 const originalFetch = globalThis.fetch;
 
@@ -12,29 +9,8 @@ afterEach(() => {
 });
 
 describe("public resume helpers", () => {
-  test("loads validated public resume settings from the read-only settings endpoint", async () => {
-    let requestedUrl = "";
-    globalThis.fetch = (async (input: string | URL | Request) => {
-      requestedUrl = String(input);
-      return new Response(
-        JSON.stringify({
-          themeColor: "#27ae60",
-          layoutTemplate: "minimal-timeline",
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }) as unknown as typeof fetch;
-
-    const settings = await loadResumeSettings();
-
-    expect(requestedUrl).toBe("/api/settings");
-    expect(settings).toEqual({
-      themeColor: "#27ae60",
-      layoutTemplate: "minimal-timeline",
-    });
+  test("keeps the public resume theme local to the client bundle", () => {
+    expect(PUBLIC_RESUME_THEME_COLOR).toBe("#27ae60");
   });
 
   test("parses public PDF errors from the API response body", async () => {
@@ -45,25 +21,25 @@ describe("public resume helpers", () => {
       });
     }) as unknown as typeof fetch;
 
-    await expect(
-      requestPublicResumePdf({
-        themeColor: "#27ae60",
-        layoutTemplate: "minimal-timeline",
-      })
-    ).rejects.toThrow("PDF engine unavailable");
+    await expect(requestPublicResumePdf()).rejects.toThrow("PDF engine unavailable");
   });
 
-  test("preserves the checked-in public presentation when settings fetch fails", async () => {
-    globalThis.fetch = (async () => {
-      throw new Error("network failure");
+  test("posts to the public PDF endpoint without sending presentation overrides", async () => {
+    let requestedUrl = "";
+    let requestedMethod = "";
+    let requestedBody: BodyInit | null | undefined;
+
+    globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+      requestedUrl = String(input);
+      requestedMethod = init?.method ?? "GET";
+      requestedBody = init?.body;
+      return new Response(new Blob(["pdf"]));
     }) as unknown as typeof fetch;
 
-    const settings = await loadResumeSettings();
+    await requestPublicResumePdf();
 
-    expect(settings).toEqual({
-      themeColor: "#27ae60",
-      layoutTemplate: "minimal-timeline",
-    });
-    expect(getResumeSettings()).toEqual(settings);
+    expect(requestedUrl).toBe("/api/public-pdf");
+    expect(requestedMethod).toBe("POST");
+    expect(requestedBody).toBeUndefined();
   });
 });

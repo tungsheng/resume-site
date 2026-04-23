@@ -3,6 +3,4 @@ services:
     build: .
     ports:
       - "3000:3000"
-    volumes:
-      - ./resumes:/app/resumes:ro
     restart: unless-stopped

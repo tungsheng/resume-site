@@ -22,5 +22,4 @@ bun run check
 ## Docs
 
 - [Developer guide](./DEVELOPER.md)
-- [Resume data format](./docs/resume-data.md)
 - [Deployment notes](./docs/deployment.md)

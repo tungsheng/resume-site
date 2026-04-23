@@ -41,11 +41,10 @@ const sampleResume: ResumeData = {
 describe("ResumePageContent", () => {
   test("renders the streamlined web resume by default while keeping the print layout mounted", () => {
     const html = renderToStaticMarkup(
-      <ResumePageContent
-        data={sampleResume}
-        themeColor="#27ae60"
-        layoutTemplate="minimal-timeline"
-        previewScale={0.9}
+        <ResumePageContent
+          data={sampleResume}
+          themeColor="#27ae60"
+          previewScale={0.9}
         downloading={false}
         showPrintPreview={false}
         onDownload={() => {}}
@@ -83,11 +82,10 @@ describe("ResumePageContent", () => {
 
   test("shows the unchanged print preview when the preview toggle is active", () => {
     const html = renderToStaticMarkup(
-      <ResumePageContent
-        data={sampleResume}
-        themeColor="#27ae60"
-        layoutTemplate="minimal-timeline"
-        previewScale={0.9}
+        <ResumePageContent
+          data={sampleResume}
+          themeColor="#27ae60"
+          previewScale={0.9}
         downloading={false}
         showPrintPreview={true}
         onDownload={() => {}}

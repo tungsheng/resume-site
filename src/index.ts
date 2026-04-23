@@ -1,19 +1,33 @@
 // Application entry point
 
-import { config } from "./config";
-import { loadResume } from "./domain/resume/load";
-import { getResumeSettings } from "./features/resume/presentation";
-import { logger } from "./logger";
 import { handlePublicPDF } from "./server/routes/pdf";
 import { handleStaticFile } from "./server/routes/static";
 import { closePDFBrowser } from "./services/pdf";
-import { addSecurityHeaders } from "./utils";
 
 // Import HTML pages directly - Bun will bundle the TSX imports
 import homePage from "../public/index.html";
 import resumePage from "../public/resume.html";
 import projectPage from "../public/project.html";
 import experimentsPage from "../public/experiments.html";
+
+const PORT = Number(process.env.PORT) || 3000;
+
+function addSecurityHeaders(res: Response): Response {
+  const headers = new Headers(res.headers);
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("X-XSS-Protection", "1; mode=block");
+  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  headers.set(
+    "Content-Security-Policy",
+    "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'"
+  );
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers,
+  });
+}
 
 // Wrap handler to apply security headers to all API responses
 function withHeaders<T extends (...args: any[]) => Response | Promise<Response>>(
@@ -25,34 +39,16 @@ function withHeaders<T extends (...args: any[]) => Response | Promise<Response>>
   }) as unknown as T;
 }
 
-async function handleGetResume(): Promise<Response> {
-  const data = await loadResume();
-  if (!data) {
-    return Response.json({ error: "Resume not found" }, { status: 404 });
-  }
-  return Response.json(data);
-}
-
-function handleGetSettings(): Response {
-  return Response.json(getResumeSettings());
-}
-
 let server: ReturnType<typeof Bun.serve>;
 
 server = Bun.serve({
-  port: config.port,
+  port: PORT,
   routes: {
     // Page routes - using Bun's HTML imports for React bundling
     "/": homePage,
     "/project/cloud-inference-platform": projectPage,
     "/experiments": experimentsPage,
     "/resume": resumePage,
-
-    // Resume API routes
-    "/api/resume": { GET: withHeaders(handleGetResume) },
-
-    // Settings API routes
-    "/api/settings": { GET: withHeaders(handleGetSettings) },
 
     // PDF export routes
     "/api/public-pdf": {
@@ -76,7 +72,7 @@ let shuttingDown = false;
 async function shutdown(signal: string): Promise<void> {
   if (shuttingDown) return;
   shuttingDown = true;
-  logger.info("Shutting down server", { signal });
+  console.log("[resume-site] Shutting down server", { signal });
 
   server.stop();
   await closePDFBrowser();
@@ -89,10 +85,10 @@ process.on("SIGTERM", () => {
   void shutdown("SIGTERM");
 });
 
-logger.info("Resume server started", {
-  baseUrl: `http://localhost:${config.port}`,
-  home: `http://localhost:${config.port}/`,
-  project: `http://localhost:${config.port}/project/cloud-inference-platform`,
-  experiments: `http://localhost:${config.port}/experiments`,
-  resume: `http://localhost:${config.port}/resume`,
+console.log("[resume-site] Resume server started", {
+  baseUrl: `http://localhost:${PORT}`,
+  home: `http://localhost:${PORT}/`,
+  project: `http://localhost:${PORT}/project/cloud-inference-platform`,
+  experiments: `http://localhost:${PORT}/experiments`,
+  resume: `http://localhost:${PORT}/resume`,
 });

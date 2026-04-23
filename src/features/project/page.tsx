@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  implementation,
-  projectContent,
-  EXPERIMENTS_PATH,
-  RESUME_PATH,
-  siteProfile,
-} from "../site/content";
+import { EXPERIMENTS_PATH, RESUME_PATH, siteProfile } from "../site/content";
+import { implementation, projectContent } from "../site/project-content";
 import { PublicSiteLayout } from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
 import type { WorkflowNode, WorkflowTrack } from "../site/types";

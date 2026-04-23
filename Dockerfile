@@ -28,7 +28,6 @@ COPY package.json ./
 COPY tsconfig.json ./
 COPY public ./public
 COPY src ./src
-COPY resumes ./resumes
 
 RUN chown -R appuser:appuser /app
 
@@ -37,6 +36,6 @@ USER appuser
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:3000/api/resume || exit 1
+    CMD curl -f http://localhost:3000/resume || exit 1
 
 CMD ["bun", "run", "src/index.ts"]

@@ -1,5 +1,3 @@
-export type PublicNavKey = "home" | "project" | "experiments" | "resume";
-
 export interface TimelineEvent {
   label: string;
   seconds: number;
@@ -104,11 +102,4 @@ export interface HighlightCard {
   id: ExperimentFamilyId;
   title: string;
   summary: string;
-}
-
-export interface SiteProfile {
-  name: string;
-  summary: string;
-  githubUrl: string;
-  linkedinUrl: string;
 }

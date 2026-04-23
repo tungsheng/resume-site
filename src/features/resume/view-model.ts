@@ -1,4 +1,3 @@
-import type { ResumeLayoutTemplate } from "../../layouts";
 import type { ResumeData } from "../../types";
 
 function capitalize(value: string): string {
@@ -23,7 +22,6 @@ export interface ResumeEducationViewModel {
   startDate: string;
   endDate: string;
   dateRange: string;
-  lineText: string;
 }
 
 export interface ResumeExperienceViewModel {
@@ -41,9 +39,6 @@ export interface ResumeProjectViewModel {
 }
 
 export interface ResumeViewModel {
-  layoutTemplate: ResumeLayoutTemplate;
-  isSingleColumnLayout: boolean;
-  isTimelineLayout: boolean;
   header: ResumeData["header"];
   summary: string;
   skills: ResumeSkillViewModel[];
@@ -61,10 +56,7 @@ export interface ResumeViewModel {
   hasExperience: boolean;
 }
 
-export function buildResumeViewModel(
-  data: ResumeData,
-  layoutTemplate: ResumeLayoutTemplate
-): ResumeViewModel {
+export function buildResumeViewModel(data: ResumeData): ResumeViewModel {
   const summary = data.header.summary.trim();
 
   const skills = Object.entries(data.skills).map(([category, items]) => ({
@@ -79,14 +71,10 @@ export function buildResumeViewModel(
     ...entry,
   }));
 
-  const education = data.education.map((entry) => {
-    const dateRange = formatRange(entry.startDate, entry.endDate);
-    return {
-      ...entry,
-      dateRange,
-      lineText: `${entry.degree} • ${entry.school} • ${dateRange}`,
-    };
-  });
+  const education = data.education.map((entry) => ({
+    ...entry,
+    dateRange: formatRange(entry.startDate, entry.endDate),
+  }));
 
   const experience = data.experience.map((entry) => ({
     ...entry,
@@ -94,9 +82,6 @@ export function buildResumeViewModel(
   }));
 
   return {
-    layoutTemplate,
-    isSingleColumnLayout: layoutTemplate === "single-column-ats",
-    isTimelineLayout: layoutTemplate === "minimal-timeline",
     header: data.header,
     summary,
     skills,

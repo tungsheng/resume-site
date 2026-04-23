@@ -1,36 +1,61 @@
-import { isResumeLayoutTemplate } from "../../layouts";
 import { generatePDF } from "../../services/pdf";
-import { loadResume } from "../../domain/resume/load";
+import { PUBLIC_RESUME_THEME_COLOR, publicResumeData } from "../../features/resume/data";
 import { renderResumeHtmlDocument } from "../../features/resume/render-static-html";
-import { getResumeSettings } from "../../features/resume/presentation";
-import { logger } from "../../logger";
-import { config } from "../../config";
-import { checkRateLimit, getClientIP, isValidColor, parseJsonBody } from "../../utils";
 
 function error(status: number, message: string): Response {
   return Response.json({ error: message }, { status });
-}
-
-function badRequest(message: string): Response {
-  return error(400, message);
-}
-
-function notFound(message: string = "Not found"): Response {
-  return error(404, message);
 }
 
 function tooManyRequests(message: string): Response {
   return error(429, message);
 }
 
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
+const rateLimits = new Map<string, RateLimitEntry>();
+
+function checkRateLimit(ip: string, limit: number, windowMs: number): boolean {
+  const now = Date.now();
+  const entry = rateLimits.get(ip);
+
+  if (rateLimits.size > 1000) {
+    for (const [key, val] of rateLimits) {
+      if (now > val.resetAt) rateLimits.delete(key);
+    }
+  }
+
+  if (!entry || now > entry.resetAt) {
+    rateLimits.set(ip, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (entry.count >= limit) return false;
+  entry.count++;
+  return true;
+}
+
+function getClientIP(req: Request, directAddress: string | null): string {
+  if (directAddress) return directAddress;
+
+  if (process.env.TRUST_PROXY === "1") {
+    const forwarded = req.headers.get("x-forwarded-for");
+    if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
+
+    const realIP = req.headers.get("x-real-ip");
+    if (realIP) return realIP;
+  }
+
+  return "unknown";
+}
+
 export async function handlePublicPDF(
   req: Request,
   directAddress: string | null = null
 ): Promise<Response> {
-  const ip = getClientIP(req, {
-    directAddress,
-    trustProxy: config.trustProxy,
-  });
+  const ip = getClientIP(req, directAddress);
   if (!checkRateLimit(ip, 3, 60000)) {
     return tooManyRequests("Too many PDF requests. Please try again later.");
   }
@@ -39,35 +64,11 @@ export async function handlePublicPDF(
 }
 
 async function handlePDFGeneration(req: Request): Promise<Response> {
-  const body = await parseJsonBody<{
-    themeColor?: string;
-    layoutTemplate?: string;
-  }>(req);
+  await req.body?.cancel().catch(() => {});
+  const data = publicResumeData;
 
-  if (!body) {
-    return badRequest("Invalid JSON");
-  }
-
-  const { themeColor, layoutTemplate } = body;
-
-  if (themeColor !== undefined && !isValidColor(themeColor)) {
-    return badRequest("Invalid theme color");
-  }
-
-  if (layoutTemplate !== undefined && !isResumeLayoutTemplate(layoutTemplate)) {
-    return badRequest("Invalid layout template");
-  }
-
-  const data = await loadResume();
-  if (!data) {
-    return notFound("Resume not found");
-  }
-
-  const settings = getResumeSettings();
-  const color = themeColor ?? settings.themeColor;
-  const template = layoutTemplate ?? settings.layoutTemplate;
   try {
-    const html = renderResumeHtmlDocument(data, color, template);
+    const html = renderResumeHtmlDocument(data, PUBLIC_RESUME_THEME_COLOR);
     const pdf = await generatePDF(html);
 
     return new Response(new Uint8Array(pdf), {
@@ -78,9 +79,8 @@ async function handlePDFGeneration(req: Request): Promise<Response> {
     });
   } catch (pdfError) {
     const message = pdfError instanceof Error ? pdfError.message : "Failed to generate PDF";
-    logger.error("PDF generation failed", {
+    console.error("[resume-site] PDF generation failed", {
       resume: data.header.name,
-      layoutTemplate: template,
       error: message,
     });
     if (message.includes("PUPPETEER_EXECUTABLE_PATH")) {

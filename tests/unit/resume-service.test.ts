@@ -1,66 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import { loadResume } from "../../src/domain/resume/load";
-import { normalizeResumeData } from "../../src/domain/resume/normalize";
+import { publicResumeData } from "../../src/features/resume/data";
 import { renderResumeHtmlDocument } from "../../src/features/resume/render-static-html";
 import type { ResumeData } from "../../src/types";
 
 describe("Resume Service", () => {
-  test("loadResume supports the checked-in public resume schema", async () => {
-    const data = await loadResume();
-    expect(data).not.toBeNull();
-    expect(data?.header.name).toBe("Tony Lee");
-    expect(data?.skills["Languages"]).toBeArray();
-    expect(data?.skills["Infrastructure"]).toContain("AWS (VPC, IAM, EC2, ALB)");
-    expect(data?.projects?.title).toBe("Selected Project");
-    expect(data?.projects?.items[0]?.title).toContain("Cloud Inference Platform");
-    expect(data?.certificates).toBeArray();
-  });
-
-  test("normalizeResumeData supports legacy string-based skills", () => {
-    const data = normalizeResumeData({
-      header: {
-        name: "Tony Lee",
-        badges: ["Staff Software Engineer"],
-        contacts: {
-          email: "tungsheng@gmail.com",
-          linkedin: "tonyslee8",
-        },
-        summary: "Legacy-format resume fixture.",
-      },
-      experience: [
-        {
-          title: "Staff Software Engineer",
-          company: "DTEX Systems",
-          startDate: "Sep 2024",
-          endDate: "Present",
-          highlights: ["Delivered production-ready systems."],
-        },
-      ],
-      skills: {
-        languages: "Python, TypeScript, Go",
-        infrastructure: "Docker, Jenkins",
-      },
-      certificates: [
-        {
-          title: "Neural Networks and Deep Learning",
-          issuer: "Coursera",
-          date: "Dec 2023",
-        },
-      ],
-      education: [
-        {
-          school: "University of California, San Diego",
-          degree: "M. E. Electrical Engineering",
-          startDate: "Sep 2006",
-          endDate: "Jun 2008",
-        },
-      ],
-    });
-
-    expect(data).not.toBeNull();
-    expect(data?.skills["languages"]).toContain("Python");
-    expect(data?.skills["infrastructure"]).toContain("Docker");
-    expect(data?.certificates).toBeArray();
+  test("publicResumeData contains the checked-in public resume", () => {
+    expect(publicResumeData.header.name).toBe("Tony Lee");
+    expect(publicResumeData.skills["Languages"]).toBeArray();
+    expect(publicResumeData.skills["Infrastructure"]).toContain("AWS (VPC, IAM, EC2, ALB)");
+    expect(publicResumeData.projects?.title).toBe("Selected Project");
+    expect(publicResumeData.projects?.items[0]?.title).toContain("Cloud Inference Platform");
+    expect(publicResumeData.certificates).toBeArray();
   });
 
   test("renderResumeHtmlDocument creates valid HTML", () => {
@@ -106,7 +56,7 @@ describe("Resume Service", () => {
     expect(html).toContain("Developer");
     expect(html).toContain("Selected Projects");
     expect(html).toContain("Inference Platform");
-    expect(html).toContain("class=\"resume-document page layout-single-column-ats\"");
+    expect(html).toContain("class=\"resume-document page layout-minimal-timeline\"");
   });
 
   test("renderResumeHtmlDocument escapes XSS", () => {
@@ -126,63 +76,6 @@ describe("Resume Service", () => {
     const html = renderResumeHtmlDocument(xssData, "#c9a86c");
     expect(html).not.toContain("<script>alert(\"XSS\")</script>");
     expect(html).toContain("&lt;script&gt;");
-  });
-
-  test("renderResumeHtmlDocument single-column template uses ATS section order", () => {
-    const mockData: ResumeData = {
-      header: {
-        name: "John Doe",
-        badges: ["Badge1"],
-        contacts: {
-          phone: "555-1234",
-          linkedin: "johndoe",
-          email: "john@example.com",
-        },
-        summary: "A summary.",
-      },
-      experience: [
-        {
-          title: "Developer",
-          company: "TechCorp",
-          startDate: "2020",
-          endDate: "2023",
-          highlights: ["Built things"],
-        },
-      ],
-      projects: {
-        title: "Selected Projects",
-        items: [
-          {
-            title: "Inference Platform",
-            highlights: ["Scaled GPU workloads"],
-          },
-        ],
-      },
-      skills: { frontend: ["React"], backend: ["Node.js"], management: ["Agile"] },
-      education: [
-        { school: "University", degree: "BS CS", startDate: "2016", endDate: "2020" },
-      ],
-      certificates: [{ title: "AWS", issuer: "Amazon", date: "2022" }],
-    };
-
-    const html = renderResumeHtmlDocument(mockData, "#c9a86c", "single-column-ats");
-    const summaryIndex = html.indexOf("<h2 class=\"section-title\">Professional Summary</h2>");
-    const skillsIndex = html.indexOf("<h2 class=\"section-title\">Skills</h2>");
-    const projectsIndex = html.indexOf("<h2 class=\"section-title\">Selected Projects</h2>");
-    const experienceIndex = html.indexOf("<h2 class=\"section-title\">Work Experience</h2>");
-    const educationIndex = html.indexOf("<h2 class=\"section-title\">Education</h2>");
-    const certificationsIndex = html.indexOf("<h2 class=\"section-title\">Certifications</h2>");
-
-    expect(html).toContain("<div class=\"single-column-flow\">");
-    expect(summaryIndex).toBeGreaterThan(-1);
-    expect(skillsIndex).toBeGreaterThan(summaryIndex);
-    expect(projectsIndex).toBeGreaterThan(skillsIndex);
-    expect(experienceIndex).toBeGreaterThan(projectsIndex);
-    expect(educationIndex).toBeGreaterThan(experienceIndex);
-    expect(certificationsIndex).toBeGreaterThan(educationIndex);
-    expect(html).toContain("class=\"education-line\">BS CS • University • 2016 - 2020</div>");
-    expect(html).toContain("class=\"skill-line\"><span class=\"skill-category-inline\">Frontend</span>: <span class=\"skill-items\">React</span>");
-    expect(html).toContain("class=\"project-title\">Inference Platform</div>");
   });
 
   test("renderResumeHtmlDocument timeline template includes connected rail and job dots", () => {
@@ -220,7 +113,7 @@ describe("Resume Service", () => {
       certificates: [],
     };
 
-    const html = renderResumeHtmlDocument(mockData, "#c9a86c", "minimal-timeline");
+    const html = renderResumeHtmlDocument(mockData, "#c9a86c");
     const dotCount = html.match(/class="experience-dot"/g)?.length ?? 0;
 
     expect(html).toContain("class=\"resume-document page layout-minimal-timeline\"");

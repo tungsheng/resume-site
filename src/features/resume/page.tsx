@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { buildResumeViewModel } from "../../domain/resume/view-model";
-import type { ResumeLayoutTemplate } from "../../layouts";
+import { buildResumeViewModel } from "./view-model";
 import type { ResumeData } from "../../types";
 import { ResumeDocumentPreview } from "./document";
-import {
-  getResumeSettings,
-  loadResumeSettings,
-  requestPublicResumePdf,
-} from "./presentation";
-import { PublicSiteFooter } from "../site/footer";
-import { PublicSiteHeader } from "../site/header";
+import { PUBLIC_RESUME_THEME_COLOR, publicResumeData } from "./data";
+import { requestPublicResumePdf } from "./presentation";
+import { PublicSiteFooter, PublicSiteHeader } from "../site/layout";
 import { EXPERIMENTS_PATH, PROJECT_PATH } from "../site/content";
 import { useDocumentTitle } from "../site/use-document-title";
 import { calculateResumePreviewScale } from "./preview-scale";
@@ -180,11 +175,10 @@ function ScreenResumeBulletList({ items }: { items: string[] }) {
 
 interface ResumeWebViewProps {
   data: ResumeData;
-  layoutTemplate: ResumeLayoutTemplate;
 }
 
-function ResumeWebView({ data, layoutTemplate }: ResumeWebViewProps) {
-  const view = buildResumeViewModel(data, layoutTemplate);
+function ResumeWebView({ data }: ResumeWebViewProps) {
+  const view = buildResumeViewModel(data);
   const linkedinHref = getLinkedinHref(view.header.contacts.linkedin);
 
   return (
@@ -351,7 +345,6 @@ function ResumeWebView({ data, layoutTemplate }: ResumeWebViewProps) {
 interface ResumePageContentProps {
   data: ResumeData;
   themeColor: string;
-  layoutTemplate: ResumeLayoutTemplate;
   previewScale: number;
   downloading: boolean;
   showPrintPreview?: boolean;
@@ -365,7 +358,6 @@ interface ResumePageContentProps {
 export function ResumePageContent({
   data,
   themeColor,
-  layoutTemplate,
   previewScale,
   downloading,
   showPrintPreview = false,
@@ -485,7 +477,7 @@ export function ResumePageContent({
         </section>
 
         {showWebResume ? (
-          <ResumeWebView data={data} layoutTemplate={layoutTemplate} />
+          <ResumeWebView data={data} />
         ) : null}
       </section>
 
@@ -507,7 +499,6 @@ export function ResumePageContent({
             <ResumeDocumentPreview
               data={data}
               themeColor={themeColor}
-              layoutTemplate={layoutTemplate}
               scale={previewScale}
             />
           </div>
@@ -521,88 +512,17 @@ export function ResumePageContent({
   );
 }
 
-function ResumeStatusView({ message, busy = false }: { message: string; busy?: boolean }) {
-  return (
-    <div style={styles.app} className="resume-app" role="main" aria-busy={busy || undefined}>
-      <div style={styles.loading} role={busy ? undefined : "alert"}>
-        {busy ? (
-          <>
-            <Spinner size={32} />
-            <span style={{ marginLeft: 12 }}>{message}</span>
-          </>
-        ) : (
-          message
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function ResumePage() {
-  const [presentation, setPresentation] = useState(() => getResumeSettings());
-  const [data, setData] = useState<ResumeData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const data = publicResumeData;
+  const themeColor = PUBLIC_RESUME_THEME_COLOR;
   const [previewScale, setPreviewScale] = useState(() =>
     typeof window === "undefined" ? 1 : calculateResumePreviewScale(window.innerWidth)
   );
   const [showPrintPreview, setShowPrintPreview] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const { themeColor, layoutTemplate } = presentation;
 
-  useDocumentTitle(data ? `${data.header.name} - Resume` : "Resume");
-
-  useEffect(() => {
-    const fallback = getResumeSettings();
-    setPresentation(fallback);
-
-    let cancelled = false;
-    void (async () => {
-      const nextPresentation = await loadResumeSettings(fallback);
-      if (!cancelled) {
-        setPresentation(nextPresentation);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    void (async () => {
-      try {
-        const res = await fetch("/api/resume");
-        if (!res.ok) {
-          if (!cancelled) setError("Resume not found");
-          return;
-        }
-
-        const resumeData = (await res.json()) as ResumeData;
-        if (!cancelled) {
-          setData(resumeData);
-          setError(null);
-        }
-      } catch {
-        if (!cancelled) {
-          setError("Failed to load resume");
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  useDocumentTitle(`${data.header.name} - Resume`);
 
   useEffect(() => {
     const updateScale = () => {
@@ -614,14 +534,6 @@ export function ResumePage() {
 
     return () => window.removeEventListener("resize", updateScale);
   }, []);
-
-  if (loading) {
-    return <ResumeStatusView message="Loading resume..." busy />;
-  }
-
-  if (error || !data) {
-    return <ResumeStatusView message={error || "Resume not found"} />;
-  }
 
   const resumeData = data;
 
@@ -637,10 +549,7 @@ export function ResumePage() {
   async function downloadPdf(): Promise<void> {
     setDownloading(true);
     try {
-      const blob = await requestPublicResumePdf({
-        themeColor,
-        layoutTemplate,
-      });
+      const blob = await requestPublicResumePdf();
       downloadBlob(blob, `${resumeData.header.name.replace(/\s+/g, "_")}_Resume.pdf`);
       showToast("PDF downloaded successfully", "success");
     } catch (downloadError) {
@@ -658,7 +567,6 @@ export function ResumePage() {
     <ResumePageContent
       data={resumeData}
       themeColor={themeColor}
-      layoutTemplate={layoutTemplate}
       previewScale={previewScale}
       downloading={downloading}
       showPrintPreview={showPrintPreview}

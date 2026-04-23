@@ -6,7 +6,7 @@
 docker compose up --build
 ```
 
-This starts the Bun server on `http://localhost:3000` and mounts the local `resumes/` directory read-only into the container.
+This starts the Bun server on `http://localhost:3000` using the checked-in site and resume data.
 
 ## Production-Style Docker Run
 
@@ -53,10 +53,10 @@ PDF export depends on a Chrome or Chromium executable.
 The container health check calls:
 
 ```text
-GET /api/resume
+GET /resume
 ```
 
-That endpoint is lightweight and works well as a simple readiness probe for the checked-in public resume.
+That route is lightweight and works well as a simple readiness probe for the public site.
 
 ## What the Container Serves
 
@@ -67,7 +67,7 @@ The current container serves these public routes:
 - `/experiments`
 - `/resume`
 
-It also serves the public JSON/PDF API routes under `/api/*`.
+It also serves the PDF export endpoint at `/api/public-pdf`.
 
 ## Recommended Hostinger VPS Process
 
@@ -190,7 +190,7 @@ The deploy workflow uses:
 5. Confirm the health check:
 
 ```bash
-curl -fsS http://127.0.0.1:3000/api/resume
+curl -fsS http://127.0.0.1:3000/resume
 ```
 
 6. Confirm the site through the reverse proxy and domain.

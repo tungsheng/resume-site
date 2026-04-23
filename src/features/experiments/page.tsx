@@ -1,9 +1,6 @@
 import React from "react";
-import {
-  experimentsContent,
-  PROJECT_PATH,
-  RESUME_PATH,
-} from "../site/content";
+import { PROJECT_PATH, RESUME_PATH } from "../site/content";
+import { experimentsContent } from "../site/experiments-content";
 import {
   formatBurstTtftLabel,
   formatCurrencyLabel,

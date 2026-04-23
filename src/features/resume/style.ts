@@ -1,7 +1,7 @@
 // Resume page styles
 
 import type React from "react";
-import { siteStyles } from "../site/style";
+import { siteStyles } from "../site/layout";
 import { getResumeDocumentCss, LETTER_HEIGHT_PX, LETTER_WIDTH_PX } from "./document-css";
 
 export { LETTER_HEIGHT_PX, LETTER_WIDTH_PX };

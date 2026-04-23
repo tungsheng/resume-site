@@ -10,7 +10,7 @@ describe("API Integration", () => {
     if (!RUN_INTEGRATION_TESTS) return;
 
     try {
-      const res = await fetch(`${BASE_URL}/api/resume`, {
+      const res = await fetch(`${BASE_URL}/resume`, {
         signal: AbortSignal.timeout(1500),
       });
       if (!res.ok) {
@@ -21,13 +21,6 @@ describe("API Integration", () => {
         `Integration tests require a running server at ${BASE_URL}. Original error: ${String(error)}`
       );
     }
-  });
-
-  itIfIntegration("GET /api/resume returns the checked-in public resume", async () => {
-    const res = await fetch(`${BASE_URL}/api/resume`);
-    expect(res.status).toBe(200);
-    const data = (await res.json()) as { header?: { name?: string } };
-    expect(data.header?.name).toBe("Tony Lee");
   });
 
   itIfIntegration("GET / serves the home page shell", async () => {
@@ -55,47 +48,12 @@ describe("API Integration", () => {
     expect(html).toContain("Experiments | Tony Lee");
   });
 
-  itIfIntegration("GET /about returns 404 after route removal", async () => {
-    const res = await fetch(`${BASE_URL}/about`);
-    expect(res.status).toBe(404);
-  });
-
   itIfIntegration("GET /resume serves the resume shell", async () => {
     const res = await fetch(`${BASE_URL}/resume`);
     expect(res.status).toBe(200);
 
     const html = await res.text();
     expect(html).toContain("<title>Resume</title>");
-  });
-
-  itIfIntegration("GET /resume/tony-lee returns 404 after single-resume cleanup", async () => {
-    const res = await fetch(`${BASE_URL}/resume/tony-lee`);
-    expect(res.status).toBe(404);
-  });
-
-  itIfIntegration("GET /api/settings preserves the public presentation", async () => {
-    const res = await fetch(`${BASE_URL}/api/settings`);
-    expect(res.status).toBe(200);
-
-    const data = (await res.json()) as {
-      themeColor: string;
-      layoutTemplate: string;
-    };
-    expect(data).toEqual({
-      themeColor: "#27ae60",
-      layoutTemplate: "minimal-timeline",
-    });
-  });
-
-  itIfIntegration("GET /admin returns 404 after admin removal", async () => {
-    const res = await fetch(`${BASE_URL}/admin`);
-    expect(res.status).toBe(404);
-  });
-
-  itIfIntegration("Security headers are present", async () => {
-    const res = await fetch(`${BASE_URL}/api/resume`);
-    expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
-    expect(res.headers.get("X-Frame-Options")).toBe("DENY");
   });
 
   itIfIntegration("POST /api/public-pdf - 429 after rate limit exceeded", async () => {
