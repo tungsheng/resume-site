@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { buildResumeViewModel } from "./view-model";
 import type { ResumeData } from "../../types";
-import { ResumeDocumentPreview } from "./document";
-import { PUBLIC_RESUME_THEME_COLOR, publicResumeData } from "./data";
+import { publicResumeData } from "./data";
 import { requestPublicResumePdf } from "./presentation";
 import { PublicSiteFooter, PublicSiteHeader } from "../site/layout";
 import { EXPERIMENTS_PATH, PROJECT_PATH } from "../site/content";
 import { useDocumentTitle } from "../site/use-document-title";
-import { calculateResumePreviewScale } from "./preview-scale";
-import { LETTER_HEIGHT_PX, LETTER_WIDTH_PX, resumePageCss, styles } from "./style";
+import { resumePageCss, styles } from "./style";
 
 interface Toast {
   id: number;
@@ -39,6 +37,8 @@ const toastBaseStyle: React.CSSProperties = {
   fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
   animation: "resume-toast-slide-in 0.2s ease-out",
+  maxWidth: "min(360px, calc(100vw - 40px))",
+  overflowWrap: "break-word",
 };
 
 const toastTypeStyles: Record<Toast["type"], React.CSSProperties> = {
@@ -344,33 +344,23 @@ function ResumeWebView({ data }: ResumeWebViewProps) {
 
 interface ResumePageContentProps {
   data: ResumeData;
-  themeColor: string;
-  previewScale: number;
   downloading: boolean;
-  showPrintPreview?: boolean;
   onDownload: () => void;
-  onShowWebResume?: () => void;
-  onShowPrintPreview?: () => void;
   toasts: Toast[];
   onRemoveToast: (id: number) => void;
 }
 
 export function ResumePageContent({
   data,
-  themeColor,
-  previewScale,
   downloading,
-  showPrintPreview = false,
   onDownload,
-  onShowWebResume,
-  onShowPrintPreview,
   toasts,
   onRemoveToast,
 }: ResumePageContentProps) {
   const linkedinHref = getLinkedinHref(data.header.contacts.linkedin);
   const secondaryLinks = [
-    { label: "View case study", href: PROJECT_PATH, external: false },
-    { label: "View evidence", href: EXPERIMENTS_PATH, external: false },
+    { label: "View project", href: PROJECT_PATH, external: false },
+    { label: "View experiments", href: EXPERIMENTS_PATH, external: false },
     data.header.contacts.email
       ? {
           label: "Email",
@@ -394,13 +384,6 @@ export function ResumePageContent({
       external: boolean;
     } => Boolean(link)
   );
-  const showWebResume = !showPrintPreview;
-  const siteMainClassName = showPrintPreview
-    ? "site-main resume-site-main resume-site-main--preview"
-    : "site-main resume-site-main";
-  const previewWrapperClassName = showWebResume
-    ? "page-wrapper resume-page-wrapper resume-page-wrapper--screen-hidden"
-    : "page-wrapper resume-page-wrapper resume-page-wrapper--preview";
 
   return (
     <div style={styles.app} className="resume-app">
@@ -408,27 +391,27 @@ export function ResumePageContent({
 
       <PublicSiteHeader activeNav="resume" />
 
-      <section className={siteMainClassName}>
+      <section className="site-main resume-site-main">
         <section className="page-hero page-hero--header">
           <div className="page-hero__content">
             <h1 className="page-title">{data.header.name}</h1>
             {data.header.badges.length > 0 ? (
-              <p className="page-subtitle">{data.header.badges.join(" • ")}</p>
+              <p className="page-lede">{data.header.badges.join(" • ")}</p>
             ) : null}
 
-            <div className="page-hero__actions resume-page-hero__actions">
+            <div className="inline-links page-hero__links">
               <button
                 type="button"
+                className="resume-download-button"
                 onClick={onDownload}
                 disabled={downloading}
-                className="button button--primary"
                 aria-label={downloading ? "Generating PDF" : "Download resume as PDF"}
                 aria-busy={downloading}
                 title="Download resume PDF"
               >
                 {downloading ? (
                   <>
-                    <Spinner size={16} color="#fff" />
+                    <Spinner size={14} />
                     Preparing PDF...
                   </>
                 ) : (
@@ -439,29 +422,6 @@ export function ResumePageContent({
                 )}
               </button>
 
-              {onShowWebResume && onShowPrintPreview ? (
-                <div className="resume-view-switch" role="tablist" aria-label="Resume formats">
-                  <button
-                    type="button"
-                    className="button button--secondary button--compact"
-                    aria-pressed={showWebResume}
-                    onClick={onShowWebResume}
-                  >
-                    Web view
-                  </button>
-                  <button
-                    type="button"
-                    className="button button--secondary button--compact"
-                    aria-pressed={showPrintPreview}
-                    onClick={onShowPrintPreview}
-                  >
-                    Print preview
-                  </button>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="inline-links page-hero__links">
               {secondaryLinks.map((link) => (
                 <a
                   key={link.label}
@@ -476,34 +436,8 @@ export function ResumePageContent({
           </div>
         </section>
 
-        {showWebResume ? (
-          <ResumeWebView data={data} />
-        ) : null}
+        <ResumeWebView data={data} />
       </section>
-
-      <main
-        style={{
-          ...styles.pageWrapper,
-          minHeight: Math.ceil(LETTER_HEIGHT_PX * previewScale) + 16,
-        }}
-        className={previewWrapperClassName}
-      >
-        <div style={styles.previewLayout} className="resume-preview-layout">
-          <div
-            style={{
-              ...styles.previewShell,
-              width: Math.ceil(LETTER_WIDTH_PX * previewScale),
-            }}
-            className="resume-preview-shell"
-          >
-            <ResumeDocumentPreview
-              data={data}
-              themeColor={themeColor}
-              scale={previewScale}
-            />
-          </div>
-        </div>
-      </main>
 
       <PublicSiteFooter />
 
@@ -514,26 +448,10 @@ export function ResumePageContent({
 
 export function ResumePage() {
   const data = publicResumeData;
-  const themeColor = PUBLIC_RESUME_THEME_COLOR;
-  const [previewScale, setPreviewScale] = useState(() =>
-    typeof window === "undefined" ? 1 : calculateResumePreviewScale(window.innerWidth)
-  );
-  const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   useDocumentTitle(`${data.header.name} - Resume`);
-
-  useEffect(() => {
-    const updateScale = () => {
-      setPreviewScale(calculateResumePreviewScale(window.innerWidth));
-    };
-
-    updateScale();
-    window.addEventListener("resize", updateScale);
-
-    return () => window.removeEventListener("resize", updateScale);
-  }, []);
 
   const resumeData = data;
 
@@ -566,18 +484,9 @@ export function ResumePage() {
   return (
     <ResumePageContent
       data={resumeData}
-      themeColor={themeColor}
-      previewScale={previewScale}
       downloading={downloading}
-      showPrintPreview={showPrintPreview}
       onDownload={() => {
         void downloadPdf();
-      }}
-      onShowWebResume={() => {
-        setShowPrintPreview(false);
-      }}
-      onShowPrintPreview={() => {
-        setShowPrintPreview(true);
       }}
       toasts={toasts}
       onRemoveToast={removeToast}

@@ -1,15 +1,10 @@
 import React from "react";
 import type { ResumeData } from "../../types";
 import { buildResumeViewModel } from "./view-model";
-import { LETTER_HEIGHT_PX, LETTER_WIDTH_PX } from "./document-css";
 
 interface ResumeDocumentProps {
   data: ResumeData;
   themeColor: string;
-}
-
-interface ResumeDocumentPreviewProps extends ResumeDocumentProps {
-  scale?: number;
 }
 
 function MailMiniIcon() {
@@ -257,32 +252,5 @@ export function ResumeDocument({ data, themeColor }: ResumeDocumentProps) {
         </div>
       </div>
     </article>
-  );
-}
-
-export function ResumeDocumentPreview({
-  data,
-  themeColor,
-  scale = 1,
-}: ResumeDocumentPreviewProps) {
-  return (
-    <div
-      className="resume-sheet"
-      style={{
-        width: `${LETTER_WIDTH_PX * scale}px`,
-        minHeight: `${LETTER_HEIGHT_PX * scale}px`,
-        margin: 0,
-      }}
-    >
-      <div
-        className="resume-sheet__page"
-        style={{
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
-        }}
-      >
-        <ResumeDocument data={data} themeColor={themeColor} />
-      </div>
-    </div>
   );
 }

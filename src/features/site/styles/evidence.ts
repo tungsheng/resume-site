@@ -1,29 +1,4 @@
 export const evidenceStyles = `
-  .comparison-table-wrap {
-    overflow-x: auto;
-  }
-
-  .comparison-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--type-meta-size);
-  }
-
-  .comparison-table th,
-  .comparison-table td {
-    padding: 13px 12px;
-    text-align: left;
-    border-bottom: 1px solid rgba(22, 34, 45, 0.08);
-    vertical-align: top;
-  }
-
-  .comparison-table thead th {
-    color: var(--accent-deep);
-    font-size: var(--type-label-size);
-    letter-spacing: var(--type-label-tracking);
-    text-transform: uppercase;
-  }
-
   .experiments-summary-copy {
     display: grid;
     gap: 14px;
@@ -60,6 +35,7 @@ export const evidenceStyles = `
 
   .experiments-summary-meta__text {
     max-width: 48rem;
+    overflow-wrap: break-word;
   }
 
   .experiments-summary-grid {
@@ -394,6 +370,7 @@ export const evidenceStyles = `
     font-size: var(--type-title-sm-size);
     font-weight: 700;
     line-height: var(--type-title-leading);
+    overflow-wrap: break-word;
   }
 
   .proof-entry__subtitle {
@@ -413,6 +390,7 @@ export const evidenceStyles = `
     background: var(--accent-soft);
     font-size: var(--type-label-size);
     color: var(--accent-deep);
+    white-space: nowrap;
   }
 
   .proof-entry__command {
@@ -420,6 +398,7 @@ export const evidenceStyles = `
     margin-top: 12px;
     color: var(--accent-deep);
     font-size: var(--type-meta-size);
+    overflow-wrap: anywhere;
   }
 
   .proof-entry__log {
@@ -507,32 +486,9 @@ export const evidenceStyles = `
     .grid-three {
       grid-template-columns: minmax(0, 1fr);
     }
-
-    .site-header__inner {
-      display: grid;
-      justify-content: stretch;
-    }
-
-    .site-header__controls {
-      justify-content: flex-start;
-    }
-
-    .site-nav {
-      gap: 8px;
-    }
   }
 
   @media (max-width: 640px) {
-    .site-main {
-      padding: 24px 16px 48px;
-    }
-
-    .site-footer,
-    .site-header__inner {
-      padding-left: 16px;
-      padding-right: 16px;
-    }
-
     .page-hero,
     .card,
     .metric-card,
@@ -541,17 +497,67 @@ export const evidenceStyles = `
     }
 
     .page-title {
-      font-size: 2.6rem;
+      font-size: clamp(2.15rem, 12vw, 2.6rem);
+      line-height: 1.02;
     }
 
     .experiments-summary-meta {
       align-items: start;
     }
 
+    .proof-entry__header {
+      display: grid;
+      gap: 8px;
+    }
+
+    .report-badge {
+      justify-self: start;
+    }
+
+    .proof-entry__log {
+      padding: 12px;
+      font-size: 0.82rem;
+    }
+
+    .timeline-event {
+      grid-template-columns: minmax(3rem, auto) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .experiment-tabs {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .experiment-tab {
+      width: 100%;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
     .comparison-chart__series-meta,
     .comparison-chart__row-header {
       display: grid;
       gap: 4px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .page-hero,
+    .card,
+    .metric-card,
+    .timeline-card {
+      padding: 18px;
+      border-radius: 20px;
+    }
+
+    .experiments-summary-card__value {
+      font-size: 1.8rem;
+    }
+
+    .proof-entry__log {
+      font-size: 0.76rem;
+      line-height: 1.55;
     }
   }
 `;

@@ -519,7 +519,7 @@ export function ExperimentsPage() {
           <p className="page-lede">{experimentsContent.subtitle}</p>
 
           <div className="inline-links page-hero__links">
-            <a href={PROJECT_PATH}>View case study</a>
+            <a href={PROJECT_PATH}>View project</a>
             <a href={RESUME_PATH}>View resume</a>
           </div>
         </div>

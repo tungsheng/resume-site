@@ -66,11 +66,11 @@ export function ProjectPage() {
           <h1 className="page-title">{projectContent.title}</h1>
           <p className="page-lede">{projectContent.lede}</p>
 
-          <div className="inline-links page-hero__links project-hero-links">
+          <div className="inline-links page-hero__links">
             <a href={EXPERIMENTS_PATH}>View experiments</a>
             <a href={RESUME_PATH}>View resume</a>
             <a href={siteProfile.githubUrl} target="_blank" rel="noreferrer">
-              GitHub repo
+              GitHub
             </a>
           </div>
         </div>

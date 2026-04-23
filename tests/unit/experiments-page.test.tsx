@@ -23,7 +23,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Target tuning");
     expect(html).toContain("Zero Idle");
     expect(html).toContain("Warm-1");
-    expect(html).toContain("View case study");
+    expect(html).toContain("View project");
     expect(html).toContain("View resume");
     expect(html).toContain("role=\"tablist\"");
     expect(html).toContain("role=\"tab\"");

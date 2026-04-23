@@ -28,9 +28,9 @@ export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
         <a className="site-brand" href="/" aria-label="Tony Lee home">
           <svg
             className="site-brand__logo"
-            width="160"
+            width="72"
             height="48"
-            viewBox="0 0 160 48"
+            viewBox="0 0 72 48"
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
             focusable="false"

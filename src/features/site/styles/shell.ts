@@ -36,7 +36,7 @@ export const shellStyles = `
 
   .site-brand__logo {
     display: block;
-    width: 7rem;
+    width: 3rem;
     height: auto;
   }
 
@@ -52,6 +52,15 @@ export const shellStyles = `
     padding: 8px 12px;
     border-radius: 999px;
     font-size: 0.95rem;
+    text-align: center;
+    transition:
+      background 0.18s ease,
+      color 0.18s ease;
+  }
+
+  .site-nav__link:focus-visible {
+    outline: 2px solid rgba(136, 88, 29, 0.35);
+    outline-offset: 2px;
   }
 
   .site-nav__link[aria-current="page"] {
@@ -88,5 +97,105 @@ export const shellStyles = `
 
   .site-footer__divider {
     color: rgba(22, 34, 45, 0.32);
+  }
+
+  @media (max-width: 900px) {
+    .site-header__inner {
+      display: grid;
+      justify-content: stretch;
+      gap: 10px;
+    }
+
+    .site-header__controls {
+      min-width: 0;
+      justify-content: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .site-header__controls::-webkit-scrollbar {
+      display: none;
+    }
+
+    .site-brand {
+      justify-self: center;
+    }
+
+    .site-brand__logo {
+      width: 3rem;
+    }
+
+    .site-nav {
+      width: max-content;
+      max-width: 100%;
+      flex-wrap: nowrap;
+      gap: 8px;
+      padding-bottom: 2px;
+    }
+
+    .site-nav__link {
+      flex: 0 0 auto;
+      padding: 8px 11px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .site-header {
+      position: static;
+    }
+
+    .site-main {
+      padding: 24px 16px 48px;
+    }
+
+    .site-footer,
+    .site-header__inner {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    .site-footer {
+      display: grid;
+      gap: 4px;
+      justify-items: center;
+      padding-top: 16px;
+      padding-bottom: 28px;
+    }
+
+    .site-footer__divider {
+      display: none;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .site-header__inner {
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+
+    .site-header__controls {
+      overflow: visible;
+    }
+
+    .site-brand__logo {
+      width: 2.85rem;
+    }
+
+    .site-nav {
+      width: 100%;
+      max-width: 20rem;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      padding-bottom: 0;
+    }
+
+    .site-nav__link {
+      min-width: 0;
+      padding: 8px 10px;
+      font-size: 0.86rem;
+      line-height: 1.2;
+    }
   }
 `;

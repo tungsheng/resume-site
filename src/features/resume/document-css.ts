@@ -1,6 +1,3 @@
-export const LETTER_WIDTH_PX = 8.5 * 96;
-export const LETTER_HEIGHT_PX = 11 * 96;
-
 export function getResumeDocumentCss(): string {
   return `
 .resume-document,

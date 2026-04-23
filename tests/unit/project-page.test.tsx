@@ -11,10 +11,10 @@ describe("ProjectPage", () => {
     expect(html).toContain(
       "A GPU inference lab on EKS that turns vLLM serving pressure into autoscaling and GPU node provisioning, with checked-in runs for cold start, warm capacity, policy comparison, and target tuning."
     );
-    expect(html).toContain("GitHub repo");
+    expect(html).toContain("GitHub");
     expect(html).toContain("View experiments");
     expect(html).toContain("View resume");
-    expect(html).toContain("class=\"inline-links page-hero__links project-hero-links\"");
+    expect(html).toContain("class=\"inline-links page-hero__links\"");
     expect(html).not.toContain("class=\"card project-overview-surface\"");
     expect(html).toContain("At a glance");
     expect(html).toContain("How the platform serves and scales");

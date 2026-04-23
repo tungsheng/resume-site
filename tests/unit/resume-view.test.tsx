@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ResumeDocumentPreview } from "../../src/features/resume/document";
+import { ResumeDocument } from "../../src/features/resume/document";
 import type { ResumeData } from "../../src/types";
 
 const sampleResume: ResumeData = {
@@ -50,15 +50,15 @@ const sampleResume: ResumeData = {
 describe("ResumeView", () => {
   test("renders a stable root class for print-specific styling", () => {
     const html = renderToStaticMarkup(
-      <ResumeDocumentPreview data={sampleResume} themeColor="#c9a86c" />
+      <ResumeDocument data={sampleResume} themeColor="#c9a86c" />
     );
 
-    expect(html).toContain("class=\"resume-sheet\"");
+    expect(html).toContain("class=\"resume-document page layout-minimal-timeline\"");
   });
 
   test("escapes text once without double-encoding entities", () => {
     const html = renderToStaticMarkup(
-      <ResumeDocumentPreview data={sampleResume} themeColor="#c9a86c" />
+      <ResumeDocument data={sampleResume} themeColor="#c9a86c" />
     );
 
     expect(html).toContain("Tony &amp; Lee");
@@ -68,7 +68,7 @@ describe("ResumeView", () => {
 
   test("encodes linkedin handle in link href while keeping display readable", () => {
     const html = renderToStaticMarkup(
-      <ResumeDocumentPreview data={sampleResume} themeColor="#c9a86c" />
+      <ResumeDocument data={sampleResume} themeColor="#c9a86c" />
     );
 
     expect(html).toContain("href=\"https://linkedin.com/in/tony%20lee%2Fdev\"");
@@ -77,7 +77,7 @@ describe("ResumeView", () => {
 
   test("renders project sections with escaped titles", () => {
     const html = renderToStaticMarkup(
-      <ResumeDocumentPreview data={sampleResume} themeColor="#c9a86c" />
+      <ResumeDocument data={sampleResume} themeColor="#c9a86c" />
     );
 
     expect(html).toContain("Selected Projects");
