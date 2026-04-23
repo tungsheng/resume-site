@@ -142,7 +142,6 @@ export const contentStyles = `
 
   .page-lede,
   .section__copy,
-  .card__copy,
   .detail-copy {
     margin: 16px 0 0;
     max-width: 44rem;

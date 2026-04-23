@@ -1,13 +1,3 @@
-import type {
-  EvidenceExcerpt,
-  ExperimentCalibrationRun,
-  ExperimentComparisonMetric,
-  ExperimentProfile,
-  ExperimentSummaryCard,
-  HighlightCard,
-  NarrativeCard,
-} from "./types";
-
 export const experimentsContent = {
   title: "Experiment Archive",
   subtitle:
@@ -38,7 +28,7 @@ export const experimentsContent = {
       detail:
         "The April 21, 2026 sweep points to target 6 as the safest usable default. Target 8 was faster at 885s, but its supporting metrics were incomplete.",
     },
-  ] satisfies ExperimentSummaryCard[],
+  ],
   guideCards: [
     {
       title: "How to use this page",
@@ -48,7 +38,7 @@ export const experimentsContent = {
       title: "What to compare",
       body: "Lower time and lower cost are better. Idle cost matters between bursts, burst cost matters during the run, and TTFT stays roughly flat across these experiments, so the biggest differences are readiness and scale-out timing.",
     },
-  ] satisfies NarrativeCard[],
+  ],
   experimentSets: [
     {
       id: "profile-baselines",
@@ -68,7 +58,7 @@ export const experimentsContent = {
       summary:
         "After fixing zero-idle, choose the safest active-pressure target from the latest sweep.",
     },
-  ] satisfies HighlightCard[],
+  ],
   profileComparison: {
     title: "Zero-idle vs warm-1",
     questionTitle: "Is warm capacity worth paying for?",
@@ -82,8 +72,6 @@ export const experimentsContent = {
   },
   policyComparison: {
     title: "Warm-1: running vs active-pressure",
-    subtitle:
-      "Both runs use the warm-1 profile and differ only in which custom metric the HPA follows.",
     questionTitle: "Which scaling signal solves slower second-replica arrival?",
     question:
       "Once warm-1 is chosen, the next problem is slower scale-out. This experiment asks which HPA signal gets the second replica online sooner without creating a new latency issue.",
@@ -125,12 +113,10 @@ export const experimentsContent = {
         activePressureValue: 90,
         betterWhen: "lower",
       },
-    ] satisfies ExperimentComparisonMetric[],
+    ],
   },
   targetCalibration: {
     title: "Zero-idle active-target sweep",
-    subtitle:
-      "The latest April 21, 2026 sweep keeps the zero-idle profile and compares active-pressure targets 2, 4, 6, and 8 under the same burst shape.",
     questionTitle: "Which active target is the safest default right now?",
     question:
       "Once zero-idle is fixed, this sweep asks where the active-pressure target should land: low enough to keep the readout complete, but not so low that burst cost and scaling behavior suffer unnecessarily.",
@@ -142,40 +128,29 @@ export const experimentsContent = {
     runs: [
       {
         label: "Active target 2",
-        value: "914s",
-        detail:
-          "Second ready replica at 914s with burst cost $0.487 and peak active requests per GPU node of 85.333.",
         secondReadySeconds: 914,
         burstCost: 0.487280,
         peakActiveRequestsPerGpuNode: 85.333,
       },
       {
         label: "Active target 4",
-        value: "951s",
-        detail:
-          "Second ready replica at 951s with burst cost $0.491 and peak active requests per GPU node of 128.000.",
         secondReadySeconds: 951,
         burstCost: 0.491372,
         peakActiveRequestsPerGpuNode: 128,
       },
       {
         label: "Active target 6",
-        value: "930s",
-        detail:
-          "Second ready replica at 930s with burst cost $0.483 and peak active requests per GPU node of 128.000. This is the latest sweep recommendation.",
         secondReadySeconds: 930,
         burstCost: 0.483189,
         peakActiveRequestsPerGpuNode: 128,
       },
-    ] satisfies ExperimentCalibrationRun[],
+    ],
   },
   profiles: [
     {
       id: "zero-idle",
       label: "Zero Idle",
       reportDate: "2026-04-20",
-      baselineGpuState: "0 GPU nodes",
-      firstReadySeconds: 437,
       firstPublicResponseSeconds: 447,
       secondReadySeconds: 899,
       idleCostPerHour: 0,
@@ -209,8 +184,6 @@ export const experimentsContent = {
       id: "warm-1",
       label: "Warm-1",
       reportDate: "2026-04-20",
-      baselineGpuState: "1 warm on-demand serving node",
-      firstReadySeconds: 73,
       firstPublicResponseSeconds: 84,
       secondReadySeconds: 563,
       idleCostPerHour: 0.526,
@@ -239,7 +212,7 @@ export const experimentsContent = {
         ],
       },
     },
-  ] satisfies ExperimentProfile[],
+  ],
   evidenceExcerpts: [
     {
       title: "Warm-1 compare",
@@ -264,5 +237,5 @@ export const experimentsContent = {
         "Target 8 second ready replica: 885s; supporting metrics unavailable",
       ],
     },
-  ] satisfies EvidenceExcerpt[],
+  ],
 };

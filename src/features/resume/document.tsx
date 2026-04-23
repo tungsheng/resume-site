@@ -4,7 +4,6 @@ import { buildResumeViewModel } from "./view-model";
 
 interface ResumeDocumentProps {
   data: ResumeData;
-  themeColor: string;
 }
 
 function MailMiniIcon() {
@@ -67,35 +66,18 @@ function ResumeBulletList({
   );
 }
 
-function isValidColor(color: string): boolean {
-  return /^#[0-9A-Fa-f]{6}$/.test(color);
-}
-
-function hexToRgba(color: string, alpha: number): string {
-  if (!isValidColor(color)) return color;
-  const clampedAlpha = Math.max(0, Math.min(1, alpha));
-  const r = Number.parseInt(color.slice(1, 3), 16);
-  const g = Number.parseInt(color.slice(3, 5), 16);
-  const b = Number.parseInt(color.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`;
-}
-
-export function ResumeDocument({ data, themeColor }: ResumeDocumentProps) {
+export function ResumeDocument({ data }: ResumeDocumentProps) {
   const view = buildResumeViewModel(data);
-  const headlineText = view.hasBadges ? view.header.badges.join(" • ") : "";
-  const documentStyle = {
-    "--resume-accent": themeColor,
-    "--resume-timeline-rail-color": hexToRgba(themeColor, 0.45),
-  } as React.CSSProperties;
+  const headlineText = view.header.badges.join(" • ");
 
-  const summarySection = view.hasSummary ? (
+  const summarySection = view.summary ? (
     <section className="section">
       <h2 className="section-title">Professional Summary</h2>
       <p className="summary">{view.summary}</p>
     </section>
   ) : null;
 
-  const skillsSection = view.hasSkills ? (
+  const skillsSection = view.skills.length > 0 ? (
     <section className="section">
       <h2 className="section-title">Skills</h2>
       <div className="skills-list">
@@ -109,7 +91,7 @@ export function ResumeDocument({ data, themeColor }: ResumeDocumentProps) {
     </section>
   ) : null;
 
-  const projectsSection = view.hasProjects ? (
+  const projectsSection = view.projects.length > 0 ? (
     <section className="section">
       <h2 className="section-title">{view.projectsTitle}</h2>
       <div className="project-list">
@@ -126,7 +108,7 @@ export function ResumeDocument({ data, themeColor }: ResumeDocumentProps) {
     </section>
   ) : null;
 
-  const educationSection = view.hasEducation ? (
+  const educationSection = view.education.length > 0 ? (
     <section className="section">
       <h2 className="section-title">Education</h2>
       {view.education.map((education, index) => (
@@ -139,20 +121,7 @@ export function ResumeDocument({ data, themeColor }: ResumeDocumentProps) {
     </section>
   ) : null;
 
-  const certificatesSection = view.hasCertificates ? (
-    <section className="section">
-      <h2 className="section-title">Certifications</h2>
-      {view.certificates.map((certificate, index) => (
-        <div key={`${certificate.title}-${index}`} className="certificate-item">
-          <div className="certificate-title">{certificate.title}</div>
-          <div className="certificate-issuer">{certificate.issuer}</div>
-          <div className="certificate-date">{certificate.date}</div>
-        </div>
-      ))}
-    </section>
-  ) : null;
-
-  const experienceSection = view.hasExperience ? (
+  const experienceSection = view.experience.length > 0 ? (
     <section className="section">
       <h2 className="section-title">Work Experience</h2>
       <div className="experience-list">
@@ -181,11 +150,7 @@ export function ResumeDocument({ data, themeColor }: ResumeDocumentProps) {
   ) : null;
 
   return (
-    <article
-      className="resume-document page layout-minimal-timeline"
-      data-layout-template="minimal-timeline"
-      style={documentStyle}
-    >
+    <article className="resume-document">
       <header className="header">
         <div className="header-content">
           <div className="header-left">
@@ -193,17 +158,8 @@ export function ResumeDocument({ data, themeColor }: ResumeDocumentProps) {
             {headlineText ? <p className="header-subtitle">{headlineText}</p> : null}
           </div>
 
-          {view.header.contacts.phone ||
-          view.header.contacts.email ||
-          view.header.contacts.linkedin ? (
+          {view.header.contacts.email || view.header.contacts.linkedin ? (
             <div className="contact-info">
-              {view.header.contacts.phone ? (
-                <div className="contact-row">
-                  <span className="contact-label">Phone</span>
-                  <span className="contact-value">{view.header.contacts.phone}</span>
-                </div>
-              ) : null}
-
               {view.header.contacts.email ? (
                 <div className="contact-row contact-row-icon">
                   <a
@@ -242,7 +198,6 @@ export function ResumeDocument({ data, themeColor }: ResumeDocumentProps) {
         <div className="left-column">
           {educationSection}
           {skillsSection}
-          {certificatesSection}
         </div>
 
         <div className="right-column">

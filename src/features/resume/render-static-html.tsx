@@ -4,14 +4,9 @@ import type { ResumeData } from "../../types";
 import { ResumeDocument } from "./document";
 import { getResumeDocumentCss } from "./document-css";
 
-export function renderResumeHtmlDocument(
-  data: ResumeData,
-  themeColor: string
-): string {
+export function renderResumeHtmlDocument(data: ResumeData): string {
   const title = renderToStaticMarkup(<title>{`${data.header.name} - Resume`}</title>);
-  const body = renderToStaticMarkup(
-    <ResumeDocument data={data} themeColor={themeColor} />
-  );
+  const body = renderToStaticMarkup(<ResumeDocument data={data} />);
 
   return `<!DOCTYPE html>
 <html lang="en">

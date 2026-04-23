@@ -9,7 +9,6 @@ const sampleResume: ResumeData = {
     name: "Tony Lee",
     badges: ["Platform", "Infrastructure"],
     contacts: {
-      phone: "(555) 000-0000",
       linkedin: "tonyslee8",
       email: "tony@example.com",
     },
@@ -35,7 +34,6 @@ const sampleResume: ResumeData = {
       endDate: "2019",
     },
   ],
-  certificates: [],
 };
 
 describe("ResumePageContent", () => {
@@ -65,14 +63,6 @@ describe("ResumePageContent", () => {
     expect(html).toContain("title=\"Download resume PDF\"");
     expect(html).toContain("class=\"resume-download-button\"");
     expect(html).toContain("class=\"inline-links page-hero__links\"");
-    expect(html).not.toContain("Web view");
-    expect(html).not.toContain("Print preview");
-    expect(html).not.toContain("resume-preview-shell");
-    expect(html).not.toContain("resume-page-wrapper");
-    expect(html).not.toContain(">Print<");
-    expect(html).not.toContain("class=\"page-eyebrow\">Resume<");
-    expect(html).not.toContain("Web view is the default. Print preview shows the unchanged one-page PDF layout.");
     expect(html).toContain("Led platform modernization.");
-    expect(html).not.toContain("Preview notes");
   });
 });

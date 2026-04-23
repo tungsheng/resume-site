@@ -9,60 +9,12 @@ function formatRange(start: string, end: string): string {
   return `${start} - ${end}`;
 }
 
-export interface ResumeSkillViewModel {
-  category: string;
-  categoryLabel: string;
-  items: string[];
-  itemsText: string;
-}
-
-export interface ResumeEducationViewModel {
-  degree: string;
-  school: string;
-  startDate: string;
-  endDate: string;
-  dateRange: string;
-}
-
-export interface ResumeExperienceViewModel {
-  title: string;
-  company: string;
-  startDate: string;
-  endDate: string;
-  dateRange: string;
-  highlights: string[];
-}
-
-export interface ResumeProjectViewModel {
-  title: string;
-  highlights: string[];
-}
-
-export interface ResumeViewModel {
-  header: ResumeData["header"];
-  summary: string;
-  skills: ResumeSkillViewModel[];
-  projectsTitle: string;
-  projects: ResumeProjectViewModel[];
-  education: ResumeEducationViewModel[];
-  certificates: ResumeData["certificates"];
-  experience: ResumeExperienceViewModel[];
-  hasBadges: boolean;
-  hasSummary: boolean;
-  hasSkills: boolean;
-  hasProjects: boolean;
-  hasEducation: boolean;
-  hasCertificates: boolean;
-  hasExperience: boolean;
-}
-
-export function buildResumeViewModel(data: ResumeData): ResumeViewModel {
+export function buildResumeViewModel(data: ResumeData) {
   const summary = data.header.summary.trim();
 
   const skills = Object.entries(data.skills).map(([category, items]) => ({
     category,
     categoryLabel: capitalize(category),
-    items,
     itemsText: items.join(" • "),
   }));
 
@@ -71,15 +23,20 @@ export function buildResumeViewModel(data: ResumeData): ResumeViewModel {
     ...entry,
   }));
 
-  const education = data.education.map((entry) => ({
-    ...entry,
-    dateRange: formatRange(entry.startDate, entry.endDate),
+  const education = data.education.map(({ degree, school, startDate, endDate }) => ({
+    degree,
+    school,
+    dateRange: formatRange(startDate, endDate),
   }));
 
-  const experience = data.experience.map((entry) => ({
-    ...entry,
-    dateRange: formatRange(entry.startDate, entry.endDate),
-  }));
+  const experience = data.experience.map(
+    ({ title, company, startDate, endDate, highlights }) => ({
+      title,
+      company,
+      dateRange: formatRange(startDate, endDate),
+      highlights,
+    })
+  );
 
   return {
     header: data.header,
@@ -88,14 +45,6 @@ export function buildResumeViewModel(data: ResumeData): ResumeViewModel {
     projectsTitle,
     projects,
     education,
-    certificates: data.certificates,
     experience,
-    hasBadges: data.header.badges.length > 0,
-    hasSummary: summary.length > 0,
-    hasSkills: skills.length > 0,
-    hasProjects: projects.length > 0,
-    hasEducation: education.length > 0,
-    hasCertificates: data.certificates.length > 0,
-    hasExperience: experience.length > 0,
   };
 }

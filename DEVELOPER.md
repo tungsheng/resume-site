@@ -60,22 +60,14 @@ Any other request falls through to `src/server/routes/static.ts`, which serves f
 - `/` introduces Tony Lee and highlights the flagship project.
 - `/project/cloud-inference-platform` is the narrative case study.
 - `/experiments` is the evidence archive for checked-in evaluation runs.
-- `/resume` is the public resume route with a screen-first web view and a preserved print-preview/PDF path.
+- `/resume` is the public resume route with a screen-first web view and PDF download path.
 
 ## Resume Content Flow
 
-1. `src/features/resume/data.ts` exports the checked-in public `ResumeData` object and theme color.
+1. `src/features/resume/data.ts` exports the checked-in public `ResumeData` object.
 2. `src/features/resume/view-model.ts` prepares display-only fields such as date ranges and skill text.
-3. `src/features/resume/document.tsx` renders the canonical `minimal-timeline` resume markup for both preview and PDF output.
-4. The public resume page imports the same data directly and keeps the print-preview document mounted.
-5. PDF downloads call `/api/public-pdf`, which renders the same resume document through React SSR and hands it to Puppeteer.
-
-## Presentation Settings
-
-The checked-in public theme lives in `src/features/resume/data.ts`; the PDF request helper lives in `src/features/resume/presentation.ts`.
-
-- The public resume is pinned to the green `minimal-timeline` presentation.
-- There is no admin UI or persistence layer for editing settings at runtime.
+3. `src/features/resume/page.tsx` renders the screen resume and calls the PDF request helper.
+4. PDF downloads call `/api/public-pdf`, which renders `src/features/resume/document.tsx` through React SSR and hands the HTML to Puppeteer.
 
 ## Environment Variables
 
@@ -87,7 +79,7 @@ The checked-in public theme lives in `src/features/resume/data.ts`; the PDF requ
 
 ## PDF Export
 
-`POST /api/public-pdf` uses the checked-in public resume data and theme.
+`POST /api/public-pdf` uses the checked-in public resume data.
 
 Notes:
 
@@ -124,7 +116,6 @@ To replace the public resume:
 
 1. Update `src/features/resume/data.ts`.
 2. Visit `/resume`.
-3. If the resume needs a different theme, update `PUBLIC_RESUME_THEME_COLOR`.
 
 ## Testing Focus
 

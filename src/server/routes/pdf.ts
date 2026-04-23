@@ -1,13 +1,9 @@
 import { generatePDF } from "../../services/pdf";
-import { PUBLIC_RESUME_THEME_COLOR, publicResumeData } from "../../features/resume/data";
+import { publicResumeData } from "../../features/resume/data";
 import { renderResumeHtmlDocument } from "../../features/resume/render-static-html";
 
 function error(status: number, message: string): Response {
   return Response.json({ error: message }, { status });
-}
-
-function tooManyRequests(message: string): Response {
-  return error(429, message);
 }
 
 interface RateLimitEntry {
@@ -57,18 +53,14 @@ export async function handlePublicPDF(
 ): Promise<Response> {
   const ip = getClientIP(req, directAddress);
   if (!checkRateLimit(ip, 3, 60000)) {
-    return tooManyRequests("Too many PDF requests. Please try again later.");
+    return error(429, "Too many PDF requests. Please try again later.");
   }
 
-  return handlePDFGeneration(req);
-}
-
-async function handlePDFGeneration(req: Request): Promise<Response> {
   await req.body?.cancel().catch(() => {});
   const data = publicResumeData;
 
   try {
-    const html = renderResumeHtmlDocument(data, PUBLIC_RESUME_THEME_COLOR);
+    const html = renderResumeHtmlDocument(data);
     const pdf = await generatePDF(html);
 
     return new Response(new Uint8Array(pdf), {

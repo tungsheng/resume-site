@@ -5,7 +5,6 @@ export interface ResumeData {
     name: string;
     badges: string[];
     contacts: {
-      phone?: string;
       linkedin?: string;
       email?: string;
     };
@@ -31,10 +30,5 @@ export interface ResumeData {
     degree: string;
     startDate: string;
     endDate: string;
-  }>;
-  certificates: Array<{
-    title: string;
-    issuer: string;
-    date: string;
   }>;
 }

@@ -1,12 +1,3 @@
-import type {
-  ImplementationMeasurement,
-  ImplementationSourceLink,
-  ImplementationStep,
-  MetricPoint,
-  NarrativeCard,
-  WorkflowTrack,
-} from "./types";
-
 const GPU_INFERENCE_REPO_LINK = "https://github.com/tungsheng/gpu-inference-lab";
 const GPU_INFERENCE_REPO_BASE = "https://github.com/tungsheng/gpu-inference-lab/blob/main";
 const SETUP_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/up`;
@@ -40,7 +31,7 @@ export const projectContent = {
       body:
         "It makes response-time tradeoffs and GPU scale-out behavior easy to understand with checked-in runs.",
     },
-  ] satisfies NarrativeCard[],
+  ],
   overviewSignalsLead:
     "These numbers show cold-start wait, warm-path benefit, and how quickly the platform adds capacity after traffic begins.",
   overviewMetrics: [
@@ -59,7 +50,7 @@ export const projectContent = {
       value: "563s",
       detail: "Second ready replica under the current warm-path and active-pressure policy.",
     },
-  ] satisfies MetricPoint[],
+  ],
   workflowSectionTitle: "How the platform serves and scales",
   workflowLead:
     "Requests follow one stable public path. Load signals follow a separate control path that adds GPU capacity only when another replica cannot schedule.",
@@ -100,7 +91,7 @@ export const projectContent = {
         label: "GPU nodes: 0",
       },
     ],
-  } satisfies WorkflowTrack,
+  },
   workflowPaths: [
     {
       title: "Serve path",
@@ -173,9 +164,8 @@ export const projectContent = {
         },
       ],
     },
-  ] satisfies WorkflowTrack[],
+  ],
   workflowRejoin: {
-    title: "Rejoin point",
     body:
       "The added replica rejoins the same in-cluster Service, so the public path stays unchanged while capacity increases underneath it.",
     nodes: [
@@ -207,7 +197,7 @@ export const projectContent = {
       body:
         "A pending pod creates the capacity signal that turns GPU NodePools into a real NodeClaim, a GPU node, and another ready replica.",
     },
-  ] satisfies NarrativeCard[],
+  ],
 };
 
 export const implementation = {
@@ -236,7 +226,7 @@ export const implementation = {
       body:
         "Remove the workload and environment again so the quick-start path ends cleanly after the proof run.",
     },
-  ] satisfies ImplementationStep[],
+  ],
   verifyProofTitle: "What the quick start proves",
   verifyProofs: [
     {
@@ -254,7 +244,7 @@ export const implementation = {
       body:
         "Cleanup removes the workload and confirms the serving GPU node count falls back to zero.",
     },
-  ] satisfies NarrativeCard[],
+  ],
   measurement: {
     title: "Go deeper with evaluate",
     command: "./scripts/evaluate --profile zero-idle|warm-1",
@@ -274,6 +264,6 @@ export const implementation = {
         label: "Evaluate script",
         href: EVALUATE_SCRIPT_LINK,
       },
-    ] satisfies ImplementationSourceLink[],
-  } satisfies ImplementationMeasurement,
+    ],
+  },
 };

@@ -1,7 +1,5 @@
 import type { ResumeData } from "../../types";
 
-export const PUBLIC_RESUME_THEME_COLOR = "#27ae60";
-
 export const publicResumeData: ResumeData = {
   header: {
     name: "Tony Lee",
@@ -113,5 +111,4 @@ export const publicResumeData: ResumeData = {
       endDate: "Dec 2005",
     },
   ],
-  certificates: [],
 };

@@ -10,7 +10,6 @@ describe("Resume Service", () => {
     expect(publicResumeData.skills["Infrastructure"]).toContain("AWS (VPC, IAM, EC2, ALB)");
     expect(publicResumeData.projects?.title).toBe("Selected Project");
     expect(publicResumeData.projects?.items[0]?.title).toContain("Cloud Inference Platform");
-    expect(publicResumeData.certificates).toBeArray();
   });
 
   test("renderResumeHtmlDocument creates valid HTML", () => {
@@ -19,7 +18,6 @@ describe("Resume Service", () => {
         name: "John Doe",
         badges: ["Badge1"],
         contacts: {
-          phone: "555-1234",
           linkedin: "johndoe",
           email: "john@example.com",
         },
@@ -47,16 +45,15 @@ describe("Resume Service", () => {
       education: [
         { school: "University", degree: "BS CS", startDate: "2016", endDate: "2020" },
       ],
-      certificates: [{ title: "AWS", issuer: "Amazon", date: "2022" }],
     };
 
-    const html = renderResumeHtmlDocument(mockData, "#c9a86c");
+    const html = renderResumeHtmlDocument(mockData);
     expect(html).toContain("<!DOCTYPE html>");
     expect(html).toContain("John Doe");
     expect(html).toContain("Developer");
     expect(html).toContain("Selected Projects");
     expect(html).toContain("Inference Platform");
-    expect(html).toContain("class=\"resume-document page layout-minimal-timeline\"");
+    expect(html).toContain("class=\"resume-document\"");
   });
 
   test("renderResumeHtmlDocument escapes XSS", () => {
@@ -64,16 +61,15 @@ describe("Resume Service", () => {
       header: {
         name: '<script>alert("XSS")</script>',
         badges: [],
-        contacts: { phone: "", linkedin: "", email: "" },
+        contacts: { linkedin: "", email: "" },
         summary: "",
       },
       experience: [],
       skills: { frontend: [], backend: [], management: [] },
       education: [],
-      certificates: [],
     };
 
-    const html = renderResumeHtmlDocument(xssData, "#c9a86c");
+    const html = renderResumeHtmlDocument(xssData);
     expect(html).not.toContain("<script>alert(\"XSS\")</script>");
     expect(html).toContain("&lt;script&gt;");
   });
@@ -84,7 +80,6 @@ describe("Resume Service", () => {
         name: "John Doe",
         badges: [],
         contacts: {
-          phone: "555-1234",
           linkedin: "johndoe",
           email: "john@example.com",
         },
@@ -110,16 +105,15 @@ describe("Resume Service", () => {
       education: [
         { school: "University", degree: "BS CS", startDate: "2016", endDate: "2020" },
       ],
-      certificates: [],
     };
 
-    const html = renderResumeHtmlDocument(mockData, "#c9a86c");
+    const html = renderResumeHtmlDocument(mockData);
     const dotCount = html.match(/class="experience-dot"/g)?.length ?? 0;
 
-    expect(html).toContain("class=\"resume-document page layout-minimal-timeline\"");
+    expect(html).toContain("class=\"resume-document\"");
     expect(html).toContain("<div class=\"experience-rail\"></div>");
     expect(dotCount).toBe(mockData.experience.length);
-    expect(html).toContain(".resume-document.layout-minimal-timeline .experience-item {");
+    expect(html).toContain(".resume-document .experience-item {");
     expect(html).toContain(".resume-document .experience-dot {");
   });
 });

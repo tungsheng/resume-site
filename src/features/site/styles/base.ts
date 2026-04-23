@@ -4,17 +4,14 @@ export const baseStyles = `
     --bg: #f8f4ec;
     --bg-accent: #ece3d4;
     --surface: rgba(255, 252, 247, 0.94);
-    --surface-strong: rgba(255, 255, 255, 0.98);
     --ink: #16222d;
     --muted: #54616b;
-    --line: rgba(22, 34, 45, 0.12);
     --accent: #ad7b3a;
     --accent-deep: #88581d;
     --accent-soft: rgba(173, 123, 58, 0.12);
     --shadow: 0 20px 60px rgba(30, 41, 47, 0.12);
     --radius-xl: 30px;
     --radius-lg: 22px;
-    --radius-md: 16px;
     --max-width: 1180px;
     --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
     --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
@@ -32,12 +29,9 @@ export const baseStyles = `
     --type-title-leading: 1.35;
     --type-panel-size: clamp(1.45rem, 2vw, 1.9rem);
     --type-panel-leading: 1.15;
-    --type-subtitle-size: clamp(1.05rem, 1.8vw, 1.4rem);
-    --type-subtitle-leading: 1.4;
     --type-section-size: clamp(1.9rem, 3vw, 2.8rem);
     --type-page-size: clamp(2.8rem, 5vw, 4.8rem);
     --type-display-size: clamp(4rem, 9vw, 7rem);
-    --type-display-accent-size: clamp(1.3rem, 2.4vw, 2rem);
     --type-stat-size: 2rem;
   }
 

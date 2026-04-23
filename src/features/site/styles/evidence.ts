@@ -145,9 +145,6 @@ export const evidenceStyles = `
 
   .experiment-tab__title {
     display: block;
-  }
-
-  .experiment-tab__title {
     margin: 0;
     font-size: var(--type-meta-size);
     font-weight: 700;

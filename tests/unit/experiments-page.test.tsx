@@ -41,12 +41,6 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("experiment-tab-profile-baselines");
     expect(html).toContain("experiment-panel-profile-baselines");
     expect(html).toContain("aria-selected=\"true\"");
-    expect(html).not.toContain("Open profile comparison");
-    expect(html).not.toContain("Step 1");
-    expect(html).not.toContain("Step 2");
-    expect(html).not.toContain("Choose a family");
-    expect(html).not.toContain("Best for");
     expect(html).toContain("href=\"/project/cloud-inference-platform\"");
-    expect(html).not.toContain("class=\"page-eyebrow\">Evidence<");
   });
 });

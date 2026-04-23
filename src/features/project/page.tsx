@@ -3,9 +3,26 @@ import { EXPERIMENTS_PATH, RESUME_PATH, siteProfile } from "../site/content";
 import { implementation, projectContent } from "../site/project-content";
 import { PublicSiteLayout } from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
-import type { WorkflowNode, WorkflowTrack } from "../site/types";
 
 const PAGE_TITLE = "Cloud Inference Platform | Tony Lee";
+
+interface WorkflowNode {
+  label: string;
+  href?: string;
+  linkLabel?: string;
+}
+
+interface WorkflowTrack {
+  title: string;
+  summary: string;
+  nodes: WorkflowNode[];
+}
+
+interface WorkflowFlowProps {
+  nodes: WorkflowNode[];
+  className: string;
+  ariaLabel: string;
+}
 
 function WorkflowNodePill({ label, href, linkLabel = "Code" }: WorkflowNode) {
   return (
@@ -25,33 +42,39 @@ function WorkflowNodePill({ label, href, linkLabel = "Code" }: WorkflowNode) {
   );
 }
 
-function WorkflowPathRow({
-  title,
-  summary,
-  nodes,
-}: WorkflowTrack) {
+function WorkflowFlow({ nodes, className, ariaLabel }: WorkflowFlowProps) {
+  return (
+    <div className={className} aria-label={ariaLabel}>
+      {nodes.map((node, index) => (
+        <React.Fragment key={node.label}>
+          <WorkflowNodePill
+            label={node.label}
+            href={node.href}
+            linkLabel={node.linkLabel}
+          />
+          {index < nodes.length - 1 && (
+            <span className="project-workflow-flow-arrow" aria-hidden="true">
+              →
+            </span>
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+function WorkflowPathRow({ title, summary, nodes }: WorkflowTrack) {
   return (
     <section className="project-workflow-path">
       <div className="project-workflow-path__meta">
-        <h3 className="card__title project-workflow-path__title">{title}</h3>
+        <h3 className="card__title">{title}</h3>
         <p className="detail-copy project-workflow-path__summary">{summary}</p>
       </div>
-      <div className="project-workflow-path__flow" aria-label={`${title} workflow`}>
-        {nodes.map((node, index) => (
-          <React.Fragment key={node.label}>
-            <WorkflowNodePill
-              label={node.label}
-              href={node.href}
-              linkLabel={node.linkLabel}
-            />
-            {index < nodes.length - 1 && (
-              <span className="project-workflow-flow-arrow" aria-hidden="true">
-                →
-              </span>
-            )}
-          </React.Fragment>
-        ))}
-      </div>
+      <WorkflowFlow
+        nodes={nodes}
+        className="project-workflow-path__flow"
+        ariaLabel={`${title} workflow`}
+      />
     </section>
   );
 }
@@ -86,7 +109,7 @@ export function ProjectPage() {
         <div className="grid-three project-overview-grid">
           {projectContent.overviewCards.map((item) => (
             <section key={item.title} className="project-overview-story-item">
-              <h3 className="card__title project-overview-story-item__title">{item.title}</h3>
+              <h3 className="card__title">{item.title}</h3>
               <p className="detail-copy project-overview-card__copy">{item.body}</p>
             </section>
           ))}
@@ -116,7 +139,7 @@ export function ProjectPage() {
         <article className="card project-workflow-surface">
           <section className="project-workflow-foundation">
             <div className="project-workflow-foundation__header">
-              <h3 className="card__title project-workflow-foundation__title">
+              <h3 className="card__title">
                 {projectContent.workflowFoundation.title}
               </h3>
               <p className="detail-copy project-workflow-foundation__summary">
@@ -151,27 +174,16 @@ export function ProjectPage() {
                 {projectContent.workflowRejoin.body}
               </p>
             </div>
-            <div className="project-workflow-rejoin__flow" aria-label="Rejoin workflow">
-              {projectContent.workflowRejoin.nodes.map((node, index) => (
-                <React.Fragment key={node.label}>
-                  <WorkflowNodePill
-                    label={node.label}
-                    href={node.href}
-                    linkLabel={node.linkLabel}
-                  />
-                  {index < projectContent.workflowRejoin.nodes.length - 1 && (
-                    <span className="project-workflow-flow-arrow" aria-hidden="true">
-                      →
-                    </span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
+            <WorkflowFlow
+              nodes={projectContent.workflowRejoin.nodes}
+              className="project-workflow-rejoin__flow"
+              ariaLabel="Rejoin workflow"
+            />
           </section>
           <div className="grid-three project-workflow-explainers">
             {projectContent.workflowExplainers.map((item) => (
               <section key={item.title} className="project-workflow-explainer">
-                <h3 className="card__title project-workflow-explainer__title">{item.title}</h3>
+                <h3 className="card__title">{item.title}</h3>
                 <p className="detail-copy project-workflow-explainer__copy">{item.body}</p>
               </section>
             ))}

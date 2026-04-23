@@ -2,67 +2,16 @@ import React, { useEffect, useState } from "react";
 import { buildResumeViewModel } from "./view-model";
 import type { ResumeData } from "../../types";
 import { publicResumeData } from "./data";
-import { requestPublicResumePdf } from "./presentation";
 import { PublicSiteFooter, PublicSiteHeader } from "../site/layout";
 import { EXPERIMENTS_PATH, PROJECT_PATH } from "../site/content";
 import { useDocumentTitle } from "../site/use-document-title";
-import { resumePageCss, styles } from "./style";
+import { resumePageCss } from "./style";
 
 interface Toast {
   id: number;
   message: string;
   type: "error" | "success";
 }
-
-interface SpinnerProps {
-  size?: number;
-  color?: string;
-}
-
-const toastContainerStyle: React.CSSProperties = {
-  position: "fixed",
-  right: 20,
-  bottom: 20,
-  zIndex: 3000,
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-};
-
-const toastBaseStyle: React.CSSProperties = {
-  padding: "12px 20px",
-  borderRadius: 6,
-  color: "#fff",
-  fontSize: 14,
-  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-  animation: "resume-toast-slide-in 0.2s ease-out",
-  maxWidth: "min(360px, calc(100vw - 40px))",
-  overflowWrap: "break-word",
-};
-
-const toastTypeStyles: Record<Toast["type"], React.CSSProperties> = {
-  error: {
-    background: "#e94560",
-  },
-  success: {
-    background: "#27ae60",
-  },
-};
-
-const toastKeyframes = `
-@keyframes resume-toast-slide-in {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-`;
 
 let toastId = 0;
 
@@ -81,6 +30,25 @@ function downloadBlob(blob: Blob, filename: string): void {
   link.click();
   document.body.removeChild(link);
   window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
+}
+
+export async function requestPublicResumePdf(): Promise<Blob> {
+  const res = await fetch("/api/public-pdf", {
+    method: "POST",
+  });
+
+  if (!res.ok) {
+    let message = "Failed to generate PDF";
+    try {
+      const errorBody = (await res.json()) as { error?: string };
+      if (errorBody?.error) message = errorBody.error;
+    } catch {
+      // Keep the fallback error message when the response is not JSON.
+    }
+    throw new Error(message);
+  }
+
+  return res.blob();
 }
 
 function DownloadIcon() {
@@ -103,7 +71,7 @@ function DownloadIcon() {
   );
 }
 
-function Spinner({ size = 16, color = "var(--accent-deep)" }: SpinnerProps) {
+function Spinner({ size = 16, color = "var(--accent-deep)" }: { size?: number; color?: string }) {
   return (
     <div
       aria-hidden="true"
@@ -130,14 +98,11 @@ function ToastContainer({
   if (toasts.length === 0) return null;
 
   return (
-    <>
-      <style>{toastKeyframes}</style>
-      <div style={toastContainerStyle} role="alert" aria-live="polite">
-        {toasts.map((toast) => (
-          <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
-        ))}
-      </div>
-    </>
+    <div className="resume-toast-container" role="alert" aria-live="polite">
+      {toasts.map((toast) => (
+        <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
+      ))}
+    </div>
   );
 }
 
@@ -153,7 +118,7 @@ function ToastItem({
     return () => window.clearTimeout(timer);
   }, [toast.id, onRemove]);
 
-  return <div style={{ ...toastBaseStyle, ...toastTypeStyles[toast.type] }}>{toast.message}</div>;
+  return <div className={`resume-toast resume-toast--${toast.type}`}>{toast.message}</div>;
 }
 
 function ScreenResumeBulletList({ items }: { items: string[] }) {
@@ -173,29 +138,22 @@ function ScreenResumeBulletList({ items }: { items: string[] }) {
   );
 }
 
-interface ResumeWebViewProps {
-  data: ResumeData;
-}
-
-function ResumeWebView({ data }: ResumeWebViewProps) {
+function ResumeWebView({ data }: { data: ResumeData }) {
   const view = buildResumeViewModel(data);
   const linkedinHref = getLinkedinHref(view.header.contacts.linkedin);
 
   return (
-    <section
-      className="section resume-web-view resume-web-view--visible"
-      aria-label="Web resume view"
-    >
+    <section className="section" aria-label="Web resume view">
       <div className="resume-web-layout">
         <div className="resume-web-main">
-          {view.hasSummary && (
+          {view.summary && (
             <article className="resume-web-card">
               <h3 className="resume-web-card__title">Professional Summary</h3>
               <p className="resume-web-copy">{view.summary}</p>
             </article>
           )}
 
-          {view.hasProjects && (
+          {view.projects.length > 0 && (
             <section className="resume-web-section">
               <h3 className="resume-web-section__title">{view.projectsTitle}</h3>
               <div className="resume-web-stack">
@@ -216,7 +174,7 @@ function ResumeWebView({ data }: ResumeWebViewProps) {
             </section>
           )}
 
-          {view.hasExperience && (
+          {view.experience.length > 0 && (
             <section className="resume-web-section">
               <h3 className="resume-web-section__title">Experience</h3>
               <div className="resume-web-stack">
@@ -241,16 +199,10 @@ function ResumeWebView({ data }: ResumeWebViewProps) {
         </div>
 
         <aside className="resume-web-sidebar">
-          {(view.header.contacts.phone || view.header.contacts.email || linkedinHref) && (
+          {(view.header.contacts.email || linkedinHref) && (
             <article className="resume-web-card resume-web-card--compact">
               <h3 className="resume-web-card__title">Contact</h3>
               <div className="resume-web-contact-list">
-                {view.header.contacts.phone && (
-                  <div className="resume-web-contact-item">
-                    <span className="resume-web-contact-label">Phone</span>
-                    <span className="resume-web-contact-value">{view.header.contacts.phone}</span>
-                  </div>
-                )}
                 {view.header.contacts.email && (
                   <div className="resume-web-contact-item">
                     <span className="resume-web-contact-label">Email</span>
@@ -279,7 +231,7 @@ function ResumeWebView({ data }: ResumeWebViewProps) {
             </article>
           )}
 
-          {view.hasSkills && (
+          {view.skills.length > 0 && (
             <section className="resume-web-section">
               <h3 className="resume-web-section__title">Skills</h3>
               <article className="resume-web-card resume-web-card--compact">
@@ -295,7 +247,7 @@ function ResumeWebView({ data }: ResumeWebViewProps) {
             </section>
           )}
 
-          {view.hasEducation && (
+          {view.education.length > 0 && (
             <section className="resume-web-section">
               <h3 className="resume-web-section__title">Education</h3>
               <div className="resume-web-stack">
@@ -309,28 +261,6 @@ function ResumeWebView({ data }: ResumeWebViewProps) {
                     <p className="resume-web-entry__date resume-web-entry__date--inline">
                       {education.dateRange}
                     </p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {view.hasCertificates && (
-            <section className="resume-web-section">
-              <h3 className="resume-web-section__title">Certifications</h3>
-              <div className="resume-web-stack">
-                {view.certificates.map((certificate, index) => (
-                  <article
-                    key={`${certificate.title}-${index}`}
-                    className="resume-web-card resume-web-card--compact"
-                  >
-                    <h4 className="resume-web-entry__title">{certificate.title}</h4>
-                    <p className="resume-web-entry__subtitle">{certificate.issuer}</p>
-                    {certificate.date ? (
-                      <p className="resume-web-entry__date resume-web-entry__date--inline">
-                        {certificate.date}
-                      </p>
-                    ) : null}
                   </article>
                 ))}
               </div>
@@ -386,7 +316,7 @@ export function ResumePageContent({
   );
 
   return (
-    <div style={styles.app} className="resume-app">
+    <div className="resume-page-app">
       <style>{resumePageCss}</style>
 
       <PublicSiteHeader activeNav="resume" />
@@ -453,8 +383,6 @@ export function ResumePage() {
 
   useDocumentTitle(`${data.header.name} - Resume`);
 
-  const resumeData = data;
-
   function showToast(message: string, type: Toast["type"] = "error"): void {
     const id = ++toastId;
     setToasts((currentToasts) => [...currentToasts, { id, message, type }]);
@@ -468,7 +396,7 @@ export function ResumePage() {
     setDownloading(true);
     try {
       const blob = await requestPublicResumePdf();
-      downloadBlob(blob, `${resumeData.header.name.replace(/\s+/g, "_")}_Resume.pdf`);
+      downloadBlob(blob, `${data.header.name.replace(/\s+/g, "_")}_Resume.pdf`);
       showToast("PDF downloaded successfully", "success");
     } catch (downloadError) {
       const message =
@@ -483,7 +411,7 @@ export function ResumePage() {
 
   return (
     <ResumePageContent
-      data={resumeData}
+      data={data}
       downloading={downloading}
       onDownload={() => {
         void downloadPdf();

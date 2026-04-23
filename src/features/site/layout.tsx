@@ -5,7 +5,7 @@ import { contentStyles } from "./styles/content";
 import { evidenceStyles } from "./styles/evidence";
 import { shellStyles } from "./styles/shell";
 
-export type PublicNavKey = "home" | "project" | "experiments" | "resume";
+type PublicNavKey = "home" | "project" | "experiments" | "resume";
 
 export const siteStyles = [
   baseStyles,

@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { PUBLIC_RESUME_THEME_COLOR } from "../../src/features/resume/data";
-import { requestPublicResumePdf } from "../../src/features/resume/presentation";
+import { requestPublicResumePdf } from "../../src/features/resume/page";
 
 const originalFetch = globalThis.fetch;
 
@@ -9,10 +8,6 @@ afterEach(() => {
 });
 
 describe("public resume helpers", () => {
-  test("keeps the public resume theme local to the client bundle", () => {
-    expect(PUBLIC_RESUME_THEME_COLOR).toBe("#27ae60");
-  });
-
   test("parses public PDF errors from the API response body", async () => {
     globalThis.fetch = (async () => {
       return new Response(JSON.stringify({ error: "PDF engine unavailable" }), {
@@ -24,7 +19,7 @@ describe("public resume helpers", () => {
     await expect(requestPublicResumePdf()).rejects.toThrow("PDF engine unavailable");
   });
 
-  test("posts to the public PDF endpoint without sending presentation overrides", async () => {
+  test("posts to the public PDF endpoint without a request body", async () => {
     let requestedUrl = "";
     let requestedMethod = "";
     let requestedBody: BodyInit | null | undefined;

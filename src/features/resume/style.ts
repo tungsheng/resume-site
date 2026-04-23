@@ -1,16 +1,6 @@
 // Resume page styles
 
-import type React from "react";
 import { siteStyles } from "../site/layout";
-
-export const styles: Record<string, React.CSSProperties> = {
-  app: {
-    background: "linear-gradient(180deg, #fbf8f2 0%, #f8f4ec 50%, #ece3d4 100%)",
-    minHeight: "100vh",
-    margin: 0,
-    padding: 0,
-  },
-};
 
 const spinKeyframes = `
 @keyframes spin {
@@ -21,8 +11,57 @@ const spinKeyframes = `
 export const resumePageCss = `
   ${siteStyles}
   ${spinKeyframes}
+  @keyframes resume-toast-slide-in {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .resume-page-app {
+    background: linear-gradient(180deg, #fbf8f2 0%, #f8f4ec 50%, #ece3d4 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
   .resume-site-main {
     padding-bottom: 40px;
+  }
+
+  .resume-toast-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .resume-toast {
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: resume-toast-slide-in 0.2s ease-out;
+    max-width: min(360px, calc(100vw - 40px));
+    overflow-wrap: break-word;
+  }
+
+  .resume-toast--error {
+    background: #e94560;
+  }
+
+  .resume-toast--success {
+    background: #27ae60;
   }
 
   .page-hero__links .resume-download-button {
@@ -124,8 +163,7 @@ export const resumePageCss = `
   }
 
   .resume-web-entry__subtitle,
-  .resume-web-entry__date,
-  .resume-web-entry__meta {
+  .resume-web-entry__date {
     margin: 6px 0 0;
     color: var(--muted);
     line-height: var(--type-body-compact-leading);
@@ -182,7 +220,6 @@ export const resumePageCss = `
     color: var(--accent-deep);
   }
 
-  .resume-web-contact-value,
   .resume-web-contact-link {
     font-size: var(--type-body-size);
     color: var(--ink);

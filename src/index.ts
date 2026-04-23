@@ -29,16 +29,6 @@ function addSecurityHeaders(res: Response): Response {
   });
 }
 
-// Wrap handler to apply security headers to all API responses
-function withHeaders<T extends (...args: any[]) => Response | Promise<Response>>(
-  handler: T
-): T {
-  return (async (...args: any[]) => {
-    const res = await handler(...args);
-    return addSecurityHeaders(res);
-  }) as unknown as T;
-}
-
 let server: ReturnType<typeof Bun.serve>;
 
 server = Bun.serve({
@@ -52,7 +42,10 @@ server = Bun.serve({
 
     // PDF export routes
     "/api/public-pdf": {
-      POST: withHeaders((req) => handlePublicPDF(req, server.requestIP(req)?.address ?? null)),
+      POST: async (req) =>
+        addSecurityHeaders(
+          await handlePublicPDF(req, server.requestIP(req)?.address ?? null)
+        ),
     },
   },
 

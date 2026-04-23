@@ -9,7 +9,6 @@ const sampleResume: ResumeData = {
     name: "Tony & Lee",
     badges: ["Platform <Engineering>"],
     contacts: {
-      phone: "(555) 000-0000",
       linkedin: "tony lee/dev",
       email: "tony+resume@example.com",
     },
@@ -44,21 +43,20 @@ const sampleResume: ResumeData = {
       endDate: "2019",
     },
   ],
-  certificates: [],
 };
 
 describe("ResumeView", () => {
   test("renders a stable root class for print-specific styling", () => {
     const html = renderToStaticMarkup(
-      <ResumeDocument data={sampleResume} themeColor="#c9a86c" />
+      <ResumeDocument data={sampleResume} />
     );
 
-    expect(html).toContain("class=\"resume-document page layout-minimal-timeline\"");
+    expect(html).toContain("class=\"resume-document\"");
   });
 
   test("escapes text once without double-encoding entities", () => {
     const html = renderToStaticMarkup(
-      <ResumeDocument data={sampleResume} themeColor="#c9a86c" />
+      <ResumeDocument data={sampleResume} />
     );
 
     expect(html).toContain("Tony &amp; Lee");
@@ -68,7 +66,7 @@ describe("ResumeView", () => {
 
   test("encodes linkedin handle in link href while keeping display readable", () => {
     const html = renderToStaticMarkup(
-      <ResumeDocument data={sampleResume} themeColor="#c9a86c" />
+      <ResumeDocument data={sampleResume} />
     );
 
     expect(html).toContain("href=\"https://linkedin.com/in/tony%20lee%2Fdev\"");
@@ -77,7 +75,7 @@ describe("ResumeView", () => {
 
   test("renders project sections with escaped titles", () => {
     const html = renderToStaticMarkup(
-      <ResumeDocument data={sampleResume} themeColor="#c9a86c" />
+      <ResumeDocument data={sampleResume} />
     );
 
     expect(html).toContain("Selected Projects");

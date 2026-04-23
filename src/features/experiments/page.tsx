@@ -5,18 +5,25 @@ import {
   formatBurstTtftLabel,
   formatCurrencyLabel,
   formatDurationLabel,
-  formatTimelineSeconds,
 } from "../site/format";
 import { PublicSiteLayout } from "../site/layout";
-import type {
-  ComparisonDirection,
-  EvidenceExcerpt,
-  ExperimentFamilyId,
-  ExperimentProfile,
-} from "../site/types";
 import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "Experiments | Tony Lee";
+
+type ComparisonDirection = "lower" | "higher";
+type ExperimentFamilyId =
+  | "profile-baselines"
+  | "policy-compare"
+  | "target-calibration";
+
+interface EvidenceExcerpt {
+  title: string;
+  subtitle: string;
+  reportDate: string;
+  command: string;
+  lines: string[];
+}
 
 const evidenceDateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "long",
@@ -38,7 +45,15 @@ interface ComparisonChartRow {
   values: ComparisonChartValue[];
 }
 
-function getProfile(id: ExperimentProfile["id"]): ExperimentProfile {
+interface ExperimentComparisonCopy {
+  questionTitle: string;
+  question: string;
+  takeawayTitle: string;
+  takeaway: string;
+  note: string;
+}
+
+function getProfile(id: string) {
   const match = experimentsContent.profiles.find((profile) => profile.id === id);
   if (!match) {
     throw new Error(`Missing experiment profile: ${id}`);
@@ -172,10 +187,54 @@ function ExperimentEvidenceSection({
   );
 }
 
-export function ExperimentsPage() {
-  const [activeExperimentId, setActiveExperimentId] = React.useState<ExperimentFamilyId>(
-    experimentsContent.experimentSets[0]?.id ?? "profile-baselines"
+function ExperimentComparisonPanel({
+  comparison,
+  chartTitle,
+  chartAriaLabel,
+  rows,
+  evidenceCopy,
+  children,
+}: {
+  comparison: ExperimentComparisonCopy;
+  chartTitle: string;
+  chartAriaLabel: string;
+  rows: ComparisonChartRow[];
+  evidenceCopy: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <ExperimentOverview
+        questionTitle={comparison.questionTitle}
+        question={comparison.question}
+        takeawayTitle={comparison.takeawayTitle}
+        takeaway={comparison.takeaway}
+      />
+
+      <article className="card comparison-surface">
+        <div className="comparison-surface__header">
+          <div>
+            <p className="label">Visual comparison</p>
+            <h3 className="card__title">{chartTitle}</h3>
+          </div>
+          <p className="detail-copy comparison-surface__copy">
+            {comparison.note}
+          </p>
+        </div>
+
+        <ComparisonChart ariaLabel={chartAriaLabel} rows={rows} />
+      </article>
+
+      <ExperimentEvidenceSection copy={evidenceCopy}>
+        {children}
+      </ExperimentEvidenceSection>
+    </>
   );
+}
+
+export function ExperimentsPage() {
+  const [activeExperimentId, setActiveExperimentId] =
+    React.useState<ExperimentFamilyId>("profile-baselines");
   const zeroIdleProfile = getProfile("zero-idle");
   const warmOneProfile = getProfile("warm-1");
   const policyProof = experimentsContent.evidenceExcerpts.find(
@@ -292,7 +351,7 @@ export function ExperimentsPage() {
 
   const policyChartRows: ComparisonChartRow[] = experimentsContent.policyComparison.rows.map((row) => ({
     label: row.label,
-    betterWhen: row.betterWhen,
+    betterWhen: row.betterWhen as ComparisonDirection,
     values: [
       {
         label: "Running",
@@ -364,147 +423,81 @@ export function ExperimentsPage() {
     switch (activeExperimentId) {
       case "profile-baselines":
         return (
-          <>
-            <ExperimentOverview
-              questionTitle={experimentsContent.profileComparison.questionTitle}
-              question={experimentsContent.profileComparison.question}
-              takeawayTitle={experimentsContent.profileComparison.takeawayTitle}
-              takeaway={experimentsContent.profileComparison.takeaway}
-            />
-
-            <article className="card comparison-surface">
-              <div className="comparison-surface__header">
-                <div>
-                  <p className="label">Visual comparison</p>
-                  <h3 className="card__title">Where latency and cost move</h3>
-                </div>
-                <p className="detail-copy comparison-surface__copy">
-                  {experimentsContent.profileComparison.note}
-                </p>
-              </div>
-
-              <ComparisonChart
-                ariaLabel="Profile baseline comparison chart"
-                rows={profileChartRows}
-              />
-            </article>
-
-            <ExperimentEvidenceSection
-              copy="Use the sequence view to see where the first delay appears, then confirm the recorded checkpoints from the stored run excerpts."
-            >
-              <div className="timeline-grid">
-                {experimentsContent.profiles.map((profile) => (
-                  <article key={profile.id} className="timeline-card">
-                    <div className="timeline-card__header">
-                      <div>
-                        <h3 className="timeline-card__title">{profile.label}</h3>
-                        <p className="timeline-card__copy">
-                          First public response in{" "}
-                          <strong>{formatDurationLabel(profile.firstPublicResponseSeconds)}</strong>
-                        </p>
+          <ExperimentComparisonPanel
+            comparison={experimentsContent.profileComparison}
+            chartTitle="Where latency and cost move"
+            chartAriaLabel="Profile baseline comparison chart"
+            rows={profileChartRows}
+            evidenceCopy="Use the sequence view to see where the first delay appears, then confirm the recorded checkpoints from the stored run excerpts."
+          >
+            <div className="timeline-grid">
+              {experimentsContent.profiles.map((profile) => (
+                <article key={profile.id} className="timeline-card">
+                  <div className="timeline-card__header">
+                    <div>
+                      <h3 className="timeline-card__title">{profile.label}</h3>
+                      <p className="timeline-card__copy">
+                        First public response in{" "}
+                        <strong>{formatDurationLabel(profile.firstPublicResponseSeconds)}</strong>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="timeline-events">
+                    {profile.timeline.map((event) => (
+                      <div
+                        key={`${profile.id}-${event.label}`}
+                        className={
+                          event.emphasis
+                            ? "timeline-event timeline-event--emphasis"
+                            : "timeline-event"
+                        }
+                      >
+                        <span className="timeline-event__time">
+                          {event.seconds}s
+                        </span>
+                        <span>{event.label}</span>
                       </div>
-                    </div>
-                    <div className="timeline-events">
-                      {profile.timeline.map((event) => (
-                        <div
-                          key={`${profile.id}-${event.label}`}
-                          className={
-                            event.emphasis
-                              ? "timeline-event timeline-event--emphasis"
-                              : "timeline-event"
-                          }
-                        >
-                          <span className="timeline-event__time">
-                            {formatTimelineSeconds(event.seconds)}
-                          </span>
-                          <span>{event.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </article>
-                ))}
-              </div>
-              <div className="proof-grid">
-                {profileProofs.map((excerpt) => (
-                  <EvidenceCard key={`${excerpt.title}-${excerpt.command}`} excerpt={excerpt} />
-                ))}
-              </div>
-            </ExperimentEvidenceSection>
-          </>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="proof-grid">
+              {profileProofs.map((excerpt) => (
+                <EvidenceCard key={`${excerpt.title}-${excerpt.command}`} excerpt={excerpt} />
+              ))}
+            </div>
+          </ExperimentComparisonPanel>
         );
       case "policy-compare":
         return (
-          <>
-            <ExperimentOverview
-              questionTitle={experimentsContent.policyComparison.questionTitle}
-              question={experimentsContent.policyComparison.question}
-              takeawayTitle={experimentsContent.policyComparison.takeawayTitle}
-              takeaway={experimentsContent.policyComparison.takeaway}
-            />
-
-            <article className="card comparison-surface">
-              <div className="comparison-surface__header">
-                <div>
-                  <p className="label">Visual comparison</p>
-                  <h3 className="card__title">Where scale-out improves</h3>
-                </div>
-                <p className="detail-copy comparison-surface__copy">
-                  {experimentsContent.policyComparison.note}
-                </p>
-              </div>
-
-              <ComparisonChart
-                ariaLabel="Warm-1 policy comparison chart"
-                rows={policyChartRows}
-              />
-            </article>
-
-            <ExperimentEvidenceSection
-              copy="This warm-1 compare report is the direct proof behind the policy recommendation."
-            >
-              <div className="proof-grid">
-                <EvidenceCard excerpt={policyProof} />
-              </div>
-            </ExperimentEvidenceSection>
-          </>
+          <ExperimentComparisonPanel
+            comparison={experimentsContent.policyComparison}
+            chartTitle="Where scale-out improves"
+            chartAriaLabel="Warm-1 policy comparison chart"
+            rows={policyChartRows}
+            evidenceCopy="This warm-1 compare report is the direct proof behind the policy recommendation."
+          >
+            <div className="proof-grid">
+              <EvidenceCard excerpt={policyProof} />
+            </div>
+          </ExperimentComparisonPanel>
         );
       case "target-calibration":
         return (
-          <>
-            <ExperimentOverview
-              questionTitle={experimentsContent.targetCalibration.questionTitle}
-              question={experimentsContent.targetCalibration.question}
-              takeawayTitle={experimentsContent.targetCalibration.takeawayTitle}
-              takeaway={experimentsContent.targetCalibration.takeaway}
-            />
-
-            <article className="card comparison-surface">
-              <div className="comparison-surface__header">
-                <div>
-                  <p className="label">Visual comparison</p>
-                  <h3 className="card__title">How the targets trade time for cost</h3>
-                </div>
-                <p className="detail-copy comparison-surface__copy">
-                  {experimentsContent.targetCalibration.note}
-                </p>
-              </div>
-
-              <ComparisonChart
-                ariaLabel="Zero-idle target calibration chart"
-                rows={targetChartRows}
-              />
-            </article>
-
-            <ExperimentEvidenceSection
-              copy="This April 21, 2026 sweep excerpt shows why target 6 is the current default and why target 8 remains provisional."
-            >
-              <div className="proof-grid">
-                {calibrationProofs.map((excerpt) => (
-                  <EvidenceCard key={`${excerpt.title}-${excerpt.command}`} excerpt={excerpt} />
-                ))}
-              </div>
-            </ExperimentEvidenceSection>
-          </>
+          <ExperimentComparisonPanel
+            comparison={experimentsContent.targetCalibration}
+            chartTitle="How the targets trade time for cost"
+            chartAriaLabel="Zero-idle target calibration chart"
+            rows={targetChartRows}
+            evidenceCopy="This April 21, 2026 sweep excerpt shows why target 6 is the current default and why target 8 remains provisional."
+          >
+            <div className="proof-grid">
+              {calibrationProofs.map((excerpt) => (
+                <EvidenceCard key={`${excerpt.title}-${excerpt.command}`} excerpt={excerpt} />
+              ))}
+            </div>
+          </ExperimentComparisonPanel>
         );
     }
   })();
@@ -590,7 +583,7 @@ export function ExperimentsPage() {
                     ? "experiment-tab experiment-tab--active"
                     : "experiment-tab"
                 }
-                onClick={() => setActiveExperimentId(item.id)}
+                onClick={() => setActiveExperimentId(item.id as ExperimentFamilyId)}
               >
                 <span className="experiment-tab__title">{item.title}</span>
               </button>
