@@ -65,24 +65,24 @@ export const resumePageCss = `
   }
 
   .page-hero__links .resume-download-button {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: white;
-    box-shadow: 0 10px 22px rgba(22, 34, 45, 0.16);
+    background: var(--interactive-surface-active-bg);
+    border-color: var(--interactive-surface-active-border);
+    color: var(--interactive-surface-active-color);
+    box-shadow: var(--interactive-surface-active-shadow);
   }
 
   .page-hero__links .resume-download-button:hover,
   .page-hero__links .resume-download-button:focus-visible {
-    background: #0f1923;
-    border-color: #0f1923;
-    color: white;
-    box-shadow: 0 12px 26px rgba(22, 34, 45, 0.2);
+    background: var(--interactive-surface-active-bg);
+    border-color: var(--interactive-surface-active-border-strong);
+    color: var(--interactive-surface-active-color);
+    box-shadow: var(--interactive-surface-active-shadow);
   }
 
   .page-hero__links .resume-download-button:disabled {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: white;
+    background: var(--interactive-surface-active-bg);
+    border-color: var(--interactive-surface-active-border);
+    color: var(--interactive-surface-active-color);
   }
 
   .resume-web-layout {

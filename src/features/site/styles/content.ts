@@ -186,11 +186,12 @@ export const contentStyles = `
   .page-hero__links button {
     padding: 8px 12px;
     border-radius: 999px;
-    border: 1px solid rgba(22, 34, 45, 0.1);
-    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid var(--interactive-surface-border);
+    background: var(--interactive-surface-bg);
     color: var(--ink);
-    box-shadow: inset 0 -1px 0 rgba(22, 34, 45, 0.04);
+    box-shadow: var(--interactive-surface-shadow);
     min-height: 2.35rem;
+    transform: translate3d(0, 0, 0);
     transition:
       transform 0.18s ease,
       border-color 0.18s ease,
@@ -203,18 +204,24 @@ export const contentStyles = `
   .page-hero__links a:focus-visible,
   .page-hero__links button:hover,
   .page-hero__links button:focus-visible {
-    transform: translateY(-1px);
-    border-color: rgba(173, 123, 58, 0.24);
-    background: rgba(255, 255, 255, 0.98);
+    transform: var(--interactive-surface-hover-transform);
+    border-color: var(--interactive-surface-hover-border);
+    background: var(--interactive-surface-hover-bg);
     color: var(--accent-deep);
-    box-shadow: 0 8px 18px rgba(22, 34, 45, 0.08);
+    box-shadow: var(--interactive-surface-hover-shadow);
+  }
+
+  .page-hero__links a:focus-visible,
+  .page-hero__links button:focus-visible {
+    outline: var(--interactive-outline);
+    outline-offset: 2px;
   }
 
   .page-hero__links button:disabled {
     cursor: progress;
     opacity: 0.72;
-    transform: none;
-    box-shadow: inset 0 -1px 0 rgba(22, 34, 45, 0.04);
+    transform: translate3d(0, 0, 0);
+    box-shadow: var(--interactive-surface-shadow);
   }
 
   @media (max-width: 640px) {
@@ -489,22 +496,36 @@ export const contentStyles = `
     align-items: center;
     padding: 3px 7px;
     border-radius: 999px;
-    background: rgba(173, 123, 58, 0.12);
-    border: 1px solid rgba(173, 123, 58, 0.18);
+    background: var(--interactive-surface-bg);
+    border: 1px solid var(--interactive-surface-border);
+    box-shadow: var(--interactive-surface-shadow);
     color: var(--accent-deep);
     font-size: 0.72rem;
     font-weight: 700;
     line-height: 1;
     text-decoration: none;
     white-space: nowrap;
-    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    transform: translate3d(0, 0, 0);
+    transition:
+      transform 0.18s ease,
+      border-color 0.18s ease,
+      background 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease;
   }
 
   .project-workflow-node__link:hover,
   .project-workflow-node__link:focus-visible {
-    background: rgba(173, 123, 58, 0.18);
-    border-color: rgba(173, 123, 58, 0.26);
+    transform: var(--interactive-surface-hover-transform);
+    background: var(--interactive-surface-hover-bg);
+    border-color: var(--interactive-surface-hover-border);
     color: var(--ink);
+    box-shadow: var(--interactive-surface-hover-shadow);
+  }
+
+  .project-workflow-node__link:focus-visible {
+    outline: var(--interactive-outline);
+    outline-offset: 2px;
   }
 
   .project-workflow-flow-arrow {
@@ -742,11 +763,13 @@ export const contentStyles = `
     padding: 6px 10px;
     border-radius: 999px;
     text-decoration: none;
-    background: rgba(255, 255, 255, 0.78);
-    border: 1px solid rgba(22, 34, 45, 0.08);
+    background: var(--interactive-surface-bg);
+    border: 1px solid var(--interactive-surface-border);
+    box-shadow: var(--interactive-surface-shadow);
     color: var(--muted);
     font-size: var(--type-meta-size);
     font-weight: 600;
+    transform: translate3d(0, 0, 0);
     transition:
       transform 0.18s ease,
       border-color 0.18s ease,
@@ -757,11 +780,16 @@ export const contentStyles = `
 
   .project-implementation-measure__source-link:hover,
   .project-implementation-measure__source-link:focus-visible {
-    transform: translateY(-1px);
-    border-color: rgba(173, 123, 58, 0.2);
-    background: rgba(255, 255, 255, 0.94);
+    transform: var(--interactive-surface-hover-transform);
+    border-color: var(--interactive-surface-hover-border);
+    background: var(--interactive-surface-hover-bg);
     color: var(--accent-deep);
-    box-shadow: 0 8px 18px rgba(22, 34, 45, 0.08);
+    box-shadow: var(--interactive-surface-hover-shadow);
+  }
+
+  .project-implementation-measure__source-link:focus-visible {
+    outline: var(--interactive-outline);
+    outline-offset: 2px;
   }
 
   @media (max-width: 900px) {
