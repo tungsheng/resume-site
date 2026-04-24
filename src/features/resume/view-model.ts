@@ -19,9 +19,7 @@ export function buildResumeViewModel(data: ResumeData) {
   }));
 
   const projectsTitle = data.projects?.title.trim() || "Projects";
-  const projects = (data.projects?.items ?? []).map((entry) => ({
-    ...entry,
-  }));
+  const projects = data.projects?.items ?? [];
 
   const education = data.education.map(({ degree, school, startDate, endDate }) => ({
     degree,

@@ -32,25 +32,6 @@ export const projectContent = {
         "It makes response-time tradeoffs and GPU scale-out behavior easy to understand with checked-in runs.",
     },
   ],
-  overviewSignalsLead:
-    "These numbers show cold-start wait, warm-path benefit, and how quickly the platform adds capacity after traffic begins.",
-  overviewMetrics: [
-    {
-      label: "Starting from zero",
-      value: "447s",
-      detail: "First public response when no GPU serving path is already running.",
-    },
-    {
-      label: "Keeping one path warm",
-      value: "84s",
-      detail: "First public response when one serving path is already ready.",
-    },
-    {
-      label: "Scaling after traffic starts",
-      value: "563s",
-      detail: "Second ready replica under the current warm-path and active-pressure policy.",
-    },
-  ],
   workflowSectionTitle: "How the platform serves and scales",
   workflowLead:
     "Requests follow one stable public path. Load signals follow a separate control path that adds GPU capacity only when another replica cannot schedule.",

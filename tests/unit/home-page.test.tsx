@@ -9,10 +9,9 @@ describe("HomePage", () => {
 
     expect(html).toContain(">I&#x27;m<");
     expect(html).toContain(">Tony Lee<");
-    expect(html).toContain("class=\"page-title home-hero-title\"");
+    expect(html).toContain("aria-label=\"Tony Lee home\"");
+    expect(html).toContain("aria-current=\"page\">Home<");
     expect(html).toContain("ML inference, built to scale.");
-    expect(html).toContain("class=\"home-hero-subtitle\"");
     expect(html).toContain("I build GPU serving platforms that turn traffic into measurable capacity.");
-    expect(html).toContain("class=\"page-hero page-hero--header home-hero\"");
   });
 });

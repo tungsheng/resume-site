@@ -1,11 +1,32 @@
 import React, { useEffect, useState } from "react";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  Link,
+  List,
+  ListItem,
+  ListItemText,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { buildResumeViewModel } from "./view-model";
 import type { ResumeData } from "../../types";
 import { publicResumeData } from "./data";
-import { PublicSiteFooter, PublicSiteHeader } from "../site/layout";
 import { EXPERIMENTS_PATH, PROJECT_PATH } from "../site/content";
+import {
+  ActionLinkRow,
+  PageHero,
+  PublicSiteLayout,
+} from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
-import { resumePageCss } from "./style";
 
 interface Toast {
   id: number;
@@ -51,43 +72,6 @@ export async function requestPublicResumePdf(): Promise<Blob> {
   return res.blob();
 }
 
-function DownloadIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  );
-}
-
-function Spinner({ size = 16, color = "var(--accent-deep)" }: { size?: number; color?: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        width: size,
-        height: size,
-        border: `${Math.max(2, size / 8)}px solid #f0f0f0`,
-        borderTopColor: color,
-        borderRadius: "50%",
-        animation: "spin 1s linear infinite",
-        display: "inline-block",
-      }}
-    />
-  );
-}
-
 function ToastContainer({
   toasts,
   onRemove,
@@ -98,11 +82,23 @@ function ToastContainer({
   if (toasts.length === 0) return null;
 
   return (
-    <div className="resume-toast-container" role="alert" aria-live="polite">
+    <Box
+      sx={{
+        position: "fixed",
+        right: 24,
+        bottom: 24,
+        zIndex: (theme) => theme.zIndex.snackbar,
+        display: "grid",
+        gap: 2,
+        maxWidth: "min(360px, calc(100vw - 48px))",
+      }}
+      role="alert"
+      aria-live="polite"
+    >
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
-    </div>
+    </Box>
   );
 }
 
@@ -118,23 +114,60 @@ function ToastItem({
     return () => window.clearTimeout(timer);
   }, [toast.id, onRemove]);
 
-  return <div className={`resume-toast resume-toast--${toast.type}`}>{toast.message}</div>;
+  return (
+    <Alert
+      severity={toast.type === "error" ? "error" : "success"}
+      variant="filled"
+      onClose={() => onRemove(toast.id)}
+    >
+      {toast.message}
+    </Alert>
+  );
 }
 
 function ScreenResumeBulletList({ items }: { items: string[] }) {
   if (items.length === 0) return null;
 
   return (
-    <ul className="resume-web-list">
+    <List
+      dense
+      disablePadding
+      sx={{
+        listStyleType: "disc",
+        pl: 3,
+        "& .MuiListItem-root": {
+          display: "list-item",
+          py: 0.25,
+        },
+      }}
+    >
       {items.map((item, index) => (
-        <li key={`${item}-${index}`}>
-          <span className="resume-list-bullet" aria-hidden="true">
-            •
-          </span>
-          <span className="resume-list-text">{item}</span>
-        </li>
+        <ListItem key={`${item}-${index}`} disablePadding>
+          <ListItemText
+            primary={
+              <Typography variant="body2" color="text.secondary">
+                {item}
+              </Typography>
+            }
+          />
+        </ListItem>
       ))}
-    </ul>
+    </List>
+  );
+}
+
+function ResumeSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Stack component="section" spacing={2}>
+      <Typography variant="h5">{title}</Typography>
+      {children}
+    </Stack>
   );
 }
 
@@ -143,132 +176,158 @@ function ResumeWebView({ data }: { data: ResumeData }) {
   const linkedinHref = getLinkedinHref(view.header.contacts.linkedin);
 
   return (
-    <section className="section" aria-label="Web resume view">
-      <div className="resume-web-layout">
-        <div className="resume-web-main">
-          {view.summary && (
-            <article className="resume-web-card">
-              <h3 className="resume-web-card__title">Professional Summary</h3>
-              <p className="resume-web-copy">{view.summary}</p>
-            </article>
-          )}
+    <Grid container spacing={3} aria-label="Web resume view">
+      <Grid size={{ xs: 12, md: 8 }}>
+        <Stack spacing={3}>
+          {view.summary ? (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Professional Summary
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {view.summary}
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : null}
 
-          {view.projects.length > 0 && (
-            <section className="resume-web-section">
-              <h3 className="resume-web-section__title">{view.projectsTitle}</h3>
-              <div className="resume-web-stack">
+          {view.projects.length > 0 ? (
+            <ResumeSection title={view.projectsTitle}>
+              <Stack spacing={2}>
                 {view.projects.map((project, index) => (
-                  <article
-                    key={`${project.title}-${index}`}
-                    className="resume-web-card resume-web-card--entry"
-                  >
-                    <div className="resume-web-entry__header">
-                      <div>
-                        <h4 className="resume-web-entry__title">{project.title}</h4>
-                      </div>
-                    </div>
-                    <ScreenResumeBulletList items={project.highlights} />
-                  </article>
+                  <Card key={`${project.title}-${index}`} variant="outlined">
+                    <CardContent>
+                      <Stack spacing={1.5}>
+                        <Typography variant="h6">{project.title}</Typography>
+                        <ScreenResumeBulletList items={project.highlights} />
+                      </Stack>
+                    </CardContent>
+                  </Card>
                 ))}
-              </div>
-            </section>
-          )}
+              </Stack>
+            </ResumeSection>
+          ) : null}
 
-          {view.experience.length > 0 && (
-            <section className="resume-web-section">
-              <h3 className="resume-web-section__title">Experience</h3>
-              <div className="resume-web-stack">
+          {view.experience.length > 0 ? (
+            <ResumeSection title="Experience">
+              <Stack spacing={2}>
                 {view.experience.map((experience, index) => (
-                  <article
-                    key={`${experience.title}-${index}`}
-                    className="resume-web-card resume-web-card--entry"
+                  <Card key={`${experience.title}-${index}`} variant="outlined">
+                    <CardContent>
+                      <Stack spacing={1.5}>
+                        <Stack
+                          direction={{ xs: "column", sm: "row" }}
+                          spacing={1}
+                          sx={{ justifyContent: "space-between" }}
+                        >
+                          <div>
+                            <Typography variant="h6">{experience.title}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {experience.company}
+                            </Typography>
+                          </div>
+                          <Typography variant="body2" color="text.secondary">
+                            {experience.dateRange}
+                          </Typography>
+                        </Stack>
+                        <ScreenResumeBulletList items={experience.highlights} />
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            </ResumeSection>
+          ) : null}
+        </Stack>
+      </Grid>
+
+      <Grid size={{ xs: 12, md: 4 }}>
+        <Stack spacing={3}>
+          {(view.header.contacts.email || linkedinHref) ? (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Contact
+                </Typography>
+                <Stack spacing={1.5}>
+                  {view.header.contacts.email ? (
+                    <div>
+                      <Typography variant="overline" color="primary">
+                        Email
+                      </Typography>
+                      <Typography variant="body2">
+                        <Link href={`mailto:${view.header.contacts.email}`}>
+                          {view.header.contacts.email}
+                        </Link>
+                      </Typography>
+                    </div>
+                  ) : null}
+                  {linkedinHref ? (
+                    <div>
+                      <Typography variant="overline" color="primary">
+                        LinkedIn
+                      </Typography>
+                      <Typography variant="body2">
+                        <Link href={linkedinHref} target="_blank" rel="noreferrer">
+                          {`linkedin.com/in/${view.header.contacts.linkedin}`}
+                        </Link>
+                      </Typography>
+                    </div>
+                  ) : null}
+                </Stack>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {view.skills.length > 0 ? (
+            <ResumeSection title="Skills">
+              <Card variant="outlined">
+                <CardContent>
+                  <Stack
+                    divider={<Divider flexItem />}
+                    spacing={1.5}
                   >
-                    <div className="resume-web-entry__header">
-                      <div>
-                        <h4 className="resume-web-entry__title">{experience.title}</h4>
-                        <p className="resume-web-entry__subtitle">{experience.company}</p>
+                    {view.skills.map((skill) => (
+                      <div key={skill.category}>
+                        <Typography variant="subtitle1">
+                          {skill.categoryLabel}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {skill.itemsText}
+                        </Typography>
                       </div>
-                      <p className="resume-web-entry__date">{experience.dateRange}</p>
-                    </div>
-                    <ScreenResumeBulletList items={experience.highlights} />
-                  </article>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
+                    ))}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </ResumeSection>
+          ) : null}
 
-        <aside className="resume-web-sidebar">
-          {(view.header.contacts.email || linkedinHref) && (
-            <article className="resume-web-card resume-web-card--compact">
-              <h3 className="resume-web-card__title">Contact</h3>
-              <div className="resume-web-contact-list">
-                {view.header.contacts.email && (
-                  <div className="resume-web-contact-item">
-                    <span className="resume-web-contact-label">Email</span>
-                    <a
-                      className="resume-web-contact-link"
-                      href={`mailto:${view.header.contacts.email}`}
-                    >
-                      {view.header.contacts.email}
-                    </a>
-                  </div>
-                )}
-                {linkedinHref && (
-                  <div className="resume-web-contact-item">
-                    <span className="resume-web-contact-label">LinkedIn</span>
-                    <a
-                      className="resume-web-contact-link"
-                      href={linkedinHref}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {`linkedin.com/in/${view.header.contacts.linkedin}`}
-                    </a>
-                  </div>
-                )}
-              </div>
-            </article>
-          )}
-
-          {view.skills.length > 0 && (
-            <section className="resume-web-section">
-              <h3 className="resume-web-section__title">Skills</h3>
-              <article className="resume-web-card resume-web-card--compact">
-                <div className="resume-web-skill-list">
-                  {view.skills.map((skill) => (
-                    <div key={skill.category} className="resume-web-skill-row">
-                      <h4 className="resume-web-skill-label">{skill.categoryLabel}</h4>
-                      <p className="resume-web-skill-items">{skill.itemsText}</p>
-                    </div>
-                  ))}
-                </div>
-              </article>
-            </section>
-          )}
-
-          {view.education.length > 0 && (
-            <section className="resume-web-section">
-              <h3 className="resume-web-section__title">Education</h3>
-              <div className="resume-web-stack">
+          {view.education.length > 0 ? (
+            <ResumeSection title="Education">
+              <Stack spacing={2}>
                 {view.education.map((education, index) => (
-                  <article
-                    key={`${education.school}-${index}`}
-                    className="resume-web-card resume-web-card--compact"
-                  >
-                    <h4 className="resume-web-entry__title">{education.degree}</h4>
-                    <p className="resume-web-entry__subtitle">{education.school}</p>
-                    <p className="resume-web-entry__date resume-web-entry__date--inline">
-                      {education.dateRange}
-                    </p>
-                  </article>
+                  <Card key={`${education.school}-${index}`} variant="outlined">
+                    <CardContent>
+                      <Stack spacing={0.5}>
+                        <Typography variant="h6">{education.degree}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {education.school}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {education.dateRange}
+                        </Typography>
+                      </Stack>
+                    </CardContent>
+                  </Card>
                 ))}
-              </div>
-            </section>
-          )}
-        </aside>
-      </div>
-    </section>
+              </Stack>
+            </ResumeSection>
+          ) : null}
+        </Stack>
+      </Grid>
+    </Grid>
   );
 }
 
@@ -316,63 +375,58 @@ export function ResumePageContent({
   );
 
   return (
-    <div className="resume-page-app">
-      <style>{resumePageCss}</style>
+    <PublicSiteLayout activeNav="resume">
+      <PageHero>
+        <Typography component="h1" variant="h3">
+          {data.header.name}
+        </Typography>
 
-      <PublicSiteHeader activeNav="resume" />
+        {data.header.badges.length > 0 ? (
+          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+            {data.header.badges.map((badge) => (
+              <Chip key={badge} label={badge} />
+            ))}
+          </Stack>
+        ) : null}
 
-      <section className="site-main resume-site-main">
-        <section className="page-hero page-hero--header">
-          <div className="page-hero__content">
-            <h1 className="page-title">{data.header.name}</h1>
-            {data.header.badges.length > 0 ? (
-              <p className="page-lede">{data.header.badges.join(" • ")}</p>
-            ) : null}
+        <ActionLinkRow>
+          <Button
+            type="button"
+            variant="contained"
+            onClick={onDownload}
+            disabled={downloading}
+            aria-label={downloading ? "Generating PDF" : "Download resume as PDF"}
+            aria-busy={downloading}
+            title="Download resume PDF"
+            startIcon={
+              downloading ? (
+                <CircularProgress color="inherit" size={18} />
+              ) : (
+                <DownloadRoundedIcon />
+              )
+            }
+          >
+            {downloading ? "Preparing PDF..." : "Download PDF"}
+          </Button>
 
-            <div className="inline-links page-hero__links">
-              <button
-                type="button"
-                className="resume-download-button"
-                onClick={onDownload}
-                disabled={downloading}
-                aria-label={downloading ? "Generating PDF" : "Download resume as PDF"}
-                aria-busy={downloading}
-                title="Download resume PDF"
-              >
-                {downloading ? (
-                  <>
-                    <Spinner size={14} />
-                    Preparing PDF...
-                  </>
-                ) : (
-                  <>
-                    <DownloadIcon />
-                    Download PDF
-                  </>
-                )}
-              </button>
+          {secondaryLinks.map((link) => (
+            <Button
+              key={link.label}
+              href={link.href}
+              variant="outlined"
+              target={link.external ? "_blank" : undefined}
+              rel={link.external ? "noreferrer" : undefined}
+            >
+              {link.label}
+            </Button>
+          ))}
+        </ActionLinkRow>
+      </PageHero>
 
-              {secondaryLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  target={link.external ? "_blank" : undefined}
-                  rel={link.external ? "noreferrer" : undefined}
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <ResumeWebView data={data} />
-      </section>
-
-      <PublicSiteFooter />
+      <ResumeWebView data={data} />
 
       <ToastContainer toasts={toasts} onRemove={onRemoveToast} />
-    </div>
+    </PublicSiteLayout>
   );
 }
 

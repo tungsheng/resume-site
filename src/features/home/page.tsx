@@ -1,6 +1,7 @@
 import React from "react";
+import { Typography } from "@mui/material";
 import { siteProfile } from "../site/content";
-import { PublicSiteLayout } from "../site/layout";
+import { PageHero, PublicSiteLayout } from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "Tony Lee | ML Inference & Distributed Systems";
@@ -13,16 +14,18 @@ export function HomePage() {
 
   return (
     <PublicSiteLayout activeNav="home">
-      <section className="page-hero page-hero--header home-hero">
-        <div className="page-hero__content">
-          <h1 className="page-title home-hero-title">
-            <span className="home-hero-title__lead">I&apos;m</span>
-            <span className="home-hero-title__name">{siteProfile.name}</span>
-          </h1>
-          <p className="home-hero-subtitle">{HOME_SUBTITLE}</p>
-          <p className="page-lede">{HOME_LEDE}</p>
-        </div>
-      </section>
+      <PageHero align="center">
+        <Typography variant="overline" color="primary">
+          I&apos;m
+        </Typography>
+        <Typography component="h1" variant="h2">
+          {siteProfile.name}
+        </Typography>
+        <Typography variant="h5">{HOME_SUBTITLE}</Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "40rem" }}>
+          {HOME_LEDE}
+        </Typography>
+      </PageHero>
     </PublicSiteLayout>
   );
 }

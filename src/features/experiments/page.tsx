@@ -1,11 +1,35 @@
 import React from "react";
+import CompareArrowsRoundedIcon from "@mui/icons-material/CompareArrowsRounded";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { PROJECT_PATH, RESUME_PATH } from "../site/content";
 import { experimentsContent } from "../site/experiments-content";
 import {
   formatCurrencyLabel,
   formatDurationLabel,
 } from "../site/format";
-import { PublicSiteLayout } from "../site/layout";
+import {
+  ActionLinkRow,
+  PageHero,
+  PageSection,
+  PublicSiteLayout,
+  SectionHeader,
+} from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "Experiments | Tony Lee";
@@ -111,14 +135,20 @@ function formatEvidenceDate(reportDate: string): string {
   return evidenceDateFormatter.format(new Date(`${reportDate}T00:00:00Z`));
 }
 
-function buildBarWidth(value: number, maxValue: number): React.CSSProperties {
+function buildBarValue(value: number, maxValue: number): number {
   if (value === 0 || maxValue === 0) {
-    return { width: "0%" };
+    return 0;
   }
 
-  return {
-    width: `${Math.max((value / maxValue) * 100, 8)}%`,
-  };
+  return Math.max((value / maxValue) * 100, 8);
+}
+
+function getDecisionChipColor(
+  tone: DecisionTone
+): "primary" | "warning" | "default" {
+  if (tone === "strong") return "primary";
+  if (tone === "provisional") return "warning";
+  return "default";
 }
 
 function ComparisonChart({
@@ -129,63 +159,93 @@ function ComparisonChart({
   rows: ComparisonChartRow[];
 }) {
   return (
-    <div className="comparison-chart" role="group" aria-label={ariaLabel}>
+    <Stack spacing={2.5} role="group" aria-label={ariaLabel}>
       {rows.map((row) => {
         const maxValue = Math.max(...row.values.map((item) => item.value), 1);
 
         return (
-          <section key={row.label} className="comparison-chart__row">
-            <div className="comparison-chart__row-header">
-              <p className="comparison-chart__metric">{row.label}</p>
-              <p className="comparison-chart__meta">Better when {row.betterWhen}</p>
-            </div>
+          <Card key={row.label} variant="outlined">
+            <CardContent>
+              <Stack spacing={2}>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={1}
+                  sx={{ justifyContent: "space-between" }}
+                >
+                  <Typography variant="subtitle1">{row.label}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Better when {row.betterWhen}
+                  </Typography>
+                </Stack>
 
-            <div className="comparison-chart__series-list">
-              {row.values.map((item) => (
-                <div key={`${row.label}-${item.label}`} className="comparison-chart__series">
-                  <div className="comparison-chart__series-meta">
-                    <span className="comparison-chart__series-label">{item.label}</span>
-                    <span className="comparison-chart__series-value">{item.display}</span>
-                  </div>
-                  <div className="comparison-chart__track" aria-hidden="true">
-                    <span
-                      className={
-                        item.tone === "primary"
-                          ? "comparison-chart__fill comparison-chart__fill--primary"
-                          : "comparison-chart__fill comparison-chart__fill--secondary"
-                      }
-                      style={buildBarWidth(item.value, maxValue)}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+                <Stack spacing={1.5}>
+                  {row.values.map((item) => (
+                    <Stack key={`${row.label}-${item.label}`} spacing={0.75}>
+                      <Stack direction="row" spacing={2} sx={{ justifyContent: "space-between" }}>
+                        <Typography variant="body2">{item.label}</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {item.display}
+                        </Typography>
+                      </Stack>
+                      <LinearProgress
+                        variant="determinate"
+                        value={buildBarValue(item.value, maxValue)}
+                        color={item.tone === "primary" ? "primary" : "secondary"}
+                      />
+                    </Stack>
+                  ))}
+                </Stack>
+              </Stack>
+            </CardContent>
+          </Card>
         );
       })}
-    </div>
+    </Stack>
   );
 }
 
 function EvidenceCard({ excerpt }: { excerpt: EvidenceExcerpt }) {
   return (
-    <article className="proof-entry">
-      <div className="proof-entry__header">
-        <div>
-          <p className="proof-entry__title">{excerpt.title}</p>
-          <p className="proof-entry__subtitle">{excerpt.subtitle}</p>
-        </div>
-        <span className="report-badge">{formatEvidenceDate(excerpt.reportDate)}</span>
-      </div>
-      <code className="proof-entry__command">{excerpt.command}</code>
-      <ul className="proof-entry__facts">
-        {excerpt.lines.map((line) => (
-          <li key={`${excerpt.command}-${line}`} className="proof-entry__fact">
-            {line}
-          </li>
-        ))}
-      </ul>
-    </article>
+    <Card variant="outlined" sx={{ height: "100%" }}>
+      <CardContent>
+        <Stack spacing={2}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1}
+            sx={{
+              justifyContent: "space-between",
+              alignItems: { xs: "flex-start", sm: "center" },
+            }}
+          >
+            <div>
+              <Typography variant="subtitle1">{excerpt.title}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {excerpt.subtitle}
+              </Typography>
+            </div>
+            <Chip label={formatEvidenceDate(excerpt.reportDate)} size="small" />
+          </Stack>
+
+          <Typography component="code" variant="body2">
+            {excerpt.command}
+          </Typography>
+
+          <List dense disablePadding>
+            {excerpt.lines.map((line) => (
+              <ListItem key={`${excerpt.command}-${line}`} disableGutters>
+                <ListItemText
+                  primary={
+                    <Typography variant="body2" color="text.secondary">
+                      {line}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+        </Stack>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -201,23 +261,39 @@ function ExperimentOverview({
   takeaway: string;
 }) {
   return (
-    <article className="experiment-overview">
-      <div className="experiment-overview__grid">
-        <section className="experiment-overview__block">
-          <p className="label">Problem statement</p>
-          <p className="experiment-overview__title">{questionTitle}</p>
-          <p className="experiment-overview__copy experiment-overview__copy--question">
-            {question}
-          </p>
-        </section>
+    <Grid container spacing={2}>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <Card variant="outlined" sx={{ height: "100%" }}>
+          <CardContent>
+            <Typography variant="overline" color="primary">
+              Problem statement
+            </Typography>
+            <Typography variant="h6" gutterBottom>
+              {questionTitle}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {question}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
 
-        <section className="experiment-overview__block experiment-overview__block--observation">
-          <p className="label">Observed outcome</p>
-          <p className="experiment-overview__title">{takeawayTitle}</p>
-          <p className="experiment-overview__copy">{takeaway}</p>
-        </section>
-      </div>
-    </article>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <Card variant="outlined" sx={{ height: "100%" }}>
+          <CardContent>
+            <Typography variant="overline" color="primary">
+              Observed outcome
+            </Typography>
+            <Typography variant="h6" gutterBottom>
+              {takeawayTitle}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {takeaway}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
   );
 }
 
@@ -229,41 +305,17 @@ function ExperimentEvidenceSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="experiment-support-panel" aria-label="Evidence">
-      <div className="experiment-support-panel__header">
-        <p className="label">Measured proof</p>
-        <p className="detail-copy experiment-support-panel__copy">{copy}</p>
+    <Stack spacing={2.5} aria-label="Evidence">
+      <div>
+        <Typography variant="overline" color="primary">
+          Measured proof
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {copy}
+        </Typography>
       </div>
-      <div className="evidence-stack">{children}</div>
-    </section>
-  );
-}
-
-function TradeoffArrowIcon() {
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      className="experiments-tradeoff-card__icon-svg"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M7 11H22M22 11L18.5 7.5M22 11L18.5 14.5"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2.2"
-      />
-      <path
-        d="M25 21H10M10 21L13.5 17.5M10 21L13.5 24.5"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2.2"
-      />
-    </svg>
+      {children}
+    </Stack>
   );
 }
 
@@ -283,40 +335,42 @@ function ExperimentDecisionMapSection({
   onSelect: (id: ExperimentFamilyId) => void;
 }) {
   return (
-    <div className="experiment-decision-map" aria-label="Decision map">
-      <p className="section__copy experiment-family-copy">{lead}</p>
-      <div
-        className="experiment-decision-grid"
-        role="tablist"
+    <Stack spacing={2.5} aria-label="Decision map">
+      <Typography variant="body1" color="text.secondary">
+        {lead}
+      </Typography>
+      <Tabs
+        value={activeExperimentId}
+        onChange={(_event, value) => onSelect(value as ExperimentFamilyId)}
         aria-label="Experiment family tabs"
-        aria-orientation="horizontal"
+        variant="scrollable"
+        allowScrollButtonsMobile
       >
         {cards.map((item) => (
-          <button
+          <Tab
             key={item.id}
-            type="button"
-            role="tab"
             id={`experiment-tab-${item.id}`}
-            aria-selected={item.id === activeExperimentId}
             aria-controls={panelId}
-            tabIndex={item.id === activeExperimentId ? 0 : -1}
-            className={
-              item.id === activeExperimentId
-                ? "experiment-decision-card experiment-decision-card--active"
-                : "experiment-decision-card"
+            value={item.id}
+            label={
+              <Stack spacing={0.5} sx={{ alignItems: "flex-start", textAlign: "left" }}>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {item.title}
+                </Typography>
+                <Typography variant="body2">{item.recommendation}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {item.readout}
+                </Typography>
+              </Stack>
             }
-            onClick={() => onSelect(item.id)}
-          >
-            <span className="experiment-decision-card__title">{item.title}</span>
-            <span className="experiment-decision-card__recommendation">
-              {item.recommendation}
-            </span>
-            <span className="experiment-decision-card__readout">{item.readout}</span>
-          </button>
+            wrapped
+          />
         ))}
-      </div>
-      <p className="experiment-decision-legend">{legend}</p>
-    </div>
+      </Tabs>
+      <Typography variant="body2" color="text.secondary">
+        {legend}
+      </Typography>
+    </Stack>
   );
 }
 
@@ -338,26 +392,76 @@ function ExperimentVerdictStrip({
   stats: ExperimentComparisonCopy["spotlightStats"];
 }) {
   return (
-    <article className="card experiment-verdict">
-      <div className="experiment-verdict__header">
-        <div className="experiment-verdict__intro">
-          <p className="label">Current call</p>
-          <p className="experiment-verdict__eyebrow">{title}</p>
-        </div>
-        <span className={`decision-status decision-status--${tone}`}>{status}</span>
-      </div>
-      <h3 className="experiment-verdict__title">{recommendation}</h3>
-      <div className="experiment-verdict__readout">{readout}</div>
-      <p className="experiment-verdict__summary">{summary}</p>
-      <div className="experiment-verdict__facts" aria-label="Key facts">
-        {stats.map((item) => (
-          <span key={`${title}-${item.label}`} className="experiment-verdict__fact">
-            <span className="experiment-verdict__fact-label">{item.label}:</span>{" "}
-            <span className="experiment-verdict__fact-value">{item.value}</span>
-          </span>
-        ))}
-      </div>
-    </article>
+    <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, height: "100%" }}>
+      <Stack spacing={2}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          sx={{
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", sm: "center" },
+          }}
+        >
+          <div>
+            <Typography variant="overline" color="primary">
+              Current call
+            </Typography>
+            <Typography variant="subtitle1">{title}</Typography>
+          </div>
+          <Chip label={status} color={getDecisionChipColor(tone)} />
+        </Stack>
+
+        <Typography variant="h5">{recommendation}</Typography>
+        <Typography variant="h6" color="primary">
+          {readout}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {summary}
+        </Typography>
+
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          aria-label="Key facts"
+          sx={{ flexWrap: "wrap" }}
+        >
+          {stats.map((item) => (
+            <Chip
+              key={`${title}-${item.label}`}
+              label={`${item.label}: ${item.value}`}
+              variant="outlined"
+            />
+          ))}
+        </Stack>
+      </Stack>
+    </Paper>
+  );
+}
+
+function TabPanel({
+  currentValue,
+  value,
+  id,
+  labelledBy,
+  children,
+}: {
+  currentValue: string;
+  value: string;
+  id: string;
+  labelledBy: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Box
+      role="tabpanel"
+      id={id}
+      aria-labelledby={labelledBy}
+      hidden={currentValue !== value}
+      sx={{ pt: 3 }}
+    >
+      {currentValue === value ? children : null}
+    </Box>
   );
 }
 
@@ -381,10 +485,10 @@ function ExperimentComparisonPanel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="experiment-detail-shell">
-      <div
-        className="experiment-detail-nav"
-        role="tablist"
+    <Stack spacing={1}>
+      <Tabs
+        value={detailView}
+        onChange={(_event, value) => onSelectDetailView(value as ExperimentDetailView)}
         aria-label="Decision detail views"
       >
         {[
@@ -392,32 +496,21 @@ function ExperimentComparisonPanel({
           { id: "chart", label: "Compact chart" },
           { id: "proof", label: "Measured proof" },
         ].map((item) => (
-          <button
+          <Tab
             key={item.id}
-            type="button"
-            role="tab"
             id={`experiment-detail-tab-${item.id}`}
-            aria-selected={detailView === item.id}
             aria-controls={`experiment-detail-panel-${item.id}`}
-            tabIndex={detailView === item.id ? 0 : -1}
-            className={
-              detailView === item.id
-                ? "experiment-detail-tab experiment-detail-tab--active"
-                : "experiment-detail-tab"
-            }
-            onClick={() => onSelectDetailView(item.id as ExperimentDetailView)}
-          >
-            {item.label}
-          </button>
+            value={item.id}
+            label={item.label}
+          />
         ))}
-      </div>
+      </Tabs>
 
-      <section
-        className="experiment-detail-panel"
-        role="tabpanel"
+      <TabPanel
+        currentValue={detailView}
+        value="why"
         id="experiment-detail-panel-why"
-        aria-labelledby="experiment-detail-tab-why"
-        hidden={detailView !== "why"}
+        labelledBy="experiment-detail-tab-why"
       >
         <ExperimentOverview
           questionTitle={comparison.questionTitle}
@@ -425,42 +518,44 @@ function ExperimentComparisonPanel({
           takeawayTitle={comparison.takeawayTitle}
           takeaway={comparison.takeaway}
         />
-      </section>
+      </TabPanel>
 
-      <section
-        className="experiment-detail-panel"
-        role="tabpanel"
+      <TabPanel
+        currentValue={detailView}
+        value="chart"
         id="experiment-detail-panel-chart"
-        aria-labelledby="experiment-detail-tab-chart"
-        hidden={detailView !== "chart"}
+        labelledBy="experiment-detail-tab-chart"
       >
-        <article className="comparison-surface">
-          <div className="comparison-surface__header">
+        <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }}>
+          <Stack spacing={2.5}>
             <div>
-              <p className="label">Compact chart</p>
-              <h3 className="card__title">{chartTitle}</h3>
+              <Typography variant="overline" color="primary">
+                Compact chart
+              </Typography>
+              <Typography variant="h6" gutterBottom>
+                {chartTitle}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {comparison.note}
+              </Typography>
             </div>
-            <p className="detail-copy comparison-surface__copy">
-              {comparison.note}
-            </p>
-          </div>
 
-          <ComparisonChart ariaLabel={chartAriaLabel} rows={rows} />
-        </article>
-      </section>
+            <ComparisonChart ariaLabel={chartAriaLabel} rows={rows} />
+          </Stack>
+        </Paper>
+      </TabPanel>
 
-      <section
-        className="experiment-detail-panel"
-        role="tabpanel"
+      <TabPanel
+        currentValue={detailView}
+        value="proof"
         id="experiment-detail-panel-proof"
-        aria-labelledby="experiment-detail-tab-proof"
-        hidden={detailView !== "proof"}
+        labelledBy="experiment-detail-tab-proof"
       >
         <ExperimentEvidenceSection copy={evidenceCopy}>
           {children}
         </ExperimentEvidenceSection>
-      </section>
-    </div>
+      </TabPanel>
+    </Stack>
   );
 }
 
@@ -626,47 +721,62 @@ export function ExperimentsPage() {
             detailView={activeDetailView}
             onSelectDetailView={setActiveDetailView}
           >
-            <div className="timeline-grid">
+            <Grid container spacing={2}>
               {experimentsContent.profiles.map((profile) => (
-                <article key={profile.id} className="timeline-card">
-                  <div className="timeline-card__header">
-                    <div>
-                      <h3 className="timeline-card__title">{profile.label}</h3>
-                      <p className="timeline-card__copy">
-                        First public response in{" "}
-                        <strong>{formatDurationLabel(profile.firstPublicResponseSeconds)}</strong>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="timeline-events">
-                    {profile.timeline
-                      .filter((event) =>
-                        (profileTimelineEventLabels[profile.id] ?? []).includes(event.label)
-                      )
-                      .map((event) => (
-                      <div
-                        key={`${profile.id}-${event.label}`}
-                        className={
-                          event.emphasis
-                            ? "timeline-event timeline-event--emphasis"
-                            : "timeline-event"
-                        }
-                      >
-                        <span className="timeline-event__time">
-                          {event.seconds}s
-                        </span>
-                        <span>{event.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </article>
+                <Grid key={profile.id} size={{ xs: 12, md: 6 }}>
+                  <Card variant="outlined" sx={{ height: "100%" }}>
+                    <CardContent>
+                      <Stack spacing={2}>
+                        <div>
+                          <Typography variant="h6">{profile.label}</Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            First public response in{" "}
+                            <Box component="span" sx={{ fontWeight: 700 }}>
+                              {formatDurationLabel(profile.firstPublicResponseSeconds)}
+                            </Box>
+                          </Typography>
+                        </div>
+
+                        <List dense disablePadding>
+                          {profile.timeline
+                            .filter((event) =>
+                              (profileTimelineEventLabels[profile.id] ?? []).includes(event.label)
+                            )
+                            .map((event) => (
+                              <ListItem key={`${profile.id}-${event.label}`} disableGutters>
+                                <ListItemText
+                                  primary={
+                                    <Stack
+                                      direction="row"
+                                      spacing={1}
+                                      sx={{ alignItems: "center" }}
+                                    >
+                                      <Chip
+                                        label={`${event.seconds}s`}
+                                        size="small"
+                                        color={event.emphasis ? "primary" : "default"}
+                                      />
+                                      <Typography variant="body2">{event.label}</Typography>
+                                    </Stack>
+                                  }
+                                />
+                              </ListItem>
+                            ))}
+                        </List>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
               ))}
-            </div>
-            <div className="proof-grid">
+            </Grid>
+
+            <Grid container spacing={2}>
               {profileProofs.map((excerpt) => (
-                <EvidenceCard key={`${excerpt.title}-${excerpt.command}`} excerpt={excerpt} />
+                <Grid key={`${excerpt.title}-${excerpt.command}`} size={{ xs: 12, md: 6 }}>
+                  <EvidenceCard excerpt={excerpt} />
+                </Grid>
               ))}
-            </div>
+            </Grid>
           </ExperimentComparisonPanel>
         );
       case "policy-compare":
@@ -680,9 +790,11 @@ export function ExperimentsPage() {
             detailView={activeDetailView}
             onSelectDetailView={setActiveDetailView}
           >
-            <div className="proof-grid">
-              <EvidenceCard excerpt={policyProof} />
-            </div>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <EvidenceCard excerpt={policyProof} />
+              </Grid>
+            </Grid>
           </ExperimentComparisonPanel>
         );
       case "target-calibration":
@@ -696,11 +808,13 @@ export function ExperimentsPage() {
             detailView={activeDetailView}
             onSelectDetailView={setActiveDetailView}
           >
-            <div className="proof-grid">
+            <Grid container spacing={2}>
               {calibrationProofs.map((excerpt) => (
-                <EvidenceCard key={`${excerpt.title}-${excerpt.command}`} excerpt={excerpt} />
+                <Grid key={`${excerpt.title}-${excerpt.command}`} size={{ xs: 12, md: 8 }}>
+                  <EvidenceCard excerpt={excerpt} />
+                </Grid>
               ))}
-            </div>
+            </Grid>
           </ExperimentComparisonPanel>
         );
     }
@@ -717,86 +831,105 @@ export function ExperimentsPage() {
 
   return (
     <PublicSiteLayout activeNav="experiments">
-      <section className="page-hero page-hero--header">
-        <div className="page-hero__content">
-          <h1 className="page-title">{experimentsContent.title}</h1>
-          <p className="page-lede">{experimentsContent.subtitle}</p>
+      <PageHero>
+        <Typography component="h1" variant="h3">
+          {experimentsContent.title}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
+          {experimentsContent.subtitle}
+        </Typography>
 
-          <div className="inline-links page-hero__links">
-            <a href={PROJECT_PATH}>View project</a>
-            <a href={RESUME_PATH}>View resume</a>
-          </div>
-        </div>
-      </section>
+        <ActionLinkRow>
+          <Button href={PROJECT_PATH} variant="contained">
+            View project
+          </Button>
+          <Button href={RESUME_PATH} variant="outlined">
+            View resume
+          </Button>
+        </ActionLinkRow>
+      </PageHero>
 
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Experiment purpose</p>
-          <h2 className="section__title">Why these experiments exist</h2>
-        </div>
-        <p className="section__copy experiments-summary-intro">{experimentsContent.summaryIntro}</p>
-        <div className="experiments-tradeoff-grid">
+      <PageSection>
+        <SectionHeader
+          eyebrow="Experiment purpose"
+          title="Why these experiments exist"
+          copy={experimentsContent.summaryIntro}
+        />
+
+        <Grid container spacing={3}>
           {experimentsContent.tradeoffCards.map((item) => (
-            <article key={item.title} className="card experiments-tradeoff-card">
-              <h3 className="experiments-tradeoff-card__title">{item.title}</h3>
-              <div
-                className="experiments-tradeoff-card__pair"
-                role="group"
-                aria-label={`${item.title} trade-off`}
-              >
-                <div className="experiments-tradeoff-card__side">
-                  <span className="experiments-tradeoff-card__side-value">{item.left}</span>
-                </div>
-                <div className="experiments-tradeoff-card__center" aria-hidden="true">
-                  <span className="experiments-tradeoff-card__badge">Trade-off</span>
-                  <span className="experiments-tradeoff-card__icon">
-                    <TradeoffArrowIcon />
-                  </span>
-                </div>
-                <div className="experiments-tradeoff-card__side experiments-tradeoff-card__side--right">
-                  <span className="experiments-tradeoff-card__side-value">{item.right}</span>
-                </div>
-              </div>
-            </article>
+            <Grid key={item.title} size={{ xs: 12, md: 4 }}>
+              <Card variant="outlined" sx={{ height: "100%" }}>
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Typography variant="h6">{item.title}</Typography>
+                    <Stack
+                      direction="row"
+                      spacing={2}
+                      sx={{ alignItems: "center", justifyContent: "space-between" }}
+                      role="group"
+                      aria-label={`${item.title} trade-off`}
+                    >
+                      <Typography variant="subtitle1">{item.left}</Typography>
+                      <Stack spacing={0.5} sx={{ alignItems: "center" }} aria-hidden="true">
+                        <Chip label="Trade-off" size="small" />
+                        <CompareArrowsRoundedIcon color="action" />
+                      </Stack>
+                      <Typography variant="subtitle1" sx={{ textAlign: "right" }}>
+                        {item.right}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </div>
-      </section>
+        </Grid>
+      </PageSection>
 
-      <section className="section">
-        <div className="section__header">
-          <p className="section__kicker">Compare by question</p>
-          <h2 className="section__title">Choose what you&apos;re deciding</h2>
-        </div>
-        <div className="experiment-decision-shell">
-          <ExperimentDecisionMapSection
-            lead={experimentsContent.decisionLead}
-            cards={experimentDecisionCards}
-            legend={experimentsContent.decisionLegend}
-            activeExperimentId={activeExperimentId}
-            panelId={activeExperimentPanelId}
-            onSelect={setActiveExperimentId}
-          />
-          <ExperimentVerdictStrip
-            title={activeDecision.title}
-            recommendation={activeDecision.recommendation}
-            readout={activeDecision.readout}
-            summary={activeExperiment.summary}
-            status={activeDecision.status}
-            tone={activeDecision.tone}
-            stats={activeExperimentComparison.spotlightStats}
-          />
-        </div>
-        <div className="experiment-family-shell">
-          <article
-            className="card experiment-family-panel"
-            role="tabpanel"
-            id={activeExperimentPanelId}
-            aria-labelledby={activeExperimentTabId}
-          >
-            {activeExperimentPanel}
-          </article>
-        </div>
-      </section>
+      <PageSection>
+        <SectionHeader
+          eyebrow="Compare by question"
+          title="Choose what you&apos;re deciding"
+        />
+
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, lg: 7 }}>
+            <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, height: "100%" }}>
+              <ExperimentDecisionMapSection
+                lead={experimentsContent.decisionLead}
+                cards={experimentDecisionCards}
+                legend={experimentsContent.decisionLegend}
+                activeExperimentId={activeExperimentId}
+                panelId={activeExperimentPanelId}
+                onSelect={setActiveExperimentId}
+              />
+            </Paper>
+          </Grid>
+
+          <Grid size={{ xs: 12, lg: 5 }}>
+            <ExperimentVerdictStrip
+              title={activeDecision.title}
+              recommendation={activeDecision.recommendation}
+              readout={activeDecision.readout}
+              summary={activeExperiment.summary}
+              status={activeDecision.status}
+              tone={activeDecision.tone}
+              stats={activeExperimentComparison.spotlightStats}
+            />
+          </Grid>
+        </Grid>
+
+        <Paper
+          variant="outlined"
+          role="tabpanel"
+          id={activeExperimentPanelId}
+          aria-labelledby={activeExperimentTabId}
+          sx={{ p: { xs: 2.5, md: 3 } }}
+        >
+          {activeExperimentPanel}
+        </Paper>
+      </PageSection>
     </PublicSiteLayout>
   );
 }

@@ -77,11 +77,6 @@ export function getResumeDocumentCss(): string {
 .resume-document .contact-row {
   display: flex;
   justify-content: flex-end;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.resume-document .contact-row-icon {
   align-items: center;
   gap: 6px;
 }
@@ -215,8 +210,7 @@ export function getResumeDocumentCss(): string {
   break-inside: avoid;
 }
 
-.resume-document .project-highlights,
-.resume-document .experience-highlights {
+.resume-document .resume-highlights {
   list-style: none;
   padding: 0;
   display: grid;
@@ -226,16 +220,15 @@ export function getResumeDocumentCss(): string {
   color: #374151;
 }
 
-.resume-document .project-highlights {
+.resume-document .project-item .resume-highlights {
   margin: 4px 0 0;
 }
 
-.resume-document .experience-highlights {
+.resume-document .experience-content .resume-highlights {
   margin: 0;
 }
 
-.resume-document .project-highlights li,
-.resume-document .experience-highlights li {
+.resume-document .resume-highlights li {
   display: grid;
   grid-template-columns: 10px minmax(0, 1fr);
   column-gap: 8px;

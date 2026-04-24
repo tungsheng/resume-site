@@ -12,11 +12,8 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Why these experiments exist");
     expect(html).toContain("Choose what you&#x27;re deciding");
     expect(html).toContain("Scale-out signal");
-    expect(html).toContain("April 20, 2026");
     expect(html).toContain("Warm baseline");
     expect(html).toContain("Active target");
-    expect(html).toContain("Zero-idle");
-    expect(html).toContain("Warm baseline (warm-1)");
     expect(html).toContain("View project");
     expect(html).toContain("View resume");
     expect(html).toContain("role=\"tablist\"");
@@ -50,11 +47,6 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Observed outcome");
     expect(html).toContain("Does one warm path justify its idle cost?");
     expect(html).toContain("One warm path sharply reduces the first public wait");
-    expect(html).toContain("Where latency and cost move");
-    expect(html).toContain("./scripts/evaluate --profile zero-idle --policy active-pressure");
-    expect(html).toContain("Profile baseline comparison chart");
-    expect(html).toContain("Measured proof");
-    expect(html).toContain("Sequence view shows where zero-idle waits before first response");
     expect(html).toContain("experiment-tab-profile-baselines");
     expect(html).toContain("experiment-panel");
     expect(html).toContain("aria-selected=\"true\"");

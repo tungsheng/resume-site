@@ -1,81 +1,105 @@
 import React from "react";
+import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
+import {
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { EXPERIMENTS_PATH, RESUME_PATH, siteProfile } from "../site/content";
 import { implementation, projectContent } from "../site/project-content";
-import { PublicSiteLayout } from "../site/layout";
+import {
+  ActionLinkRow,
+  PageHero,
+  PageSection,
+  PublicSiteLayout,
+  SectionHeader,
+} from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "Cloud Inference Platform | Tony Lee";
 
-interface WorkflowNode {
-  label: string;
-  href?: string;
-  linkLabel?: string;
-}
+type WorkflowNode = (typeof projectContent.workflowFoundation.nodes)[number];
+type WorkflowTrack = (typeof projectContent.workflowPaths)[number];
 
-interface WorkflowTrack {
-  title: string;
-  summary: string;
-  nodes: WorkflowNode[];
-}
+function WorkflowNodeCard({ node }: { node: WorkflowNode }) {
+  const href = "href" in node ? node.href : undefined;
+  const linkLabel =
+    "linkLabel" in node && node.linkLabel ? node.linkLabel : "Code";
 
-interface WorkflowFlowProps {
-  nodes: WorkflowNode[];
-  className: string;
-  ariaLabel: string;
-}
-
-function WorkflowNodePill({ label, href, linkLabel = "Code" }: WorkflowNode) {
   return (
-    <span className="project-workflow-node">
-      <span className="project-workflow-node__label">{label}</span>
-      {href ? (
-        <a
-          className="project-workflow-node__link"
-          href={href}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {linkLabel}
-        </a>
-      ) : null}
-    </span>
+    <Paper
+      variant="outlined"
+      sx={{ p: 1.5, minWidth: { xs: "100%", sm: 180 }, maxWidth: 240 }}
+    >
+      <Stack spacing={1}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {node.label}
+        </Typography>
+        {href ? (
+          <Button
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+            sx={{ alignSelf: "flex-start" }}
+          >
+            {linkLabel}
+          </Button>
+        ) : null}
+      </Stack>
+    </Paper>
   );
 }
 
-function WorkflowFlow({ nodes, className, ariaLabel }: WorkflowFlowProps) {
+function WorkflowFlow({
+  nodes,
+  ariaLabel,
+}: {
+  nodes: WorkflowNode[];
+  ariaLabel: string;
+}) {
   return (
-    <div className={className} aria-label={ariaLabel}>
+    <Stack
+      direction="row"
+      spacing={1}
+      useFlexGap
+      sx={{ flexWrap: "wrap", alignItems: "center" }}
+      aria-label={ariaLabel}
+    >
       {nodes.map((node, index) => (
-        <React.Fragment key={node.label}>
-          <WorkflowNodePill
-            label={node.label}
-            href={node.href}
-            linkLabel={node.linkLabel}
-          />
-          {index < nodes.length - 1 && (
-            <span className="project-workflow-flow-arrow" aria-hidden="true">
-              →
-            </span>
-          )}
+        <React.Fragment key={`${node.label}-${index}`}>
+          <WorkflowNodeCard node={node} />
+          {index < nodes.length - 1 ? (
+            <NavigateNextRoundedIcon color="action" aria-hidden="true" />
+          ) : null}
         </React.Fragment>
       ))}
-    </div>
+    </Stack>
   );
 }
 
 function WorkflowPathRow({ title, summary, nodes }: WorkflowTrack) {
   return (
-    <section className="project-workflow-path">
-      <div className="project-workflow-path__meta">
-        <h3 className="card__title">{title}</h3>
-        <p className="detail-copy project-workflow-path__summary">{summary}</p>
-      </div>
-      <WorkflowFlow
-        nodes={nodes}
-        className="project-workflow-path__flow"
-        ariaLabel={`${title} workflow`}
-      />
-    </section>
+    <Card variant="outlined">
+      <CardContent>
+        <Stack spacing={2}>
+          <div>
+            <Typography variant="h6">{title}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              {summary}
+            </Typography>
+          </div>
+          <WorkflowFlow nodes={nodes} ariaLabel={`${title} workflow`} />
+        </Stack>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -84,205 +108,240 @@ export function ProjectPage() {
 
   return (
     <PublicSiteLayout activeNav="project">
-      <section className="page-hero page-hero--header">
-        <div className="page-hero__content">
-          <h1 className="page-title">{projectContent.title}</h1>
-          <p className="page-lede">{projectContent.lede}</p>
+      <PageHero>
+        <Typography component="h1" variant="h3">
+          {projectContent.title}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
+          {projectContent.lede}
+        </Typography>
 
-          <div className="inline-links page-hero__links">
-            <a href={EXPERIMENTS_PATH}>View experiments</a>
-            <a href={RESUME_PATH}>View resume</a>
-            <a href={siteProfile.githubUrl} target="_blank" rel="noreferrer">
-              GitHub
-            </a>
-          </div>
-        </div>
-      </section>
+        <ActionLinkRow>
+          <Button href={EXPERIMENTS_PATH} variant="contained">
+            View experiments
+          </Button>
+          <Button href={RESUME_PATH} variant="outlined">
+            View resume
+          </Button>
+          <Button
+            href={siteProfile.githubUrl}
+            target="_blank"
+            rel="noreferrer"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            GitHub
+          </Button>
+        </ActionLinkRow>
+      </PageHero>
 
-      <section className="section">
-        <div className="section__header">
-          <h2 className="section__title">At a glance</h2>
-        </div>
-        <p className="section__copy project-overview-summary">
-          {projectContent.overviewSummary}
-        </p>
-        <div className="grid-three project-overview-grid">
+      <PageSection>
+        <SectionHeader
+          title="At a glance"
+          copy={projectContent.overviewSummary}
+        />
+
+        <Grid container spacing={3}>
           {projectContent.overviewCards.map((item) => (
-            <section key={item.title} className="project-overview-story-item">
-              <h3 className="card__title">{item.title}</h3>
-              <p className="detail-copy project-overview-card__copy">{item.body}</p>
-            </section>
-          ))}
-        </div>
-        <section className="project-overview-signals">
-          <div className="project-overview-signals__intro">
-            <p className="label">Signals in plain English</p>
-            <p className="detail-copy project-overview-signals__copy">{projectContent.overviewSignalsLead}</p>
-          </div>
-          <div className="grid-three project-overview-signals-grid">
-            {projectContent.overviewMetrics.map((item) => (
-              <section key={item.label} className="project-signal">
-                <h3 className="project-signal__title">{item.label}</h3>
-                <div className="project-stat-value">{item.value}</div>
-                <p className="project-stat-detail project-signal__detail">{item.detail}</p>
-              </section>
-            ))}
-          </div>
-        </section>
-      </section>
-
-      <section className="section">
-        <div className="section__header">
-          <h2 className="section__title">{projectContent.workflowSectionTitle}</h2>
-        </div>
-        <p className="section__copy project-workflow-lead">{projectContent.workflowLead}</p>
-        <article className="card project-workflow-surface">
-          <section className="project-workflow-foundation">
-            <div className="project-workflow-foundation__header">
-              <h3 className="card__title">
-                {projectContent.workflowFoundation.title}
-              </h3>
-              <p className="detail-copy project-workflow-foundation__summary">
-                {projectContent.workflowFoundation.summary}
-              </p>
-            </div>
-            <div className="project-workflow-foundation__nodes">
-              {projectContent.workflowFoundation.nodes.map((node) => (
-                <WorkflowNodePill
-                  key={node.label}
-                  label={node.label}
-                  href={node.href}
-                  linkLabel={node.linkLabel}
-                />
-              ))}
-            </div>
-          </section>
-          <div className="project-workflow-paths">
-            {projectContent.workflowPaths.map((path) => (
-              <WorkflowPathRow
-                key={path.title}
-                title={path.title}
-                summary={path.summary}
-                nodes={path.nodes}
-              />
-            ))}
-          </div>
-          <section className="project-workflow-rejoin">
-            <div className="project-workflow-rejoin__meta">
-              <p className="label">Rejoin point</p>
-              <p className="detail-copy project-workflow-rejoin__copy">
-                {projectContent.workflowRejoin.body}
-              </p>
-            </div>
-            <WorkflowFlow
-              nodes={projectContent.workflowRejoin.nodes}
-              className="project-workflow-rejoin__flow"
-              ariaLabel="Rejoin workflow"
-            />
-          </section>
-          <div className="grid-three project-workflow-explainers">
-            {projectContent.workflowExplainers.map((item) => (
-              <section key={item.title} className="project-workflow-explainer">
-                <h3 className="card__title">{item.title}</h3>
-                <p className="detail-copy project-workflow-explainer__copy">{item.body}</p>
-              </section>
-            ))}
-          </div>
-        </article>
-      </section>
-
-      <section className="section">
-        <div className="section__header">
-          <h2 className="section__title">{implementation.title}</h2>
-        </div>
-        <p className="section__copy">{implementation.lead}</p>
-        <article className="card project-implementation-surface">
-          <section className="project-implementation-primary">
-            <div className="project-implementation-primary__intro">
-              <p className="label">{implementation.defaultPathTitle}</p>
-              <p className="detail-copy project-implementation-primary__copy">
-                {implementation.defaultPathLead}
-              </p>
-            </div>
-            <div className="project-implementation-default-flow" aria-label="Default repo flow">
-              {implementation.defaultPathSteps.map((item, index) => (
-                <section
-                  key={item.title}
-                  className="project-implementation-default-step"
-                  data-continues={
-                    index < implementation.defaultPathSteps.length - 1 ? "true" : "false"
-                  }
-                >
-                  <p className="label project-implementation-default-step__index">
-                    Step {index + 1}
-                  </p>
-                  <h3 className="card__title project-implementation-default-step__title">
+            <Grid key={item.title} size={{ xs: 12, md: 4 }}>
+              <Card variant="outlined" sx={{ height: "100%" }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
                     {item.title}
-                  </h3>
-                  <code className="project-implementation-default-step__command">
-                    {item.command}
-                  </code>
-                  <p className="detail-copy project-implementation-default-step__copy">
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
                     {item.body}
-                  </p>
-                </section>
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </PageSection>
+
+      <PageSection>
+        <SectionHeader
+          title={projectContent.workflowSectionTitle}
+          copy={projectContent.workflowLead}
+        />
+
+        <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }}>
+          <Stack spacing={3}>
+            <Card variant="outlined">
+              <CardContent>
+                <Stack spacing={2}>
+                  <div>
+                    <Typography variant="h6" gutterBottom>
+                      {projectContent.workflowFoundation.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {projectContent.workflowFoundation.summary}
+                    </Typography>
+                  </div>
+                  <WorkflowFlow
+                    nodes={projectContent.workflowFoundation.nodes}
+                    ariaLabel="Foundation workflow"
+                  />
+                </Stack>
+              </CardContent>
+            </Card>
+
+            <Grid container spacing={3}>
+              {projectContent.workflowPaths.map((path) => (
+                <Grid key={path.title} size={{ xs: 12, md: 6 }}>
+                  <WorkflowPathRow
+                    title={path.title}
+                    summary={path.summary}
+                    nodes={path.nodes}
+                  />
+                </Grid>
               ))}
-            </div>
-          </section>
-          <div className="project-implementation-support">
-            <section className="project-implementation-proof">
-              <div className="project-implementation-proof__intro">
-                <p className="label">{implementation.verifyProofTitle}</p>
-              </div>
-              <div className="project-implementation-proof-list">
-                {implementation.verifyProofs.map((item) => (
-                  <section key={item.title} className="project-implementation-proof-item">
-                    <h3 className="card__title project-implementation-proof-item__title">
-                      {item.title}
-                    </h3>
-                    <p className="detail-copy project-implementation-proof-item__copy">
-                      {item.body}
-                    </p>
-                  </section>
-                ))}
-              </div>
-            </section>
-            <section className="project-implementation-measure">
-              <div className="project-implementation-measure__intro">
-                <p className="label">{implementation.measurement.title}</p>
-                <p className="detail-copy project-implementation-measure__copy">
-                  {implementation.measurement.body}
-                </p>
-              </div>
-              <div className="project-implementation-measure__detail">
-                <code className="project-implementation-measure__command">
-                  {implementation.measurement.command}
-                </code>
-              <div className="project-implementation-measure__outputs">
-                {implementation.measurement.outputs.map((item) => (
-                  <span key={item} className="project-implementation-measure__output">
-                    {item}
-                  </span>
-                ))}
-              </div>
-                <div className="project-implementation-measure__links">
-                  {implementation.measurement.links.map((link) => (
-                    <a
-                      key={link.href}
-                      className="project-implementation-measure__source-link"
-                      href={link.href}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {link.label}
-                    </a>
-                  ))}
+            </Grid>
+
+            <Card variant="outlined">
+              <CardContent>
+                <Stack spacing={2}>
+                  <div>
+                    <Typography variant="overline" color="primary">
+                      Rejoin point
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {projectContent.workflowRejoin.body}
+                    </Typography>
+                  </div>
+                  <WorkflowFlow
+                    nodes={projectContent.workflowRejoin.nodes}
+                    ariaLabel="Rejoin workflow"
+                  />
+                </Stack>
+              </CardContent>
+            </Card>
+
+            <Grid container spacing={2}>
+              {projectContent.workflowExplainers.map((item) => (
+                <Grid key={item.title} size={{ xs: 12, md: 4 }}>
+                  <Card variant="outlined" sx={{ height: "100%" }}>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        {item.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {item.body}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Stack>
+        </Paper>
+      </PageSection>
+
+      <PageSection>
+        <SectionHeader title={implementation.title} copy={implementation.lead} />
+
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, lg: 7 }}>
+            <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, height: "100%" }}>
+              <Stack spacing={2.5}>
+                <div>
+                  <Typography variant="overline" color="primary">
+                    {implementation.defaultPathTitle}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {implementation.defaultPathLead}
+                  </Typography>
                 </div>
-              </div>
-            </section>
-          </div>
-        </article>
-      </section>
+
+                <Grid container spacing={2}>
+                  {implementation.defaultPathSteps.map((item, index) => (
+                    <Grid key={item.title} size={{ xs: 12, md: 4 }}>
+                      <Card variant="outlined" sx={{ height: "100%" }}>
+                        <CardContent>
+                          <Stack spacing={1.5}>
+                            <Chip
+                              label={`Step ${index + 1}`}
+                              size="small"
+                              sx={{ alignSelf: "flex-start" }}
+                            />
+                            <Typography variant="h6">{item.title}</Typography>
+                            <Typography component="code" variant="body2">
+                              {item.command}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {item.body}
+                            </Typography>
+                          </Stack>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Stack>
+            </Paper>
+          </Grid>
+
+          <Grid size={{ xs: 12, lg: 5 }}>
+            <Stack spacing={3}>
+              <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }}>
+                <Stack spacing={2}>
+                  <Typography variant="overline" color="primary">
+                    {implementation.verifyProofTitle}
+                  </Typography>
+                  {implementation.verifyProofs.map((item) => (
+                    <Card key={item.title} variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          {item.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {item.body}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Stack>
+              </Paper>
+
+              <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }}>
+                <Stack spacing={2}>
+                  <div>
+                    <Typography variant="overline" color="primary">
+                      {implementation.measurement.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {implementation.measurement.body}
+                    </Typography>
+                  </div>
+
+                  <Typography component="code" variant="body2">
+                    {implementation.measurement.command}
+                  </Typography>
+
+                  <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                    {implementation.measurement.outputs.map((item) => (
+                      <Chip key={item} label={item} />
+                    ))}
+                  </Stack>
+
+                  <ActionLinkRow>
+                    {implementation.measurement.links.map((link) => (
+                      <Button
+                        key={link.href}
+                        href={link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        endIcon={<OpenInNewRoundedIcon />}
+                      >
+                        {link.label}
+                      </Button>
+                    ))}
+                  </ActionLinkRow>
+                </Stack>
+              </Paper>
+            </Stack>
+          </Grid>
+        </Grid>
+      </PageSection>
     </PublicSiteLayout>
   );
 }

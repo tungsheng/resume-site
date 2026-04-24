@@ -39,8 +39,8 @@ const sampleResume: ResumeData = {
 describe("ResumePageContent", () => {
   test("renders the streamlined web resume with PDF download available", () => {
     const html = renderToStaticMarkup(
-        <ResumePageContent
-          data={sampleResume}
+      <ResumePageContent
+        data={sampleResume}
         downloading={false}
         onDownload={() => {}}
         toasts={[]}
@@ -48,11 +48,8 @@ describe("ResumePageContent", () => {
       />
     );
 
-    expect(html).toContain("class=\"site-header\"");
-    expect(html).toContain("class=\"site-footer\"");
     expect(html).toContain("aria-current=\"page\">Resume<");
     expect(html).toContain("aria-label=\"Tony Lee home\"");
-    expect(html).toContain("class=\"site-brand__logo\"");
     expect(html).toContain("T│L");
     expect(html).toContain("ML inference infrastructure");
     expect(html).toContain("Professional Summary");
@@ -61,8 +58,7 @@ describe("ResumePageContent", () => {
     expect(html).toContain(">Email<");
     expect(html).toContain(">LinkedIn<");
     expect(html).toContain("title=\"Download resume PDF\"");
-    expect(html).toContain("class=\"resume-download-button\"");
-    expect(html).toContain("class=\"inline-links page-hero__links\"");
+    expect(html).toContain("Download PDF");
     expect(html).toContain("Led platform modernization.");
   });
 });

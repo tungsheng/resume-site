@@ -45,15 +45,13 @@ function LinkedinMiniIcon() {
 
 function ResumeBulletList({
   items,
-  className,
 }: {
   items: string[];
-  className: string;
 }) {
   if (items.length === 0) return null;
 
   return (
-    <ul className={className}>
+    <ul className="resume-highlights">
       {items.map((item, index) => (
         <li key={`${item}-${index}`}>
           <span className="resume-list-bullet" aria-hidden="true">
@@ -98,10 +96,7 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
         {view.projects.map((project, index) => (
           <div key={`${project.title}-${index}`} className="project-item">
             <div className="project-title">{project.title}</div>
-            <ResumeBulletList
-              items={project.highlights}
-              className="project-highlights"
-            />
+            <ResumeBulletList items={project.highlights} />
           </div>
         ))}
       </div>
@@ -140,7 +135,6 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
               </div>
               <ResumeBulletList
                 items={experience.highlights}
-                className="experience-highlights"
               />
             </div>
           </div>
@@ -161,7 +155,7 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
           {view.header.contacts.email || view.header.contacts.linkedin ? (
             <div className="contact-info">
               {view.header.contacts.email ? (
-                <div className="contact-row contact-row-icon">
+                <div className="contact-row">
                   <a
                     className="contact-link"
                     href={`mailto:${view.header.contacts.email}`}
@@ -175,7 +169,7 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
               ) : null}
 
               {view.header.contacts.linkedin ? (
-                <div className="contact-row contact-row-icon">
+                <div className="contact-row">
                   <a
                     className="contact-link"
                     href={`https://linkedin.com/in/${encodeURIComponent(view.header.contacts.linkedin)}`}

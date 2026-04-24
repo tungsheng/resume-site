@@ -14,7 +14,6 @@ describe("ProjectPage", () => {
     expect(html).toContain("GitHub");
     expect(html).toContain("View experiments");
     expect(html).toContain("View resume");
-    expect(html).toContain("class=\"inline-links page-hero__links\"");
     expect(html).toContain("At a glance");
     expect(html).toContain("How the platform serves and scales");
     expect(html).toContain("Quick start and measure");
@@ -61,10 +60,6 @@ describe("ProjectPage", () => {
     expect(html).toContain(
       "It makes response-time tradeoffs and GPU scale-out behavior easy to understand with checked-in runs."
     );
-    expect(html).toContain("Signals in plain English");
-    expect(html).toContain("Starting from zero");
-    expect(html).toContain("Keeping one path warm");
-    expect(html).toContain("Scaling after traffic starts");
     expect(html).toContain("Serve path");
     expect(html).toContain("Scale path");
     expect(html).toContain("Foundation");
@@ -111,9 +106,6 @@ describe("ProjectPage", () => {
     );
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/scaling.md\""
-    );
-    expect(html).toContain(
-      "These numbers show cold-start wait, warm-path benefit, and how quickly the platform adds capacity after traffic begins."
     );
     expect(html).toContain("href=\"/experiments\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
