@@ -2,7 +2,6 @@ import React from "react";
 import { PROJECT_PATH, RESUME_PATH } from "../site/content";
 import { experimentsContent } from "../site/experiments-content";
 import {
-  formatBurstTtftLabel,
   formatCurrencyLabel,
   formatDurationLabel,
 } from "../site/format";
@@ -12,6 +11,8 @@ import { useDocumentTitle } from "../site/use-document-title";
 const PAGE_TITLE = "Experiments | Tony Lee";
 
 type ComparisonDirection = "lower" | "higher";
+type DecisionTone = "strong" | "measured" | "provisional";
+type ExperimentDetailView = "why" | "chart" | "proof";
 type ExperimentFamilyId =
   | "profile-baselines"
   | "policy-compare"
@@ -51,7 +52,52 @@ interface ExperimentComparisonCopy {
   takeawayTitle: string;
   takeaway: string;
   note: string;
+  spotlightStats: Array<{
+    label: string;
+    value: string;
+    context: string;
+  }>;
 }
+
+interface ExperimentDecisionCard {
+  id: ExperimentFamilyId;
+  title: string;
+  summary: string;
+  recommendation: string;
+  readout: string;
+  status: string;
+  tone: DecisionTone;
+}
+
+const profileTimelineEventLabels: Record<string, string[]> = {
+  "zero-idle": [
+    "First GPU node",
+    "First ready replica",
+    "First public response",
+    "Second ready replica",
+  ],
+  "warm-1": [
+    "Warm baseline already present",
+    "First ready replica",
+    "First public response",
+    "Second ready replica",
+  ],
+};
+
+const profileProofLineFragments: Record<string, string[]> = {
+  "zero-idle": [
+    "First GPU node registered",
+    "First ready replica",
+    "First public response",
+    "Second ready replica",
+  ],
+  "warm-1": [
+    "Warm baseline already present",
+    "First ready replica",
+    "First public response",
+    "Second ready replica",
+  ],
+};
 
 function getProfile(id: string) {
   const match = experimentsContent.profiles.find((profile) => profile.id === id);
@@ -132,7 +178,13 @@ function EvidenceCard({ excerpt }: { excerpt: EvidenceExcerpt }) {
         <span className="report-badge">{formatEvidenceDate(excerpt.reportDate)}</span>
       </div>
       <code className="proof-entry__command">{excerpt.command}</code>
-      <pre className="proof-entry__log">{excerpt.lines.join("\n")}</pre>
+      <ul className="proof-entry__facts">
+        {excerpt.lines.map((line) => (
+          <li key={`${excerpt.command}-${line}`} className="proof-entry__fact">
+            {line}
+          </li>
+        ))}
+      </ul>
     </article>
   );
 }
@@ -149,19 +201,19 @@ function ExperimentOverview({
   takeaway: string;
 }) {
   return (
-    <article className="card experiment-overview">
+    <article className="experiment-overview">
       <div className="experiment-overview__grid">
         <section className="experiment-overview__block">
-          <p className="label">Question</p>
-          <h3 className="experiment-overview__title">{questionTitle}</h3>
+          <p className="label">Problem statement</p>
+          <p className="experiment-overview__title">{questionTitle}</p>
           <p className="experiment-overview__copy experiment-overview__copy--question">
             {question}
           </p>
         </section>
 
         <section className="experiment-overview__block experiment-overview__block--observation">
-          <p className="label">Observation</p>
-          <h3 className="experiment-overview__title">{takeawayTitle}</h3>
+          <p className="label">Observed outcome</p>
+          <p className="experiment-overview__title">{takeawayTitle}</p>
           <p className="experiment-overview__copy">{takeaway}</p>
         </section>
       </div>
@@ -179,11 +231,133 @@ function ExperimentEvidenceSection({
   return (
     <section className="experiment-support-panel" aria-label="Evidence">
       <div className="experiment-support-panel__header">
-        <p className="label">Evidence</p>
+        <p className="label">Measured proof</p>
         <p className="detail-copy experiment-support-panel__copy">{copy}</p>
       </div>
       <div className="evidence-stack">{children}</div>
     </section>
+  );
+}
+
+function TradeoffArrowIcon() {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      className="experiments-tradeoff-card__icon-svg"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M7 11H22M22 11L18.5 7.5M22 11L18.5 14.5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.2"
+      />
+      <path
+        d="M25 21H10M10 21L13.5 17.5M10 21L13.5 24.5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.2"
+      />
+    </svg>
+  );
+}
+
+function ExperimentDecisionMapSection({
+  lead,
+  cards,
+  legend,
+  activeExperimentId,
+  panelId,
+  onSelect,
+}: {
+  lead: string;
+  cards: ExperimentDecisionCard[];
+  legend: string;
+  activeExperimentId: ExperimentFamilyId;
+  panelId: string;
+  onSelect: (id: ExperimentFamilyId) => void;
+}) {
+  return (
+    <div className="experiment-decision-map" aria-label="Decision map">
+      <p className="section__copy experiment-family-copy">{lead}</p>
+      <div
+        className="experiment-decision-grid"
+        role="tablist"
+        aria-label="Experiment family tabs"
+        aria-orientation="horizontal"
+      >
+        {cards.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            role="tab"
+            id={`experiment-tab-${item.id}`}
+            aria-selected={item.id === activeExperimentId}
+            aria-controls={panelId}
+            tabIndex={item.id === activeExperimentId ? 0 : -1}
+            className={
+              item.id === activeExperimentId
+                ? "experiment-decision-card experiment-decision-card--active"
+                : "experiment-decision-card"
+            }
+            onClick={() => onSelect(item.id)}
+          >
+            <span className="experiment-decision-card__title">{item.title}</span>
+            <span className="experiment-decision-card__recommendation">
+              {item.recommendation}
+            </span>
+            <span className="experiment-decision-card__readout">{item.readout}</span>
+          </button>
+        ))}
+      </div>
+      <p className="experiment-decision-legend">{legend}</p>
+    </div>
+  );
+}
+
+function ExperimentVerdictStrip({
+  title,
+  recommendation,
+  readout,
+  summary,
+  status,
+  tone,
+  stats,
+}: {
+  title: string;
+  recommendation: string;
+  readout: string;
+  summary: string;
+  status: string;
+  tone: DecisionTone;
+  stats: ExperimentComparisonCopy["spotlightStats"];
+}) {
+  return (
+    <article className="card experiment-verdict">
+      <div className="experiment-verdict__header">
+        <div className="experiment-verdict__intro">
+          <p className="label">Current call</p>
+          <p className="experiment-verdict__eyebrow">{title}</p>
+        </div>
+        <span className={`decision-status decision-status--${tone}`}>{status}</span>
+      </div>
+      <h3 className="experiment-verdict__title">{recommendation}</h3>
+      <div className="experiment-verdict__readout">{readout}</div>
+      <p className="experiment-verdict__summary">{summary}</p>
+      <div className="experiment-verdict__facts" aria-label="Key facts">
+        {stats.map((item) => (
+          <span key={`${title}-${item.label}`} className="experiment-verdict__fact">
+            <span className="experiment-verdict__fact-label">{item.label}:</span>{" "}
+            <span className="experiment-verdict__fact-value">{item.value}</span>
+          </span>
+        ))}
+      </div>
+    </article>
   );
 }
 
@@ -193,6 +367,8 @@ function ExperimentComparisonPanel({
   chartAriaLabel,
   rows,
   evidenceCopy,
+  detailView,
+  onSelectDetailView,
   children,
 }: {
   comparison: ExperimentComparisonCopy;
@@ -200,45 +376,104 @@ function ExperimentComparisonPanel({
   chartAriaLabel: string;
   rows: ComparisonChartRow[];
   evidenceCopy: string;
+  detailView: ExperimentDetailView;
+  onSelectDetailView: (view: ExperimentDetailView) => void;
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <ExperimentOverview
-        questionTitle={comparison.questionTitle}
-        question={comparison.question}
-        takeawayTitle={comparison.takeawayTitle}
-        takeaway={comparison.takeaway}
-      />
+    <div className="experiment-detail-shell">
+      <div
+        className="experiment-detail-nav"
+        role="tablist"
+        aria-label="Decision detail views"
+      >
+        {[
+          { id: "why", label: "Why" },
+          { id: "chart", label: "Compact chart" },
+          { id: "proof", label: "Measured proof" },
+        ].map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            role="tab"
+            id={`experiment-detail-tab-${item.id}`}
+            aria-selected={detailView === item.id}
+            aria-controls={`experiment-detail-panel-${item.id}`}
+            tabIndex={detailView === item.id ? 0 : -1}
+            className={
+              detailView === item.id
+                ? "experiment-detail-tab experiment-detail-tab--active"
+                : "experiment-detail-tab"
+            }
+            onClick={() => onSelectDetailView(item.id as ExperimentDetailView)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
 
-      <article className="card comparison-surface">
-        <div className="comparison-surface__header">
-          <div>
-            <p className="label">Visual comparison</p>
-            <h3 className="card__title">{chartTitle}</h3>
+      <section
+        className="experiment-detail-panel"
+        role="tabpanel"
+        id="experiment-detail-panel-why"
+        aria-labelledby="experiment-detail-tab-why"
+        hidden={detailView !== "why"}
+      >
+        <ExperimentOverview
+          questionTitle={comparison.questionTitle}
+          question={comparison.question}
+          takeawayTitle={comparison.takeawayTitle}
+          takeaway={comparison.takeaway}
+        />
+      </section>
+
+      <section
+        className="experiment-detail-panel"
+        role="tabpanel"
+        id="experiment-detail-panel-chart"
+        aria-labelledby="experiment-detail-tab-chart"
+        hidden={detailView !== "chart"}
+      >
+        <article className="comparison-surface">
+          <div className="comparison-surface__header">
+            <div>
+              <p className="label">Compact chart</p>
+              <h3 className="card__title">{chartTitle}</h3>
+            </div>
+            <p className="detail-copy comparison-surface__copy">
+              {comparison.note}
+            </p>
           </div>
-          <p className="detail-copy comparison-surface__copy">
-            {comparison.note}
-          </p>
-        </div>
 
-        <ComparisonChart ariaLabel={chartAriaLabel} rows={rows} />
-      </article>
+          <ComparisonChart ariaLabel={chartAriaLabel} rows={rows} />
+        </article>
+      </section>
 
-      <ExperimentEvidenceSection copy={evidenceCopy}>
-        {children}
-      </ExperimentEvidenceSection>
-    </>
+      <section
+        className="experiment-detail-panel"
+        role="tabpanel"
+        id="experiment-detail-panel-proof"
+        aria-labelledby="experiment-detail-tab-proof"
+        hidden={detailView !== "proof"}
+      >
+        <ExperimentEvidenceSection copy={evidenceCopy}>
+          {children}
+        </ExperimentEvidenceSection>
+      </section>
+    </div>
   );
 }
 
 export function ExperimentsPage() {
   const [activeExperimentId, setActiveExperimentId] =
     React.useState<ExperimentFamilyId>("profile-baselines");
+  const [activeDetailView, setActiveDetailView] =
+    React.useState<ExperimentDetailView>("why");
+  const experimentDecisionCards = experimentsContent.decisionCards as ExperimentDecisionCard[];
   const zeroIdleProfile = getProfile("zero-idle");
   const warmOneProfile = getProfile("warm-1");
   const policyProof = experimentsContent.evidenceExcerpts.find(
-    (excerpt) => excerpt.title === "Warm-1 compare"
+    (excerpt) => excerpt.title === "Warm baseline compare"
   );
   const calibrationProofs = experimentsContent.evidenceExcerpts.filter((excerpt) =>
     excerpt.title.startsWith("Zero-idle sweep")
@@ -253,7 +488,9 @@ export function ExperimentsPage() {
     subtitle: profile.proofExcerpt.title,
     reportDate: profile.reportDate,
     command: profile.proofExcerpt.command,
-    lines: profile.proofExcerpt.lines,
+    lines: profile.proofExcerpt.lines.filter((line) =>
+      (profileProofLineFragments[profile.id] ?? []).some((fragment) => line.includes(fragment))
+    ),
   }));
 
   const profileChartRows: ComparisonChartRow[] = [
@@ -271,24 +508,6 @@ export function ExperimentsPage() {
           label: warmOneProfile.label,
           value: warmOneProfile.firstPublicResponseSeconds,
           display: formatDurationLabel(warmOneProfile.firstPublicResponseSeconds),
-          tone: "primary",
-        },
-      ],
-    },
-    {
-      label: "Second ready replica",
-      betterWhen: "lower",
-      values: [
-        {
-          label: zeroIdleProfile.label,
-          value: zeroIdleProfile.secondReadySeconds,
-          display: formatDurationLabel(zeroIdleProfile.secondReadySeconds),
-          tone: "secondary",
-        },
-        {
-          label: warmOneProfile.label,
-          value: warmOneProfile.secondReadySeconds,
-          display: formatDurationLabel(warmOneProfile.secondReadySeconds),
           tone: "primary",
         },
       ],
@@ -325,24 +544,6 @@ export function ExperimentsPage() {
           label: warmOneProfile.label,
           value: warmOneProfile.burstCost,
           display: formatCurrencyLabel(warmOneProfile.burstCost),
-          tone: "primary",
-        },
-      ],
-    },
-    {
-      label: "Burst TTFT",
-      betterWhen: "lower",
-      values: [
-        {
-          label: zeroIdleProfile.label,
-          value: zeroIdleProfile.burstTimeToFirstTokenSeconds * 1000,
-          display: formatBurstTtftLabel(zeroIdleProfile.burstTimeToFirstTokenSeconds),
-          tone: "secondary",
-        },
-        {
-          label: warmOneProfile.label,
-          value: warmOneProfile.burstTimeToFirstTokenSeconds * 1000,
-          display: formatBurstTtftLabel(warmOneProfile.burstTimeToFirstTokenSeconds),
           tone: "primary",
         },
       ],
@@ -389,16 +590,6 @@ export function ExperimentsPage() {
         tone: run.label === "Active target 6" ? "primary" : "secondary",
       })),
     },
-    {
-      label: "Peak active requests / GPU node",
-      betterWhen: "lower",
-      values: experimentsContent.targetCalibration.runs.map((run) => ({
-        label: run.label,
-        value: run.peakActiveRequestsPerGpuNode,
-        display: run.peakActiveRequestsPerGpuNode.toFixed(3),
-        tone: run.label === "Active target 6" ? "primary" : "secondary",
-      })),
-    },
   ];
 
   const activeExperiment = experimentsContent.experimentSets.find(
@@ -409,15 +600,18 @@ export function ExperimentsPage() {
     throw new Error("Missing active experiment family");
   }
 
-  const activeExperimentTabId = `experiment-tab-${activeExperimentId}`;
-  const activeExperimentPanelId = `experiment-panel-${activeExperimentId}`;
+  const activeDecision = experimentDecisionCards.find((item) => item.id === activeExperimentId);
 
-  const activeExperimentPanelTitle =
-    activeExperimentId === "profile-baselines"
-      ? experimentsContent.profileComparison.title
-      : activeExperimentId === "policy-compare"
-        ? experimentsContent.policyComparison.title
-        : experimentsContent.targetCalibration.title;
+  if (!activeDecision) {
+    throw new Error("Missing active decision card");
+  }
+
+  React.useEffect(() => {
+    setActiveDetailView("why");
+  }, [activeExperimentId]);
+
+  const activeExperimentTabId = `experiment-tab-${activeExperimentId}`;
+  const activeExperimentPanelId = "experiment-panel";
 
   const activeExperimentPanel = (() => {
     switch (activeExperimentId) {
@@ -428,7 +622,9 @@ export function ExperimentsPage() {
             chartTitle="Where latency and cost move"
             chartAriaLabel="Profile baseline comparison chart"
             rows={profileChartRows}
-            evidenceCopy="Use the sequence view to see where the first delay appears, then confirm the recorded checkpoints from the stored run excerpts."
+            evidenceCopy="Sequence view shows where zero-idle waits before first response. The stored run excerpts confirm the checkpoints."
+            detailView={activeDetailView}
+            onSelectDetailView={setActiveDetailView}
           >
             <div className="timeline-grid">
               {experimentsContent.profiles.map((profile) => (
@@ -443,7 +639,11 @@ export function ExperimentsPage() {
                     </div>
                   </div>
                   <div className="timeline-events">
-                    {profile.timeline.map((event) => (
+                    {profile.timeline
+                      .filter((event) =>
+                        (profileTimelineEventLabels[profile.id] ?? []).includes(event.label)
+                      )
+                      .map((event) => (
                       <div
                         key={`${profile.id}-${event.label}`}
                         className={
@@ -474,9 +674,11 @@ export function ExperimentsPage() {
           <ExperimentComparisonPanel
             comparison={experimentsContent.policyComparison}
             chartTitle="Where scale-out improves"
-            chartAriaLabel="Warm-1 policy comparison chart"
+            chartAriaLabel="Warm baseline policy comparison chart"
             rows={policyChartRows}
-            evidenceCopy="This warm-1 compare report is the direct proof behind the policy recommendation."
+            evidenceCopy="This stored compare excerpt backs the scale-out recommendation. It uses active target 8; the target-tuning tab covers the later sweep."
+            detailView={activeDetailView}
+            onSelectDetailView={setActiveDetailView}
           >
             <div className="proof-grid">
               <EvidenceCard excerpt={policyProof} />
@@ -490,7 +692,9 @@ export function ExperimentsPage() {
             chartTitle="How the targets trade time for cost"
             chartAriaLabel="Zero-idle target calibration chart"
             rows={targetChartRows}
-            evidenceCopy="This April 21, 2026 sweep excerpt shows why target 6 is the current default and why target 8 remains provisional."
+            evidenceCopy="This April 21, 2026 sweep shows why 6 is the recommendation while the checked-in manifest still stays at 4."
+            detailView={activeDetailView}
+            onSelectDetailView={setActiveDetailView}
           >
             <div className="proof-grid">
               {calibrationProofs.map((excerpt) => (
@@ -501,6 +705,13 @@ export function ExperimentsPage() {
         );
     }
   })();
+
+  const activeExperimentComparison =
+    activeExperimentId === "profile-baselines"
+      ? experimentsContent.profileComparison
+      : activeExperimentId === "policy-compare"
+        ? experimentsContent.policyComparison
+        : experimentsContent.targetCalibration;
 
   useDocumentTitle(PAGE_TITLE);
 
@@ -520,37 +731,35 @@ export function ExperimentsPage() {
 
       <section className="section">
         <div className="section__header">
-          <p className="section__kicker">Decision summary</p>
-          <h2 className="section__title">What the current runs suggest</h2>
+          <p className="section__kicker">Experiment purpose</p>
+          <h2 className="section__title">Why these experiments exist</h2>
         </div>
-        <div className="experiments-summary-copy">
-          <p className="section__copy experiments-summary-lead">{experimentsContent.summaryLead}</p>
-          <div className="experiments-summary-meta" aria-label="Latest experiment artifacts metadata">
-            <span className="experiments-summary-meta__label">Artifacts updated</span>
-            <span className="experiments-summary-meta__text">{experimentsContent.readoutsMeta}</span>
-          </div>
-        </div>
-        <div className="grid-three experiments-summary-grid">
-          {experimentsContent.conclusionPoints.map((item) => (
-            <article key={item.label} className="metric-card experiments-summary-card">
-              <p className="label experiments-summary-card__eyebrow">{item.eyebrow}</p>
-              <h3 className="experiments-summary-card__title">{item.label}</h3>
-              <div className="experiments-summary-card__value">{item.value}</div>
-              <p className="experiments-summary-card__detail">{item.detail}</p>
+        <p className="section__copy experiments-summary-intro">{experimentsContent.summaryIntro}</p>
+        <div className="experiments-tradeoff-grid">
+          {experimentsContent.tradeoffCards.map((item) => (
+            <article key={item.title} className="card experiments-tradeoff-card">
+              <h3 className="experiments-tradeoff-card__title">{item.title}</h3>
+              <div
+                className="experiments-tradeoff-card__pair"
+                role="group"
+                aria-label={`${item.title} trade-off`}
+              >
+                <div className="experiments-tradeoff-card__side">
+                  <span className="experiments-tradeoff-card__side-value">{item.left}</span>
+                </div>
+                <div className="experiments-tradeoff-card__center" aria-hidden="true">
+                  <span className="experiments-tradeoff-card__badge">Trade-off</span>
+                  <span className="experiments-tradeoff-card__icon">
+                    <TradeoffArrowIcon />
+                  </span>
+                </div>
+                <div className="experiments-tradeoff-card__side experiments-tradeoff-card__side--right">
+                  <span className="experiments-tradeoff-card__side-value">{item.right}</span>
+                </div>
+              </div>
             </article>
           ))}
         </div>
-
-        <article className="card experiments-guide">
-          <div className="grid-two experiments-guide-grid">
-            {experimentsContent.guideCards.map((item) => (
-              <section key={item.title}>
-                <h3 className="card__title">{item.title}</h3>
-                <p className="detail-copy experiments-guide__copy">{item.body}</p>
-              </section>
-            ))}
-          </div>
-        </article>
       </section>
 
       <section className="section">
@@ -558,47 +767,32 @@ export function ExperimentsPage() {
           <p className="section__kicker">Compare by question</p>
           <h2 className="section__title">Choose what you&apos;re deciding</h2>
         </div>
-        <p className="section__copy experiment-family-copy">
-          Tabs are the only controls here. Open one to see the question, the observed result, the
-          visual comparison, and the checked-in proof in one container.
-        </p>
+        <div className="experiment-decision-shell">
+          <ExperimentDecisionMapSection
+            lead={experimentsContent.decisionLead}
+            cards={experimentDecisionCards}
+            legend={experimentsContent.decisionLegend}
+            activeExperimentId={activeExperimentId}
+            panelId={activeExperimentPanelId}
+            onSelect={setActiveExperimentId}
+          />
+          <ExperimentVerdictStrip
+            title={activeDecision.title}
+            recommendation={activeDecision.recommendation}
+            readout={activeDecision.readout}
+            summary={activeExperiment.summary}
+            status={activeDecision.status}
+            tone={activeDecision.tone}
+            stats={activeExperimentComparison.spotlightStats}
+          />
+        </div>
         <div className="experiment-family-shell">
-          <div
-            className="experiment-tabs"
-            role="tablist"
-            aria-label="Experiment family tabs"
-            aria-orientation="horizontal"
-          >
-            {experimentsContent.experimentSets.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                id={`experiment-tab-${item.id}`}
-                aria-selected={item.id === activeExperimentId}
-                aria-controls={`experiment-panel-${item.id}`}
-                tabIndex={item.id === activeExperimentId ? 0 : -1}
-                className={
-                  item.id === activeExperimentId
-                    ? "experiment-tab experiment-tab--active"
-                    : "experiment-tab"
-                }
-                onClick={() => setActiveExperimentId(item.id as ExperimentFamilyId)}
-              >
-                <span className="experiment-tab__title">{item.title}</span>
-              </button>
-            ))}
-          </div>
           <article
             className="card experiment-family-panel"
             role="tabpanel"
             id={activeExperimentPanelId}
             aria-labelledby={activeExperimentTabId}
           >
-            <div className="experiment-family-panel__header">
-              <h3 className="experiment-tab-panel__title">{activeExperimentPanelTitle}</h3>
-              <p className="detail-copy experiment-tab-panel__copy">{activeExperiment.summary}</p>
-            </div>
             {activeExperimentPanel}
           </article>
         </div>

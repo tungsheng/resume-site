@@ -2,84 +2,129 @@ export const experimentsContent = {
   title: "Experiment Archive",
   subtitle:
     "Checked-in evaluation runs for comparing baseline posture, autoscaling policy, and active-pressure target calibration.",
-  readoutsMeta:
-    "Latest local gpu-inference-lab artifacts were generated on April 21, 2026 from runs completed on April 19-21, 2026.",
-  summaryLead:
-    "The current evidence separates the large decision from the tuning decisions. Keeping one warm serving path changes the first response dramatically, while policy and target changes mostly affect how quickly the second replica arrives.",
-  conclusionPoints: [
+  summaryIntro:
+    "Each run isolates one rollout trade-off. Choose one below for the current call and proof.",
+  tradeoffCards: [
     {
-      eyebrow: "First response",
-      label: "Keep one warm path when first response matters",
-      value: "84s vs 447s",
-      detail:
-        "Warm-1 reaches the first public response 363s sooner than zero-idle, with a steady idle cost of $0.526 per hour.",
+      title: "Warm baseline",
+      left: "Idle cost",
+      right: "First response",
     },
     {
-      eyebrow: "Scale-out policy",
-      label: "Use active-pressure after choosing warm-1",
-      value: "563s vs 1002s",
-      detail:
-        "With warm-1 already in place, active-pressure brings the second ready replica online 439s sooner for about $0.037 more burst cost.",
+      title: "Scale-out signal",
+      left: "Burst spend",
+      right: "Replica 2 speed",
     },
     {
-      eyebrow: "Target tuning",
-      label: "Use target 6 as the current default",
-      value: "930s at $0.483",
-      detail:
-        "The April 21, 2026 sweep points to target 6 as the safest usable default. Target 8 was faster at 885s, but its supporting metrics were incomplete.",
+      title: "Active target",
+      left: "Aggressive target",
+      right: "Readable metrics",
     },
   ],
-  guideCards: [
+  decisionLead: "Choose a decision. The current call and supporting detail appear underneath.",
+  decisionCards: [
     {
-      title: "How to use this page",
-      body: "Start with these three takeaways if you only need the recommendation. Then move into the experiment family that matches your question: warm-path cost, autoscaling policy, or active-pressure target tuning.",
+      id: "profile-baselines",
+      title: "Warm baseline",
+      summary: "0 ready vs 1 ready path",
+      recommendation: "Keep 1 warm path",
+      readout: "84s vs 447s",
+      status: "Strong recommendation",
+      tone: "strong",
     },
     {
-      title: "What to compare",
-      body: "Lower time and lower cost are better. Idle cost matters between bursts, burst cost matters during the run, and TTFT stays roughly flat across these experiments, so the biggest differences are readiness and scale-out timing.",
+      id: "policy-compare",
+      title: "Scale-out signal",
+      summary: "running vs active-pressure",
+      recommendation: "Use active-pressure",
+      readout: "563s vs 1002s",
+      status: "Measured compare run",
+      tone: "measured",
+    },
+    {
+      id: "target-calibration",
+      title: "Active target",
+      summary: "default 4 -> recommend 6",
+      recommendation: "Recommend target 6",
+      readout: "930s at $0.483",
+      status: "Provisional",
+      tone: "provisional",
     },
   ],
+  decisionLegend:
+    "warm-1 = 1 ready path · zero-idle = 0 ready paths · target N = HPA request threshold",
   experimentSets: [
     {
       id: "profile-baselines",
-      title: "Warm path",
-      summary:
-        "Decide whether paying for one warm serving path is worth avoiding the long first cold start.",
+      title: "Warm baseline",
+      summary: "First-response tradeoff: zero-idle vs one warm path.",
     },
     {
       id: "policy-compare",
       title: "Scale-out policy",
-      summary:
-        "After choosing warm-1, compare which scaling signal gets the second replica online sooner.",
+      summary: "Second-replica tradeoff after the warm baseline is chosen.",
     },
     {
       id: "target-calibration",
-      title: "Target tuning",
-      summary:
-        "After fixing zero-idle, choose the safest active-pressure target from the latest sweep.",
+      title: "Active target tuning",
+      summary: "Latest zero-idle sweep: keep 4 or move toward 6?",
     },
   ],
   profileComparison: {
-    title: "Zero-idle vs warm-1",
-    questionTitle: "Is warm capacity worth paying for?",
+    title: "Zero-idle vs warm baseline (warm-1)",
+    questionTitle: "Does one warm path justify its idle cost?",
     question:
-      "This is the baseline decision: do we accept a steady idle cost to avoid the long cold-start delay on the first public request?",
-    takeawayTitle: "Warm-1 removes the main first-response bottleneck",
+      "Zero-idle avoids hourly idle spend, but the first public response waits 447 seconds.",
+    takeawayTitle: "One warm path sharply reduces the first public wait",
     takeaway:
-      "Warm-1 cuts first public response from 447s to 84s. The trade is paying to keep one serving path warm between bursts, not a much larger burst cost during the run.",
+      "Warm baseline reaches the first public response in 84 seconds instead of 447, at an idle cost of $0.526 per hour.",
     note:
-      "Lower bars are better for time and cost. Warm-1 clearly wins on latency, while zero-idle only wins on steady idle spend.",
+      "Focus on first response, idle cost, and burst cost. Lower is better.",
+    spotlightStats: [
+      {
+        label: "First response",
+        value: "84s vs 447s",
+        context: "Warm baseline vs zero-idle",
+      },
+      {
+        label: "Idle cost",
+        value: "$0.526 / hr",
+        context: "Steady cost to keep one path warm",
+      },
+      {
+        label: "Burst cost",
+        value: "$0.438 vs $0.490",
+        context: "Warm baseline vs zero-idle",
+      },
+    ],
   },
   policyComparison: {
-    title: "Warm-1: running vs active-pressure",
-    questionTitle: "Which scaling signal solves slower second-replica arrival?",
+    title: "Warm baseline compare: running vs active-pressure",
+    questionTitle: "Which signal gets the second replica ready sooner?",
     question:
-      "Once warm-1 is chosen, the next problem is slower scale-out. This experiment asks which HPA signal gets the second replica online sooner without creating a new latency issue.",
-    takeawayTitle: "Active-pressure is the better signal for faster scale-out",
+      "With one path already warm, the remaining problem is slow scale-out to replica two.",
+    takeawayTitle: "Active-pressure is the faster measured signal",
     takeaway:
-      "Active-pressure brings the second ready replica online 439s sooner, while p95 TTFT stays effectively flat. The trade is a modest increase in burst cost.",
+      "Active-pressure reaches the second ready replica in 563 seconds vs 1002 for running-request. Burst cost rises by about $0.037 and p95 TTFT stays flat.",
     note:
-      "This chart is about scale-out behavior, not cold-start avoidance. Lower time and cost are better here; higher completed requests per second is better.",
+      "Focus on second-replica time, burst cost, and p95 TTFT.",
+    spotlightStats: [
+      {
+        label: "Second replica",
+        value: "563s vs 1002s",
+        context: "Active-pressure vs running-request",
+      },
+      {
+        label: "Burst cost delta",
+        value: "+$0.037",
+        context: "Increase in the measured compare run",
+      },
+      {
+        label: "p95 TTFT",
+        value: "90 ms vs 91 ms",
+        context: "Effectively flat latency",
+      },
+    ],
     rows: [
       {
         label: "Second ready replica",
@@ -98,15 +143,7 @@ export const experimentsContent = {
         betterWhen: "lower",
       },
       {
-        label: "Average completed req/s",
-        running: "2.31",
-        activePressure: "2.49",
-        runningValue: 2.31,
-        activePressureValue: 2.49,
-        betterWhen: "higher",
-      },
-      {
-        label: "p95 TTFT",
+        label: "p95 time to first token (TTFT)",
         running: "91 ms",
         activePressure: "90 ms",
         runningValue: 91,
@@ -116,15 +153,32 @@ export const experimentsContent = {
     ],
   },
   targetCalibration: {
-    title: "Zero-idle active-target sweep",
-    questionTitle: "Which active target is the safest default right now?",
+    title: "Zero-idle active-pressure target sweep",
+    questionTitle: "Which active target is safe to recommend now?",
     question:
-      "Once zero-idle is fixed, this sweep asks where the active-pressure target should land: low enough to keep the readout complete, but not so low that burst cost and scaling behavior suffer unnecessarily.",
-    takeawayTitle: "Target 6 is the current default, but the sweep is still incomplete",
+      "For zero-idle, the target should keep scale-out data usable without paying more burst cost for no clear gain.",
+    takeawayTitle: "Target 6 is the best supported recommendation",
     takeaway:
-      "The sweep currently recommends target 6. Target 8 was faster and cheaper in the raw run, but it dropped supporting metrics, so 6 is the safest usable default. Target 2 was slightly faster than 6 on second ready replica timing, but cost more.",
+      "Target 6 is slightly cheaper than 2 or 4 and keeps supporting metrics intact. Target 8 looked better in the raw run, but its supporting metrics dropped.",
     note:
-      "Lower time and cost are better. This chart only shows targets 2, 4, and 6 because target 8 lost supporting metrics in the latest sweep.",
+      "Focus on second-replica time and burst cost. Target 8 is omitted because supporting metrics were missing.",
+    spotlightStats: [
+      {
+        label: "Recommendation",
+        value: "Target 6",
+        context: "Best supported in the April 21, 2026 sweep",
+      },
+      {
+        label: "Repo default",
+        value: "Target 4",
+        context: "Still checked in today",
+      },
+      {
+        label: "Burst cost",
+        value: "$0.483",
+        context: "Measured at the recommended target",
+      },
+    ],
     runs: [
       {
         label: "Active target 2",
@@ -149,7 +203,7 @@ export const experimentsContent = {
   profiles: [
     {
       id: "zero-idle",
-      label: "Zero Idle",
+      label: "Zero-idle",
       reportDate: "2026-04-20",
       firstPublicResponseSeconds: 447,
       secondReadySeconds: 899,
@@ -161,7 +215,7 @@ export const experimentsContent = {
         { label: "First GPU node", seconds: 35 },
         { label: "First ready replica", seconds: 437, emphasis: true },
         { label: "First public response", seconds: 447, emphasis: true },
-        { label: "HPA desired replicas = 2", seconds: 485 },
+        { label: "Horizontal Pod Autoscaler (HPA) desired replicas = 2", seconds: 485 },
         { label: "Second ready replica", seconds: 899 },
         { label: "Cleanup to zero GPU nodes", seconds: 2168 },
       ],
@@ -173,7 +227,7 @@ export const experimentsContent = {
           "[35s] First GPU node registered",
           "[437s] First ready replica",
           "[447s] First public response",
-          "[485s] HPA desired replicas = 2",
+          "[485s] Horizontal Pod Autoscaler (HPA) desired replicas = 2",
           "[510s] Second GPU node registered",
           "[899s] Second ready replica",
           "[2168s] Final cleanup to zero GPU nodes",
@@ -182,7 +236,7 @@ export const experimentsContent = {
     },
     {
       id: "warm-1",
-      label: "Warm-1",
+      label: "Warm baseline (warm-1)",
       reportDate: "2026-04-20",
       firstPublicResponseSeconds: 84,
       secondReadySeconds: 563,
@@ -193,19 +247,19 @@ export const experimentsContent = {
         { label: "Warm baseline already present", seconds: 0, emphasis: true },
         { label: "First ready replica", seconds: 73, emphasis: true },
         { label: "First public response", seconds: 84, emphasis: true },
-        { label: "HPA desired replicas = 2", seconds: 125 },
+        { label: "Horizontal Pod Autoscaler (HPA) desired replicas = 2", seconds: 125 },
         { label: "Second GPU node", seconds: 152 },
         { label: "Second ready replica", seconds: 563 },
         { label: "Warm baseline restored", seconds: 1361 },
       ],
       proofExcerpt: {
-        title: "active-pressure run",
+        title: "active-pressure run (target 8)",
         command: "./scripts/evaluate --profile warm-1 --policy active-pressure --active-target 8",
         lines: [
           "[0s] Warm baseline already present",
           "[73s] First ready replica",
           "[84s] First public response",
-          "[125s] HPA desired replicas = 2",
+          "[125s] Horizontal Pod Autoscaler (HPA) desired replicas = 2",
           "[152s] Second GPU node registered",
           "[563s] Second ready replica",
           "[1361s] Warm baseline restored",
@@ -215,24 +269,25 @@ export const experimentsContent = {
   ],
   evidenceExcerpts: [
     {
-      title: "Warm-1 compare",
-      subtitle: "compare report",
+      title: "Warm baseline compare",
+      subtitle: "compare report (active target 8)",
       reportDate: "2026-04-20",
       command: "./scripts/evaluate --profile warm-1 --policy compare --active-target 8",
       lines: [
         "Second ready replica: running 1002s vs active-pressure 563s",
         "Burst cost: running $0.401075 vs active-pressure $0.438041",
-        "Average completed req/s: running 2.3066 vs active-pressure 2.4875",
+        "p95 TTFT: running 91 ms vs active-pressure 90 ms",
       ],
     },
     {
       title: "Zero-idle sweep summary",
-      subtitle: "active-pressure target sweep",
+      subtitle: "active-pressure target sweep (recommendation is provisional)",
       reportDate: "2026-04-21",
       command: "./scripts/evaluate --profile zero-idle --policy sweep --active-targets 2,4,6,8",
       lines: [
         "Recommended active target: 6",
-        "Target 2 second ready replica: 914s; burst cost: $0.487280",
+        "Checked-in active-pressure manifest target: 4",
+        "Target 4 second ready replica: 951s; burst cost: $0.491372",
         "Target 6 second ready replica: 930s; burst cost: $0.483189",
         "Target 8 second ready replica: 885s; supporting metrics unavailable",
       ],
