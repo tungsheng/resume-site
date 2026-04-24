@@ -27,6 +27,14 @@ const PAGE_TITLE = "Cloud Inference Platform | Tony Lee";
 type WorkflowNode = (typeof projectContent.workflowFoundation.nodes)[number];
 type WorkflowTrack = (typeof projectContent.workflowPaths)[number];
 
+const commandTextSx = {
+  display: "block",
+  minWidth: 0,
+  maxWidth: "100%",
+  fontSize: "0.88rem",
+  lineHeight: 1.55,
+} as const;
+
 function WorkflowNodeCard({ node }: { node: WorkflowNode }) {
   const href = "href" in node ? node.href : undefined;
   const linkLabel =
@@ -35,7 +43,12 @@ function WorkflowNodeCard({ node }: { node: WorkflowNode }) {
   return (
     <Paper
       variant="outlined"
-      sx={{ p: 1.5, minWidth: { xs: "100%", sm: 180 }, maxWidth: 240 }}
+      sx={{
+        p: { xs: 1.25, sm: 1.5 },
+        minWidth: { xs: 0, sm: 180 },
+        maxWidth: { xs: "none", sm: 240 },
+        flex: { xs: "1 1 100%", sm: "0 1 180px" },
+      }}
     >
       <Stack spacing={1}>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
@@ -77,7 +90,11 @@ function WorkflowFlow({
         <React.Fragment key={`${node.label}-${index}`}>
           <WorkflowNodeCard node={node} />
           {index < nodes.length - 1 ? (
-            <NavigateNextRoundedIcon color="action" aria-hidden="true" />
+            <NavigateNextRoundedIcon
+              color="action"
+              aria-hidden="true"
+              sx={{ display: { xs: "none", sm: "block" }, flexShrink: 0 }}
+            />
           ) : null}
         </React.Fragment>
       ))}
@@ -264,7 +281,7 @@ export function ProjectPage() {
                               sx={{ alignSelf: "flex-start" }}
                             />
                             <Typography variant="h6">{item.title}</Typography>
-                            <Typography component="code" variant="body2">
+                            <Typography component="code" variant="body2" sx={commandTextSx}>
                               {item.command}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
@@ -313,7 +330,7 @@ export function ProjectPage() {
                     </Typography>
                   </div>
 
-                  <Typography component="code" variant="body2">
+                  <Typography component="code" variant="body2" sx={commandTextSx}>
                     {implementation.measurement.command}
                   </Typography>
 

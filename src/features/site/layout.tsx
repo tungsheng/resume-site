@@ -1,17 +1,23 @@
 import React from "react";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import {
   AppBar,
   Box,
   Button,
+  Collapse,
   Container,
   Divider,
+  IconButton,
   Link,
   Paper,
   Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
+import { alpha, type SxProps, type Theme } from "@mui/material/styles";
 import { EXPERIMENTS_PATH, PROJECT_PATH, RESUME_PATH, siteProfile } from "./content";
+import { monoStack } from "../../theme";
 
 export type PublicNavKey = "home" | "project" | "experiments" | "resume";
 
@@ -22,30 +28,89 @@ const NAV_ITEMS: Array<{ key: PublicNavKey; label: string; href: string }> = [
   { key: "resume", label: "Resume", href: RESUME_PATH },
 ];
 
+function getNavButtonStyles(theme: Theme, active: boolean) {
+  return {
+    color: active ? theme.palette.text.primary : theme.palette.text.secondary,
+    bgcolor: active ? alpha(theme.palette.warning.main, 0.06) : "transparent",
+    borderColor: active ? alpha(theme.palette.warning.main, 0.18) : "transparent",
+    flexShrink: 0,
+    minHeight: 40,
+    minWidth: "auto",
+    px: { xs: 1.25, sm: 1.5 },
+    "&:hover": {
+      color: theme.palette.text.primary,
+      bgcolor: active
+        ? alpha(theme.palette.warning.main, 0.09)
+        : alpha(theme.palette.text.primary, 0.04),
+      borderColor: active
+        ? alpha(theme.palette.warning.main, 0.24)
+        : alpha(theme.palette.text.primary, 0.08),
+    },
+  };
+}
+
+function getNavButtonSx(active: boolean): SxProps<Theme> {
+  return (theme) => getNavButtonStyles(theme, active);
+}
+
+function mergeSx(base: SxProps<Theme>, extra?: SxProps<Theme>): SxProps<Theme> {
+  if (!extra) {
+    return base;
+  }
+
+  return (Array.isArray(extra) ? [base, ...extra] : [base, extra]) as SxProps<Theme>;
+}
+
 export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
+
   return (
-    <AppBar position="sticky">
+    <AppBar
+      position="sticky"
+      color="transparent"
+      elevation={0}
+      sx={(theme) => ({
+        top: 0,
+        backdropFilter: "blur(18px)",
+        backgroundColor: alpha(theme.palette.background.default, 0.82),
+        borderBottom: `1px solid ${theme.palette.divider}`,
+      })}
+    >
       <Container maxWidth="lg">
         <Toolbar
           disableGutters
           sx={{
-            py: 1.5,
-            gap: 2,
-            flexWrap: { xs: "wrap", md: "nowrap" },
+            py: { xs: 1, md: 1.75 },
+            gap: { xs: 1, md: 2.5 },
+            flexWrap: "nowrap",
+            alignItems: "center",
           }}
         >
           <Link
             href="/"
             underline="none"
-            color="inherit"
+            color="text.primary"
             aria-label="Tony Lee home"
             sx={{
               display: "inline-flex",
               alignItems: "center",
-              mr: { md: "auto" },
+              justifyContent: "center",
+              width: { xs: 40, md: 44 },
+              height: { xs: 40, md: 44 },
+              minWidth: { xs: 40, md: 44 },
+              mr: "auto",
             }}
           >
-            <Typography component="span" variant="h6" sx={{ fontWeight: 700 }}>
+            <Typography
+              component="span"
+              sx={{
+                fontFamily: monoStack,
+                fontSize: { xs: "1.1rem", md: "1.4rem" },
+                fontWeight: 600,
+                letterSpacing: "-0.08em",
+                lineHeight: 1,
+              }}
+            >
               T│L
             </Typography>
           </Link>
@@ -53,7 +118,10 @@ export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
           <Box
             component="nav"
             aria-label="Primary"
-            sx={{ width: { xs: "100%", md: "auto" } }}
+            sx={{
+              display: { xs: "none", sm: "block" },
+              overflowX: "visible",
+            }}
           >
             <Stack
               direction="row"
@@ -61,24 +129,76 @@ export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
               useFlexGap
               sx={{
                 flexWrap: "wrap",
-                justifyContent: { xs: "flex-start", md: "flex-end" },
+                justifyContent: "flex-end",
               }}
             >
               {NAV_ITEMS.map((item) => (
                 <Button
                   key={item.key}
                   href={item.href}
-                  color="inherit"
                   variant={item.key === activeNav ? "outlined" : "text"}
+                  size="small"
                   aria-current={item.key === activeNav ? "page" : undefined}
-                  sx={item.key === activeNav ? { borderColor: "currentColor" } : undefined}
+                  sx={getNavButtonSx(item.key === activeNav)}
                 >
                   {item.label}
                 </Button>
               ))}
             </Stack>
           </Box>
+
+          <IconButton
+            type="button"
+            color="inherit"
+            aria-label={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileNavOpen}
+            aria-controls="mobile-primary-navigation"
+            onClick={() => setMobileNavOpen((open) => !open)}
+            sx={{
+              display: { xs: "inline-flex", sm: "none" },
+              flexShrink: 0,
+              height: 40,
+              width: 40,
+            }}
+          >
+            {mobileNavOpen ? <CloseRoundedIcon /> : <MenuRoundedIcon />}
+          </IconButton>
         </Toolbar>
+
+        <Collapse in={mobileNavOpen} mountOnEnter unmountOnExit>
+          <Box
+            id="mobile-primary-navigation"
+            component="nav"
+            aria-label="Primary"
+            sx={{ display: { xs: "block", sm: "none" }, pb: 1.5 }}
+          >
+            <Box
+              sx={{
+                display: "grid",
+                gap: 1,
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              }}
+            >
+              {NAV_ITEMS.map((item) => (
+                <Button
+                  key={item.key}
+                  href={item.href}
+                  variant={item.key === activeNav ? "outlined" : "text"}
+                  size="small"
+                  aria-current={item.key === activeNav ? "page" : undefined}
+                  onClick={() => setMobileNavOpen(false)}
+                  sx={(theme) => ({
+                    ...getNavButtonStyles(theme, item.key === activeNav),
+                    justifyContent: "center",
+                    width: "100%",
+                  })}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
+          </Box>
+        </Collapse>
       </Container>
     </AppBar>
   );
@@ -87,20 +207,32 @@ export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
 export function PublicSiteFooter() {
   return (
     <Box component="footer" sx={{ mt: "auto" }}>
-      <Divider />
-      <Container maxWidth="lg" sx={{ py: 3 }}>
+      <Container
+        maxWidth="lg"
+        sx={{
+          py: { xs: 2.5, md: 3.5 },
+          borderTop: 1,
+          borderColor: "divider",
+        }}
+      >
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={1}
           sx={{
-            alignItems: { xs: "flex-start", sm: "center" },
-            justifyContent: "space-between",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
           }}
         >
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="caption" color="text.primary" sx={{ fontWeight: 600 }}>
             {siteProfile.name}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ display: { xs: "none", sm: "block" } }}
+          />
+          <Typography variant="caption" color="text.secondary">
             ML inference infrastructure
           </Typography>
         </Stack>
@@ -124,12 +256,12 @@ export function PublicSiteLayout({
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        bgcolor: "background.default",
+        bgcolor: "transparent",
       }}
     >
       <PublicSiteHeader activeNav={activeNav} />
 
-      <Container maxWidth="lg" sx={{ flexGrow: 1, py: { xs: 4, md: 6 } }}>
+      <Container maxWidth="lg" sx={{ flexGrow: 1, py: { xs: 3, md: 4 } }}>
         {children}
       </Container>
 
@@ -138,21 +270,45 @@ export function PublicSiteLayout({
   );
 }
 
+interface PageHeroProps {
+  children: React.ReactNode;
+  align?: "left" | "center";
+  contentWidth?: React.CSSProperties["maxWidth"];
+  sx?: SxProps<Theme>;
+  contentSx?: SxProps<Theme>;
+}
+
 export function PageHero({
   children,
   align = "left",
-}: {
-  children: React.ReactNode;
-  align?: "left" | "center";
-}) {
+  contentWidth = "58rem",
+  sx,
+  contentSx,
+}: PageHeroProps) {
+  const heroBaseSx: SxProps<Theme> = {
+    p: { xs: 3, md: 4 },
+    mb: { xs: 3, md: 4 },
+    backgroundColor: "background.paper",
+    overflow: "hidden",
+    position: "relative",
+  };
+  const contentBaseSx: SxProps<Theme> = {
+    maxWidth: contentWidth,
+    alignItems: align === "center" ? "center" : "flex-start",
+    textAlign: align,
+    ...(align === "center" ? { mx: "auto" } : {}),
+  };
+  const heroSx = mergeSx(heroBaseSx, sx);
+  const heroContentSx = mergeSx(contentBaseSx, contentSx);
+
   return (
-    <Paper variant="outlined" sx={{ p: { xs: 3, md: 4 }, mb: { xs: 4, md: 6 } }}>
+    <Paper
+      variant="outlined"
+      sx={heroSx}
+    >
       <Stack
         spacing={2}
-        sx={{
-          alignItems: align === "center" ? "center" : "flex-start",
-          textAlign: align,
-        }}
+        sx={heroContentSx}
       >
         {children}
       </Stack>
@@ -162,8 +318,8 @@ export function PageHero({
 
 export function PageSection({ children }: { children: React.ReactNode }) {
   return (
-    <Box component="section" sx={{ mb: { xs: 4, md: 6 } }}>
-      <Stack spacing={3}>{children}</Stack>
+    <Box component="section" sx={{ mb: { xs: 4, md: 5 } }}>
+      <Stack spacing={3.5}>{children}</Stack>
     </Box>
   );
 }
@@ -178,17 +334,17 @@ export function SectionHeader({
   copy?: string;
 }) {
   return (
-    <Stack spacing={1}>
+    <Stack spacing={1.25}>
       {eyebrow ? (
-        <Typography variant="overline" color="primary">
+        <Typography variant="overline" sx={{ color: "secondary.main" }}>
           {eyebrow}
         </Typography>
       ) : null}
-      <Typography component="h2" variant="h4">
+      <Typography component="h2" variant="h3">
         {title}
       </Typography>
       {copy ? (
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "46rem" }}>
           {copy}
         </Typography>
       ) : null}
@@ -208,7 +364,13 @@ export function ActionLinkRow({
       direction="row"
       spacing={1.5}
       useFlexGap
-      sx={{ flexWrap: "wrap", justifyContent }}
+      sx={{
+        flexWrap: "wrap",
+        justifyContent,
+        "& .MuiButton-root": {
+          minHeight: 40,
+        },
+      }}
     >
       {children}
     </Stack>

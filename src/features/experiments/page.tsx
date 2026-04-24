@@ -17,6 +17,7 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { PROJECT_PATH, RESUME_PATH } from "../site/content";
 import { experimentsContent } from "../site/experiments-content";
 import {
@@ -41,6 +42,14 @@ type ExperimentFamilyId =
   | "profile-baselines"
   | "policy-compare"
   | "target-calibration";
+
+const evidenceCodeSx = {
+  display: "block",
+  minWidth: 0,
+  maxWidth: "100%",
+  fontSize: "0.88rem",
+  lineHeight: 1.55,
+} as const;
 
 interface EvidenceExcerpt {
   title: string;
@@ -226,7 +235,7 @@ function EvidenceCard({ excerpt }: { excerpt: EvidenceExcerpt }) {
             <Chip label={formatEvidenceDate(excerpt.reportDate)} size="small" />
           </Stack>
 
-          <Typography component="code" variant="body2">
+          <Typography component="code" variant="body2" sx={evidenceCodeSx}>
             {excerpt.command}
           </Typography>
 
@@ -235,7 +244,11 @@ function EvidenceCard({ excerpt }: { excerpt: EvidenceExcerpt }) {
               <ListItem key={`${excerpt.command}-${line}`} disableGutters>
                 <ListItemText
                   primary={
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ overflowWrap: "anywhere" }}
+                    >
                       {line}
                     </Typography>
                   }
@@ -339,12 +352,76 @@ function ExperimentDecisionMapSection({
       <Typography variant="body1" color="text.secondary">
         {lead}
       </Typography>
+      <Box
+        aria-label="Experiment family choices"
+        sx={{ display: { xs: "grid", sm: "none" }, gap: 1 }}
+      >
+        {cards.map((item) => {
+          const selected = item.id === activeExperimentId;
+
+          return (
+            <Button
+              key={item.id}
+              type="button"
+              aria-controls={panelId}
+              aria-pressed={selected}
+              onClick={() => onSelect(item.id)}
+              variant="outlined"
+              sx={(theme) => ({
+                justifyContent: "flex-start",
+                px: 1.5,
+                py: 1.25,
+                textAlign: "left",
+                color: "text.primary",
+                bgcolor: selected
+                  ? alpha(theme.palette.warning.main, 0.08)
+                  : "transparent",
+                borderColor: selected
+                  ? alpha(theme.palette.warning.main, 0.36)
+                  : theme.palette.divider,
+                "&:hover": {
+                  bgcolor: selected
+                    ? alpha(theme.palette.warning.main, 0.12)
+                    : alpha(theme.palette.text.primary, 0.04),
+                  borderColor: selected
+                    ? alpha(theme.palette.warning.main, 0.48)
+                    : alpha(theme.palette.text.primary, 0.12),
+                },
+              })}
+            >
+              <Stack spacing={0.35} sx={{ alignItems: "flex-start", minWidth: 0 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {item.title}
+                </Typography>
+                <Typography variant="body2" sx={{ overflowWrap: "anywhere" }}>
+                  {item.recommendation}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ overflowWrap: "anywhere" }}
+                >
+                  {item.readout}
+                </Typography>
+              </Stack>
+            </Button>
+          );
+        })}
+      </Box>
       <Tabs
         value={activeExperimentId}
         onChange={(_event, value) => onSelect(value as ExperimentFamilyId)}
         aria-label="Experiment family tabs"
-        variant="scrollable"
-        allowScrollButtonsMobile
+        variant="fullWidth"
+        sx={{
+          display: { xs: "none", sm: "flex" },
+          "& .MuiTab-root": {
+            alignItems: "stretch",
+            maxWidth: "none",
+            minHeight: 72,
+            py: 1.25,
+          },
+        }}
       >
         {cards.map((item) => (
           <Tab
@@ -353,12 +430,26 @@ function ExperimentDecisionMapSection({
             aria-controls={panelId}
             value={item.id}
             label={
-              <Stack spacing={0.5} sx={{ alignItems: "flex-start", textAlign: "left" }}>
+              <Stack
+                spacing={0.5}
+                sx={{
+                  alignItems: "flex-start",
+                  minWidth: 0,
+                  textAlign: "left",
+                  width: "100%",
+                }}
+              >
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {item.title}
                 </Typography>
-                <Typography variant="body2">{item.recommendation}</Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="body2" sx={{ overflowWrap: "anywhere" }}>
+                  {item.recommendation}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ overflowWrap: "anywhere" }}
+                >
                   {item.readout}
                 </Typography>
               </Stack>
@@ -490,6 +581,12 @@ function ExperimentComparisonPanel({
         value={detailView}
         onChange={(_event, value) => onSelectDetailView(value as ExperimentDetailView)}
         aria-label="Decision detail views"
+        variant="fullWidth"
+        sx={{
+          "& .MuiTab-root": {
+            minHeight: 44,
+          },
+        }}
       >
         {[
           { id: "why", label: "Why" },

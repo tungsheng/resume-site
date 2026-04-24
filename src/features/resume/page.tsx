@@ -6,10 +6,8 @@ import {
   Button,
   Card,
   CardContent,
-  Chip,
   CircularProgress,
   Divider,
-  Grid,
   Link,
   List,
   ListItem,
@@ -17,6 +15,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { buildResumeViewModel } from "./view-model";
 import type { ResumeData } from "../../types";
 import { publicResumeData } from "./data";
@@ -35,6 +34,13 @@ interface Toast {
 }
 
 let toastId = 0;
+
+const resumeCardContentSx = {
+  p: { xs: 2.25, md: 2.5 },
+  "&:last-child": {
+    pb: { xs: 2.25, md: 2.5 },
+  },
+} as const;
 
 function getLinkedinHref(linkedin: string | undefined): string | null {
   if (!linkedin) return null;
@@ -85,12 +91,12 @@ function ToastContainer({
     <Box
       sx={{
         position: "fixed",
-        right: 24,
-        bottom: 24,
+        right: { xs: 16, sm: 24 },
+        bottom: { xs: 16, sm: 24 },
         zIndex: (theme) => theme.zIndex.snackbar,
         display: "grid",
         gap: 2,
-        maxWidth: "min(360px, calc(100vw - 48px))",
+        maxWidth: { xs: "calc(100vw - 32px)", sm: "min(360px, calc(100vw - 48px))" },
       }}
       role="alert"
       aria-live="polite"
@@ -133,11 +139,18 @@ function ScreenResumeBulletList({ items }: { items: string[] }) {
       dense
       disablePadding
       sx={{
-        listStyleType: "disc",
-        pl: 3,
+        mt: 0.5,
+        display: "grid",
+        gap: 1.25,
         "& .MuiListItem-root": {
-          display: "list-item",
-          py: 0.25,
+          alignItems: "flex-start",
+          gap: 1.25,
+          py: 0,
+          "&::before": {
+            content: '"•"',
+            color: "secondary.main",
+            lineHeight: 1.5,
+          },
         },
       }}
     >
@@ -145,7 +158,7 @@ function ScreenResumeBulletList({ items }: { items: string[] }) {
         <ListItem key={`${item}-${index}`} disablePadding>
           <ListItemText
             primary={
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
                 {item}
               </Typography>
             }
@@ -165,7 +178,7 @@ function ResumeSection({
 }) {
   return (
     <Stack component="section" spacing={2}>
-      <Typography variant="h5">{title}</Typography>
+      <Typography variant="h6">{title}</Typography>
       {children}
     </Stack>
   );
@@ -176,13 +189,23 @@ function ResumeWebView({ data }: { data: ResumeData }) {
   const linkedinHref = getLinkedinHref(view.header.contacts.linkedin);
 
   return (
-    <Grid container spacing={3} aria-label="Web resume view">
-      <Grid size={{ xs: 12, md: 8 }}>
-        <Stack spacing={3}>
+    <Box
+      aria-label="Web resume view"
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "minmax(0, 1fr)",
+          md: "minmax(0, 1.6fr) minmax(280px, 0.85fr)",
+        },
+        gap: { xs: 2, md: 2.5 },
+        alignItems: "start",
+      }}
+    >
+      <Stack spacing={2.5}>
           {view.summary ? (
             <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+              <CardContent sx={resumeCardContentSx}>
+                <Typography variant="h6" sx={{ mb: 1.5 }}>
                   Professional Summary
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
@@ -197,9 +220,9 @@ function ResumeWebView({ data }: { data: ResumeData }) {
               <Stack spacing={2}>
                 {view.projects.map((project, index) => (
                   <Card key={`${project.title}-${index}`} variant="outlined">
-                    <CardContent>
+                    <CardContent sx={resumeCardContentSx}>
                       <Stack spacing={1.5}>
-                        <Typography variant="h6">{project.title}</Typography>
+                        <Typography variant="subtitle1">{project.title}</Typography>
                         <ScreenResumeBulletList items={project.highlights} />
                       </Stack>
                     </CardContent>
@@ -214,15 +237,15 @@ function ResumeWebView({ data }: { data: ResumeData }) {
               <Stack spacing={2}>
                 {view.experience.map((experience, index) => (
                   <Card key={`${experience.title}-${index}`} variant="outlined">
-                    <CardContent>
-                      <Stack spacing={1.5}>
+                    <CardContent sx={resumeCardContentSx}>
+                      <Stack spacing={1.75}>
                         <Stack
                           direction={{ xs: "column", sm: "row" }}
                           spacing={1}
                           sx={{ justifyContent: "space-between" }}
                         >
                           <div>
-                            <Typography variant="h6">{experience.title}</Typography>
+                            <Typography variant="subtitle1">{experience.title}</Typography>
                             <Typography variant="body2" color="text.secondary">
                               {experience.company}
                             </Typography>
@@ -239,25 +262,31 @@ function ResumeWebView({ data }: { data: ResumeData }) {
               </Stack>
             </ResumeSection>
           ) : null}
-        </Stack>
-      </Grid>
+      </Stack>
 
-      <Grid size={{ xs: 12, md: 4 }}>
-        <Stack spacing={3}>
+      <Stack spacing={2.5}>
           {(view.header.contacts.email || linkedinHref) ? (
             <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+              <CardContent sx={resumeCardContentSx}>
+                <Typography variant="h6" sx={{ mb: 1.5 }}>
                   Contact
                 </Typography>
                 <Stack spacing={1.5}>
                   {view.header.contacts.email ? (
                     <div>
-                      <Typography variant="overline" color="primary">
+                      <Typography variant="overline" sx={{ color: "secondary.main" }}>
                         Email
                       </Typography>
                       <Typography variant="body2">
-                        <Link href={`mailto:${view.header.contacts.email}`}>
+                        <Link
+                          href={`mailto:${view.header.contacts.email}`}
+                          sx={{
+                            alignItems: "center",
+                            display: "inline-flex",
+                            minHeight: 40,
+                            overflowWrap: "anywhere",
+                          }}
+                        >
                           {view.header.contacts.email}
                         </Link>
                       </Typography>
@@ -265,11 +294,21 @@ function ResumeWebView({ data }: { data: ResumeData }) {
                   ) : null}
                   {linkedinHref ? (
                     <div>
-                      <Typography variant="overline" color="primary">
+                      <Typography variant="overline" sx={{ color: "secondary.main" }}>
                         LinkedIn
                       </Typography>
                       <Typography variant="body2">
-                        <Link href={linkedinHref} target="_blank" rel="noreferrer">
+                        <Link
+                          href={linkedinHref}
+                          target="_blank"
+                          rel="noreferrer"
+                          sx={{
+                            alignItems: "center",
+                            display: "inline-flex",
+                            minHeight: 40,
+                            overflowWrap: "anywhere",
+                          }}
+                        >
                           {`linkedin.com/in/${view.header.contacts.linkedin}`}
                         </Link>
                       </Typography>
@@ -283,7 +322,7 @@ function ResumeWebView({ data }: { data: ResumeData }) {
           {view.skills.length > 0 ? (
             <ResumeSection title="Skills">
               <Card variant="outlined">
-                <CardContent>
+                <CardContent sx={resumeCardContentSx}>
                   <Stack
                     divider={<Divider flexItem />}
                     spacing={1.5}
@@ -309,9 +348,9 @@ function ResumeWebView({ data }: { data: ResumeData }) {
               <Stack spacing={2}>
                 {view.education.map((education, index) => (
                   <Card key={`${education.school}-${index}`} variant="outlined">
-                    <CardContent>
+                    <CardContent sx={resumeCardContentSx}>
                       <Stack spacing={0.5}>
-                        <Typography variant="h6">{education.degree}</Typography>
+                        <Typography variant="subtitle1">{education.degree}</Typography>
                         <Typography variant="body2" color="text.secondary">
                           {education.school}
                         </Typography>
@@ -325,9 +364,8 @@ function ResumeWebView({ data }: { data: ResumeData }) {
               </Stack>
             </ResumeSection>
           ) : null}
-        </Stack>
-      </Grid>
-    </Grid>
+      </Stack>
+    </Box>
   );
 }
 
@@ -376,17 +414,27 @@ export function ResumePageContent({
 
   return (
     <PublicSiteLayout activeNav="resume">
-      <PageHero>
+      <PageHero
+        sx={(theme) => ({
+          backgroundImage: `linear-gradient(180deg, rgba(255, 253, 249, 0.98), ${alpha(theme.palette.warning.main, 0.08)})`,
+        })}
+      >
         <Typography component="h1" variant="h3">
           {data.header.name}
         </Typography>
 
         {data.header.badges.length > 0 ? (
-          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
-            {data.header.badges.map((badge) => (
-              <Chip key={badge} label={badge} />
-            ))}
-          </Stack>
+          <Typography
+            variant="body1"
+            sx={{
+              color: "secondary.main",
+              fontWeight: 600,
+              letterSpacing: "-0.01em",
+              overflowWrap: "anywhere",
+            }}
+          >
+            {data.header.badges.join(" • ")}
+          </Typography>
         ) : null}
 
         <ActionLinkRow>

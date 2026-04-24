@@ -1,31 +1,19 @@
 import React from "react";
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import { createRoot } from "react-dom/client";
-import { ExperimentsPage } from "./features/experiments/page";
-import { HomePage } from "./features/home/page";
-import { ProjectPage } from "./features/project/page";
-import { ResumePage } from "./features/resume/page";
+import { theme } from "./theme";
 
-const routes: Record<string, React.ReactNode> = {
-  "/": <HomePage />,
-  "/project/cloud-inference-platform": <ProjectPage />,
-  "/experiments": <ExperimentsPage />,
-  "/resume": <ResumePage />,
-};
+export function renderSite(page: React.ReactNode): void {
+  const root = document.getElementById("root");
 
-const theme = createTheme({
-  cssVariables: true,
-});
+  if (!root) {
+    throw new Error("Root element not found");
+  }
 
-const root = document.getElementById("root");
-
-if (!root) {
-  throw new Error("Root element not found");
+  createRoot(root).render(
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {page}
+    </ThemeProvider>
+  );
 }
-
-createRoot(root).render(
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    {routes[window.location.pathname] ?? <HomePage />}
-  </ThemeProvider>
-);
