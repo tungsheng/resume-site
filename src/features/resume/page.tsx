@@ -184,6 +184,121 @@ function ResumeSection({
   );
 }
 
+function ResumeContactLinks({
+  email,
+  linkedin,
+  linkedinHref,
+  compact = false,
+}: {
+  email?: string;
+  linkedin?: string;
+  linkedinHref: string | null;
+  compact?: boolean;
+}) {
+  if (!email && !linkedinHref) return null;
+
+  if (compact) {
+    return (
+      <Stack
+        component="address"
+        className="resume-mobile-contact"
+        direction="row"
+        spacing={1.25}
+        useFlexGap
+        sx={{
+          flexWrap: "wrap",
+          fontStyle: "normal",
+          maxWidth: "100%",
+        }}
+      >
+        {email ? (
+          <Link
+            href={`mailto:${email}`}
+            sx={(theme) => ({
+              color: "text.secondary",
+              fontSize: "0.95rem",
+              fontWeight: 500,
+              lineHeight: 1.5,
+              minHeight: 28,
+              overflowWrap: "anywhere",
+              textDecorationColor: alpha(theme.palette.text.secondary, 0.42),
+              textUnderlineOffset: 3,
+            })}
+          >
+            {email}
+          </Link>
+        ) : null}
+        {linkedinHref ? (
+          <Link
+            href={linkedinHref}
+            target="_blank"
+            rel="noreferrer"
+            sx={(theme) => ({
+              color: "text.secondary",
+              fontSize: "0.95rem",
+              fontWeight: 500,
+              lineHeight: 1.5,
+              minHeight: 28,
+              overflowWrap: "anywhere",
+              textDecorationColor: alpha(theme.palette.text.secondary, 0.42),
+              textUnderlineOffset: 3,
+            })}
+          >
+            {`linkedin.com/in/${linkedin}`}
+          </Link>
+        ) : null}
+      </Stack>
+    );
+  }
+
+  return (
+    <Stack className="resume-sidebar-contact" spacing={1.5}>
+      {email ? (
+        <div>
+          <Typography variant="overline" sx={{ color: "secondary.main" }}>
+            Email
+          </Typography>
+          <Typography variant="body2">
+            <Link
+              href={`mailto:${email}`}
+              sx={{
+                alignItems: "center",
+                display: "inline-flex",
+                minHeight: 40,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {email}
+            </Link>
+          </Typography>
+        </div>
+      ) : null}
+      {linkedinHref ? (
+        <div>
+          <Typography variant="overline" sx={{ color: "secondary.main" }}>
+            LinkedIn
+          </Typography>
+          <Typography variant="body2">
+            <Link
+              href={linkedinHref}
+              target="_blank"
+              rel="noreferrer"
+              sx={{
+                alignItems: "center",
+                display: "inline-flex",
+                minHeight: 40,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {`linkedin.com/in/${linkedin}`}
+            </Link>
+          </Typography>
+        </div>
+      ) : null}
+    </Stack>
+  );
+}
+
 function ResumeWebView({ data }: { data: ResumeData }) {
   const view = buildResumeViewModel(data);
   const linkedinHref = getLinkedinHref(view.header.contacts.linkedin);
@@ -202,168 +317,129 @@ function ResumeWebView({ data }: { data: ResumeData }) {
       }}
     >
       <Stack spacing={2.5}>
-          {view.summary ? (
-            <Card variant="outlined">
-              <CardContent sx={resumeCardContentSx}>
-                <Typography variant="h6" sx={{ mb: 1.5 }}>
-                  Professional Summary
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {view.summary}
-                </Typography>
-              </CardContent>
-            </Card>
-          ) : null}
+        {view.summary ? (
+          <Card variant="outlined">
+            <CardContent sx={resumeCardContentSx}>
+              <Typography variant="h6" sx={{ mb: 1.5 }}>
+                Professional Summary
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {view.summary}
+              </Typography>
+            </CardContent>
+          </Card>
+        ) : null}
 
-          {view.projects.length > 0 ? (
-            <ResumeSection title={view.projectsTitle}>
-              <Stack spacing={2}>
-                {view.projects.map((project, index) => (
-                  <Card key={`${project.title}-${index}`} variant="outlined">
-                    <CardContent sx={resumeCardContentSx}>
-                      <Stack spacing={1.5}>
-                        <Typography variant="subtitle1">{project.title}</Typography>
-                        <ScreenResumeBulletList items={project.highlights} />
-                      </Stack>
-                    </CardContent>
-                  </Card>
-                ))}
-              </Stack>
-            </ResumeSection>
-          ) : null}
+        {view.projects.length > 0 ? (
+          <ResumeSection title={view.projectsTitle}>
+            <Stack spacing={2}>
+              {view.projects.map((project, index) => (
+                <Card key={`${project.title}-${index}`} variant="outlined">
+                  <CardContent sx={resumeCardContentSx}>
+                    <Stack spacing={1.5}>
+                      <Typography variant="subtitle1">{project.title}</Typography>
+                      <ScreenResumeBulletList items={project.highlights} />
+                    </Stack>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          </ResumeSection>
+        ) : null}
 
-          {view.experience.length > 0 ? (
-            <ResumeSection title="Experience">
-              <Stack spacing={2}>
-                {view.experience.map((experience, index) => (
-                  <Card key={`${experience.title}-${index}`} variant="outlined">
-                    <CardContent sx={resumeCardContentSx}>
-                      <Stack spacing={1.75}>
-                        <Stack
-                          direction={{ xs: "column", sm: "row" }}
-                          spacing={1}
-                          sx={{ justifyContent: "space-between" }}
-                        >
-                          <div>
-                            <Typography variant="subtitle1">{experience.title}</Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {experience.company}
-                            </Typography>
-                          </div>
+        {view.experience.length > 0 ? (
+          <ResumeSection title="Experience">
+            <Stack spacing={2}>
+              {view.experience.map((experience, index) => (
+                <Card key={`${experience.title}-${index}`} variant="outlined">
+                  <CardContent sx={resumeCardContentSx}>
+                    <Stack spacing={1.75}>
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={1}
+                        sx={{ justifyContent: "space-between" }}
+                      >
+                        <div>
+                          <Typography variant="subtitle1">{experience.title}</Typography>
                           <Typography variant="body2" color="text.secondary">
-                            {experience.dateRange}
+                            {experience.company}
                           </Typography>
-                        </Stack>
-                        <ScreenResumeBulletList items={experience.highlights} />
+                        </div>
+                        <Typography variant="body2" color="text.secondary">
+                          {experience.dateRange}
+                        </Typography>
                       </Stack>
-                    </CardContent>
-                  </Card>
-                ))}
-              </Stack>
-            </ResumeSection>
-          ) : null}
+                      <ScreenResumeBulletList items={experience.highlights} />
+                    </Stack>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          </ResumeSection>
+        ) : null}
       </Stack>
 
       <Stack spacing={2.5}>
-          {(view.header.contacts.email || linkedinHref) ? (
+        {(view.header.contacts.email || linkedinHref) ? (
+          <Card variant="outlined" sx={{ display: { xs: "none", md: "block" } }}>
+            <CardContent sx={resumeCardContentSx}>
+              <Typography variant="h6" sx={{ mb: 1.5 }}>
+                Contact
+              </Typography>
+              <ResumeContactLinks
+                email={view.header.contacts.email}
+                linkedin={view.header.contacts.linkedin}
+                linkedinHref={linkedinHref}
+              />
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {view.skills.length > 0 ? (
+          <ResumeSection title="Skills">
             <Card variant="outlined">
               <CardContent sx={resumeCardContentSx}>
-                <Typography variant="h6" sx={{ mb: 1.5 }}>
-                  Contact
-                </Typography>
-                <Stack spacing={1.5}>
-                  {view.header.contacts.email ? (
-                    <div>
-                      <Typography variant="overline" sx={{ color: "secondary.main" }}>
-                        Email
+                <Stack
+                  divider={<Divider flexItem />}
+                  spacing={1.5}
+                >
+                  {view.skills.map((skill) => (
+                    <div key={skill.category}>
+                      <Typography variant="subtitle1">
+                        {skill.categoryLabel}
                       </Typography>
-                      <Typography variant="body2">
-                        <Link
-                          href={`mailto:${view.header.contacts.email}`}
-                          sx={{
-                            alignItems: "center",
-                            display: "inline-flex",
-                            minHeight: 40,
-                            overflowWrap: "anywhere",
-                          }}
-                        >
-                          {view.header.contacts.email}
-                        </Link>
+                      <Typography variant="body2" color="text.secondary">
+                        {skill.itemsText}
                       </Typography>
                     </div>
-                  ) : null}
-                  {linkedinHref ? (
-                    <div>
-                      <Typography variant="overline" sx={{ color: "secondary.main" }}>
-                        LinkedIn
-                      </Typography>
-                      <Typography variant="body2">
-                        <Link
-                          href={linkedinHref}
-                          target="_blank"
-                          rel="noreferrer"
-                          sx={{
-                            alignItems: "center",
-                            display: "inline-flex",
-                            minHeight: 40,
-                            overflowWrap: "anywhere",
-                          }}
-                        >
-                          {`linkedin.com/in/${view.header.contacts.linkedin}`}
-                        </Link>
-                      </Typography>
-                    </div>
-                  ) : null}
+                  ))}
                 </Stack>
               </CardContent>
             </Card>
-          ) : null}
+          </ResumeSection>
+        ) : null}
 
-          {view.skills.length > 0 ? (
-            <ResumeSection title="Skills">
-              <Card variant="outlined">
-                <CardContent sx={resumeCardContentSx}>
-                  <Stack
-                    divider={<Divider flexItem />}
-                    spacing={1.5}
-                  >
-                    {view.skills.map((skill) => (
-                      <div key={skill.category}>
-                        <Typography variant="subtitle1">
-                          {skill.categoryLabel}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {skill.itemsText}
-                        </Typography>
-                      </div>
-                    ))}
-                  </Stack>
-                </CardContent>
-              </Card>
-            </ResumeSection>
-          ) : null}
-
-          {view.education.length > 0 ? (
-            <ResumeSection title="Education">
-              <Stack spacing={2}>
-                {view.education.map((education, index) => (
-                  <Card key={`${education.school}-${index}`} variant="outlined">
-                    <CardContent sx={resumeCardContentSx}>
-                      <Stack spacing={0.5}>
-                        <Typography variant="subtitle1">{education.degree}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {education.school}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {education.dateRange}
-                        </Typography>
-                      </Stack>
-                    </CardContent>
-                  </Card>
-                ))}
-              </Stack>
-            </ResumeSection>
-          ) : null}
+        {view.education.length > 0 ? (
+          <ResumeSection title="Education">
+            <Stack spacing={2}>
+              {view.education.map((education, index) => (
+                <Card key={`${education.school}-${index}`} variant="outlined">
+                  <CardContent sx={resumeCardContentSx}>
+                    <Stack spacing={0.5}>
+                      <Typography variant="subtitle1">{education.degree}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {education.school}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {education.dateRange}
+                      </Typography>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          </ResumeSection>
+        ) : null}
       </Stack>
     </Box>
   );
@@ -388,29 +464,7 @@ export function ResumePageContent({
   const secondaryLinks = [
     { label: "View project", href: PROJECT_PATH, external: false },
     { label: "View experiments", href: EXPERIMENTS_PATH, external: false },
-    data.header.contacts.email
-      ? {
-          label: "Email",
-          href: `mailto:${data.header.contacts.email}`,
-          external: false,
-        }
-      : null,
-    linkedinHref
-      ? {
-          label: "LinkedIn",
-          href: linkedinHref,
-          external: true,
-        }
-      : null,
-  ].filter(
-    (
-      link
-    ): link is {
-      label: string;
-      href: string;
-      external: boolean;
-    } => Boolean(link)
-  );
+  ];
 
   return (
     <PublicSiteLayout activeNav="resume">
@@ -435,6 +489,17 @@ export function ResumePageContent({
           >
             {data.header.badges.join(" • ")}
           </Typography>
+        ) : null}
+
+        {(data.header.contacts.email || linkedinHref) ? (
+          <Box sx={{ display: { xs: "block", md: "none" } }}>
+            <ResumeContactLinks
+              compact
+              email={data.header.contacts.email}
+              linkedin={data.header.contacts.linkedin}
+              linkedinHref={linkedinHref}
+            />
+          </Box>
         ) : null}
 
         <ActionLinkRow>
