@@ -22,7 +22,7 @@ describe("ProjectPage", () => {
     );
     expect(html).toContain("Default path");
     expect(html).toContain(
-      "This is the shortest path to understand what the repo proves without going straight into the heavier measurement workflow."
+      "Shortest path: bring up the platform, prove one public response, then clean it up."
     );
     expect(html).toContain("Step 1");
     expect(html).toContain("Step 2");
@@ -34,19 +34,26 @@ describe("ProjectPage", () => {
     expect(html).toContain("GPU capacity appears");
     expect(html).toContain("Public inference works");
     expect(html).toContain("Cleanup returns to zero");
-    expect(html).toContain("Go deeper with evaluate");
+    expect(html).toContain("Measure when comparing profiles");
     expect(html).toContain("./scripts/down");
-    expect(html).toContain("./scripts/evaluate --profile zero-idle|warm-1");
+    expect(html).toContain("./scripts/evaluate");
+    expect(html).toContain("--profile");
+    expect(html).toContain("zero-idle");
+    expect(html).toContain("warm-1");
+    expect(html).toContain("command-token--program");
+    expect(html).toContain("command-token--flag");
+    expect(html).toContain("command-token--value");
+    expect(html).toContain("command-token--separator");
     expect(html).toContain("Markdown report");
     expect(html).toContain("JSON report");
     expect(html).toContain("Quick start README");
     expect(html).toContain("Verify script");
     expect(html).toContain("Evaluate script");
     expect(html).toContain(
-      "Run one end-to-end cold-start proof through the real public endpoint instead of a local-only smoke test."
+      "Confirm one successful public /v1 inference response."
     );
     expect(html).toContain(
-      "Use the heavier measurement path when you want compare and tuning data instead of a single cold-start proof. It runs profile-based workflows and writes report artifacts you can inspect later."
+      "Use evaluate when you want profile comparison and target-tuning reports instead of a single cold-start proof."
     );
     expect(html).toContain(
       "A compact view of what the platform is, how it works, and why the measured results matter."

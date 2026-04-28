@@ -187,25 +187,22 @@ export const implementation = {
     "Bring the lab up, prove one real public response, and tear it down. Run evaluate only when you want comparison reports and tuning data.",
   defaultPathTitle: "Default path",
   defaultPathLead:
-    "This is the shortest path to understand what the repo proves without going straight into the heavier measurement workflow.",
+    "Shortest path: bring up the platform, prove one public response, then clean it up.",
   defaultPathSteps: [
     {
       title: "Start the lab",
       command: "./scripts/up",
-      body:
-        "Provision the VPC, EKS cluster, ingress, observability, and GPU-ready platform pieces so the environment is ready before serving starts.",
+      body: "Provision platform pieces before serving starts.",
     },
     {
       title: "Prove the path",
       command: "./scripts/verify",
-      body:
-        "Run one end-to-end cold-start proof through the real public endpoint instead of a local-only smoke test.",
+      body: "Confirm one successful public /v1 inference response.",
     },
     {
       title: "Tear it down",
       command: "./scripts/down",
-      body:
-        "Remove the workload and environment again so the quick-start path ends cleanly after the proof run.",
+      body: "Remove the workload and return serving GPUs to zero.",
     },
   ],
   verifyProofTitle: "What the quick start proves",
@@ -227,10 +224,10 @@ export const implementation = {
     },
   ],
   measurement: {
-    title: "Go deeper with evaluate",
+    title: "Measure when comparing profiles",
     command: "./scripts/evaluate --profile zero-idle|warm-1",
     body:
-      "Use the heavier measurement path when you want compare and tuning data instead of a single cold-start proof. It runs profile-based workflows and writes report artifacts you can inspect later.",
+      "Use evaluate when you want profile comparison and target-tuning reports instead of a single cold-start proof.",
     outputs: ["Markdown report", "JSON report"],
     links: [
       {

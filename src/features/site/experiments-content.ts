@@ -1,7 +1,7 @@
 export const experimentsContent = {
   title: "Experiment Archive",
   subtitle:
-    "Checked-in evaluation runs for comparing baseline posture, autoscaling policy, and active-pressure target calibration.",
+    "Evaluation runs comparing baseline posture, autoscaling policy, and active-pressure target calibration.",
   summaryIntro:
     "Each run isolates one rollout trade-off. Choose one below for the current call and proof.",
   tradeoffCards: [
@@ -16,7 +16,7 @@ export const experimentsContent = {
       right: "Replica 2 speed",
     },
     {
-      title: "Active target",
+      title: "Target tuning",
       left: "Aggressive target",
       right: "Readable metrics",
     },
@@ -43,11 +43,11 @@ export const experimentsContent = {
     },
     {
       id: "target-calibration",
-      title: "Active target",
-      summary: "default 4 -> recommend 6",
+      title: "Target tuning",
+      summary: "target 4 vs target 6",
       recommendation: "Recommend target 6",
       readout: "930s at $0.483",
-      status: "Provisional",
+      status: "Best usable target",
       tone: "provisional",
     },
   ],
@@ -66,7 +66,7 @@ export const experimentsContent = {
     },
     {
       id: "target-calibration",
-      title: "Active target tuning",
+      title: "Target tuning",
       summary: "Latest zero-idle sweep: keep 4 or move toward 6?",
     },
   ],
@@ -154,24 +154,24 @@ export const experimentsContent = {
   },
   targetCalibration: {
     title: "Zero-idle active-pressure target sweep",
-    questionTitle: "Which active target is safe to recommend now?",
+    questionTitle: "Which target is safe to recommend now?",
     question:
       "For zero-idle, the target should keep scale-out data usable without paying more burst cost for no clear gain.",
-    takeawayTitle: "Target 6 is the best supported recommendation",
+    takeawayTitle: "Target 6 is the most usable recommendation",
     takeaway:
-      "Target 6 is slightly cheaper than 2 or 4 and keeps supporting metrics intact. Target 8 looked better in the raw run, but its supporting metrics dropped.",
+      "Target 6 is slightly cheaper than 2 or 4 and keeps latency, queue, and throughput metrics available. Target 8 looked faster and cheaper, but missing supporting metrics make it unsuitable as the current recommendation.",
     note:
-      "Focus on second-replica time and burst cost. Target 8 is omitted because supporting metrics were missing.",
+      "Focus on second-replica time, burst cost, and metric completeness. Target 8 is excluded because latency, queue, and throughput metrics were unavailable.",
     spotlightStats: [
       {
         label: "Recommendation",
         value: "Target 6",
-        context: "Best supported in the April 21, 2026 sweep",
+        context: "Recommended from the April 21, 2026 sweep",
       },
       {
-        label: "Repo default",
+        label: "Current target",
         value: "Target 4",
-        context: "Still checked in today",
+        context: "Baseline setting before retuning",
       },
       {
         label: "Burst cost",
@@ -181,19 +181,19 @@ export const experimentsContent = {
     ],
     runs: [
       {
-        label: "Active target 2",
+        label: "Target 2",
         secondReadySeconds: 914,
         burstCost: 0.487280,
         peakActiveRequestsPerGpuNode: 85.333,
       },
       {
-        label: "Active target 4",
+        label: "Target 4",
         secondReadySeconds: 951,
         burstCost: 0.491372,
         peakActiveRequestsPerGpuNode: 128,
       },
       {
-        label: "Active target 6",
+        label: "Target 6",
         secondReadySeconds: 930,
         burstCost: 0.483189,
         peakActiveRequestsPerGpuNode: 128,
@@ -270,7 +270,7 @@ export const experimentsContent = {
   evidenceExcerpts: [
     {
       title: "Warm baseline compare",
-      subtitle: "compare report (active target 8)",
+      subtitle: "compare report (target 8)",
       reportDate: "2026-04-20",
       command: "./scripts/evaluate --profile warm-1 --policy compare --active-target 8",
       lines: [
@@ -285,8 +285,8 @@ export const experimentsContent = {
       reportDate: "2026-04-21",
       command: "./scripts/evaluate --profile zero-idle --policy sweep --active-targets 2,4,6,8",
       lines: [
-        "Recommended active target: 6",
-        "Checked-in active-pressure manifest target: 4",
+        "Recommended target: 6",
+        "Current active-pressure manifest target: 4",
         "Target 4 second ready replica: 951s; burst cost: $0.491372",
         "Target 6 second ready replica: 930s; burst cost: $0.483189",
         "Target 8 second ready replica: 885s; supporting metrics unavailable",

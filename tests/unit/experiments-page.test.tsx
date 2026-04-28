@@ -13,7 +13,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Choose what you&#x27;re deciding");
     expect(html).toContain("Scale-out signal");
     expect(html).toContain("Warm baseline");
-    expect(html).toContain("Active target");
+    expect(html).toContain("Target tuning");
     expect(html).toContain("View project");
     expect(html).toContain("View resume");
     expect(html).toContain("role=\"tablist\"");
@@ -22,6 +22,12 @@ describe("ExperimentsPage", () => {
     expect(html).toContain(
       "Each run isolates one rollout trade-off. Choose one below for the current call and proof.",
     );
+    expect(html).toContain("experiment-tradeoff-card");
+    expect(html).toContain("experiment-tradeoff-card__title");
+    expect(html).toContain("experiment-tradeoff-card__signal");
+    expect(html).toContain("experiment-tradeoff-card__signal-label");
+    expect(html).toContain("experiment-tradeoff-card__rail");
+    expect(html).toContain("experiment-tradeoff-card__endpoint");
     expect(html).toContain("Trade-off");
     expect(html).toContain("Idle cost");
     expect(html).toContain("First response");
@@ -30,19 +36,28 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Aggressive target");
     expect(html).toContain("Readable metrics");
     expect(html).toContain("Choose a decision. The current call and supporting detail appear underneath.");
+    expect(html).toContain("experiment-decision-workspace");
+    expect(html).toContain("experiment-decision-selector");
+    expect(html).toContain("experiment-decision-tabs");
+    expect(html).toContain("experiment-decision-choice");
+    expect(html).toContain("experiment-decision-summary");
+    expect(html).toContain("experiment-decision-status");
+    expect(html).toContain("experiment-decision-summary__stat");
+    expect(html).toContain("experiment-support-panel");
     expect(html).toContain("Warm baseline");
     expect(html).toContain("Keep 1 warm path");
     expect(html).toContain("84s vs 447s");
     expect(html).toContain("Strong recommendation");
     expect(html).toContain("Scale-out signal");
     expect(html).toContain("Use active-pressure");
-    expect(html).toContain("Active target");
+    expect(html).toContain("Target tuning");
     expect(html).toContain("Recommend target 6");
     expect(html).toContain("Current call");
     expect(html).toContain("warm-1 = 1 ready path");
+    expect(html).toContain("Support detail");
     expect(html).toContain("Why");
-    expect(html).toContain("Compact chart");
-    expect(html).toContain("Measured proof");
+    expect(html).toContain("Chart");
+    expect(html).toContain("Proof");
     expect(html).toContain("Problem statement");
     expect(html).toContain("Observed outcome");
     expect(html).toContain("Does one warm path justify its idle cost?");
