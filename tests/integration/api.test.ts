@@ -48,6 +48,22 @@ describe("API Integration", () => {
     expect(html).toContain("Experiments | Tony Lee");
   });
 
+  itIfIntegration("GET /experiments/:slug serves the experiments shell", async () => {
+    const res = await fetch(`${BASE_URL}/experiments/kv-cache`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Experiments | Tony Lee");
+  });
+
+  itIfIntegration("GET /experiments/platform-validation serves the experiments shell", async () => {
+    const res = await fetch(`${BASE_URL}/experiments/platform-validation`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Experiments | Tony Lee");
+  });
+
   itIfIntegration("GET /resume serves the resume shell", async () => {
     const res = await fetch(`${BASE_URL}/resume`);
     expect(res.status).toBe(200);

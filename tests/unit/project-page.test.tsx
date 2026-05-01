@@ -9,17 +9,41 @@ describe("ProjectPage", () => {
 
     expect(html).toContain("Cloud Inference Platform");
     expect(html).toContain(
-      "A GPU inference lab on EKS that turns vLLM serving pressure into autoscaling and GPU node provisioning, with checked-in runs for cold start, warm capacity, policy comparison, and target tuning."
+      "A GPU inference lab on EKS that turns vLLM serving pressure into autoscaling and GPU node provisioning, with platform validation runs and a catalog of focused serving experiments."
     );
     expect(html).toContain("GitHub");
     expect(html).toContain("View experiments");
     expect(html).toContain("View resume");
     expect(html).toContain("At a glance");
-    expect(html).toContain("How the platform serves and scales");
-    expect(html).toContain("Quick start and measure");
     expect(html).toContain(
-      "Bring the lab up, prove one real public response, and tear it down. Run evaluate only when you want comparison reports and tuning data."
+      "The lab has one public serving path, one observable scale path, and three workflows for proving or measuring behavior."
     );
+    expect(html).toContain("AWS EKS + vLLM");
+    expect(html).toContain("0 serving GPUs");
+    expect(html).toContain("Verify / Evaluate / Experiment");
+    expect(html).toContain("6 experiments");
+    expect(html).toContain("Validation measured");
+    expect(html).toContain("Choose the right workflow");
+    expect(html).toContain("Use verify for path proof, evaluate for platform comparisons, and experiment for catalog-defined serving questions.");
+    expect(html).toContain("Verify");
+    expect(html).toContain("Evaluate");
+    expect(html).toContain("Experiment");
+    expect(html).toContain("Use after ./scripts/up for a fast path check.");
+    expect(html).toContain("Use for profile, scale signal, or target tuning decisions.");
+    expect(html).toContain("Use locally to validate or render; use run after ./scripts/up for measurements.");
+    expect(html).toContain("validate");
+    expect(html).toContain("Public /v1 response");
+    expect(html).toContain("Catalog validation");
+    expect(html).toContain("Decision evidence");
+    expect(html).toContain("Experiment contract");
+    expect(html).toContain("Question");
+    expect(html).toContain("Cases");
+    expect(html).toContain("Serving profile");
+    expect(html).toContain("Metrics");
+    expect(html).toContain("Result");
+    expect(html).toContain("Experiment summary");
+    expect(html).toContain("Experiment runner");
+    expect(html).toContain("How the platform serves and scales");
     expect(html).toContain("Default path");
     expect(html).toContain(
       "Shortest path: bring up the platform, prove one public response, then clean it up."
@@ -34,46 +58,32 @@ describe("ProjectPage", () => {
     expect(html).toContain("GPU capacity appears");
     expect(html).toContain("Public inference works");
     expect(html).toContain("Cleanup returns to zero");
-    expect(html).toContain("Measure when comparing profiles");
     expect(html).toContain("./scripts/down");
     expect(html).toContain("./scripts/evaluate");
     expect(html).toContain("--profile");
     expect(html).toContain("zero-idle");
-    expect(html).toContain("warm-1");
     expect(html).toContain("command-token--program");
     expect(html).toContain("command-token--flag");
     expect(html).toContain("command-token--value");
     expect(html).toContain("command-token--separator");
     expect(html).toContain("Markdown report");
     expect(html).toContain("JSON report");
-    expect(html).toContain("Quick start README");
-    expect(html).toContain("Verify script");
-    expect(html).toContain("Evaluate script");
     expect(html).toContain(
       "Confirm one successful public /v1 inference response."
     );
     expect(html).toContain(
-      "Use evaluate when you want profile comparison and target-tuning reports instead of a single cold-start proof."
+      "Evidence and outputs"
     );
-    expect(html).toContain(
-      "A compact view of what the platform is, how it works, and why the measured results matter."
-    );
-    expect(html).toContain(
-      "A reproducible GPU inference lab on AWS EKS for measuring cold start, warm capacity, and autoscaling behavior."
-    );
-    expect(html).toContain(
-      "Serving pressure becomes scaling decisions through Prometheus, the adapter, HPA, pending GPU pods, and Karpenter."
-    );
-    expect(html).toContain(
-      "It makes response-time tradeoffs and GPU scale-out behavior easy to understand with checked-in runs."
-    );
+    expect(html).toContain("Measured platform validation, generated reports, and catalog experiments are related, but they are not the same artifact.");
+    expect(html).toContain("Measured evaluate runs support warm baseline, scale-out signal, and target tuning decisions.");
+    expect(html).toContain("Experiment definitions and runners exist; curated live-cluster conclusions are still pending.");
+    expect(html).toContain("Generated Markdown, JSON, and logs stay under docs/reports until selected for the project narrative.");
+    expect(html).toContain("Reports docs");
+    expect(html).toContain("Scaling docs");
     expect(html).toContain("Serve path");
     expect(html).toContain("Scale path");
     expect(html).toContain("Foundation");
     expect(html).toContain("Rejoin point");
-    expect(html).toContain("Stable path");
-    expect(html).toContain("Reactive path");
-    expect(html).toContain("Added capacity");
     expect(html).toContain("Setup via scripts/up");
     expect(html).toContain("Public ingress hostname");
     expect(html).toContain("Adapter / custom metrics API");
@@ -98,7 +108,17 @@ describe("ProjectPage", () => {
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/scripts/evaluate\""
     );
+    expect(html).toContain(
+      "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/scripts/experiment\""
+    );
+    expect(html).toContain(
+      "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/experiments-summary.md\""
+    );
+    expect(html).toContain(
+      "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/reports/README.md\""
+    );
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
+    expect(html).toContain("href=\"/experiments/platform-validation\"");
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/platform/inference/ingress.yaml\""
     );

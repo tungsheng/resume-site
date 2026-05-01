@@ -5,8 +5,6 @@ import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Grid,
   Link,
@@ -31,6 +29,28 @@ const PAGE_TITLE = "Cloud Inference Platform | Tony Lee";
 
 type WorkflowNode = (typeof projectContent.workflowFoundation.nodes)[number];
 type WorkflowTrack = (typeof projectContent.workflowPaths)[number];
+
+const overviewFactGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    sm: "repeat(2, minmax(0, 1fr))",
+    lg: "repeat(3, minmax(0, 1fr))",
+  },
+  gap: { xs: 1.25, md: 1.5 },
+};
+
+const overviewFactSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.55,
+  alignContent: "start",
+  minWidth: 0,
+  p: { xs: 1.5, sm: 1.65, md: 1.75 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.54),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.65)}`,
+});
 
 const workflowSurfaceSx: SxProps<Theme> = {
   p: { xs: 2, sm: 2.5, md: 3 },
@@ -200,23 +220,6 @@ const workflowRejoinSx: SxProps<Theme> = (theme) => ({
   boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.65)}`,
 });
 
-const workflowExplainersSx: SxProps<Theme> = (theme) => ({
-  display: "grid",
-  gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(3, minmax(0, 1fr))" },
-  gap: { xs: 1, md: 1.25 },
-  alignItems: "start",
-  "& > section": {
-    display: "grid",
-    gap: 1,
-    alignContent: "start",
-    minWidth: 0,
-    p: { xs: 1.35, sm: 1.5 },
-    borderRadius: 2,
-    backgroundColor: alpha(theme.palette.text.primary, 0.025),
-    border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
-  },
-});
-
 const quickStartCommandSx: SxProps<Theme> = {
   overflowX: "auto",
   overflowY: "hidden",
@@ -228,24 +231,6 @@ const quickStartCommandSx: SxProps<Theme> = {
   "& code, & span": {
     whiteSpace: "inherit",
   },
-};
-
-const quickStartRunbookSurfaceSx: SxProps<Theme> = {
-  p: { xs: 2, sm: 2.5, md: 3 },
-  display: "grid",
-  gap: { xs: 2.5, md: 3 },
-};
-
-const quickStartMainSx: SxProps<Theme> = {
-  display: "grid",
-  gap: { xs: 1.75, md: 2 },
-  minWidth: 0,
-};
-
-const quickStartIntroSx: SxProps<Theme> = {
-  display: "grid",
-  gap: 0.5,
-  maxWidth: "50rem",
 };
 
 const quickStartStepListSx: SxProps<Theme> = (theme) => ({
@@ -374,36 +359,136 @@ const quickStartCheckIconSx: SxProps<Theme> = (theme) => ({
   fontSize: "1rem",
 });
 
-const quickStartMeasureCalloutSx: SxProps<Theme> = (theme) => ({
-  display: "grid",
-  gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 0.88fr) minmax(20rem, 1.12fr)" },
-  gap: { xs: 1.5, md: 2.25 },
-  alignItems: "start",
-  minWidth: 0,
-  p: { xs: 1.5, sm: 1.75, md: 2 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.secondary.main, 0.035),
-  border: `1px solid ${alpha(theme.palette.secondary.main, 0.14)}`,
-  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.62)}`,
-});
-
-const quickStartMeasureCopySx: SxProps<Theme> = {
-  display: "grid",
-  gap: 0.75,
-  minWidth: 0,
-};
-
-const quickStartMeasureActionsSx: SxProps<Theme> = {
-  display: "grid",
-  gap: 1.15,
-  minWidth: 0,
-};
-
 const quickStartOutputChipSx: SxProps<Theme> = (theme) => ({
   backgroundColor: alpha(theme.palette.text.primary, 0.035),
   borderColor: alpha(theme.palette.text.primary, 0.1),
   color: alpha(theme.palette.text.primary, 0.72),
   fontWeight: 600,
+});
+
+const usageSurfaceSx: SxProps<Theme> = {
+  p: { xs: 2, sm: 2.5, md: 3 },
+  display: "grid",
+  gap: { xs: 2.25, md: 2.75 },
+};
+
+const usageWorkflowGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "repeat(3, minmax(0, 1fr))" },
+  gap: { xs: 1.25, md: 1.5 },
+  alignItems: "stretch",
+};
+
+const usageWorkflowItemSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateRows: { xs: "auto auto auto", lg: "auto minmax(8.5rem, 1fr) auto" },
+  gap: 1.25,
+  alignContent: "stretch",
+  minWidth: 0,
+  height: "100%",
+  p: { xs: 1.5, sm: 1.65, md: 1.75 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.54),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.65)}`,
+});
+
+const usageWorkflowHeaderSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.35,
+  alignContent: "start",
+  minWidth: 0,
+};
+
+const usageWorkflowBodySx: SxProps<Theme> = {
+  display: "grid",
+  alignContent: "start",
+  gap: 0.75,
+  minWidth: 0,
+};
+
+const usageWorkflowActionsSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 1,
+  alignSelf: "end",
+  minWidth: 0,
+};
+
+const usageDefaultPathSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: { xs: 1.5, md: 1.75 },
+  p: { xs: 1.5, sm: 1.75, md: 2 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.text.primary, 0.025),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+});
+
+const usageDefaultHeaderSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.5,
+  maxWidth: "52rem",
+};
+
+const usageConceptSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: { xs: 1.5, md: 1.75 },
+  p: { xs: 1.5, sm: 1.75, md: 2 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.secondary.main, 0.035),
+  border: `1px solid ${alpha(theme.palette.secondary.main, 0.14)}`,
+});
+
+const usageConceptHeaderSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.5,
+  maxWidth: "52rem",
+};
+
+const usageConceptFlowSx: SxProps<Theme> = (theme) => ({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: { xs: 0.75, md: 1 },
+  alignItems: "center",
+  "& .project-usage-concept-arrow": {
+    color: alpha(theme.palette.secondary.dark, 0.42),
+    fontSize: "1rem",
+  },
+});
+
+const usageConceptStepSx: SxProps<Theme> = (theme) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: "2.35rem",
+  px: { xs: 1.15, md: 1.35 },
+  py: 0.75,
+  borderRadius: 999,
+  backgroundColor: alpha(theme.palette.common.white, 0.72),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+  fontSize: "0.86rem",
+  fontWeight: 700,
+  lineHeight: 1.2,
+});
+
+const evidenceSurfaceSx: SxProps<Theme> = {
+  p: { xs: 2, sm: 2.5, md: 3 },
+  display: "grid",
+  gap: { xs: 1.75, md: 2 },
+};
+
+const evidenceGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(3, minmax(0, 1fr))" },
+  gap: { xs: 1.25, md: 1.5 },
+};
+
+const evidenceItemSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.75,
+  minWidth: 0,
+  p: { xs: 1.5, sm: 1.65, md: 1.75 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.54),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
 });
 
 function WorkflowNodePill({ node }: { node: WorkflowNode }) {
@@ -490,6 +575,224 @@ function WorkflowPathRow({ title, summary, nodes }: WorkflowTrack) {
   );
 }
 
+function LabUsageSection() {
+  return (
+    <PageSection>
+      <SectionHeader
+        title={projectContent.usage.title}
+        copy={projectContent.usage.lead}
+      />
+
+      <Paper variant="outlined" sx={usageSurfaceSx}>
+        <Box sx={usageWorkflowGridSx}>
+          {projectContent.usage.workflows.map((item) => (
+            <Box key={item.title} component="section" sx={usageWorkflowItemSx}>
+              <Box sx={usageWorkflowHeaderSx}>
+                <Typography variant="overline" color="primary">
+                  Workflow
+                </Typography>
+                <Typography variant="h6">{item.title}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {item.body}
+                </Typography>
+              </Box>
+
+              <Box sx={usageWorkflowBodySx}>
+                <Typography variant="body2">
+                  {item.when}
+                </Typography>
+                <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                  {item.outputs.map((output) => (
+                    <Chip
+                      key={`${item.title}-${output}`}
+                      label={output}
+                      size="small"
+                      variant="outlined"
+                      sx={quickStartOutputChipSx}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+
+              <Box sx={usageWorkflowActionsSx}>
+                <CommandCodeBlock
+                  command={item.command}
+                  ariaLabel={`${item.title} command`}
+                  sx={quickStartCommandSx}
+                />
+
+                <Button
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  size="small"
+                  endIcon={<OpenInNewRoundedIcon />}
+                  sx={{ justifySelf: "start" }}
+                >
+                  Source
+                </Button>
+              </Box>
+            </Box>
+          ))}
+        </Box>
+
+        <Box component="section" sx={usageDefaultPathSx}>
+          <Box sx={usageDefaultHeaderSx}>
+            <Typography variant="overline" color="primary">
+              {implementation.defaultPathTitle}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {implementation.defaultPathLead}
+            </Typography>
+          </Box>
+
+          <Box sx={quickStartStepListSx} aria-label="Quick start default path">
+            {implementation.defaultPathSteps.map((item, index) => (
+              <React.Fragment key={item.title}>
+                <Box component="section" sx={quickStartStepRowSx}>
+                  <Box sx={quickStartStepHeaderSx}>
+                    <Box
+                      component="span"
+                      aria-label={`Step ${index + 1}`}
+                      sx={quickStartStepBadgeSx}
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </Box>
+                    <Typography variant="h6">{item.title}</Typography>
+                  </Box>
+                  <Box sx={quickStartStepCopySx}>
+                    <CommandCodeBlock
+                      command={item.command}
+                      ariaLabel={`${item.title} command`}
+                      sx={quickStartStepCommandSx}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      {item.body}
+                    </Typography>
+                  </Box>
+                </Box>
+                {index < implementation.defaultPathSteps.length - 1 ? (
+                  <Box sx={quickStartStepConnectorSx} aria-hidden="true">
+                    <ArrowForwardIcon />
+                  </Box>
+                ) : null}
+              </React.Fragment>
+            ))}
+          </Box>
+
+          <Box component="section" sx={quickStartSupportBlockSx}>
+            <Typography variant="overline" color="primary">
+              {implementation.verifyProofTitle}
+            </Typography>
+            <Box sx={quickStartProofListSx}>
+              {implementation.verifyProofs.map((item) => (
+                <Box key={item.title} sx={quickStartProofItemSx}>
+                  <CheckRoundedIcon aria-hidden="true" sx={quickStartCheckIconSx} />
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {item.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {item.body}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+
+        <Box component="section" sx={usageConceptSx}>
+          <Box sx={usageConceptHeaderSx}>
+            <Typography variant="overline" color="primary">
+              {projectContent.usage.conceptTitle}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {projectContent.usage.conceptLead}
+            </Typography>
+          </Box>
+
+          <Box sx={usageConceptFlowSx} aria-label="Experiment concept flow">
+            {projectContent.usage.conceptSteps.map((step, index) => (
+              <React.Fragment key={step}>
+                <Box component="span" sx={usageConceptStepSx}>
+                  {step}
+                </Box>
+                {index < projectContent.usage.conceptSteps.length - 1 ? (
+                  <ArrowForwardIcon
+                    className="project-usage-concept-arrow"
+                    aria-hidden="true"
+                  />
+                ) : null}
+              </React.Fragment>
+            ))}
+          </Box>
+
+          <ActionLinkRow>
+            {projectContent.usage.links.map((link) => (
+              <Button
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                size="small"
+                endIcon={<OpenInNewRoundedIcon />}
+              >
+                {link.label}
+              </Button>
+            ))}
+          </ActionLinkRow>
+        </Box>
+      </Paper>
+    </PageSection>
+  );
+}
+
+function ProjectEvidenceSection() {
+  return (
+    <PageSection>
+      <SectionHeader
+        title={projectContent.evidence.title}
+        copy={projectContent.evidence.lead}
+      />
+
+      <Paper variant="outlined" sx={evidenceSurfaceSx}>
+        <Box sx={evidenceGridSx}>
+          {projectContent.evidence.items.map((item) => (
+            <Box key={item.title} component="section" sx={evidenceItemSx}>
+              <Typography variant="h6">{item.title}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {item.body}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+
+        <ActionLinkRow>
+          <Button href={`${EXPERIMENTS_PATH}/platform-validation`} variant="contained">
+            Platform validation
+          </Button>
+          <Button href={EXPERIMENTS_PATH} variant="outlined">
+            Experiment catalog
+          </Button>
+          {projectContent.evidence.links.map((link) => (
+            <Button
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noreferrer"
+              size="small"
+              endIcon={<OpenInNewRoundedIcon />}
+            >
+              {link.label}
+            </Button>
+          ))}
+        </ActionLinkRow>
+      </Paper>
+    </PageSection>
+  );
+}
+
 export function ProjectPage() {
   useDocumentTitle(PAGE_TITLE);
 
@@ -528,22 +831,25 @@ export function ProjectPage() {
         />
 
         <Grid container spacing={3}>
-          {projectContent.overviewCards.map((item) => (
-            <Grid key={item.title} size={{ xs: 12, md: 4 }}>
-              <Card variant="outlined" sx={{ height: "100%" }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {item.title}
+          <Grid size={{ xs: 12 }}>
+            <Box sx={overviewFactGridSx}>
+              {projectContent.overviewFacts.map((item) => (
+                <Box key={item.label} component="section" sx={overviewFactSx}>
+                  <Typography variant="overline" color="primary">
+                    {item.label}
                   </Typography>
+                  <Typography variant="h6">{item.value}</Typography>
                   <Typography variant="body2" color="text.secondary">
                     {item.body}
                   </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+                </Box>
+              ))}
+            </Box>
+          </Grid>
         </Grid>
       </PageSection>
+
+      <LabUsageSection />
 
       <PageSection>
         <SectionHeader
@@ -592,136 +898,10 @@ export function ProjectPage() {
               ariaLabel="Rejoin workflow"
             />
           </Box>
-
-          <Box sx={workflowExplainersSx}>
-            {projectContent.workflowExplainers.map((item) => (
-              <Box key={item.title} component="section">
-                <Typography variant="h6">{item.title}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {item.body}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
         </Paper>
       </PageSection>
 
-      <PageSection>
-        <SectionHeader title={implementation.title} copy={implementation.lead} />
-
-        <Paper variant="outlined" sx={quickStartRunbookSurfaceSx}>
-          <Box component="section" sx={quickStartMainSx}>
-            <Box sx={quickStartIntroSx}>
-              <Typography variant="overline" color="primary">
-                {implementation.defaultPathTitle}
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                {implementation.defaultPathLead}
-              </Typography>
-            </Box>
-
-            <Box sx={quickStartStepListSx} aria-label="Quick start default path">
-              {implementation.defaultPathSteps.map((item, index) => (
-                <React.Fragment key={item.title}>
-                  <Box component="section" sx={quickStartStepRowSx}>
-                    <Box sx={quickStartStepHeaderSx}>
-                      <Box
-                        component="span"
-                        aria-label={`Step ${index + 1}`}
-                        sx={quickStartStepBadgeSx}
-                      >
-                        {String(index + 1).padStart(2, "0")}
-                      </Box>
-                      <Typography variant="h6">{item.title}</Typography>
-                    </Box>
-                    <Box sx={quickStartStepCopySx}>
-                      <CommandCodeBlock
-                        command={item.command}
-                        ariaLabel={`${item.title} command`}
-                        sx={quickStartStepCommandSx}
-                      />
-                      <Typography variant="body2" color="text.secondary">
-                        {item.body}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  {index < implementation.defaultPathSteps.length - 1 ? (
-                    <Box sx={quickStartStepConnectorSx} aria-hidden="true">
-                      <ArrowForwardIcon />
-                    </Box>
-                  ) : null}
-                </React.Fragment>
-              ))}
-            </Box>
-          </Box>
-
-          <Box component="section" sx={quickStartSupportBlockSx}>
-            <Typography variant="overline" color="primary">
-              {implementation.verifyProofTitle}
-            </Typography>
-            <Box sx={quickStartProofListSx}>
-              {implementation.verifyProofs.map((item) => (
-                <Box key={item.title} sx={quickStartProofItemSx}>
-                  <CheckRoundedIcon aria-hidden="true" sx={quickStartCheckIconSx} />
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      {item.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {item.body}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-
-          <Box component="section" sx={quickStartMeasureCalloutSx}>
-            <Box sx={quickStartMeasureCopySx}>
-              <Typography variant="overline" color="primary">
-                {implementation.measurement.title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {implementation.measurement.body}
-              </Typography>
-            </Box>
-
-            <Box sx={quickStartMeasureActionsSx}>
-              <CommandCodeBlock
-                command={implementation.measurement.command}
-                ariaLabel={`${implementation.measurement.title} command`}
-              />
-
-              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
-                {implementation.measurement.outputs.map((item) => (
-                  <Chip
-                    key={item}
-                    label={item}
-                    size="small"
-                    variant="outlined"
-                    sx={quickStartOutputChipSx}
-                  />
-                ))}
-              </Stack>
-
-              <ActionLinkRow>
-                {implementation.measurement.links.map((link) => (
-                  <Button
-                    key={link.href}
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    size="small"
-                    endIcon={<OpenInNewRoundedIcon />}
-                  >
-                    {link.label}
-                  </Button>
-                ))}
-              </ActionLinkRow>
-            </Box>
-          </Box>
-        </Paper>
-      </PageSection>
+      <ProjectEvidenceSection />
     </PublicSiteLayout>
   );
 }

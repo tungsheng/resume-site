@@ -1,8 +1,10 @@
-const GPU_INFERENCE_REPO_LINK = "https://github.com/tungsheng/gpu-inference-lab";
 const GPU_INFERENCE_REPO_BASE = "https://github.com/tungsheng/gpu-inference-lab/blob/main";
 const SETUP_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/up`;
 const VERIFY_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/verify`;
 const EVALUATE_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/evaluate`;
+const EXPERIMENT_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/experiment`;
+const EXPERIMENT_SUMMARY_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/experiments-summary.md`;
+const REPORTS_DOC_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/reports/README.md`;
 const INGRESS_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/ingress.yaml`;
 const SERVICE_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/service.yaml`;
 const VLLM_DEPLOYMENT_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/vllm-openai.yaml`;
@@ -12,26 +14,137 @@ const SCALING_DOC_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/scaling.md`;
 export const projectContent = {
   title: "Cloud Inference Platform",
   lede:
-    "A GPU inference lab on EKS that turns vLLM serving pressure into autoscaling and GPU node provisioning, with checked-in runs for cold start, warm capacity, policy comparison, and target tuning.",
+    "A GPU inference lab on EKS that turns vLLM serving pressure into autoscaling and GPU node provisioning, with platform validation runs and a catalog of focused serving experiments.",
   overviewSummary:
-    "A compact view of what the platform is, how it works, and why the measured results matter.",
-  overviewCards: [
+    "The lab has one public serving path, one observable scale path, and three workflows for proving or measuring behavior.",
+  overviewFacts: [
     {
-      title: "What",
+      label: "Platform",
+      value: "AWS EKS + vLLM",
       body:
-        "A reproducible GPU inference lab on AWS EKS for measuring cold start, warm capacity, and autoscaling behavior.",
+        "Real OpenAI-compatible serving on Karpenter-managed GPU nodes.",
     },
     {
-      title: "How",
+      label: "Scale signal",
+      value: "Prometheus -> HPA",
       body:
-        "Serving pressure becomes scaling decisions through Prometheus, the adapter, HPA, pending GPU pods, and Karpenter.",
+        "Serving pressure becomes desired replicas and pending GPU pods.",
     },
     {
-      title: "Why",
+      label: "Baseline",
+      value: "0 serving GPUs",
       body:
-        "It makes response-time tradeoffs and GPU scale-out behavior easy to understand with checked-in runs.",
+        "After setup, serving capacity can start from zero for cold-start proof.",
+    },
+    {
+      label: "Workflows",
+      value: "Verify / Evaluate / Experiment",
+      body:
+        "Use the smallest command path that matches the question being asked.",
+    },
+    {
+      label: "Catalog",
+      value: "6 experiments",
+      body:
+        "Focused definitions for memory, latency, batching, traffic, autoscaling, and cost.",
+    },
+    {
+      label: "Results",
+      value: "Validation measured",
+      body:
+        "Platform evidence exists; curated live-cluster catalog results are pending.",
     },
   ],
+  usage: {
+    title: "Choose the right workflow",
+    lead:
+      "Use verify for path proof, evaluate for platform comparisons, and experiment for catalog-defined serving questions.",
+    workflows: [
+      {
+        title: "Verify",
+        command: "./scripts/verify",
+        body:
+          "End-to-end proof that a GPU node appears, vLLM becomes Ready, /v1 returns 200, and cleanup returns serving GPUs to zero.",
+        when: "Use after ./scripts/up for a fast path check.",
+        outputs: ["GPU node appears", "Public /v1 response", "Cleanup to zero"],
+        href: VERIFY_SCRIPT_LINK,
+      },
+      {
+        title: "Evaluate",
+        command: "./scripts/evaluate --profile zero-idle",
+        body:
+          "Measured platform comparisons for cold start, warm capacity, HPA policy, active-pressure targets, and resilience drills.",
+        when: "Use for profile, scale signal, or target tuning decisions.",
+        outputs: ["Markdown report", "JSON report", "Decision evidence"],
+        href: EVALUATE_SCRIPT_LINK,
+      },
+      {
+        title: "Experiment",
+        command: "./scripts/experiment validate",
+        body:
+          "Catalog-defined ML-serving studies for workload cases, serving profiles, metrics, and generated reports.",
+        when: "Use locally to validate or render; use run after ./scripts/up for measurements.",
+        outputs: ["Catalog validation", "Rendered manifests", "Generated reports"],
+        href: EXPERIMENT_SCRIPT_LINK,
+      },
+    ],
+    conceptTitle: "Experiment contract",
+    conceptLead:
+      "The experiment page carries the full catalog; this page only shows the repeatable contract.",
+    conceptSteps: [
+      "Question",
+      "Cases",
+      "Serving profile",
+      "Metrics",
+      "Result",
+    ],
+    links: [
+      {
+        label: "Experiment summary",
+        href: EXPERIMENT_SUMMARY_LINK,
+      },
+      {
+        label: "Experiment runner",
+        href: EXPERIMENT_SCRIPT_LINK,
+      },
+    ],
+  },
+  evidence: {
+    title: "Evidence and outputs",
+    lead:
+      "Measured platform validation, generated reports, and catalog experiments are related, but they are not the same artifact.",
+    items: [
+      {
+        title: "Platform validation",
+        body:
+          "Measured evaluate runs support warm baseline, scale-out signal, and target tuning decisions.",
+      },
+      {
+        title: "Experiment catalog",
+        body:
+          "Experiment definitions and runners exist; curated live-cluster conclusions are still pending.",
+      },
+      {
+        title: "Report rules",
+        body:
+          "Generated Markdown, JSON, and logs stay under docs/reports until selected for the project narrative.",
+      },
+    ],
+    links: [
+      {
+        label: "Reports docs",
+        href: REPORTS_DOC_LINK,
+      },
+      {
+        label: "Scaling docs",
+        href: SCALING_DOC_LINK,
+      },
+      {
+        label: "Experiment summary",
+        href: EXPERIMENT_SUMMARY_LINK,
+      },
+    ],
+  },
   workflowSectionTitle: "How the platform serves and scales",
   workflowLead:
     "Requests follow one stable public path. Load signals follow a separate control path that adds GPU capacity only when another replica cannot schedule.",
@@ -162,29 +275,9 @@ export const projectContent = {
       },
     ],
   },
-  workflowExplainers: [
-    {
-      title: "Stable path",
-      body:
-        "The public ingress hostname and in-cluster Service keep the request path steady while replicas restart, move, or scale.",
-    },
-    {
-      title: "Reactive path",
-      body:
-        "Prometheus, the adapter, and the HPA convert serving pressure into desired replicas instead of guessing from raw infrastructure state.",
-    },
-    {
-      title: "Added capacity",
-      body:
-        "A pending pod creates the capacity signal that turns GPU NodePools into a real NodeClaim, a GPU node, and another ready replica.",
-    },
-  ],
 };
 
 export const implementation = {
-  title: "Quick start and measure",
-  lead:
-    "Bring the lab up, prove one real public response, and tear it down. Run evaluate only when you want comparison reports and tuning data.",
   defaultPathTitle: "Default path",
   defaultPathLead:
     "Shortest path: bring up the platform, prove one public response, then clean it up.",
@@ -223,25 +316,4 @@ export const implementation = {
         "Cleanup removes the workload and confirms the serving GPU node count falls back to zero.",
     },
   ],
-  measurement: {
-    title: "Measure when comparing profiles",
-    command: "./scripts/evaluate --profile zero-idle|warm-1",
-    body:
-      "Use evaluate when you want profile comparison and target-tuning reports instead of a single cold-start proof.",
-    outputs: ["Markdown report", "JSON report"],
-    links: [
-      {
-        label: "Quick start README",
-        href: GPU_INFERENCE_REPO_LINK,
-      },
-      {
-        label: "Verify script",
-        href: VERIFY_SCRIPT_LINK,
-      },
-      {
-        label: "Evaluate script",
-        href: EVALUATE_SCRIPT_LINK,
-      },
-    ],
-  },
 };

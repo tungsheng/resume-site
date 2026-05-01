@@ -38,6 +38,7 @@ server = Bun.serve({
     "/": homePage,
     "/project/cloud-inference-platform": projectPage,
     "/experiments": experimentsPage,
+    "/experiments/:slug": experimentsPage,
     "/resume": resumePage,
 
     // PDF export routes

@@ -1,5 +1,8 @@
 import React from "react";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CompareArrowsRoundedIcon from "@mui/icons-material/CompareArrowsRounded";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import {
   Box,
   Button,
@@ -17,7 +20,14 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha, type SxProps, type Theme } from "@mui/material/styles";
-import { PROJECT_PATH, RESUME_PATH } from "../site/content";
+import { EXPERIMENTS_PATH, PROJECT_PATH, RESUME_PATH } from "../site/content";
+import {
+  experimentCatalogContent,
+  experimentDetailPath,
+  experimentSourceLink,
+  getExperimentBySlug,
+  type ExperimentCatalogItem,
+} from "../site/experiment-catalog-content";
 import { experimentsContent } from "../site/experiments-content";
 import {
   formatCurrencyLabel,
@@ -43,11 +53,319 @@ type ExperimentFamilyId =
   | "policy-compare"
   | "target-calibration";
 
+const EXPERIMENT_DETAIL_PREFIX = `${EXPERIMENTS_PATH}/`;
+
 interface TradeoffCardItem {
   title: string;
   left: string;
   right: string;
 }
+
+const catalogStatusNoteSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "auto minmax(0, 1fr)" },
+  gap: { xs: 1, md: 1.25 },
+  alignItems: "center",
+  width: "100%",
+  p: { xs: 1.25, sm: 1.5 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.warning.light, 0.14),
+  border: `1px solid ${alpha(theme.palette.warning.dark, 0.2)}`,
+});
+
+const heroSplitSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "minmax(0, 0.95fr) minmax(23rem, 0.75fr)" },
+  gap: { xs: 2.25, md: 3 },
+  alignItems: "start",
+  width: "100%",
+};
+
+const heroPrimarySx: SxProps<Theme> = {
+  display: "grid",
+  gap: 2,
+  alignContent: "start",
+  minWidth: 0,
+  maxWidth: "58rem",
+};
+
+const heroSupportSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 1.25,
+  alignContent: "start",
+  minWidth: 0,
+  width: "100%",
+};
+
+const catalogFactStripSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    sm: "repeat(2, minmax(0, 1fr))",
+  },
+  gap: 0,
+  width: "100%",
+  overflow: "hidden",
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.6),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+});
+
+const catalogFactItemSx: SxProps<Theme> = (theme) => ({
+  minWidth: 0,
+  display: "grid",
+  alignContent: "center",
+  gap: 0.2,
+  minHeight: "6.1rem",
+  px: { xs: 1.25, md: 1.5 },
+  py: { xs: 1.05, md: 1.2 },
+  "& + &": {
+    borderTop: { xs: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`, sm: 0 },
+    borderLeft: { xs: 0, sm: `1px solid ${alpha(theme.palette.text.primary, 0.08)}` },
+  },
+  "&:nth-of-type(3)": {
+    borderTop: {
+      xs: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+      sm: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+    },
+    borderLeft: {
+      xs: 0,
+      sm: 0,
+    },
+  },
+  "&:nth-of-type(4)": {
+    borderTop: {
+      xs: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+      sm: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+    },
+  },
+});
+
+const conceptSurfaceSx: SxProps<Theme> = (theme) => ({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: { xs: 0.75, md: 1 },
+  alignItems: "center",
+  p: { xs: 1.25, sm: 1.5, md: 1.75 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.58),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+});
+
+const conceptStepSx: SxProps<Theme> = (theme) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: "2.35rem",
+  minWidth: 0,
+  px: { xs: 1.1, sm: 1.25 },
+  py: 0.75,
+  borderRadius: 999,
+  backgroundColor: alpha(theme.palette.text.primary, 0.025),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+  fontSize: "0.86rem",
+  fontWeight: 700,
+  lineHeight: 1.2,
+});
+
+const conceptArrowSx: SxProps<Theme> = (theme) => ({
+  color: alpha(theme.palette.secondary.dark, 0.42),
+  fontSize: "1rem",
+  flexShrink: 0,
+  display: { xs: "none", sm: "inline-flex" },
+});
+
+function buildBrowseRowColumns() {
+  return {
+    xs: "minmax(0, 1fr)",
+    md: "minmax(14rem, 1fr) minmax(11rem, 0.75fr) minmax(12rem, 1fr) minmax(11rem, 0.85fr) 8rem",
+  };
+}
+
+const browseSurfaceSx: SxProps<Theme> = (theme) => ({
+  overflow: "hidden",
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.58),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+});
+
+const browseHeaderSx: SxProps<Theme> = (theme) => ({
+  display: { xs: "none", md: "grid" },
+  gridTemplateColumns: buildBrowseRowColumns().md,
+  gap: 1.25,
+  alignItems: "center",
+  px: 1.5,
+  py: 1,
+  backgroundColor: alpha(theme.palette.text.primary, 0.035),
+  borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+  color: theme.palette.text.secondary,
+  fontSize: "0.72rem",
+  fontWeight: 700,
+  lineHeight: 1.2,
+  textTransform: "uppercase",
+});
+
+const browseRowSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: buildBrowseRowColumns(),
+  gap: { xs: 0.9, md: 1.25 },
+  alignItems: "stretch",
+  minWidth: 0,
+  minHeight: { md: "5.9rem" },
+  px: { xs: 1.35, md: 1.5 },
+  py: { xs: 1.35, md: 1.2 },
+  "& + &": {
+    borderTop: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+  },
+});
+
+const browseFieldSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.35,
+  alignContent: { xs: "start", md: "center" },
+  minWidth: 0,
+  height: "100%",
+};
+
+const mobileFieldLabelSx: SxProps<Theme> = {
+  display: { xs: "block", md: "none" },
+  mb: 0.25,
+  fontSize: "0.68rem",
+  fontWeight: 700,
+  lineHeight: 1.2,
+  textTransform: "uppercase",
+  color: "text.secondary",
+};
+
+const browseActionSx: SxProps<Theme> = {
+  justifySelf: { xs: "start", md: "end" },
+  alignSelf: "center",
+  minWidth: { md: "7rem" },
+};
+
+const platformValidationBandSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) 8rem" },
+  gap: { xs: 1.25, md: 2 },
+  alignItems: "stretch",
+  minHeight: { md: "7.25rem" },
+  p: { xs: 1.5, sm: 1.75, md: 2 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.primary.main, 0.035),
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.14)}`,
+});
+
+const experimentMetaRowSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.75,
+  alignItems: "center",
+};
+
+const detailSummaryStripSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    sm: "repeat(2, minmax(0, 1fr))",
+  },
+  gap: 0.75,
+  alignItems: "stretch",
+  gridAutoRows: "1fr",
+  width: "100%",
+});
+
+const detailSummaryItemSx: SxProps<Theme> = (theme) => ({
+  minWidth: 0,
+  display: "grid",
+  alignContent: "center",
+  gap: 0.2,
+  minHeight: "4.35rem",
+  height: "100%",
+  px: { xs: 1.25, md: 1.4 },
+  py: { xs: 1, md: 1.1 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.6),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+});
+
+const metricGroupSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.8,
+  alignContent: "start",
+  minWidth: 0,
+  height: "100%",
+  minHeight: "8.75rem",
+  p: { xs: 1.35, sm: 1.5 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.58),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+});
+
+const compactMetricChipSx: SxProps<Theme> = (theme) => ({
+  backgroundColor: alpha(theme.palette.secondary.main, 0.035),
+  borderColor: alpha(theme.palette.secondary.main, 0.12),
+  color: alpha(theme.palette.text.primary, 0.74),
+  fontWeight: 600,
+});
+
+const detailIntroSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: { xs: 1.25, md: 1.5 },
+  p: { xs: 1.5, sm: 1.75, md: 2 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.secondary.main, 0.035),
+  border: `1px solid ${alpha(theme.palette.secondary.main, 0.14)}`,
+});
+
+const runMatrixSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "repeat(2, minmax(0, 1fr))" },
+  gap: { xs: 2, md: 2.5 },
+  alignItems: "stretch",
+};
+
+const matrixListSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 1,
+  alignContent: "start",
+  minWidth: 0,
+};
+
+const matrixColumnHeaderSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.75,
+  alignItems: "baseline",
+  justifyContent: "space-between",
+};
+
+const matrixItemSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.6,
+  alignContent: "start",
+  minWidth: 0,
+  minHeight: "8.25rem",
+  p: { xs: 1.35, sm: 1.5 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.58),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+});
+
+const commandListSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateRows: "auto 1fr",
+  gap: 1,
+  height: "100%",
+  minWidth: 0,
+};
+
+const pendingResultSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 1,
+  p: { xs: 1.5, sm: 1.75, md: 2 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.warning.light, 0.14),
+  border: `1px solid ${alpha(theme.palette.warning.dark, 0.2)}`,
+});
 
 const tradeoffCardSx: SxProps<Theme> = (theme) => ({
   height: "100%",
@@ -550,6 +868,652 @@ function getDecisionChoiceSx(selected: boolean): SxProps<Theme> {
         : alpha(theme.palette.text.primary, 0.12),
     },
   });
+}
+
+export function getExperimentSlugFromPath(pathname: string): string | null {
+  const normalizedPath = (pathname.split(/[?#]/, 1)[0] ?? "").replace(/\/+$/, "");
+
+  if (normalizedPath === EXPERIMENTS_PATH) {
+    return null;
+  }
+
+  if (!normalizedPath.startsWith(EXPERIMENT_DETAIL_PREFIX)) {
+    return null;
+  }
+
+  const slug = normalizedPath.slice(EXPERIMENT_DETAIL_PREFIX.length);
+  if (!slug || slug.includes("/")) {
+    return null;
+  }
+
+  return decodeURIComponent(slug);
+}
+
+function resolveCurrentPathname(initialPath?: string): string {
+  if (initialPath) {
+    return initialPath;
+  }
+
+  if (typeof window === "undefined") {
+    return EXPERIMENTS_PATH;
+  }
+
+  return window.location.pathname;
+}
+
+function CatalogStatusNote() {
+  return (
+    <Box role="note" sx={catalogStatusNoteSx}>
+      <Chip label="Catalog ready" color="warning" variant="outlined" />
+      <Typography variant="body2" color="text.secondary">
+        {experimentCatalogContent.statusNote}
+      </Typography>
+    </Box>
+  );
+}
+
+function CatalogFactStrip() {
+  const facts = [
+    {
+      value: experimentCatalogContent.experiments.length.toString(),
+      label: "experiment definitions",
+    },
+    {
+      value: "Renderable locally",
+      label: "catalog inspection and manifest rendering",
+    },
+    {
+      value: "Measurable with run commands",
+      label: "live cluster runner is defined per experiment",
+    },
+    {
+      value: "Curated results pending",
+      label: "checked-in conclusions still need selected live runs",
+    },
+  ];
+
+  return (
+    <Box sx={catalogFactStripSx} aria-label="Experiment catalog status facts">
+      {facts.map((fact) => (
+        <Box key={fact.label} sx={catalogFactItemSx}>
+          <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
+            {fact.value}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {fact.label}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+function ExperimentCatalogConceptSection() {
+  return (
+    <PageSection>
+      <SectionHeader
+        eyebrow="Experiment model"
+        title="How experiments work"
+        copy={experimentCatalogContent.conceptLead}
+      />
+
+      <Box component="section" sx={conceptSurfaceSx}>
+        {experimentCatalogContent.conceptSteps.map((step, index) => (
+          <React.Fragment key={step.label}>
+            <Box component="span" sx={conceptStepSx} title={step.body}>
+              {step.label}
+            </Box>
+            {index < experimentCatalogContent.conceptSteps.length - 1 ? (
+              <ArrowForwardRoundedIcon aria-hidden="true" sx={conceptArrowSx} />
+            ) : null}
+          </React.Fragment>
+        ))}
+      </Box>
+    </PageSection>
+  );
+}
+
+function BrowseField({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Box sx={browseFieldSx}>
+      <Box component="span" sx={mobileFieldLabelSx}>
+        {label}
+      </Box>
+      {children}
+    </Box>
+  );
+}
+
+function ExperimentStatusChips({ experiment }: { experiment: ExperimentCatalogItem }) {
+  return (
+    <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap" }}>
+      <Chip
+        label={experiment.status.definition}
+        size="small"
+        color="success"
+        variant="outlined"
+      />
+      <Chip
+        label={experiment.status.result}
+        size="small"
+        color="warning"
+        variant="outlined"
+      />
+    </Stack>
+  );
+}
+
+function ExperimentBrowseRow({ experiment }: { experiment: ExperimentCatalogItem }) {
+  return (
+    <Box component="section" sx={browseRowSx}>
+      <BrowseField label="Experiment">
+        <Box sx={{ mb: 0.55 }}>
+          <Chip label={experiment.category} size="small" variant="outlined" />
+        </Box>
+        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+          {experiment.title}
+        </Typography>
+      </BrowseField>
+      <BrowseField label="Purpose">
+        <Typography variant="body2" color="text.secondary">
+          {experiment.cardSummary}
+        </Typography>
+      </BrowseField>
+      <BrowseField label="Focus">
+        <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap" }}>
+          {experiment.metricFocus.map((metric) => (
+            <Chip
+              key={`${experiment.slug}-${metric}`}
+              label={metric}
+              size="small"
+              variant="outlined"
+              sx={compactMetricChipSx}
+            />
+          ))}
+        </Stack>
+      </BrowseField>
+      <BrowseField label="Status">
+        <ExperimentStatusChips experiment={experiment} />
+      </BrowseField>
+      <Button
+        href={experimentDetailPath(experiment.slug)}
+        size="small"
+        endIcon={<ArrowForwardRoundedIcon />}
+        sx={browseActionSx}
+      >
+        View details
+      </Button>
+    </Box>
+  );
+}
+
+function PlatformValidationBand() {
+  const item = experimentCatalogContent.platformValidation;
+
+  return (
+    <Box component="section" sx={platformValidationBandSx}>
+      <Box sx={{ display: "grid", gap: 0.8, alignContent: "center", minWidth: 0 }}>
+        <Box sx={experimentMetaRowSx}>
+          <Chip label="Measured platform evidence" size="small" color="success" variant="outlined" />
+          {item.metricFocus.map((metric) => (
+            <Chip
+              key={`${item.slug}-${metric}`}
+              label={metric}
+              size="small"
+              variant="outlined"
+              sx={compactMetricChipSx}
+            />
+          ))}
+        </Box>
+        <Typography variant="h6">{item.title}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {item.question}
+        </Typography>
+      </Box>
+
+      <Button
+        href={item.href}
+        size="small"
+        endIcon={<ArrowForwardRoundedIcon />}
+        sx={browseActionSx}
+      >
+        View details
+      </Button>
+    </Box>
+  );
+}
+
+function ExperimentCatalogListSection() {
+  return (
+    <PageSection>
+      <SectionHeader
+        eyebrow="Catalog"
+        title="Browse experiments"
+        copy="Scan by purpose and metric focus, then open the detail page for the full question, run shape, and commands."
+      />
+
+      <Stack spacing={2.25}>
+        <Box sx={browseSurfaceSx}>
+          <Box sx={browseHeaderSx} aria-hidden="true">
+            <span>Experiment</span>
+            <span>Purpose</span>
+            <span>Focus</span>
+            <span>Status</span>
+            <span>Details</span>
+          </Box>
+          {experimentCatalogContent.experiments.map((experiment) => (
+            <ExperimentBrowseRow key={experiment.slug} experiment={experiment} />
+          ))}
+        </Box>
+
+        <PlatformValidationBand />
+      </Stack>
+    </PageSection>
+  );
+}
+
+function ExperimentCatalogRoute() {
+  useDocumentTitle(PAGE_TITLE);
+
+  return (
+    <PublicSiteLayout activeNav="experiments">
+      <PageHero contentWidth="100%">
+        <Box sx={heroSplitSx}>
+          <Box sx={heroPrimarySx}>
+            <Typography component="h1" variant="h3">
+              {experimentCatalogContent.title}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
+              {experimentCatalogContent.subtitle}
+            </Typography>
+
+            <ActionLinkRow>
+              <Button href={PROJECT_PATH} variant="contained">
+                View project
+              </Button>
+              <Button href={RESUME_PATH} variant="outlined">
+                View resume
+              </Button>
+            </ActionLinkRow>
+          </Box>
+
+          <Box sx={heroSupportSx}>
+            <CatalogStatusNote />
+            <CatalogFactStrip />
+          </Box>
+        </Box>
+      </PageHero>
+
+      <ExperimentCatalogConceptSection />
+      <ExperimentCatalogListSection />
+    </PublicSiteLayout>
+  );
+}
+
+function ExperimentMetricGroupList({ experiment }: { experiment: ExperimentCatalogItem }) {
+  return (
+    <Grid container spacing={2}>
+      {experiment.metricGroups.map((group) => (
+        <Grid key={group.label} size={{ xs: 12, md: 4 }}>
+          <Box sx={metricGroupSx}>
+            <Typography variant="h6">{group.label}</Typography>
+            <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap" }}>
+              {group.metrics.map((metric) => (
+                <Chip key={`${group.label}-${metric}`} label={metric} size="small" variant="outlined" />
+              ))}
+            </Stack>
+          </Box>
+        </Grid>
+      ))}
+    </Grid>
+  );
+}
+
+function formatCount(value: number, singular: string, plural = `${singular}s`): string {
+  return `${value} ${value === 1 ? singular : plural}`;
+}
+
+function formatTokenRange(values: number[]): string {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+
+  if (min === max) {
+    return min.toLocaleString("en-US");
+  }
+
+  return `${min.toLocaleString("en-US")}-${max.toLocaleString("en-US")}`;
+}
+
+function ExperimentDetailSummaryStrip({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const facts = [
+    {
+      label: "Category",
+      value: experiment.category,
+    },
+    {
+      label: "Cases",
+      value: formatCount(experiment.cases.length, "case"),
+    },
+    {
+      label: "Profiles",
+      value: formatCount(experiment.servingProfiles.length, "profile"),
+    },
+    {
+      label: "Runner",
+      value: experiment.runner,
+    },
+    {
+      label: "Endpoint",
+      value: experiment.endpoint,
+    },
+    {
+      label: "Result",
+      value: experiment.status.result,
+    },
+  ];
+
+  return (
+    <Box sx={detailSummaryStripSx} aria-label={`${experiment.title} summary facts`}>
+      {facts.map((fact) => (
+        <Box key={fact.label} sx={detailSummaryItemSx}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+            {fact.label}
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
+            {fact.value}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+function RunShapeColumn({
+  title,
+  count,
+  children,
+}: {
+  title: string;
+  count: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Box sx={matrixListSx}>
+      <Box sx={matrixColumnHeaderSx}>
+        <Typography variant="overline" color="primary">
+          {title}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          {count}
+        </Typography>
+      </Box>
+      {children}
+    </Box>
+  );
+}
+
+function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogItem }) {
+  useDocumentTitle(`${experiment.title} | Tony Lee`);
+  const localCommand = experiment.localCommands[0];
+  const liveCommand = experiment.liveCommands[0];
+  const promptTokenRange = formatTokenRange(
+    experiment.cases.map((item) => item.promptTokens),
+  );
+  const outputTokenRange = formatTokenRange(
+    experiment.cases.map((item) => item.outputTokens),
+  );
+
+  return (
+    <PublicSiteLayout activeNav="experiments">
+      <PageHero contentWidth="100%">
+        <Box sx={heroSplitSx}>
+          <Box sx={heroPrimarySx}>
+            <Typography component="h1" variant="h3">
+              {experiment.title}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "58rem" }}>
+              {experiment.question}
+            </Typography>
+
+            <ActionLinkRow>
+              <Button href={EXPERIMENTS_PATH} variant="contained" startIcon={<ArrowBackRoundedIcon />}>
+                Experiment catalog
+              </Button>
+              <Button
+                href={experimentSourceLink(experiment.sourcePath)}
+                target="_blank"
+                rel="noreferrer"
+                endIcon={<OpenInNewRoundedIcon />}
+              >
+                Source
+              </Button>
+            </ActionLinkRow>
+          </Box>
+
+          <Box sx={heroSupportSx}>
+            <ExperimentDetailSummaryStrip experiment={experiment} />
+          </Box>
+        </Box>
+      </PageHero>
+
+      <PageSection>
+        <SectionHeader title="Why it matters" copy={experiment.summary} />
+        <Box sx={detailIntroSx}>
+          <Typography variant="body1">{experiment.whyItMatters}</Typography>
+        </Box>
+      </PageSection>
+
+      <PageSection>
+        <SectionHeader
+          eyebrow="Run shape"
+          title="Run shape"
+          copy={`${formatCount(experiment.cases.length, "case")} across ${promptTokenRange} prompt tokens and ${outputTokenRange} output tokens, paired with ${formatCount(experiment.servingProfiles.length, "serving profile")}.`}
+        />
+
+        <Box sx={runMatrixSx}>
+          <RunShapeColumn
+            title="Cases"
+            count={formatCount(experiment.cases.length, "case")}
+          >
+            {experiment.cases.map((item) => (
+              <Box key={item.id} sx={matrixItemSx}>
+                <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
+                  {item.id}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {item.description}
+                </Typography>
+                <Box sx={experimentMetaRowSx}>
+                  <Chip label={`${item.promptTokens} prompt tokens`} size="small" variant="outlined" />
+                  <Chip label={`${item.outputTokens} output tokens`} size="small" variant="outlined" />
+                </Box>
+              </Box>
+            ))}
+          </RunShapeColumn>
+
+          <RunShapeColumn
+            title="Serving profiles"
+            count={formatCount(experiment.servingProfiles.length, "profile")}
+          >
+            {experiment.servingProfiles.map((profile) => (
+              <Box key={profile.id} sx={matrixItemSx}>
+                <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
+                  {profile.id}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {profile.description}
+                </Typography>
+              </Box>
+            ))}
+          </RunShapeColumn>
+        </Box>
+      </PageSection>
+
+      <PageSection>
+        <SectionHeader
+          eyebrow="Measurement focus"
+          title="Metrics to capture"
+          copy="Metric groups show the signal this experiment needs without repeating the catalog contract."
+        />
+        <ExperimentMetricGroupList experiment={experiment} />
+      </PageSection>
+
+      <PageSection>
+        <SectionHeader
+          eyebrow="Usage"
+          title="How to run"
+          copy="These examples show the local render path and the live cluster runner without pretending to list every valid combination."
+        />
+
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Box sx={commandListSx}>
+              <Typography variant="overline" color="primary">
+                Example local command
+              </Typography>
+              {localCommand ? (
+                <CommandCodeBlock
+                  command={localCommand}
+                  ariaLabel={`${experiment.title} example local command`}
+                />
+              ) : null}
+            </Box>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Box sx={commandListSx}>
+              <Typography variant="overline" color="primary">
+                Example live command
+              </Typography>
+              {liveCommand ? (
+                <CommandCodeBlock
+                  command={liveCommand}
+                  ariaLabel={`${experiment.title} example live command`}
+                />
+              ) : null}
+            </Box>
+          </Grid>
+        </Grid>
+
+        <ActionLinkRow>
+          <Button
+            href={experimentSourceLink(experiment.sourcePath)}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            Source
+          </Button>
+          <Button
+            href={experimentSourceLink(experiment.resultsPath)}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            Results template
+          </Button>
+        </ActionLinkRow>
+      </PageSection>
+
+      <PageSection>
+        <SectionHeader
+          eyebrow="Artifacts"
+          title="Result status"
+          copy="Generated artifacts stay separate from curated conclusions until a run is selected for the project narrative."
+        />
+
+        <Box sx={pendingResultSx}>
+          <Typography variant="h6">Curated live results pending</Typography>
+          <Typography variant="body2" color="text.secondary">
+            The source repo currently treats {experiment.resultsPath} as a result template. Generated Markdown, JSON, and client logs belong under docs/reports/ until representative results are chosen.
+          </Typography>
+          <ActionLinkRow>
+            <Button
+              href={experimentSourceLink("docs/reports/README.md")}
+              target="_blank"
+              rel="noreferrer"
+              size="small"
+              endIcon={<OpenInNewRoundedIcon />}
+            >
+              Report rules
+            </Button>
+          </ActionLinkRow>
+        </Box>
+      </PageSection>
+    </PublicSiteLayout>
+  );
+}
+
+function PlatformValidationRoute() {
+  const item = experimentCatalogContent.platformValidation;
+  useDocumentTitle(`${item.title} | Tony Lee`);
+
+  return (
+    <PublicSiteLayout activeNav="experiments">
+      <PageHero>
+        <Typography component="h1" variant="h3">
+          Platform Validation Evidence
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "58rem" }}>
+          {item.question}
+        </Typography>
+        <Box sx={experimentMetaRowSx}>
+          <Chip label={item.status} color="success" variant="outlined" />
+          {item.metricFocus.map((metric) => (
+            <Chip
+              key={`${item.slug}-${metric}`}
+              label={metric}
+              variant="outlined"
+              sx={compactMetricChipSx}
+            />
+          ))}
+        </Box>
+
+        <ActionLinkRow>
+          <Button href={EXPERIMENTS_PATH} variant="contained" startIcon={<ArrowBackRoundedIcon />}>
+            Experiment catalog
+          </Button>
+          <Button href={PROJECT_PATH} variant="outlined">
+            View project
+          </Button>
+        </ActionLinkRow>
+      </PageHero>
+
+      <PlatformValidationEvidenceSection />
+    </PublicSiteLayout>
+  );
+}
+
+function UnknownExperimentRoute({ slug }: { slug: string }) {
+  useDocumentTitle("Experiment Not Found | Tony Lee");
+
+  return (
+    <PublicSiteLayout activeNav="experiments">
+      <PageHero>
+        <Typography component="h1" variant="h3">
+          Experiment not found
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "54rem" }}>
+          No experiment is published for "{slug}". Use the catalog to choose a current experiment page.
+        </Typography>
+        <ActionLinkRow>
+          <Button href={EXPERIMENTS_PATH} variant="contained" startIcon={<ArrowBackRoundedIcon />}>
+            Experiment catalog
+          </Button>
+          <Button href={PROJECT_PATH} variant="outlined">
+            View project
+          </Button>
+        </ActionLinkRow>
+      </PageHero>
+    </PublicSiteLayout>
+  );
 }
 
 function ComparisonChart({
@@ -1090,7 +2054,7 @@ function ExperimentComparisonPanel({
   );
 }
 
-export function ExperimentsPage() {
+function PlatformValidationEvidenceSection() {
   const [activeExperimentId, setActiveExperimentId] =
     React.useState<ExperimentFamilyId>("profile-baselines");
   const [activeDetailView, setActiveDetailView] =
@@ -1358,33 +2322,13 @@ export function ExperimentsPage() {
         ? experimentsContent.policyComparison
         : experimentsContent.targetCalibration;
 
-  useDocumentTitle(PAGE_TITLE);
-
   return (
-    <PublicSiteLayout activeNav="experiments">
-      <PageHero>
-        <Typography component="h1" variant="h3">
-          {experimentsContent.title}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
-          {experimentsContent.subtitle}
-        </Typography>
-
-        <ActionLinkRow>
-          <Button href={PROJECT_PATH} variant="contained">
-            View project
-          </Button>
-          <Button href={RESUME_PATH} variant="outlined">
-            View resume
-          </Button>
-        </ActionLinkRow>
-      </PageHero>
-
+    <>
       <PageSection>
         <SectionHeader
-          eyebrow="Experiment purpose"
-          title="Why these experiments exist"
-          copy={experimentsContent.summaryIntro}
+          eyebrow="Platform validation"
+          title="Evaluate evidence from the platform"
+          copy="These existing evaluate runs remain as context for rollout decisions. The catalog above covers focused ML-serving experiments."
         />
 
         <Grid container spacing={3}>
@@ -1399,7 +2343,7 @@ export function ExperimentsPage() {
       <PageSection>
         <SectionHeader
           eyebrow="Compare by question"
-          title="Choose what you&apos;re deciding"
+          title="Choose an evaluate decision"
         />
 
         <Box className="experiment-decision-workspace" sx={decisionWorkspaceSx}>
@@ -1432,6 +2376,27 @@ export function ExperimentsPage() {
           </Box>
         </Box>
       </PageSection>
-    </PublicSiteLayout>
+    </>
   );
+}
+
+export function ExperimentsPage({ initialPath }: { initialPath?: string } = {}) {
+  const pathname = resolveCurrentPathname(initialPath);
+  const slug = getExperimentSlugFromPath(pathname);
+
+  if (slug) {
+    if (slug === experimentCatalogContent.platformValidation.slug) {
+      return <PlatformValidationRoute />;
+    }
+
+    const experiment = getExperimentBySlug(slug);
+
+    if (!experiment) {
+      return <UnknownExperimentRoute slug={slug} />;
+    }
+
+    return <ExperimentDetailRoute experiment={experiment} />;
+  }
+
+  return <ExperimentCatalogRoute />;
 }
