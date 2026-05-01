@@ -9,7 +9,7 @@ describe("Resume Service", () => {
     expect(publicResumeData.skills["Languages"]).toBeArray();
     expect(publicResumeData.skills["Infrastructure"]).toContain("AWS (VPC, IAM, EC2, ALB)");
     expect(publicResumeData.projects?.title).toBe("Selected Project");
-    expect(publicResumeData.projects?.items[0]?.title).toContain("Cloud Inference Platform");
+    expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Lab");
   });
 
   test("renderResumeHtmlDocument creates valid HTML", () => {

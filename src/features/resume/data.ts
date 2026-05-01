@@ -42,13 +42,13 @@ export const publicResumeData: ResumeData = {
     title: "Selected Project",
     items: [
       {
-        title: "Cloud Inference Platform (AWS EKS + Karpenter + vLLM)",
+        title: "GPU Inference Lab (AWS EKS + Karpenter + vLLM)",
         highlights: [
-          "Built a cloud inference platform on AWS with Terraform-managed VPC/EKS, Karpenter, and vLLM, exposing an OpenAI-compatible API through an Application Load Balancer (ALB).",
-          "Designed GPU capacity across spot and on-demand Karpenter NodePools to support scale from zero, a warm baseline, and burst-driven provisioning.",
-          "Implemented custom-metric autoscaling with Prometheus Adapter and vLLM metrics so the Horizontal Pod Autoscaler (HPA) scaled on active inference load instead of CPU.",
-          "Built verification and evaluation workflows to simulate burst traffic and measure time to first token (TTFT), autoscaling lag, GPU utilization, and zero-idle versus warm-baseline cost tradeoffs.",
-          "Identified cold-start latency and scale-up lag as the main burst bottlenecks and evaluated warm-pool and capacity-aware scaling strategies to improve responsiveness.",
+          "Built an AWS EKS GPU inference lab with Terraform-managed VPC/EKS, public ALB-backed OpenAI-compatible vLLM serving, Prometheus/Grafana observability, and Karpenter-managed on-demand/spot GPU NodePools.",
+          "Designed zero-idle and warm-1 serving profiles; the verify workflow proves GPU node provisioning, vLLM readiness, public /v1 completion success, and cleanup back to zero serving GPU nodes.",
+          "Implemented custom-metric autoscaling with Prometheus Adapter and vLLM request metrics, comparing running-request HPA against active-pressure scaling on waiting + running requests.",
+          "Built evaluate workflows for controlled k6 burst runs, HPA policy comparison, active-target sweeps, and synthetic spot-capacity resilience drills, producing Markdown/JSON reports with timeline, latency, queue, cost, and metric-collection status.",
+          "Added a structured experiment catalog for KV cache, prefill/decode timing, batching, request patterns, autoscaling queueing, and cost-per-useful-work studies; local validation/rendering is ready while curated live-cluster experiment results remain pending.",
         ],
       },
     ],
