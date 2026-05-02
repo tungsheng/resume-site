@@ -13,18 +13,16 @@ export const publicResumeData: ResumeData = {
       linkedin: "tonyslee8",
     },
     summary:
-      "Staff Software Engineer focused on cloud platform, ML inference infrastructure, and distributed systems. Built GPU-backed inference platforms on AWS/Kubernetes with an emphasis on autoscaling, reliability, and cost-aware performance under burst workloads.",
+      "Staff Software Engineer specializing in ML inference infrastructure and distributed systems. Experienced in building GPU-backed inference platforms on Kubernetes, with a focus on latency, throughput, and cost efficiency under burst workloads and real-world constraints.",
   },
   skills: {
-    Inference: [
+    "ML Infrastructure / Inference": [
       "vLLM",
       "LLM Serving",
       "Autoscaling",
       "GPU Scheduling (NVIDIA Device Plugin)",
     ],
-    Languages: ["Go", "Python", "TypeScript", "SQL"],
-    Backend: ["Node.js", "GraphQL", "REST"],
-    Infrastructure: [
+    "Infrastructure / Cloud": [
       "Terraform",
       "Kubernetes (EKS)",
       "AWS (VPC, IAM, EC2, ALB)",
@@ -32,6 +30,8 @@ export const publicResumeData: ResumeData = {
       "CI/CD Automation",
       "Prometheus / Grafana",
     ],
+    Languages: ["Go", "Python", "TypeScript", "SQL"],
+    Backend: ["Node.js", "GraphQL", "REST"],
     Leadership: [
       "Architecture Design",
       "Cross-Functional Leadership",
@@ -45,10 +45,10 @@ export const publicResumeData: ResumeData = {
         title: "GPU Inference Lab (AWS EKS + Karpenter + vLLM)",
         highlights: [
           "Built an AWS EKS GPU inference lab with Terraform-managed VPC/EKS, public ALB-backed OpenAI-compatible vLLM serving, Prometheus/Grafana observability, and Karpenter-managed on-demand/spot GPU NodePools.",
-          "Designed zero-idle and warm-1 serving profiles; the verify workflow proves GPU node provisioning, vLLM readiness, public /v1 completion success, and cleanup back to zero serving GPU nodes.",
-          "Implemented custom-metric autoscaling with Prometheus Adapter and vLLM request metrics, comparing running-request HPA against active-pressure scaling on waiting + running requests.",
-          "Built evaluate workflows for controlled k6 burst runs, HPA policy comparison, active-target sweeps, and synthetic spot-capacity resilience drills, producing Markdown/JSON reports with timeline, latency, queue, cost, and metric-collection status.",
-          "Added a structured experiment catalog for KV cache, prefill/decode timing, batching, request patterns, autoscaling queueing, and cost-per-useful-work studies; local validation/rendering is ready while curated live-cluster experiment results remain pending.",
+          "Reduced serving-GPU idle cost to $0/hr for sparse traffic with a zero-idle profile that starts from 0 GPU nodes, provisions a GPU for a public /v1 completion, and cleans back to 0 serving GPUs after validation.",
+          "Diagnosed queue buildup and delayed scale-out under burst traffic due to model-readiness lag, then redesigned the autoscaling signal around queue depth and request concurrency to manage backpressure.",
+          "Measured burst behavior through policy comparisons and active-target sweeps; active-pressure reached a second Ready replica 43% faster in one warm-baseline compare run (564s vs. 989s).",
+          "Identified KV-cache memory as the primary concurrency constraint for long prompts and framed batching as a throughput-versus-p99-latency tradeoff driven by queueing delay.",
         ],
       },
     ],
@@ -60,10 +60,11 @@ export const publicResumeData: ResumeData = {
       startDate: "Sep 2024",
       endDate: "Present",
       highlights: [
-        "Partnered directly with AWS/OpenSearch engineering to unblock a launch-critical Dashboards migration and stabilize deployments across environments.",
-        "Delivered the DLP feature end-to-end across UI workflows, APIs, and data modeling, aligning frontend, backend, infra, and product teams for a go-to-market initiative.",
-        "Built local development and validation automation that cut dev/test cycle time by 20% and reduced onboarding friction.",
-        "Containerized UI services and removed shared dependency coupling, improving deployment isolation, release reliability, and execution speed on high-risk changes.",
+        "Designed and delivered distributed platform services with a focus on reliability, deployment safety, and cross-service coordination across UI, API, data, and infrastructure boundaries.",
+        "Applied distributed systems and scaling principles to evaluate platform behavior under load, focusing on latency, throughput, deployment failure modes, and recovery paths.",
+        "Improved release stability by containerizing UI services, decoupling shared dependencies, and isolating deployment surfaces for high-risk changes.",
+        "Led a launch-critical OpenSearch Dashboards migration, resolving deployment and environment consistency issues across production systems in partnership with AWS/OpenSearch engineers.",
+        "Built local development and validation automation that reduced dev/test iteration latency by 20% and improved onboarding for service changes.",
       ],
     },
     {

@@ -6,8 +6,9 @@ import type { ResumeData } from "../../src/types";
 describe("Resume Service", () => {
   test("publicResumeData contains the checked-in public resume", () => {
     expect(publicResumeData.header.name).toBe("Tony Lee");
+    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("vLLM");
+    expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("AWS (VPC, IAM, EC2, ALB)");
     expect(publicResumeData.skills["Languages"]).toBeArray();
-    expect(publicResumeData.skills["Infrastructure"]).toContain("AWS (VPC, IAM, EC2, ALB)");
     expect(publicResumeData.projects?.title).toBe("Selected Project");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Lab");
   });
