@@ -1,14 +1,13 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
-import { siteProfile } from "../site/content";
-import { PageHero, PublicSiteLayout } from "../site/layout";
+import { Button, Stack, Typography } from "@mui/material";
+import { PROJECT_PATH, RESUME_PATH, siteProfile } from "../site/content";
+import { ActionLinkRow, PageHero, PublicSiteLayout } from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
 
-const PAGE_TITLE = "Tony Lee | ML Inference & Distributed Systems";
-const HOME_SUBTITLE = "ML inference, built to scale.";
+const PAGE_TITLE = "Tony Lee | ML Inference Infrastructure Engineer";
+const HOME_ROLE = "ML Inference Infrastructure Engineer";
 const HOME_LEDE =
-  "I build GPU serving platforms that turn traffic into measurable capacity.";
+  "I design GPU-backed inference systems on Kubernetes, focused on scaling, latency, and cost under real workloads.";
 
 export function HomePage() {
   useDocumentTitle(PAGE_TITLE);
@@ -17,68 +16,74 @@ export function HomePage() {
     <PublicSiteLayout activeNav="home">
       <PageHero
         align="center"
-        contentWidth="56rem"
-        sx={(theme) => ({
-          py: { xs: 5.5, md: 8 },
-          px: { xs: 2.5, md: 6 },
-          minHeight: { md: "clamp(420px, 52vh, 620px)" },
+        contentWidth="48rem"
+        contentSx={{ gap: { xs: 5, md: 6.5 } }}
+        sx={{
+          py: { xs: 8.5, md: 11 },
+          px: { xs: 3, md: 6 },
+          minHeight: { md: "clamp(540px, 66vh, 720px)" },
           display: "grid",
           alignItems: "center",
-          backgroundImage: `radial-gradient(circle at 50% 35%, ${alpha(theme.palette.warning.main, 0.18)}, transparent 35%), linear-gradient(145deg, rgba(255, 252, 247, 0.98), rgba(246, 238, 224, 0.92))`,
-          boxShadow: "0 20px 60px rgba(30, 41, 47, 0.12)",
-        })}
+        }}
       >
-        <Box
+        <Stack
+          spacing={{ xs: 2.5, md: 3.25 }}
           sx={{
-            display: "grid",
-            justifyItems: "center",
-            gap: { xs: 4, md: 8 },
+            alignItems: "center",
+            maxWidth: "100%",
           }}
         >
-          <Box
+          <Typography
+            component="h1"
+            variant="h1"
             sx={{
-              display: "grid",
-              justifyItems: "center",
-              gap: { xs: 0.25, md: 0.5 },
+              fontSize: {
+                xs: "clamp(3.2rem, 15vw, 4.5rem)",
+                md: "clamp(4.5rem, 7vw, 6.5rem)",
+              },
+              lineHeight: 1,
             }}
           >
-            <Typography variant="overline" sx={{ color: "secondary.main" }}>
-              I&apos;m
-            </Typography>
-            <Typography
-              component="h1"
-              variant="h1"
-              sx={{
-                fontSize: {
-                  xs: "clamp(3.25rem, 17vw, 4.4rem)",
-                  md: "clamp(4rem, 9vw, 7rem)",
-                },
-                lineHeight: 0.95,
-              }}
-            >
-              {siteProfile.name}
-            </Typography>
-          </Box>
+            {siteProfile.name}
+          </Typography>
           <Typography
             component="p"
             sx={{
               color: "secondary.main",
-              fontSize: {
-                xs: "clamp(1.25rem, 6.5vw, 1.5rem)",
-                md: "clamp(1.3rem, 2.4vw, 2rem)",
-              },
-              fontWeight: 600,
-              lineHeight: 1.18,
-              letterSpacing: "-0.03em",
-              maxWidth: { xs: "18rem", md: "none" },
+              fontSize: { xs: "1.16rem", md: "1.4rem" },
+              fontWeight: 700,
+              lineHeight: 1.3,
             }}
           >
-            {HOME_SUBTITLE}
+            {HOME_ROLE}
           </Typography>
-        </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "38rem" }}>
-          {HOME_LEDE}
-        </Typography>
+        </Stack>
+        <Stack
+          spacing={{ xs: 2, md: 2.5 }}
+          sx={{
+            alignItems: "center",
+            maxWidth: "40rem",
+          }}
+        >
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: "1.04rem", md: "1.16rem" },
+              lineHeight: 1.8,
+            }}
+          >
+            {HOME_LEDE}
+          </Typography>
+          <ActionLinkRow justifyContent="center">
+            <Button href={PROJECT_PATH} variant="text">
+              View project
+            </Button>
+            <Button href={RESUME_PATH} variant="text">
+              View resume
+            </Button>
+          </ActionLinkRow>
+        </Stack>
       </PageHero>
     </PublicSiteLayout>
   );
