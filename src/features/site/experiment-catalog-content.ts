@@ -1,8 +1,34 @@
+import { PROJECT_VALIDATION_PATH } from "./content";
+
 const GPU_INFERENCE_REPO_BASE = "https://github.com/tungsheng/gpu-inference-lab/blob/main";
 
 export type ExperimentMetricGroup = {
   label: string;
   metrics: string[];
+};
+
+export type ExperimentResultEvidenceRow = {
+  target: string;
+  outcome: string;
+  p95Latency: string;
+  peakWaiting: string;
+  gpuMax: string;
+};
+
+export type ExperimentResultEvidenceStat = {
+  label: string;
+  value: string;
+  context: string;
+};
+
+export type ExperimentResultEvidence = {
+  title: string;
+  statusLabel: string;
+  reportDate: string;
+  summary: string;
+  boundary: string;
+  stats: ExperimentResultEvidenceStat[];
+  rows: ExperimentResultEvidenceRow[];
 };
 
 export type ExperimentCase = {
@@ -43,14 +69,18 @@ export type ExperimentCatalogItem = {
   metricGroups: ExperimentMetricGroup[];
   localCommands: string[];
   liveCommands: string[];
+  resultEvidence?: ExperimentResultEvidence;
 };
 
-function experimentStatus(measurement: string): ExperimentStatus {
+function experimentStatus(
+  measurement: string,
+  result = "Curated results pending",
+): ExperimentStatus {
   return {
     definition: "Definition ready",
     local: "Renderable locally",
     measurement,
-    result: "Curated results pending",
+    result,
   };
 }
 
@@ -59,16 +89,30 @@ export const experimentCatalogContent = {
   subtitle:
     "Focused GPU inference experiments for memory pressure, streaming latency, batching, request shape, autoscaling, and cost efficiency.",
   statusNote:
-    "Catalog ready; curated live results pending.",
+    "Catalog ready; KV-cache knee refinement measured, with the remaining live result matrices still pending.",
   platformValidation: {
     slug: "platform-validation",
-    title: "Platform Validation",
+    title: "Project validation",
     category: "Platform evidence",
-    status: "Measured evaluate runs",
+    status: "Related project evidence",
     question:
-      "Which platform posture, scaling signal, and active-pressure target are safest to recommend?",
-    metricFocus: ["Cold start", "Scale-out", "Target tuning"],
-    href: "/experiments/platform-validation",
+      "Warm baseline, active-pressure scale-out, and target tuning are project rollout decisions, not catalog experiments.",
+    metricFocus: ["Warm path", "Active-pressure", "Target 4"],
+    summaryFacts: [
+      {
+        label: "First response",
+        value: "93s vs 423s",
+      },
+      {
+        label: "Replica 2",
+        value: "564s vs 989s",
+      },
+      {
+        label: "Target call",
+        value: "Keep 4",
+      },
+    ],
+    href: PROJECT_VALIDATION_PATH,
   },
   conceptLead:
     "Every experiment follows the same simple path from a serving question to a curated result.",
@@ -99,15 +143,15 @@ export const experimentCatalogContent = {
       slug: "kv-cache",
       title: "KV Cache vs Concurrency",
       category: "Memory pressure",
-      status: experimentStatus("Measurable with run"),
+      status: experimentStatus("Measurable with run", "Measured knee refinement"),
       question:
         "How does longer prompt context reduce stable concurrency and throughput?",
-      cardSummary: "Prompt length versus concurrency.",
+      cardSummary: "Long-context capacity knee.",
       metricFocus: ["Concurrency", "KV memory", "Tail latency"],
       summary:
-        "Compares short, medium, and long prompt contexts to find where memory pressure reduces stable concurrency and throughput.",
+        "Compares short, medium, and long prompt contexts, then uses an 8192-token sweep to find where long-context serving begins to queue.",
       whyItMatters:
-        "Long prompts can consume enough KV-cache memory that a GPU serving endpoint looks healthy but cannot sustain the same useful concurrency. This experiment turns that risk into an explicit run matrix.",
+        "Long prompts can make a GPU serving endpoint look healthy until arrival rate crosses a narrow operating boundary. The latest sweep turns that risk into measured latency, queue depth, and GPU-utilization evidence.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/kv-cache/",
@@ -162,8 +206,92 @@ export const experimentCatalogContent = {
         "./scripts/experiment render-serving --experiment kv-cache --profile long-context",
       ],
       liveCommands: [
-        "./scripts/experiment run --experiment kv-cache --case prompt-512-output-100 --profile default",
+        "./scripts/experiment run --experiment kv-cache --case prompt-8192-output-300-rate-115 --profile long-context",
       ],
+      resultEvidence: {
+        title: "Long-context capacity knee",
+        statusLabel: "Measured knee refinement",
+        reportDate: "2026-05-04",
+        summary:
+          "For 8192-token prompts with 300 generated tokens, the latest sweep narrows the single-replica long-context capacity knee to the 1.10-1.15 req/s band.",
+        boundary:
+          "Repeat runs and scheduler/admission-control variants are still pending, so treat the boundary as a measured operating band rather than a final universal limit.",
+        stats: [
+          {
+            label: "Clean through",
+            value: "1.10 req/s",
+            context: "0 waiting requests; p95 28.20s",
+          },
+          {
+            label: "Queue starts",
+            value: "1.15 req/s",
+            context: "20 waiting requests; p95 46.68s",
+          },
+          {
+            label: "Saturation grows",
+            value: "1.20 req/s",
+            context: "33 waiting requests; p95 56.96s",
+          },
+        ],
+        rows: [
+          {
+            target: "0.75 req/s",
+            outcome: "stable",
+            p95Latency: "6.61s",
+            peakWaiting: "0",
+            gpuMax: "96%",
+          },
+          {
+            target: "1.00 req/s",
+            outcome: "stable but slower",
+            p95Latency: "11.91s",
+            peakWaiting: "0",
+            gpuMax: "93%",
+          },
+          {
+            target: "1.05 req/s",
+            outcome: "clean but slower",
+            p95Latency: "16.83s",
+            peakWaiting: "0",
+            gpuMax: "100%",
+          },
+          {
+            target: "1.10 req/s",
+            outcome: "clean with rising tail",
+            p95Latency: "28.20s",
+            peakWaiting: "0",
+            gpuMax: "100%",
+          },
+          {
+            target: "1.15 req/s",
+            outcome: "queue starts",
+            p95Latency: "46.68s",
+            peakWaiting: "20",
+            gpuMax: "100%",
+          },
+          {
+            target: "1.20 req/s",
+            outcome: "saturation grows",
+            p95Latency: "56.96s",
+            peakWaiting: "33",
+            gpuMax: "100%",
+          },
+          {
+            target: "1.25 req/s",
+            outcome: "saturation is obvious",
+            p95Latency: "85.75s",
+            peakWaiting: "65",
+            gpuMax: "100%",
+          },
+          {
+            target: "1.50 req/s",
+            outcome: "overloaded",
+            p95Latency: "180.27s",
+            peakWaiting: "181",
+            gpuMax: "100%",
+          },
+        ],
+      },
     },
     {
       slug: "prefill-decode",

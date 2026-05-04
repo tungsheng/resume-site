@@ -14,7 +14,13 @@ import {
 } from "@mui/material";
 import { alpha, type SxProps, type Theme } from "@mui/material/styles";
 import { CommandCodeBlock } from "../site/command-code-block";
-import { EXPERIMENTS_PATH, RESUME_PATH, siteProfile } from "../site/content";
+import {
+  EXPERIMENTS_PATH,
+  PROJECT_PATH,
+  PROJECT_VALIDATION_PATH,
+  RESUME_PATH,
+  siteProfile,
+} from "../site/content";
 import { implementation, projectContent } from "../site/project-content";
 import {
   ActionLinkRow,
@@ -29,6 +35,7 @@ const PAGE_TITLE = "Cloud Inference Platform | Tony Lee";
 
 type WorkflowNode = (typeof projectContent.workflowFoundation.nodes)[number];
 type WorkflowTrack = (typeof projectContent.workflowPaths)[number];
+type ValidationDecision = (typeof projectContent.validation.decisions)[number];
 
 const overviewFactGridSx: SxProps<Theme> = {
   display: "grid",
@@ -491,6 +498,105 @@ const evidenceItemSx: SxProps<Theme> = (theme) => ({
   border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
 });
 
+const validationHeroFactsSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 1,
+  alignItems: "center",
+};
+
+const validationSurfaceSx: SxProps<Theme> = {
+  p: { xs: 2, sm: 2.5, md: 3 },
+  display: "grid",
+  gap: { xs: 1.5, md: 1.75 },
+};
+
+const validationDecisionSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "minmax(12rem, 0.36fr) minmax(0, 0.64fr)",
+  },
+  gap: { xs: 1.25, md: 2 },
+  alignItems: "start",
+  minWidth: 0,
+  p: { xs: 1.45, sm: 1.6, md: 1.75 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.54),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+  "& + &": {
+    mt: { xs: 1.2, md: 1.35 },
+  },
+});
+
+const validationDecisionMetaSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.45,
+  minWidth: 0,
+};
+
+const validationDecisionBodySx: SxProps<Theme> = {
+  display: "grid",
+  gap: 1,
+  minWidth: 0,
+};
+
+const validationProofSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.2,
+  alignContent: "center",
+  minWidth: 0,
+  width: "fit-content",
+  maxWidth: "100%",
+  px: 1.25,
+  py: 1,
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.secondary.main, 0.045),
+  border: `1px solid ${alpha(theme.palette.secondary.main, 0.13)}`,
+});
+
+const validationCaveatSx: SxProps<Theme> = (theme) => ({
+  p: 1.15,
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.warning.light, 0.12),
+  border: `1px solid ${alpha(theme.palette.warning.dark, 0.16)}`,
+});
+
+const validationSourceStripSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    sm: "repeat(3, minmax(0, 1fr))",
+  },
+  gap: { xs: 1, md: 1.25 },
+};
+
+const validationSourceFactSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.2,
+  minWidth: 0,
+  p: { xs: 1.2, sm: 1.3 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.text.primary, 0.025),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+});
+
+function resolveCurrentPathname(initialPath?: string): string {
+  if (initialPath) {
+    return initialPath;
+  }
+
+  if (typeof window === "undefined") {
+    return PROJECT_PATH;
+  }
+
+  return window.location.pathname;
+}
+
+function isProjectValidationPath(pathname: string): boolean {
+  return (pathname.split(/[?#]/, 1)[0] ?? "").replace(/\/+$/, "") === PROJECT_VALIDATION_PATH;
+}
+
 function WorkflowNodePill({ node }: { node: WorkflowNode }) {
   const href = "href" in node ? node.href : undefined;
   const linkLabel =
@@ -748,6 +854,126 @@ function LabUsageSection() {
   );
 }
 
+function ProjectValidationDecision({ decision }: { decision: ValidationDecision }) {
+  return (
+    <Box component="section" sx={validationDecisionSx}>
+      <Box sx={validationDecisionMetaSx}>
+        <Typography variant="overline" color="primary">
+          Decision
+        </Typography>
+        <Typography variant="h6">{decision.title}</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+          {decision.call}
+        </Typography>
+      </Box>
+
+      <Box sx={validationDecisionBodySx}>
+        <Box sx={validationProofSx}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+            {decision.proofLabel}
+          </Typography>
+          <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
+            {decision.proofValue}
+          </Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          {decision.body}
+        </Typography>
+        <Box sx={validationCaveatSx}>
+          <Typography variant="body2" color="text.secondary">
+            {decision.caveat}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+function ProjectValidationRoute() {
+  useDocumentTitle(`${projectContent.validation.title} | Tony Lee`);
+
+  return (
+    <PublicSiteLayout activeNav="project">
+      <PageHero>
+        <Typography component="h1" variant="h3">
+          {projectContent.validation.title}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "58rem" }}>
+          {projectContent.validation.lede}
+        </Typography>
+        <Box sx={validationHeroFactsSx}>
+          {projectContent.validation.sourceFacts.map((fact) => (
+            <Chip
+              key={fact.label}
+              label={`${fact.label}: ${fact.value}`}
+              variant="outlined"
+            />
+          ))}
+        </Box>
+
+        <ActionLinkRow>
+          <Button href={PROJECT_PATH} variant="contained">
+            Project overview
+          </Button>
+          <Button href={EXPERIMENTS_PATH} variant="outlined">
+            Experiment catalog
+          </Button>
+        </ActionLinkRow>
+      </PageHero>
+
+      <PageSection>
+        <SectionHeader
+          eyebrow="Operational validation"
+          title="Decision record"
+          copy={projectContent.validation.summary}
+        />
+
+        <Paper variant="outlined" sx={validationSurfaceSx}>
+          <Box>
+            {projectContent.validation.decisions.map((decision) => (
+              <ProjectValidationDecision key={decision.title} decision={decision} />
+            ))}
+          </Box>
+
+          <Box sx={validationSourceStripSx} aria-label="Validation source facts">
+            {projectContent.validation.sourceFacts.map((fact) => (
+              <Box key={fact.label} sx={validationSourceFactSx}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                  {fact.label}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
+                  {fact.value}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+
+          <ActionLinkRow>
+            <Button
+              href="https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/reports/README.md"
+              target="_blank"
+              rel="noreferrer"
+              size="small"
+              endIcon={<OpenInNewRoundedIcon />}
+            >
+              Report rules
+            </Button>
+            <Button
+              href="https://github.com/tungsheng/gpu-inference-lab/blob/main/scripts/evaluate"
+              target="_blank"
+              rel="noreferrer"
+              size="small"
+              endIcon={<OpenInNewRoundedIcon />}
+            >
+              Evaluate runner
+            </Button>
+          </ActionLinkRow>
+        </Paper>
+      </PageSection>
+    </PublicSiteLayout>
+  );
+}
+
 function ProjectEvidenceSection() {
   return (
     <PageSection>
@@ -769,8 +995,8 @@ function ProjectEvidenceSection() {
         </Box>
 
         <ActionLinkRow>
-          <Button href={`${EXPERIMENTS_PATH}/platform-validation`} variant="contained">
-            Platform validation
+          <Button href={PROJECT_VALIDATION_PATH} variant="contained">
+            Platform decisions
           </Button>
           <Button href={EXPERIMENTS_PATH} variant="outlined">
             Experiment catalog
@@ -793,7 +1019,7 @@ function ProjectEvidenceSection() {
   );
 }
 
-export function ProjectPage() {
+function ProjectOverviewRoute() {
   useDocumentTitle(PAGE_TITLE);
 
   return (
@@ -904,4 +1130,14 @@ export function ProjectPage() {
       <ProjectEvidenceSection />
     </PublicSiteLayout>
   );
+}
+
+export function ProjectPage({ initialPath }: { initialPath?: string } = {}) {
+  const pathname = resolveCurrentPathname(initialPath);
+
+  if (isProjectValidationPath(pathname)) {
+    return <ProjectValidationRoute />;
+  }
+
+  return <ProjectOverviewRoute />;
 }

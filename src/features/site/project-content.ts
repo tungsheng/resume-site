@@ -145,6 +145,57 @@ export const projectContent = {
       },
     ],
   },
+  validation: {
+    title: "Platform Decisions",
+    lede:
+      "Operational validation from evaluate runs: the platform posture, autoscaling signal, and active-pressure target Tony would ship next.",
+    summary:
+      "This is not an experiment catalog entry. It is the decision record that turns measured platform runs into rollout calls.",
+    decisions: [
+      {
+        title: "Warm baseline",
+        call: "Keep 1 warm path",
+        proofLabel: "First public response",
+        proofValue: "93s vs 423s",
+        body:
+          "One ready path cuts the first public wait by more than five minutes compared with zero-idle.",
+        caveat: "$0.526/hr idle cost for the warm path.",
+      },
+      {
+        title: "Scale-out signal",
+        call: "Use active-pressure",
+        proofLabel: "Second ready replica",
+        proofValue: "564s vs 989s",
+        body:
+          "The active-pressure HPA signal brings the second replica online sooner than running-request pressure.",
+        caveat: "Burst cost rises by about $0.038 in the compare run.",
+      },
+      {
+        title: "Target tuning",
+        call: "Keep target 4",
+        proofLabel: "Target sweep",
+        proofValue: "952s at $0.484",
+        body:
+          "Target 4 has complete latency and queue fields, zero peak waiting requests, and nearly the same burst cost as target 2.",
+        caveat:
+          "Provisional: GPU efficiency fields were unavailable, and target 8 was missing key metrics.",
+      },
+    ],
+    sourceFacts: [
+      {
+        label: "Generated",
+        value: "May 1, 2026",
+      },
+      {
+        label: "Workflow",
+        value: "./scripts/evaluate",
+      },
+      {
+        label: "Evidence type",
+        value: "Decision record",
+      },
+    ],
+  },
   workflowSectionTitle: "How the platform serves and scales",
   workflowLead:
     "Requests follow one stable public path. Load signals follow a separate control path that adds GPU capacity only when another replica cannot schedule.",

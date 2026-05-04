@@ -13,7 +13,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Experiment Catalog");
     expect(html).toContain("Focused GPU inference experiments");
     expect(html).toContain("Catalog ready");
-    expect(html).toContain("Catalog ready; curated live results pending.");
+    expect(html).toContain("KV-cache knee refinement measured");
     expect(html).toContain("experiment definitions");
     expect(html).toContain("Renderable locally");
     expect(html).toContain("Measurable with run commands");
@@ -29,7 +29,9 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Streaming latency");
     expect(html).toContain("Scheduler behavior");
     expect(html).toContain("Purpose");
-    expect(html).toContain("Definition ready");
+    expect(html).toContain("Run ready");
+    expect(html).toContain("Result measured");
+    expect(html).toContain("Result pending");
     expect(html).toContain("KV Cache vs Concurrency");
     expect(html).toContain("Prefill vs Decode Timing");
     expect(html).toContain("Batching Scheduler Tradeoffs");
@@ -42,12 +44,15 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("href=\"/experiments/request-patterns\"");
     expect(html).toContain("href=\"/experiments/autoscaling\"");
     expect(html).toContain("href=\"/experiments/cost\"");
-    expect(html).toContain("Platform Validation");
-    expect(html).toContain("Measured platform evidence");
-    expect(html).toContain("href=\"/experiments/platform-validation\"");
-    expect(html).toContain("Prompt length versus concurrency.");
+    expect(html).toContain("Related project evidence");
+    expect(html).toContain("Platform decisions live with the project");
+    expect(html).toContain("not catalog experiments");
+    expect(html).toContain("href=\"/project/cloud-inference-platform/validation\"");
+    expect(html).not.toContain("href=\"/experiments/platform-validation\"");
+    expect(html).toContain("Long-context capacity knee.");
     expect(html).toContain("Concurrency");
     expect(html).toContain("KV memory");
+    expect(html).toContain("knee refinement");
     expect(html).toContain("Curated results pending");
     expect(html).not.toContain("Evaluate evidence from the platform");
     expect(html).not.toContain("Choose an evaluate decision");
@@ -57,9 +62,8 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("href=\"/project/cloud-inference-platform\"");
   });
 
-  test("renders each individual experiment detail page with the shared template", () => {
+  test("renders pending experiment detail pages with the shared template", () => {
     const slugs = [
-      "kv-cache",
       "prefill-decode",
       "batching",
       "request-patterns",
@@ -107,26 +111,38 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("max stable concurrency");
     expect(html).toContain("KV Cache vs Concurrency example local command");
     expect(html).toContain("KV Cache vs Concurrency example live command");
+    expect(html).toContain("Measured result");
+    expect(html).toContain("Result evidence");
+    expect(html).toContain("Long-context capacity knee");
+    expect(html).toContain("Latest reports: 2026-05-04");
+    expect(html).toContain("1.10-1.15 req/s band");
+    expect(html).toContain("Clean through");
+    expect(html).toContain("1.10 req/s");
+    expect(html).toContain("Queue starts");
+    expect(html).toContain("1.15 req/s");
+    expect(html).toContain("Saturation grows");
+    expect(html).toContain("1.20 req/s");
+    expect(html).toContain("16.83s");
+    expect(html).toContain("28.20s");
+    expect(html).toContain("46.68s");
+    expect(html).toContain("56.96s");
+    expect(html).toContain("85.75s");
+    expect(html).toContain("180.27s");
+    expect(html).toContain("Repeat runs");
+    expect(html).toContain("Results summary");
+    expect(html).not.toContain("Curated live results pending");
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/experiments/kv-cache/\"",
     );
   });
 
-  test("renders platform validation on its own detail route", () => {
+  test("does not render platform validation as an experiment detail route", () => {
     const html = renderToStaticMarkup(
       <ExperimentsPage initialPath="/experiments/platform-validation" />,
     );
 
-    expect(html).toContain("Platform Validation Evidence");
-    expect(html).toContain("Measured evaluate runs");
-    expect(html).toContain("Evaluate evidence from the platform");
-    expect(html).toContain("Choose an evaluate decision");
-    expect(html).toContain("Warm baseline");
-    expect(html).toContain("Scale-out signal");
-    expect(html).toContain("Target tuning");
-    expect(html).toContain("experiment-decision-workspace");
-    expect(html).toContain("role=\"tablist\"");
-    expect(html).toContain("role=\"tabpanel\"");
+    expect(html).toContain("Experiment not found");
+    expect(html).toContain("No experiment is published for &quot;platform-validation&quot;.");
     expect(html).toContain("href=\"/experiments\"");
   });
 

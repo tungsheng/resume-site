@@ -37,6 +37,7 @@ server = Bun.serve({
     // Page routes - using Bun's HTML imports for React bundling
     "/": homePage,
     "/project/cloud-inference-platform": projectPage,
+    "/project/cloud-inference-platform/validation": projectPage,
     "/experiments": experimentsPage,
     "/experiments/:slug": experimentsPage,
     "/resume": resumePage,

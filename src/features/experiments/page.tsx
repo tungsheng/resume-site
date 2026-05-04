@@ -142,14 +142,53 @@ const catalogFactItemSx: SxProps<Theme> = (theme) => ({
 });
 
 const conceptSurfaceSx: SxProps<Theme> = (theme) => ({
-  display: "flex",
+  "--experiment-concept-rail-x": "1.45rem",
+  "--experiment-concept-step-indent": "3.05rem",
+  "--experiment-concept-marker-size": "0.6rem",
+  position: "relative",
+  display: { xs: "grid", sm: "flex" },
+  gridTemplateColumns: { xs: "minmax(0, 1fr)" },
   flexWrap: "wrap",
-  gap: { xs: 0.75, md: 1 },
-  alignItems: "center",
+  gap: { xs: 0.85, sm: 0.75, md: 1 },
+  alignItems: { xs: "stretch", sm: "center" },
   p: { xs: 1.25, sm: 1.5, md: 1.75 },
+  pl: { xs: "var(--experiment-concept-step-indent)", sm: 1.5, md: 1.75 },
   borderRadius: 2,
   backgroundColor: alpha(theme.palette.common.white, 0.58),
   border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+  "&::before": {
+    content: '""',
+    display: { xs: "block", sm: "none" },
+    position: "absolute",
+    left: "var(--experiment-concept-rail-x)",
+    top: "1.75rem",
+    bottom: "1.75rem",
+    width: "1px",
+    backgroundColor: alpha(theme.palette.secondary.main, 0.16),
+  },
+});
+
+const conceptStepItemSx: SxProps<Theme> = (theme) => ({
+  position: { xs: "relative", sm: "static" },
+  display: "inline-flex",
+  alignItems: "center",
+  minWidth: 0,
+  justifySelf: { xs: "start", sm: "auto" },
+  "&::before": {
+    content: '""',
+    display: { xs: "block", sm: "none" },
+    position: "absolute",
+    left:
+      "calc(var(--experiment-concept-rail-x) - var(--experiment-concept-step-indent) - (var(--experiment-concept-marker-size) / 2))",
+    top: "50%",
+    zIndex: 1,
+    width: "var(--experiment-concept-marker-size)",
+    height: "var(--experiment-concept-marker-size)",
+    borderRadius: "50%",
+    backgroundColor: theme.palette.background.paper,
+    border: `2px solid ${alpha(theme.palette.secondary.main, 0.46)}`,
+    transform: "translateY(-50%)",
+  },
 });
 
 const conceptStepSx: SxProps<Theme> = (theme) => ({
@@ -157,6 +196,8 @@ const conceptStepSx: SxProps<Theme> = (theme) => ({
   alignItems: "center",
   minHeight: "2.35rem",
   minWidth: 0,
+  width: "fit-content",
+  maxWidth: "100%",
   px: { xs: 1.1, sm: 1.25 },
   py: 0.75,
   borderRadius: 999,
@@ -244,14 +285,31 @@ const browseActionSx: SxProps<Theme> = {
 
 const platformValidationBandSx: SxProps<Theme> = (theme) => ({
   display: "grid",
-  gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) 8rem" },
-  gap: { xs: 1.25, md: 2 },
-  alignItems: "stretch",
-  minHeight: { md: "7.25rem" },
-  p: { xs: 1.5, sm: 1.75, md: 2 },
+  gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) auto" },
+  gap: { xs: 1, md: 1.5 },
+  alignItems: "center",
+  p: { xs: 1.25, sm: 1.4, md: 1.5 },
   borderRadius: 2,
-  backgroundColor: alpha(theme.palette.primary.main, 0.035),
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.14)}`,
+  backgroundColor: alpha(theme.palette.common.white, 0.44),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+});
+
+const platformValidationFactStripSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.75,
+  alignItems: "center",
+};
+
+const platformValidationFactSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.1,
+  minWidth: { xs: "8.5rem", sm: "9rem" },
+  px: 1,
+  py: 0.75,
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.56),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
 });
 
 const experimentMetaRowSx: SxProps<Theme> = {
@@ -306,6 +364,60 @@ const compactMetricChipSx: SxProps<Theme> = (theme) => ({
   color: alpha(theme.palette.text.primary, 0.74),
   fontWeight: 600,
 });
+
+type CatalogStatusTone = "ready" | "measured" | "pending";
+
+const catalogStatusStackSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.35,
+  alignContent: "center",
+  minWidth: 0,
+  maxWidth: { md: "12rem" },
+};
+
+const catalogStatusLineSx: SxProps<Theme> = {
+  display: "flex",
+  gap: 0.55,
+  alignItems: "baseline",
+  minWidth: 0,
+  color: "text.secondary",
+};
+
+function catalogStatusDotSx(tone: CatalogStatusTone): SxProps<Theme> {
+  return (theme) => {
+    const toneColor =
+      tone === "pending"
+        ? theme.palette.warning.dark
+        : tone === "measured"
+          ? theme.palette.success.dark
+          : theme.palette.success.main;
+
+    return {
+      width: "0.45rem",
+      height: "0.45rem",
+      mt: "0.15rem",
+      borderRadius: "50%",
+      backgroundColor: alpha(toneColor, tone === "pending" ? 0.72 : 0.78),
+      flexShrink: 0,
+    };
+  };
+}
+
+const catalogStatusTextSx: SxProps<Theme> = {
+  minWidth: 0,
+  fontSize: "0.78rem",
+  fontWeight: 700,
+  lineHeight: 1.3,
+  overflowWrap: "anywhere",
+};
+
+const catalogStatusMutedSx: SxProps<Theme> = {
+  color: "text.secondary",
+  fontSize: "0.74rem",
+  fontWeight: 600,
+  lineHeight: 1.3,
+  overflowWrap: "anywhere",
+};
 
 const detailIntroSx: SxProps<Theme> = (theme) => ({
   display: "grid",
@@ -365,6 +477,92 @@ const pendingResultSx: SxProps<Theme> = (theme) => ({
   borderRadius: 2,
   backgroundColor: alpha(theme.palette.warning.light, 0.14),
   border: `1px solid ${alpha(theme.palette.warning.dark, 0.2)}`,
+});
+
+const measuredResultSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: { xs: 1.35, md: 1.5 },
+  p: { xs: 1.5, sm: 1.75, md: 2 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.success.light, 0.1),
+  border: `1px solid ${alpha(theme.palette.success.dark, 0.16)}`,
+});
+
+const resultStatGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "repeat(3, minmax(0, 1fr))",
+  },
+  gap: { xs: 0.85, md: 1 },
+};
+
+const resultStatSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.25,
+  minWidth: 0,
+  minHeight: "5.4rem",
+  p: { xs: 1.15, sm: 1.25 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.58),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+});
+
+const resultTableSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  minWidth: 0,
+  overflow: "hidden",
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.58),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+});
+
+const resultTableRowSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "minmax(7rem, 0.9fr) minmax(10rem, 1fr) repeat(3, minmax(5.5rem, 0.7fr))",
+  },
+  gap: { xs: 0.45, md: 1 },
+  alignItems: "center",
+  minWidth: 0,
+  px: { xs: 1.15, md: 1.35 },
+  py: { xs: 1, md: 0.9 },
+  "& + &": {
+    borderTop: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+  },
+});
+
+const resultTableHeaderSx: SxProps<Theme> = (theme) => ({
+  ...resultTableRowSx(theme),
+  display: { xs: "none", md: "grid" },
+  backgroundColor: alpha(theme.palette.text.primary, 0.035),
+  color: theme.palette.text.secondary,
+  fontSize: "0.72rem",
+  fontWeight: 700,
+  lineHeight: 1.2,
+  textTransform: "uppercase",
+});
+
+const resultTableCellSx: SxProps<Theme> = {
+  minWidth: 0,
+  overflowWrap: "anywhere",
+};
+
+const resultMobileLabelSx: SxProps<Theme> = {
+  display: { xs: "inline", md: "none" },
+  mr: 0.5,
+  color: "text.secondary",
+  fontSize: "0.7rem",
+  fontWeight: 700,
+  textTransform: "uppercase",
+};
+
+const resultBoundarySx: SxProps<Theme> = (theme) => ({
+  p: { xs: 1.15, sm: 1.25 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.warning.light, 0.12),
+  border: `1px solid ${alpha(theme.palette.warning.dark, 0.16)}`,
 });
 
 const tradeoffCardSx: SxProps<Theme> = (theme) => ({
@@ -960,8 +1158,10 @@ function ExperimentCatalogConceptSection() {
       <Box component="section" sx={conceptSurfaceSx}>
         {experimentCatalogContent.conceptSteps.map((step, index) => (
           <React.Fragment key={step.label}>
-            <Box component="span" sx={conceptStepSx} title={step.body}>
-              {step.label}
+            <Box component="span" className="experiment-concept-step" sx={conceptStepItemSx}>
+              <Box component="span" sx={conceptStepSx} title={step.body}>
+                {step.label}
+              </Box>
             </Box>
             {index < experimentCatalogContent.conceptSteps.length - 1 ? (
               <ArrowForwardRoundedIcon aria-hidden="true" sx={conceptArrowSx} />
@@ -991,21 +1191,34 @@ function BrowseField({
 }
 
 function ExperimentStatusChips({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const hasMeasuredResult = Boolean(experiment.resultEvidence);
+  const evidenceValue = hasMeasuredResult ? "Result measured" : "Result pending";
+  const evidenceDetail = hasMeasuredResult
+    ? experiment.resultEvidence?.statusLabel.replace(/^Measured\s+/i, "") ?? experiment.status.result
+    : null;
+  const evidenceTone: CatalogStatusTone = hasMeasuredResult ? "measured" : "pending";
+
   return (
-    <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap" }}>
-      <Chip
-        label={experiment.status.definition}
-        size="small"
-        color="success"
-        variant="outlined"
-      />
-      <Chip
-        label={experiment.status.result}
-        size="small"
-        color="warning"
-        variant="outlined"
-      />
-    </Stack>
+    <Box sx={catalogStatusStackSx} aria-label={`${experiment.title} status`}>
+      <Box component="span" sx={catalogStatusLineSx}>
+        <Box component="span" sx={catalogStatusDotSx("ready")} aria-hidden="true" />
+        <Box component="span" sx={catalogStatusTextSx}>
+          Run ready
+        </Box>
+      </Box>
+      <Box component="span" sx={catalogStatusLineSx}>
+        <Box component="span" sx={catalogStatusDotSx(evidenceTone)} aria-hidden="true" />
+        <Box component="span" sx={catalogStatusTextSx}>
+          {evidenceValue}
+          {evidenceDetail ? (
+            <Box component="span" sx={catalogStatusMutedSx}>
+              {" "}
+              · {evidenceDetail}
+            </Box>
+          ) : null}
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
@@ -1053,25 +1266,18 @@ function ExperimentBrowseRow({ experiment }: { experiment: ExperimentCatalogItem
   );
 }
 
-function PlatformValidationBand() {
+function RelatedProjectEvidenceBand() {
   const item = experimentCatalogContent.platformValidation;
 
   return (
     <Box component="section" sx={platformValidationBandSx}>
-      <Box sx={{ display: "grid", gap: 0.8, alignContent: "center", minWidth: 0 }}>
-        <Box sx={experimentMetaRowSx}>
-          <Chip label="Measured platform evidence" size="small" color="success" variant="outlined" />
-          {item.metricFocus.map((metric) => (
-            <Chip
-              key={`${item.slug}-${metric}`}
-              label={metric}
-              size="small"
-              variant="outlined"
-              sx={compactMetricChipSx}
-            />
-          ))}
-        </Box>
-        <Typography variant="h6">{item.title}</Typography>
+      <Box sx={{ display: "grid", gap: 0.4, minWidth: 0 }}>
+        <Typography variant="overline" color="primary">
+          {item.status}
+        </Typography>
+        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+          Platform decisions live with the project
+        </Typography>
         <Typography variant="body2" color="text.secondary">
           {item.question}
         </Typography>
@@ -1083,7 +1289,7 @@ function PlatformValidationBand() {
         endIcon={<ArrowForwardRoundedIcon />}
         sx={browseActionSx}
       >
-        View details
+        View project decisions
       </Button>
     </Box>
   );
@@ -1112,7 +1318,7 @@ function ExperimentCatalogListSection() {
           ))}
         </Box>
 
-        <PlatformValidationBand />
+        <RelatedProjectEvidenceBand />
       </Stack>
     </PageSection>
   );
@@ -1172,6 +1378,159 @@ function ExperimentMetricGroupList({ experiment }: { experiment: ExperimentCatal
         </Grid>
       ))}
     </Grid>
+  );
+}
+
+function ExperimentPendingResult({ experiment }: { experiment: ExperimentCatalogItem }) {
+  return (
+    <Box sx={pendingResultSx}>
+      <Typography variant="h6">Curated live results pending</Typography>
+      <Typography variant="body2" color="text.secondary">
+        The source repo currently treats {experiment.resultsPath} as a result template. Generated Markdown, JSON, and client logs belong under docs/reports/ until representative results are chosen.
+      </Typography>
+      <ActionLinkRow>
+        <Button
+          href={experimentSourceLink("docs/reports/README.md")}
+          target="_blank"
+          rel="noreferrer"
+          size="small"
+          endIcon={<OpenInNewRoundedIcon />}
+        >
+          Report rules
+        </Button>
+      </ActionLinkRow>
+    </Box>
+  );
+}
+
+function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const evidence = experiment.resultEvidence;
+
+  if (!evidence) {
+    return <ExperimentPendingResult experiment={experiment} />;
+  }
+
+  return (
+    <Box sx={measuredResultSx}>
+      <Box sx={experimentMetaRowSx}>
+        <Chip label={evidence.statusLabel} color="success" variant="outlined" />
+        <Chip label={`Latest reports: ${evidence.reportDate}`} size="small" variant="outlined" />
+      </Box>
+
+      <Box sx={{ display: "grid", gap: 0.7, minWidth: 0 }}>
+        <Typography variant="h6">{evidence.title}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {evidence.summary}
+        </Typography>
+      </Box>
+
+      <Box sx={resultStatGridSx} aria-label={`${experiment.title} measured result highlights`}>
+        {evidence.stats.map((stat) => (
+          <Box key={stat.label} sx={resultStatSx}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+              {stat.label}
+            </Typography>
+            <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
+              {stat.value}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {stat.context}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+
+      <Box role="table" aria-label={`${experiment.title} measured sweep`} sx={resultTableSx}>
+        <Box role="row" sx={resultTableHeaderSx}>
+          <span>Target</span>
+          <span>Outcome</span>
+          <span>p95 latency</span>
+          <span>Peak waiting</span>
+          <span>GPU max</span>
+        </Box>
+        {evidence.rows.map((row) => (
+          <Box key={row.target} role="row" sx={resultTableRowSx}>
+            <Typography role="cell" variant="body2" sx={{ ...resultTableCellSx, fontWeight: 700 }}>
+              <Box component="span" sx={resultMobileLabelSx}>
+                Target
+              </Box>
+              {row.target}
+            </Typography>
+            <Typography role="cell" variant="body2" sx={resultTableCellSx}>
+              <Box component="span" sx={resultMobileLabelSx}>
+                Outcome
+              </Box>
+              {row.outcome}
+            </Typography>
+            <Typography role="cell" variant="body2" sx={resultTableCellSx}>
+              <Box component="span" sx={resultMobileLabelSx}>
+                p95
+              </Box>
+              {row.p95Latency}
+            </Typography>
+            <Typography role="cell" variant="body2" sx={resultTableCellSx}>
+              <Box component="span" sx={resultMobileLabelSx}>
+                Waiting
+              </Box>
+              {row.peakWaiting}
+            </Typography>
+            <Typography role="cell" variant="body2" sx={resultTableCellSx}>
+              <Box component="span" sx={resultMobileLabelSx}>
+                GPU
+              </Box>
+              {row.gpuMax}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+
+      <Box sx={resultBoundarySx}>
+        <Typography variant="body2" color="text.secondary">
+          {evidence.boundary}
+        </Typography>
+      </Box>
+
+      <ActionLinkRow>
+        <Button
+          href={experimentSourceLink(experiment.resultsPath)}
+          target="_blank"
+          rel="noreferrer"
+          size="small"
+          endIcon={<OpenInNewRoundedIcon />}
+        >
+          Results summary
+        </Button>
+        <Button
+          href={experimentSourceLink("docs/reports/README.md")}
+          target="_blank"
+          rel="noreferrer"
+          size="small"
+          endIcon={<OpenInNewRoundedIcon />}
+        >
+          Report rules
+        </Button>
+      </ActionLinkRow>
+    </Box>
+  );
+}
+
+function ExperimentResultSection({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const hasMeasuredResult = Boolean(experiment.resultEvidence);
+
+  return (
+    <PageSection>
+      <SectionHeader
+        eyebrow={hasMeasuredResult ? "Measured result" : "Artifacts"}
+        title={hasMeasuredResult ? "Result evidence" : "Result status"}
+        copy={
+          hasMeasuredResult
+            ? "A selected live-cluster run set is now part of this experiment story, with its evidence boundary kept explicit."
+            : "Generated artifacts stay separate from curated conclusions until a run is selected for the project narrative."
+        }
+      />
+
+      <ExperimentMeasuredResult experiment={experiment} />
+    </PageSection>
   );
 }
 
@@ -1417,76 +1776,12 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
             size="small"
             endIcon={<OpenInNewRoundedIcon />}
           >
-            Results template
+            {experiment.resultEvidence ? "Results summary" : "Results template"}
           </Button>
         </ActionLinkRow>
       </PageSection>
 
-      <PageSection>
-        <SectionHeader
-          eyebrow="Artifacts"
-          title="Result status"
-          copy="Generated artifacts stay separate from curated conclusions until a run is selected for the project narrative."
-        />
-
-        <Box sx={pendingResultSx}>
-          <Typography variant="h6">Curated live results pending</Typography>
-          <Typography variant="body2" color="text.secondary">
-            The source repo currently treats {experiment.resultsPath} as a result template. Generated Markdown, JSON, and client logs belong under docs/reports/ until representative results are chosen.
-          </Typography>
-          <ActionLinkRow>
-            <Button
-              href={experimentSourceLink("docs/reports/README.md")}
-              target="_blank"
-              rel="noreferrer"
-              size="small"
-              endIcon={<OpenInNewRoundedIcon />}
-            >
-              Report rules
-            </Button>
-          </ActionLinkRow>
-        </Box>
-      </PageSection>
-    </PublicSiteLayout>
-  );
-}
-
-function PlatformValidationRoute() {
-  const item = experimentCatalogContent.platformValidation;
-  useDocumentTitle(`${item.title} | Tony Lee`);
-
-  return (
-    <PublicSiteLayout activeNav="experiments">
-      <PageHero>
-        <Typography component="h1" variant="h3">
-          Platform Validation Evidence
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "58rem" }}>
-          {item.question}
-        </Typography>
-        <Box sx={experimentMetaRowSx}>
-          <Chip label={item.status} color="success" variant="outlined" />
-          {item.metricFocus.map((metric) => (
-            <Chip
-              key={`${item.slug}-${metric}`}
-              label={metric}
-              variant="outlined"
-              sx={compactMetricChipSx}
-            />
-          ))}
-        </Box>
-
-        <ActionLinkRow>
-          <Button href={EXPERIMENTS_PATH} variant="contained" startIcon={<ArrowBackRoundedIcon />}>
-            Experiment catalog
-          </Button>
-          <Button href={PROJECT_PATH} variant="outlined">
-            View project
-          </Button>
-        </ActionLinkRow>
-      </PageHero>
-
-      <PlatformValidationEvidenceSection />
+      <ExperimentResultSection experiment={experiment} />
     </PublicSiteLayout>
   );
 }
@@ -1815,6 +2110,13 @@ function ExperimentDecisionMapSection({
                 >
                   {item.readout}
                 </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ fontWeight: 700, overflowWrap: "anywhere" }}
+                >
+                  {item.status}
+                </Typography>
               </Stack>
             </Button>
           );
@@ -1857,6 +2159,13 @@ function ExperimentDecisionMapSection({
                   sx={{ overflowWrap: "anywhere" }}
                 >
                   {item.readout}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ fontWeight: 700, overflowWrap: "anywhere" }}
+                >
+                  {item.status}
                 </Typography>
               </Stack>
             }
@@ -2167,7 +2476,7 @@ function PlatformValidationEvidenceSection() {
         label: run.label,
         value: run.secondReadySeconds,
         display: formatDurationLabel(run.secondReadySeconds),
-        tone: run.label === "Target 6" ? "primary" : "secondary",
+        tone: run.label === "Target 4" ? "primary" : "secondary",
       })),
     },
     {
@@ -2177,7 +2486,7 @@ function PlatformValidationEvidenceSection() {
         label: run.label,
         value: run.burstCost,
         display: formatCurrencyLabel(run.burstCost),
-        tone: run.label === "Target 6" ? "primary" : "secondary",
+        tone: run.label === "Target 4" ? "primary" : "secondary",
       })),
     },
   ];
@@ -2281,7 +2590,7 @@ function PlatformValidationEvidenceSection() {
             chartTitle="Where scale-out improves"
             chartAriaLabel="Warm baseline policy comparison chart"
             rows={policyChartRows}
-            evidenceCopy="This compare excerpt backs the scale-out recommendation. It uses target 8; the target-tuning tab covers the later sweep."
+            evidenceCopy="This compare excerpt backs the scale-out recommendation. It uses target 6; the target-tuning tab covers the later sweep."
             detailView={activeDetailView}
             onSelectDetailView={setActiveDetailView}
           >
@@ -2299,7 +2608,7 @@ function PlatformValidationEvidenceSection() {
             chartTitle="How the targets trade time for cost"
             chartAriaLabel="Zero-idle target calibration chart"
             rows={targetChartRows}
-            evidenceCopy="This April 21, 2026 sweep shows why target 6 is recommended while target 4 remains the baseline setting."
+            evidenceCopy="This May 1, 2026 sweep shows why target 4 remains the provisional recommendation until GPU-efficiency metrics are complete enough to justify retuning."
             detailView={activeDetailView}
             onSelectDetailView={setActiveDetailView}
           >
@@ -2385,10 +2694,6 @@ export function ExperimentsPage({ initialPath }: { initialPath?: string } = {}) 
   const slug = getExperimentSlugFromPath(pathname);
 
   if (slug) {
-    if (slug === experimentCatalogContent.platformValidation.slug) {
-      return <PlatformValidationRoute />;
-    }
-
     const experiment = getExperimentBySlug(slug);
 
     if (!experiment) {

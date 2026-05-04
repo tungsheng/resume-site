@@ -11,6 +11,9 @@ describe("Resume Service", () => {
     expect(publicResumeData.skills["Languages"]).toBeArray();
     expect(publicResumeData.projects?.title).toBe("Selected Project");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Lab");
+    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
+      "Narrowed the long-context vLLM capacity knee for 8192/300 requests to the 1.10-1.15 req/s band; 1.10 req/s held zero waiting requests while 1.15 req/s introduced queue pressure and 1.20 req/s pushed p95 latency to 57s.",
+    );
   });
 
   test("renderResumeHtmlDocument creates valid HTML", () => {

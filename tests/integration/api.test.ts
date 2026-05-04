@@ -40,6 +40,14 @@ describe("API Integration", () => {
     expect(html).toContain("Cloud Inference Platform | Tony Lee");
   });
 
+  itIfIntegration("GET /project/cloud-inference-platform/validation serves the project shell", async () => {
+    const res = await fetch(`${BASE_URL}/project/cloud-inference-platform/validation`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Cloud Inference Platform | Tony Lee");
+  });
+
   itIfIntegration("GET /experiments serves the experiments shell", async () => {
     const res = await fetch(`${BASE_URL}/experiments`);
     expect(res.status).toBe(200);
@@ -50,14 +58,6 @@ describe("API Integration", () => {
 
   itIfIntegration("GET /experiments/:slug serves the experiments shell", async () => {
     const res = await fetch(`${BASE_URL}/experiments/kv-cache`);
-    expect(res.status).toBe(200);
-
-    const html = await res.text();
-    expect(html).toContain("Experiments | Tony Lee");
-  });
-
-  itIfIntegration("GET /experiments/platform-validation serves the experiments shell", async () => {
-    const res = await fetch(`${BASE_URL}/experiments/platform-validation`);
     expect(res.status).toBe(200);
 
     const html = await res.text();

@@ -48,7 +48,7 @@ export const publicResumeData: ResumeData = {
           "Reduced serving-GPU idle cost to $0/hr for sparse traffic with a zero-idle profile that starts from 0 GPU nodes, provisions a GPU for a public /v1 completion, and cleans back to 0 serving GPUs after validation.",
           "Diagnosed queue buildup and delayed scale-out under burst traffic due to model-readiness lag, then redesigned the autoscaling signal around queue depth and request concurrency to manage backpressure.",
           "Measured burst behavior through policy comparisons and active-target sweeps; active-pressure reached a second Ready replica 43% faster in one warm-baseline compare run (564s vs. 989s).",
-          "Identified KV-cache memory as the primary concurrency constraint for long prompts and framed batching as a throughput-versus-p99-latency tradeoff driven by queueing delay.",
+          "Narrowed the long-context vLLM capacity knee for 8192/300 requests to the 1.10-1.15 req/s band; 1.10 req/s held zero waiting requests while 1.15 req/s introduced queue pressure and 1.20 req/s pushed p95 latency to 57s.",
         ],
       },
     ],

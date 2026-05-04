@@ -118,7 +118,8 @@ describe("ProjectPage", () => {
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/reports/README.md\""
     );
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
-    expect(html).toContain("href=\"/experiments/platform-validation\"");
+    expect(html).toContain("Platform decisions");
+    expect(html).toContain("href=\"/project/cloud-inference-platform/validation\"");
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/platform/inference/ingress.yaml\""
     );
@@ -136,5 +137,31 @@ describe("ProjectPage", () => {
     );
     expect(html).toContain("href=\"/experiments\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
+  });
+
+  test("renders the platform decision record on the validation route", () => {
+    const html = renderToStaticMarkup(
+      <ProjectPage initialPath="/project/cloud-inference-platform/validation" />,
+    );
+
+    expect(html).toContain("Platform Decisions");
+    expect(html).toContain("Operational validation from evaluate runs");
+    expect(html).toContain("Decision record");
+    expect(html).toContain("This is not an experiment catalog entry.");
+    expect(html).toContain("Keep 1 warm path");
+    expect(html).toContain("93s vs 423s");
+    expect(html).toContain("$0.526/hr idle cost");
+    expect(html).toContain("Use active-pressure");
+    expect(html).toContain("564s vs 989s");
+    expect(html).toContain("Burst cost rises by about $0.038");
+    expect(html).toContain("Keep target 4");
+    expect(html).toContain("952s at $0.484");
+    expect(html).toContain("Provisional: GPU efficiency fields were unavailable");
+    expect(html).toContain("Generated: May 1, 2026");
+    expect(html).toContain("Workflow: ./scripts/evaluate");
+    expect(html).toContain("Project overview");
+    expect(html).toContain("Experiment catalog");
+    expect(html).toContain("href=\"/project/cloud-inference-platform\"");
+    expect(html).toContain("href=\"/experiments\"");
   });
 });
