@@ -190,12 +190,12 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
 
       <div className="main-content">
         <div className="left-column">
-          {educationSection}
+          {summarySection}
           {skillsSection}
+          {educationSection}
         </div>
 
         <div className="right-column">
-          {summarySection}
           {projectsSection}
           {experienceSection}
         </div>

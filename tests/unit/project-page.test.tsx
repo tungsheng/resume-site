@@ -22,7 +22,7 @@ describe("ProjectPage", () => {
     expect(html).toContain("0 serving GPUs");
     expect(html).toContain("Verify / Evaluate / Experiment");
     expect(html).toContain("6 experiments");
-    expect(html).toContain("Validation measured");
+    expect(html).toContain("Validation + studies");
     expect(html).toContain("Choose the right workflow");
     expect(html).toContain("Use verify for path proof, evaluate for platform comparisons, and experiment for catalog-defined serving questions.");
     expect(html).toContain("Verify");
@@ -76,7 +76,7 @@ describe("ProjectPage", () => {
     );
     expect(html).toContain("Measured platform validation, generated reports, and catalog experiments are related, but they are not the same artifact.");
     expect(html).toContain("Measured evaluate runs support warm baseline, scale-out signal, and target tuning decisions.");
-    expect(html).toContain("Experiment definitions and runners exist; curated live-cluster conclusions are still pending.");
+    expect(html).toContain("Selected KV-cache, batching, and streaming timing reports now support measured study pages");
     expect(html).toContain("Generated Markdown, JSON, and logs stay under docs/reports until selected for the project narrative.");
     expect(html).toContain("Reports docs");
     expect(html).toContain("Scaling docs");

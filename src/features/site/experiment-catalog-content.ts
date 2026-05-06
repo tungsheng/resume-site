@@ -15,6 +15,14 @@ export type ExperimentResultEvidenceRow = {
   gpuMax: string;
 };
 
+export type ExperimentResultEvidenceColumns = {
+  target: string;
+  outcome: string;
+  p95Latency: string;
+  peakWaiting: string;
+  gpuMax: string;
+};
+
 export type ExperimentResultEvidenceStat = {
   label: string;
   value: string;
@@ -29,6 +37,8 @@ export type ExperimentResultEvidence = {
   boundary: string;
   stats: ExperimentResultEvidenceStat[];
   rows: ExperimentResultEvidenceRow[];
+  tableColumns?: ExperimentResultEvidenceColumns;
+  curatedResults?: boolean;
 };
 
 export type ExperimentCase = {
@@ -89,7 +99,7 @@ export const experimentCatalogContent = {
   subtitle:
     "Focused GPU inference experiments for memory pressure, streaming latency, batching, request shape, autoscaling, and cost efficiency.",
   statusNote:
-    "Catalog ready; KV-cache knee refinement measured, with the remaining live result matrices still pending.",
+    "Catalog ready; KV-cache, batching, and streaming timing have selected measured evidence, with request-pattern, autoscaling, and cost matrices still pending.",
   platformValidation: {
     slug: "platform-validation",
     title: "Project validation",
@@ -297,7 +307,7 @@ export const experimentCatalogContent = {
       slug: "prefill-decode",
       title: "Prefill vs Decode Timing",
       category: "Streaming latency",
-      status: experimentStatus("Measurable with run-stream"),
+      status: experimentStatus("Measurable with run-stream", "Measured streaming split"),
       question:
         "How do prompt-heavy and decode-heavy requests shift TTFT and inter-token timing?",
       cardSummary: "Streaming timing by request shape.",
@@ -352,12 +362,62 @@ export const experimentCatalogContent = {
       liveCommands: [
         "./scripts/experiment run-stream --experiment prefill-decode --case prefill-heavy --profile default --samples 5",
       ],
+      resultEvidence: {
+        title: "Prompt prefill vs decode timing",
+        statusLabel: "Measured streaming split",
+        reportDate: "2026-05-06",
+        summary:
+          "Streaming runs separate prompt-heavy TTFT from decode-heavy total latency on the default vLLM profile.",
+        boundary:
+          "The selected reports cover one default-profile pair at concurrency 16, so use them as a clear shape comparison rather than a full streaming capacity envelope.",
+        curatedResults: false,
+        tableColumns: {
+          target: "Case",
+          outcome: "Timing split",
+          p95Latency: "p95 total",
+          peakWaiting: "p95 TTFT",
+          gpuMax: "GPU max",
+        },
+        stats: [
+          {
+            label: "Prefill-heavy TTFT",
+            value: "1.37s p95",
+            context: "1536-token prompt, 64-token output",
+          },
+          {
+            label: "Decode-heavy TTFT",
+            value: "149 ms p95",
+            context: "128-token prompt, 768-token output",
+          },
+          {
+            label: "Decode-heavy total",
+            value: "8.41s p95",
+            context: "Longer output dominates total latency",
+          },
+        ],
+        rows: [
+          {
+            target: "prefill-heavy",
+            outcome: "Longer TTFT, short total",
+            p95Latency: "2.24s",
+            peakWaiting: "1.37s",
+            gpuMax: "95%",
+          },
+          {
+            target: "decode-heavy",
+            outcome: "Fast TTFT, longer total",
+            p95Latency: "8.41s",
+            peakWaiting: "149 ms",
+            gpuMax: "84%",
+          },
+        ],
+      },
     },
     {
       slug: "batching",
       title: "Batching Scheduler Tradeoffs",
       category: "Scheduler behavior",
-      status: experimentStatus("Measurable with run"),
+      status: experimentStatus("Measurable with run", "Measured scheduler compare"),
       question:
         "How do vLLM scheduler limits trade throughput for p95/p99 latency?",
       cardSummary: "Scheduler limits versus tail latency.",
@@ -418,8 +478,65 @@ export const experimentCatalogContent = {
         "./scripts/experiment render-serving --experiment batching --profile limited-batching",
       ],
       liveCommands: [
-        "./scripts/experiment run --experiment batching --case steady-512-output-128 --profile limited-batching",
+        "./scripts/experiment run --experiment batching --case steady-512-output-128 --profile dynamic-default",
       ],
+      resultEvidence: {
+        title: "Scheduler limits under steady load",
+        statusLabel: "Measured scheduler compare",
+        reportDate: "2026-05-06",
+        summary:
+          "For the steady 512/128 workload at an 8 req/s target, the vLLM dynamic-default scheduler delivered the full run with low tail latency while tighter sequence caps forced queueing and dropped work.",
+        boundary:
+          "The selected matrix covers one steady workload. Burst and mixed-shape cases should be measured before claiming a universal scheduler policy.",
+        curatedResults: false,
+        tableColumns: {
+          target: "Profile",
+          outcome: "Outcome",
+          p95Latency: "p95 latency",
+          peakWaiting: "Delivery",
+          gpuMax: "GPU max",
+        },
+        stats: [
+          {
+            label: "Dynamic default",
+            value: "7.41 req/s",
+            context: "2669/2669 delivered; p95 1.66s",
+          },
+          {
+            label: "Limited batching",
+            value: "80.1% delivered",
+            context: "531 unserved iterations; p95 10.55s",
+          },
+          {
+            label: "Constrained",
+            value: "15.6% delivered",
+            context: "2253 unserved iterations; p95 59.72s",
+          },
+        ],
+        rows: [
+          {
+            target: "dynamic-default",
+            outcome: "Full delivery, no waiting",
+            p95Latency: "1.66s",
+            peakWaiting: "100%",
+            gpuMax: "85%",
+          },
+          {
+            target: "limited-batching",
+            outcome: "Queueing and dropped work",
+            p95Latency: "10.55s",
+            peakWaiting: "80.1%",
+            gpuMax: "85%",
+          },
+          {
+            target: "constrained-scheduler",
+            outcome: "Severe underdelivery",
+            p95Latency: "59.72s",
+            peakWaiting: "15.6%",
+            gpuMax: "88%",
+          },
+        ],
+      },
     },
     {
       slug: "request-patterns",

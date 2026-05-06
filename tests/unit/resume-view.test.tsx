@@ -82,4 +82,27 @@ describe("ResumeView", () => {
     expect(html).toContain("GPU &lt;Inference&gt; Platform");
     expect(html).toContain("Measured queue pressure &amp; scaled nodes.");
   });
+
+  test("balances print sections between sidebar and main column", () => {
+    const html = renderToStaticMarkup(
+      <ResumeDocument data={sampleResume} />
+    );
+
+    const sidebarStart = html.indexOf("<div class=\"left-column\">");
+    const mainStart = html.indexOf("<div class=\"right-column\">");
+    const summaryIndex = html.indexOf("Professional Summary");
+    const skillsIndex = html.indexOf("Skills");
+    const educationIndex = html.indexOf("Education");
+    const projectsIndex = html.indexOf("Selected Projects");
+    const experienceIndex = html.indexOf("Work Experience");
+
+    expect(sidebarStart).toBeGreaterThan(-1);
+    expect(mainStart).toBeGreaterThan(sidebarStart);
+    expect(summaryIndex).toBeGreaterThan(sidebarStart);
+    expect(summaryIndex).toBeLessThan(skillsIndex);
+    expect(skillsIndex).toBeLessThan(educationIndex);
+    expect(educationIndex).toBeLessThan(mainStart);
+    expect(projectsIndex).toBeGreaterThan(mainStart);
+    expect(projectsIndex).toBeLessThan(experienceIndex);
+  });
 });

@@ -5,6 +5,12 @@ export function getResumeDocumentCss(): string {
   box-sizing: border-box;
 }
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
 @page {
   size: letter;
   margin: 0;
@@ -13,6 +19,10 @@ export function getResumeDocumentCss(): string {
 .resume-document {
   --resume-accent: #27ae60;
   --ui-font: 'Arial', 'Helvetica', sans-serif;
+  --page-x: 0.4in;
+  --column-gap: 0.15in;
+  --sidebar-width: 1.9in;
+  --section-gap: 0.2in;
   --experience-gap: 0.13in;
 
   width: 8.5in;
@@ -20,13 +30,13 @@ export function getResumeDocumentCss(): string {
   margin: 0 auto;
   background: white;
   color: #1f2937;
-  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-family: var(--ui-font);
   font-size: 9.2pt;
   line-height: 1.34;
 }
 
 .resume-document .header {
-  padding: 0.24in 0.4in 0.1in;
+  padding: 0.24in var(--page-x) 0.1in;
 }
 
 .resume-document .header-content {
@@ -60,7 +70,7 @@ export function getResumeDocumentCss(): string {
   letter-spacing: 0.28px;
   text-transform: none;
   color: var(--resume-accent);
-  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-family: var(--ui-font);
   line-height: 1;
 }
 
@@ -114,25 +124,23 @@ export function getResumeDocumentCss(): string {
 }
 
 .resume-document .main-content {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  padding: 0.13in 0.4in 0.12in;
-  gap: 0.15in;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  align-items: start;
+  padding: 0.13in var(--page-x) 0.12in;
+  column-gap: var(--column-gap);
 }
 
 .resume-document .left-column {
-  width: 1.9in;
-  flex-shrink: 0;
-  display: block;
+  min-width: 0;
 }
 
 .resume-document .right-column {
-  flex: 1;
+  min-width: 0;
 }
 
 .resume-document .section {
-  margin-bottom: 0.22in;
+  margin-bottom: var(--section-gap);
   break-inside: avoid;
 }
 

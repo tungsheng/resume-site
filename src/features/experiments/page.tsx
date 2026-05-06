@@ -63,11 +63,19 @@ interface TradeoffCardItem {
 
 const catalogStatusNoteSx: SxProps<Theme> = (theme) => ({
   display: "grid",
-  gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "auto minmax(0, 1fr)" },
-  gap: { xs: 1, md: 1.25 },
-  alignItems: "center",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    sm: "auto minmax(0, 1fr)",
+    md: "minmax(0, 1fr)",
+    lg: "auto minmax(0, 1fr)",
+  },
+  gap: { xs: 0.9, md: 1.1 },
+  alignItems: { xs: "start", sm: "center", md: "start", lg: "center" },
+  alignContent: "center",
   width: "100%",
-  p: { xs: 1.25, sm: 1.5 },
+  height: "100%",
+  minHeight: { md: "9.5rem" },
+  p: { xs: 1.25, sm: 1.5, md: 1.6 },
   borderRadius: 2,
   backgroundColor: alpha(theme.palette.warning.light, 0.14),
   border: `1px solid ${alpha(theme.palette.warning.dark, 0.2)}`,
@@ -97,48 +105,59 @@ const heroSupportSx: SxProps<Theme> = {
   width: "100%",
 };
 
+const catalogHeroTopSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "minmax(0, 1fr) minmax(20rem, 0.52fr)",
+  },
+  gap: { xs: 2, md: 3 },
+  alignItems: "stretch",
+  width: "100%",
+};
+
+const catalogHeroPrimarySx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 1.5, md: 1.75 },
+  alignContent: "start",
+  minWidth: 0,
+  maxWidth: "61rem",
+};
+
+const catalogHeroSupportSx: SxProps<Theme> = {
+  display: "grid",
+  alignContent: "start",
+  minWidth: 0,
+  width: "100%",
+};
+
 const catalogFactStripSx: SxProps<Theme> = (theme) => ({
   display: "grid",
   gridTemplateColumns: {
     xs: "minmax(0, 1fr)",
     sm: "repeat(2, minmax(0, 1fr))",
+    md: "repeat(5, minmax(0, 1fr))",
   },
-  gap: 0,
+  gap: 0.75,
   width: "100%",
   overflow: "hidden",
   borderRadius: 2,
   backgroundColor: alpha(theme.palette.common.white, 0.6),
   border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+  p: 0.75,
 });
 
 const catalogFactItemSx: SxProps<Theme> = (theme) => ({
   minWidth: 0,
   display: "grid",
   alignContent: "center",
-  gap: 0.2,
-  minHeight: "6.1rem",
+  gap: 0.3,
+  minHeight: { xs: "4.9rem", md: "5.65rem" },
   px: { xs: 1.25, md: 1.5 },
   py: { xs: 1.05, md: 1.2 },
-  "& + &": {
-    borderTop: { xs: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`, sm: 0 },
-    borderLeft: { xs: 0, sm: `1px solid ${alpha(theme.palette.text.primary, 0.08)}` },
-  },
-  "&:nth-of-type(3)": {
-    borderTop: {
-      xs: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
-      sm: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
-    },
-    borderLeft: {
-      xs: 0,
-      sm: 0,
-    },
-  },
-  "&:nth-of-type(4)": {
-    borderTop: {
-      xs: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
-      sm: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
-    },
-  },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.5),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
 });
 
 const conceptSurfaceSx: SxProps<Theme> = (theme) => ({
@@ -1111,22 +1130,31 @@ function CatalogStatusNote() {
 }
 
 function CatalogFactStrip() {
+  const measuredExperimentCount = experimentCatalogContent.experiments.filter(
+    (experiment) => experiment.resultEvidence,
+  ).length;
+  const pendingExperimentCount =
+    experimentCatalogContent.experiments.length - measuredExperimentCount;
   const facts = [
     {
-      value: experimentCatalogContent.experiments.length.toString(),
-      label: "experiment definitions",
+      value: `${experimentCatalogContent.experiments.length} experiments`,
+      label: "definition catalog",
     },
     {
-      value: "Renderable locally",
-      label: "catalog inspection and manifest rendering",
+      value: "Local render",
+      label: "inspect manifests and templates",
     },
     {
-      value: "Measurable with run commands",
-      label: "live cluster runner is defined per experiment",
+      value: "Live runners",
+      label: "per-experiment run commands",
     },
     {
-      value: "Curated results pending",
-      label: "checked-in conclusions still need selected live runs",
+      value: `${measuredExperimentCount} measured`,
+      label: "selected evidence pages",
+    },
+    {
+      value: `${pendingExperimentCount} pending`,
+      label: "matrices still being curated",
     },
   ];
 
@@ -1329,9 +1357,13 @@ function ExperimentCatalogRoute() {
 
   return (
     <PublicSiteLayout activeNav="experiments">
-      <PageHero contentWidth="100%">
-        <Box sx={heroSplitSx}>
-          <Box sx={heroPrimarySx}>
+      <PageHero
+        contentWidth="100%"
+        contentSx={{ gap: { xs: 2, md: 2.5 } }}
+        sx={{ p: { xs: 2.5, md: 3.25 } }}
+      >
+        <Box sx={catalogHeroTopSx}>
+          <Box sx={catalogHeroPrimarySx}>
             <Typography component="h1" variant="h3">
               {experimentCatalogContent.title}
             </Typography>
@@ -1349,11 +1381,11 @@ function ExperimentCatalogRoute() {
             </ActionLinkRow>
           </Box>
 
-          <Box sx={heroSupportSx}>
+          <Box sx={catalogHeroSupportSx}>
             <CatalogStatusNote />
-            <CatalogFactStrip />
           </Box>
         </Box>
+        <CatalogFactStrip />
       </PageHero>
 
       <ExperimentCatalogConceptSection />
@@ -1410,6 +1442,16 @@ function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalo
     return <ExperimentPendingResult experiment={experiment} />;
   }
 
+  const tableColumns = {
+    target: "Target",
+    outcome: "Outcome",
+    p95Latency: "p95 latency",
+    peakWaiting: "Peak waiting",
+    gpuMax: "GPU max",
+    ...evidence.tableColumns,
+  };
+  const resultsLinkLabel = evidence.curatedResults === false ? "Results template" : "Results summary";
+
   return (
     <Box sx={measuredResultSx}>
       <Box sx={experimentMetaRowSx}>
@@ -1442,41 +1484,41 @@ function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalo
 
       <Box role="table" aria-label={`${experiment.title} measured sweep`} sx={resultTableSx}>
         <Box role="row" sx={resultTableHeaderSx}>
-          <span>Target</span>
-          <span>Outcome</span>
-          <span>p95 latency</span>
-          <span>Peak waiting</span>
-          <span>GPU max</span>
+          <span>{tableColumns.target}</span>
+          <span>{tableColumns.outcome}</span>
+          <span>{tableColumns.p95Latency}</span>
+          <span>{tableColumns.peakWaiting}</span>
+          <span>{tableColumns.gpuMax}</span>
         </Box>
         {evidence.rows.map((row) => (
           <Box key={row.target} role="row" sx={resultTableRowSx}>
             <Typography role="cell" variant="body2" sx={{ ...resultTableCellSx, fontWeight: 700 }}>
               <Box component="span" sx={resultMobileLabelSx}>
-                Target
+                {tableColumns.target}
               </Box>
               {row.target}
             </Typography>
             <Typography role="cell" variant="body2" sx={resultTableCellSx}>
               <Box component="span" sx={resultMobileLabelSx}>
-                Outcome
+                {tableColumns.outcome}
               </Box>
               {row.outcome}
             </Typography>
             <Typography role="cell" variant="body2" sx={resultTableCellSx}>
               <Box component="span" sx={resultMobileLabelSx}>
-                p95
+                {tableColumns.p95Latency}
               </Box>
               {row.p95Latency}
             </Typography>
             <Typography role="cell" variant="body2" sx={resultTableCellSx}>
               <Box component="span" sx={resultMobileLabelSx}>
-                Waiting
+                {tableColumns.peakWaiting}
               </Box>
               {row.peakWaiting}
             </Typography>
             <Typography role="cell" variant="body2" sx={resultTableCellSx}>
               <Box component="span" sx={resultMobileLabelSx}>
-                GPU
+                {tableColumns.gpuMax}
               </Box>
               {row.gpuMax}
             </Typography>
@@ -1498,7 +1540,7 @@ function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalo
           size="small"
           endIcon={<OpenInNewRoundedIcon />}
         >
-          Results summary
+          {resultsLinkLabel}
         </Button>
         <Button
           href={experimentSourceLink("docs/reports/README.md")}
@@ -1621,6 +1663,12 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
   useDocumentTitle(`${experiment.title} | Tony Lee`);
   const localCommand = experiment.localCommands[0];
   const liveCommand = experiment.liveCommands[0];
+  const resultLinkLabel =
+    experiment.resultEvidence?.curatedResults === false
+      ? "Results template"
+      : experiment.resultEvidence
+        ? "Results summary"
+        : "Results template";
   const promptTokenRange = formatTokenRange(
     experiment.cases.map((item) => item.promptTokens),
   );
@@ -1776,7 +1824,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
             size="small"
             endIcon={<OpenInNewRoundedIcon />}
           >
-            {experiment.resultEvidence ? "Results summary" : "Results template"}
+            {resultLinkLabel}
           </Button>
         </ActionLinkRow>
       </PageSection>

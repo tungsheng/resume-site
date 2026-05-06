@@ -19,8 +19,10 @@ export const publicResumeData: ResumeData = {
     "ML Infrastructure / Inference": [
       "vLLM",
       "LLM Serving",
+      "OpenAI-Compatible APIs",
       "Autoscaling",
       "GPU Scheduling (NVIDIA Device Plugin)",
+      "Inference Load Testing (k6)",
     ],
     "Infrastructure / Cloud": [
       "Terraform",
@@ -29,6 +31,7 @@ export const publicResumeData: ResumeData = {
       "Karpenter",
       "CI/CD Automation",
       "Prometheus / Grafana",
+      "DCGM Exporter",
     ],
     Languages: ["Go", "Python", "TypeScript", "SQL"],
     Backend: ["Node.js", "GraphQL", "REST"],
@@ -48,7 +51,7 @@ export const publicResumeData: ResumeData = {
           "Reduced serving-GPU idle cost to $0/hr for sparse traffic with a zero-idle profile that starts from 0 GPU nodes, provisions a GPU for a public /v1 completion, and cleans back to 0 serving GPUs after validation.",
           "Diagnosed queue buildup and delayed scale-out under burst traffic due to model-readiness lag, then redesigned the autoscaling signal around queue depth and request concurrency to manage backpressure.",
           "Measured burst behavior through policy comparisons and active-target sweeps; active-pressure reached a second Ready replica 43% faster in one warm-baseline compare run (564s vs. 989s).",
-          "Narrowed the long-context vLLM capacity knee for 8192/300 requests to the 1.10-1.15 req/s band; 1.10 req/s held zero waiting requests while 1.15 req/s introduced queue pressure and 1.20 req/s pushed p95 latency to 57s.",
+          "Measured controlled vLLM workloads across long-context, scheduler, and streaming cases: narrowed the 8192/300 capacity knee to 1.10-1.15 req/s, showed dynamic scheduling completing 2,669/2,669 requests at 7.4 req/s with 1.66s p95 latency, and separated prompt-heavy TTFT from decode-heavy total latency.",
         ],
       },
     ],

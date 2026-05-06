@@ -13,11 +13,13 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Experiment Catalog");
     expect(html).toContain("Focused GPU inference experiments");
     expect(html).toContain("Catalog ready");
-    expect(html).toContain("KV-cache knee refinement measured");
-    expect(html).toContain("experiment definitions");
-    expect(html).toContain("Renderable locally");
-    expect(html).toContain("Measurable with run commands");
-    expect(html).toContain("Curated results pending");
+    expect(html).toContain("KV-cache, batching, and streaming timing");
+    expect(html).toContain("6 experiments");
+    expect(html).toContain("definition catalog");
+    expect(html).toContain("Local render");
+    expect(html).toContain("Live runners");
+    expect(html).toContain("3 measured");
+    expect(html).toContain("3 pending");
     expect(html).toContain("How experiments work");
     expect(html).toContain("Browse experiments");
     expect(html).toContain("Question");
@@ -53,7 +55,8 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Concurrency");
     expect(html).toContain("KV memory");
     expect(html).toContain("knee refinement");
-    expect(html).toContain("Curated results pending");
+    expect(html).toContain("streaming split");
+    expect(html).toContain("scheduler compare");
     expect(html).not.toContain("Evaluate evidence from the platform");
     expect(html).not.toContain("Choose an evaluate decision");
     expect(html).not.toContain("experiment-decision-workspace");
@@ -64,8 +67,6 @@ describe("ExperimentsPage", () => {
 
   test("renders pending experiment detail pages with the shared template", () => {
     const slugs = [
-      "prefill-decode",
-      "batching",
       "request-patterns",
       "autoscaling",
       "cost",
@@ -134,6 +135,50 @@ describe("ExperimentsPage", () => {
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/experiments/kv-cache/\"",
     );
+  });
+
+  test("renders measured batching detail content", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/batching" />,
+    );
+
+    expect(html).toContain("Batching Scheduler Tradeoffs");
+    expect(html).toContain("Measured result");
+    expect(html).toContain("Scheduler limits under steady load");
+    expect(html).toContain("Latest reports: 2026-05-06");
+    expect(html).toContain("vLLM dynamic-default scheduler delivered the full run");
+    expect(html).toContain("Dynamic default");
+    expect(html).toContain("7.41 req/s");
+    expect(html).toContain("Limited batching");
+    expect(html).toContain("80.1% delivered");
+    expect(html).toContain("Constrained");
+    expect(html).toContain("15.6% delivered");
+    expect(html).toContain("dynamic-default");
+    expect(html).toContain("1.66s");
+    expect(html).toContain("10.55s");
+    expect(html).toContain("59.72s");
+    expect(html).not.toContain("Curated live results pending");
+  });
+
+  test("renders measured prefill/decode detail content", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/prefill-decode" />,
+    );
+
+    expect(html).toContain("Prefill vs Decode Timing");
+    expect(html).toContain("Measured result");
+    expect(html).toContain("Prompt prefill vs decode timing");
+    expect(html).toContain("Latest reports: 2026-05-06");
+    expect(html).toContain("Streaming runs separate prompt-heavy TTFT");
+    expect(html).toContain("Prefill-heavy TTFT");
+    expect(html).toContain("1.37s p95");
+    expect(html).toContain("Decode-heavy TTFT");
+    expect(html).toContain("149 ms p95");
+    expect(html).toContain("Decode-heavy total");
+    expect(html).toContain("8.41s p95");
+    expect(html).toContain("prefill-heavy");
+    expect(html).toContain("decode-heavy");
+    expect(html).not.toContain("Curated live results pending");
   });
 
   test("does not render platform validation as an experiment detail route", () => {

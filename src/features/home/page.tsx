@@ -1,5 +1,6 @@
 import React from "react";
-import { Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { PROJECT_PATH, RESUME_PATH, siteProfile } from "../site/content";
 import { ActionLinkRow, PageHero, PublicSiteLayout } from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
@@ -8,6 +9,67 @@ const PAGE_TITLE = "Tony Lee | ML Inference Infrastructure Engineer";
 const HOME_ROLE = "ML Inference Infrastructure Engineer";
 const HOME_LEDE =
   "I design GPU-backed inference systems on Kubernetes, focused on scaling, latency, and cost under real workloads.";
+const HOME_PROOF_POINTS = [
+  {
+    value: "1.10-1.15 req/s",
+    label: "long-context knee",
+  },
+  {
+    value: "7.41 req/s",
+    label: "scheduler baseline",
+  },
+  {
+    value: "1.37s vs 149ms",
+    label: "p95 TTFT split",
+  },
+];
+
+function HomeProofStrip() {
+  return (
+    <Box
+      aria-label="Selected inference proof points"
+      sx={(theme) => ({
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "minmax(0, 1fr)",
+          sm: "repeat(3, minmax(0, 1fr))",
+        },
+        gap: 0.75,
+        width: "100%",
+        maxWidth: "42rem",
+        p: 0.75,
+        borderRadius: 2,
+        backgroundColor: alpha(theme.palette.common.white, 0.58),
+        border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+      })}
+    >
+      {HOME_PROOF_POINTS.map((point) => (
+        <Box
+          key={point.label}
+          sx={(theme) => ({
+            display: "grid",
+            alignContent: "center",
+            gap: 0.25,
+            minWidth: 0,
+            minHeight: "4.7rem",
+            px: { xs: 1.15, sm: 1.25 },
+            py: 0.95,
+            borderRadius: 2,
+            backgroundColor: alpha(theme.palette.common.white, 0.5),
+            border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+          })}
+        >
+          <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
+            {point.value}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+            {point.label}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+}
 
 export function HomePage() {
   useDocumentTitle(PAGE_TITLE);
@@ -75,6 +137,7 @@ export function HomePage() {
           >
             {HOME_LEDE}
           </Typography>
+          <HomeProofStrip />
           <ActionLinkRow justifyContent="center">
             <Button href={PROJECT_PATH} variant="text">
               View project

@@ -50,9 +50,9 @@ export const projectContent = {
     },
     {
       label: "Results",
-      value: "Validation measured",
+      value: "Validation + studies",
       body:
-        "Platform evidence exists; curated live-cluster catalog results are pending.",
+        "Platform evidence and selected serving studies are measured; remaining catalog matrices are still being curated.",
     },
   ],
   usage: {
@@ -122,7 +122,7 @@ export const projectContent = {
       {
         title: "Experiment catalog",
         body:
-          "Experiment definitions and runners exist; curated live-cluster conclusions are still pending.",
+          "Selected KV-cache, batching, and streaming timing reports now support measured study pages while the broader request-pattern, autoscaling, and cost matrices remain pending.",
       },
       {
         title: "Report rules",

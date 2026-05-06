@@ -1,6 +1,6 @@
 // PDF generation
 
-import puppeteer, { type Browser } from "puppeteer-core";
+import puppeteer, { type Browser, type Page } from "puppeteer-core";
 
 const BROWSER_ARGS = [
   "--no-sandbox",
@@ -23,6 +23,16 @@ const EXECUTABLE_CANDIDATES = [
 ];
 
 let browser: Browser | null = null;
+
+export const LETTER_PDF_SIZE_PX = {
+  width: LETTER_WIDTH_PX,
+  height: LETTER_HEIGHT_PX,
+} as const;
+
+export interface PdfContentSize {
+  contentWidthPx: number;
+  contentHeightPx: number;
+}
 
 function clampPdfScale(scale: number): number {
   if (!Number.isFinite(scale)) return 1;
@@ -73,7 +83,7 @@ async function getBrowser(): Promise<Browser> {
   return browser;
 }
 
-export async function generatePDF(html: string): Promise<Buffer> {
+async function createPDFPage(html: string): Promise<Page> {
   const b = await getBrowser();
   const page = await b.newPage();
 
@@ -84,32 +94,72 @@ export async function generatePDF(html: string): Promise<Buffer> {
       deviceScaleFactor: 1,
     });
     await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 0 });
-    const { contentWidthPx, contentHeightPx } = await page.evaluate(
-      ({ letterWidthPx, letterHeightPx }) => {
-        const root = document.querySelector(".resume-document");
-        if (!root || !(root instanceof HTMLElement)) {
-          return {
-            contentWidthPx: letterWidthPx,
-            contentHeightPx: letterHeightPx,
-          };
-        }
+    return page;
+  } catch (error) {
+    await page.close();
+    throw error;
+  }
+}
 
-        const rect = root.getBoundingClientRect();
-        const rectWidth = rect.width;
-        const rectHeight = rect.height;
-        const scrollWidth = root.scrollWidth;
-        const scrollHeight = root.scrollHeight;
+export async function measurePDFContentSize(page: Page): Promise<PdfContentSize> {
+  return page.evaluate(
+    ({ letterWidthPx, letterHeightPx }) => {
+      const root = document.querySelector(".resume-document");
+      if (!root || !(root instanceof HTMLElement)) {
         return {
-          contentWidthPx: Math.ceil(Math.max(rectWidth, scrollWidth, letterWidthPx)),
-          contentHeightPx: Math.ceil(Math.max(rectHeight, scrollHeight, letterHeightPx)),
+          contentWidthPx: letterWidthPx,
+          contentHeightPx: letterHeightPx,
         };
-      },
-      { letterWidthPx: LETTER_WIDTH_PX, letterHeightPx: LETTER_HEIGHT_PX }
-    );
+      }
 
+      const rect = root.getBoundingClientRect();
+      const body = document.body;
+      const doc = document.documentElement;
+      const leftEdge = Math.min(rect.left, 0);
+      const topEdge = Math.min(rect.top, 0);
+      const rightEdge = Math.max(
+        rect.right,
+        root.scrollWidth + Math.max(rect.left, 0),
+        body?.scrollWidth ?? 0,
+        doc.scrollWidth,
+        letterWidthPx
+      );
+      const bottomEdge = Math.max(
+        rect.bottom,
+        root.scrollHeight + Math.max(rect.top, 0),
+        body?.scrollHeight ?? 0,
+        doc.scrollHeight,
+        letterHeightPx
+      );
+
+      return {
+        contentWidthPx: Math.ceil(Math.max(rightEdge - leftEdge, letterWidthPx)),
+        contentHeightPx: Math.ceil(Math.max(bottomEdge - topEdge, letterHeightPx)),
+      };
+    },
+    { letterWidthPx: LETTER_WIDTH_PX, letterHeightPx: LETTER_HEIGHT_PX }
+  );
+}
+
+export async function measurePDFContent(html: string): Promise<PdfContentSize> {
+  const page = await createPDFPage(html);
+
+  try {
+    return await measurePDFContentSize(page);
+  } finally {
+    await page.close();
+  }
+}
+
+export async function generatePDF(html: string): Promise<Buffer> {
+  const page = await createPDFPage(html);
+
+  try {
+    const { contentWidthPx, contentHeightPx } = await measurePDFContentSize(page);
     const pdfScale = calculatePdfScale(contentWidthPx, contentHeightPx);
     const pdf = await page.pdf({
       format: "Letter",
+      preferCSSPageSize: true,
       printBackground: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
       scale: pdfScale,

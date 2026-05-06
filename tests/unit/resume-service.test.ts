@@ -7,12 +7,14 @@ describe("Resume Service", () => {
   test("publicResumeData contains the checked-in public resume", () => {
     expect(publicResumeData.header.name).toBe("Tony Lee");
     expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("vLLM");
+    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Inference Load Testing (k6)");
     expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("AWS (VPC, IAM, EC2, ALB)");
+    expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("DCGM Exporter");
     expect(publicResumeData.skills["Languages"]).toBeArray();
     expect(publicResumeData.projects?.title).toBe("Selected Project");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Lab");
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Narrowed the long-context vLLM capacity knee for 8192/300 requests to the 1.10-1.15 req/s band; 1.10 req/s held zero waiting requests while 1.15 req/s introduced queue pressure and 1.20 req/s pushed p95 latency to 57s.",
+      "Measured controlled vLLM workloads across long-context, scheduler, and streaming cases: narrowed the 8192/300 capacity knee to 1.10-1.15 req/s, showed dynamic scheduling completing 2,669/2,669 requests at 7.4 req/s with 1.66s p95 latency, and separated prompt-heavy TTFT from decode-heavy total latency.",
     );
   });
 
