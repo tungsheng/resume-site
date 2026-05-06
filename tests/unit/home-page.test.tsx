@@ -14,10 +14,7 @@ describe("HomePage", () => {
     expect(html).toContain(
       "I design GPU-backed inference systems on Kubernetes, focused on scaling, latency, and cost under real workloads."
     );
-    expect(html).toContain("Selected inference proof points");
-    expect(html).toContain("1.10-1.15 req/s");
-    expect(html).toContain("7.41 req/s");
-    expect(html).toContain("1.37s vs 149ms");
+    expect(html).not.toContain("Selected inference proof points");
     expect(html).toContain("href=\"/project/cloud-inference-platform\"");
     expect(html).toContain(">View project<");
     expect(html).toContain("href=\"/resume\"");
