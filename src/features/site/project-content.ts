@@ -122,7 +122,7 @@ export const projectContent = {
       {
         title: "Experiment catalog",
         body:
-          "Selected KV-cache, batching, and streaming timing reports now support measured study pages while the broader request-pattern, autoscaling, and cost matrices remain pending.",
+          "Selected KV-cache, batching, streaming timing, and autoscaling reports now support measured study pages while the broader request-pattern and cost matrices remain pending.",
       },
       {
         title: "Report rules",

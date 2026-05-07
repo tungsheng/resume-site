@@ -76,7 +76,7 @@ describe("ProjectPage", () => {
     );
     expect(html).toContain("Measured platform validation, generated reports, and catalog experiments are related, but they are not the same artifact.");
     expect(html).toContain("Measured evaluate runs support warm baseline, scale-out signal, and target tuning decisions.");
-    expect(html).toContain("Selected KV-cache, batching, and streaming timing reports now support measured study pages");
+    expect(html).toContain("Selected KV-cache, batching, streaming timing, and autoscaling reports now support measured study pages");
     expect(html).toContain("Generated Markdown, JSON, and logs stay under docs/reports until selected for the project narrative.");
     expect(html).toContain("Reports docs");
     expect(html).toContain("Scaling docs");

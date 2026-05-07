@@ -13,13 +13,15 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Experiment Catalog");
     expect(html).toContain("Focused GPU inference experiments");
     expect(html).toContain("Catalog ready");
-    expect(html).toContain("KV-cache, batching, and streaming timing");
+    expect(html).toContain("KV-cache, batching, streaming timing, and autoscaling");
     expect(html).toContain("6 experiments");
-    expect(html).toContain("definition catalog");
     expect(html).toContain("Local render");
     expect(html).toContain("Live runners");
-    expect(html).toContain("3 measured");
-    expect(html).toContain("3 pending");
+    expect(html).toContain("4 measured");
+    expect(html).toContain("2 pending");
+    expect(html).toContain("href=\"#experiment-catalog-list\"");
+    expect(html).not.toContain("definition catalog");
+    expect(html).not.toContain(">View resume<");
     expect(html).toContain("How experiments work");
     expect(html).toContain("Browse experiments");
     expect(html).toContain("Question");
@@ -57,6 +59,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("knee refinement");
     expect(html).toContain("streaming split");
     expect(html).toContain("scheduler compare");
+    expect(html).toContain("queueing behavior");
     expect(html).not.toContain("Evaluate evidence from the platform");
     expect(html).not.toContain("Choose an evaluate decision");
     expect(html).not.toContain("experiment-decision-workspace");
@@ -68,7 +71,6 @@ describe("ExperimentsPage", () => {
   test("renders pending experiment detail pages with the shared template", () => {
     const slugs = [
       "request-patterns",
-      "autoscaling",
       "cost",
     ];
 
@@ -91,6 +93,7 @@ describe("ExperimentsPage", () => {
       expect(html).toContain("Source");
       expect(html).toContain("Results template");
       expect(html).toContain("Report rules");
+      expect(html).toContain("Next runs to curate");
       expect(html).toContain("href=\"/experiments\"");
       expect(html).toContain("command-token--program");
       expect(html).toContain("command-token--flag");
@@ -104,32 +107,40 @@ describe("ExperimentsPage", () => {
 
     expect(html).toContain("KV Cache vs Concurrency");
     expect(html).toContain("How does longer prompt context reduce stable concurrency and throughput?");
-    expect(html).toContain("2 profiles");
+    expect(html).toContain("5 profiles");
     expect(html).toContain("512-8,192 prompt tokens");
     expect(html).toContain("prompt-512-output-100");
     expect(html).toContain("prompt-8192-output-300");
     expect(html).toContain("long-context");
+    expect(html).toContain("long-context-seqs-24");
     expect(html).toContain("max stable concurrency");
     expect(html).toContain("KV Cache vs Concurrency example local command");
     expect(html).toContain("KV Cache vs Concurrency example live command");
     expect(html).toContain("Measured result");
     expect(html).toContain("Result evidence");
     expect(html).toContain("Long-context capacity knee");
-    expect(html).toContain("Latest reports: 2026-05-04");
+    expect(html).toContain("Latest reports: 2026-05-06");
     expect(html).toContain("1.10-1.15 req/s band");
     expect(html).toContain("Clean through");
     expect(html).toContain("1.10 req/s");
     expect(html).toContain("Queue starts");
     expect(html).toContain("1.15 req/s");
-    expect(html).toContain("Saturation grows");
-    expect(html).toContain("1.20 req/s");
+    expect(html).toContain("Best variant");
+    expect(html).toContain("40.57s p95");
+    expect(html).toContain("8192/300 rate sweep");
+    expect(html).toContain("Profile variants near the knee");
+    expect(html).toContain("seqs-24 @ 1.15");
+    expect(html).toContain("seqs-16 @ 1.15");
+    expect(html).toContain("97.4% delivered");
     expect(html).toContain("16.83s");
     expect(html).toContain("28.20s");
     expect(html).toContain("46.68s");
     expect(html).toContain("56.96s");
     expect(html).toContain("85.75s");
     expect(html).toContain("180.27s");
-    expect(html).toContain("Repeat runs");
+    expect(html).toContain("Evidence boundary");
+    expect(html).toContain("Selected reports");
+    expect(html).toContain("seqs-24 report");
     expect(html).toContain("Results summary");
     expect(html).not.toContain("Curated live results pending");
     expect(html).toContain(
@@ -153,6 +164,8 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("80.1% delivered");
     expect(html).toContain("Constrained");
     expect(html).toContain("15.6% delivered");
+    expect(html).toContain("Steady scheduler profile comparison");
+    expect(html).toContain("Dynamic default report");
     expect(html).toContain("dynamic-default");
     expect(html).toContain("1.66s");
     expect(html).toContain("10.55s");
@@ -167,17 +180,58 @@ describe("ExperimentsPage", () => {
 
     expect(html).toContain("Prefill vs Decode Timing");
     expect(html).toContain("Measured result");
-    expect(html).toContain("Prompt prefill vs decode timing");
+    expect(html).toContain("Mixed streaming shape split");
     expect(html).toContain("Latest reports: 2026-05-06");
-    expect(html).toContain("Streaming runs separate prompt-heavy TTFT");
-    expect(html).toContain("Prefill-heavy TTFT");
-    expect(html).toContain("1.37s p95");
-    expect(html).toContain("Decode-heavy TTFT");
-    expect(html).toContain("149 ms p95");
-    expect(html).toContain("Decode-heavy total");
-    expect(html).toContain("8.41s p95");
+    expect(html).toContain("640 requests at concurrency 24");
+    expect(html).toContain("Mixed run");
+    expect(html).toContain("12.52s p95");
+    expect(html).toContain("Prefill shape");
+    expect(html).toContain("1.52s p95");
+    expect(html).toContain("Decode shape");
+    expect(html).toContain("12.79s p95");
+    expect(html).toContain("Mixed run shape split");
+    expect(html).toContain("Isolated shape baseline");
+    expect(html).toContain("1.37s");
+    expect(html).toContain("149 ms");
+    expect(html).toContain("Mixed profile follow-up");
+    expect(html).toContain("max-seqs-8");
+    expect(html).toContain("133.64s");
+    expect(html).toContain("Mixed run report");
     expect(html).toContain("prefill-heavy");
     expect(html).toContain("decode-heavy");
+    expect(html).not.toContain("Curated live results pending");
+  });
+
+  test("renders measured autoscaling detail content", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/autoscaling" />,
+    );
+
+    expect(html).toContain("Autoscaling and Queueing Behavior");
+    expect(html).toContain("Measured result");
+    expect(html).toContain("Scale-from-zero queue behavior");
+    expect(html).toContain("Latest reports: 2026-05-07");
+    expect(html).toContain("bounded-queue clients across burst and spike-to-zero cases");
+    expect(html).toContain("GPU node ready");
+    expect(html).toContain("35s");
+    expect(html).toContain("Model ready");
+    expect(html).toContain("425-439s");
+    expect(html).toContain("Queued delivery");
+    expect(html).toContain("100%");
+    expect(html).toContain("Queue policy outcome");
+    expect(html).toContain("burst-direct");
+    expect(html).toContain("76.98% delivered");
+    expect(html).toContain("787 dropped / 255 active");
+    expect(html).toContain("burst-queued");
+    expect(html).toContain("2.19s");
+    expect(html).toContain("spike-direct");
+    expect(html).toContain("237 dropped / 254 active");
+    expect(html).toContain("spike-queued");
+    expect(html).toContain("1.98s");
+    expect(html).toContain("Spike cold-start timeline");
+    expect(html).toContain("354s / 425s");
+    expect(html).toContain("357s / 439s");
+    expect(html).toContain("Spike queued report");
     expect(html).not.toContain("Curated live results pending");
   });
 

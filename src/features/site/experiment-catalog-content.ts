@@ -23,10 +23,22 @@ export type ExperimentResultEvidenceColumns = {
   gpuMax: string;
 };
 
+export type ExperimentResultEvidenceTable = {
+  title: string;
+  summary?: string;
+  columns?: ExperimentResultEvidenceColumns;
+  rows: ExperimentResultEvidenceRow[];
+};
+
 export type ExperimentResultEvidenceStat = {
   label: string;
   value: string;
   context: string;
+};
+
+export type ExperimentSourceReport = {
+  label: string;
+  path: string;
 };
 
 export type ExperimentResultEvidence = {
@@ -36,8 +48,11 @@ export type ExperimentResultEvidence = {
   summary: string;
   boundary: string;
   stats: ExperimentResultEvidenceStat[];
-  rows: ExperimentResultEvidenceRow[];
+  rows?: ExperimentResultEvidenceRow[];
   tableColumns?: ExperimentResultEvidenceColumns;
+  tables?: ExperimentResultEvidenceTable[];
+  boundaryPoints?: string[];
+  sourceReports?: ExperimentSourceReport[];
   curatedResults?: boolean;
 };
 
@@ -79,6 +94,11 @@ export type ExperimentCatalogItem = {
   metricGroups: ExperimentMetricGroup[];
   localCommands: string[];
   liveCommands: string[];
+  pendingNextRuns?: {
+    label: string;
+    command: string;
+    reason: string;
+  }[];
   resultEvidence?: ExperimentResultEvidence;
 };
 
@@ -99,7 +119,7 @@ export const experimentCatalogContent = {
   subtitle:
     "Focused GPU inference experiments for memory pressure, streaming latency, batching, request shape, autoscaling, and cost efficiency.",
   statusNote:
-    "Catalog ready; KV-cache, batching, and streaming timing have selected measured evidence, with request-pattern, autoscaling, and cost matrices still pending.",
+    "Catalog ready; KV-cache, batching, streaming timing, and autoscaling have selected measured evidence, with request-pattern and cost matrices still pending.",
   platformValidation: {
     slug: "platform-validation",
     title: "Project validation",
@@ -195,6 +215,18 @@ export const experimentCatalogContent = {
           id: "long-context",
           description: "8k context profile for KV-cache pressure tests",
         },
+        {
+          id: "long-context-seqs-24",
+          description: "reduced sequence cap for long-context knee comparison",
+        },
+        {
+          id: "long-context-seqs-16",
+          description: "more conservative sequence cap that tested delivery tradeoffs",
+        },
+        {
+          id: "long-context-batched-16384",
+          description: "larger batched-token budget for long-context prefill comparison",
+        },
       ],
       metricGroups: [
         {
@@ -221,11 +253,16 @@ export const experimentCatalogContent = {
       resultEvidence: {
         title: "Long-context capacity knee",
         statusLabel: "Measured knee refinement",
-        reportDate: "2026-05-04",
+        reportDate: "2026-05-06",
         summary:
-          "For 8192-token prompts with 300 generated tokens, the latest sweep narrows the single-replica long-context capacity knee to the 1.10-1.15 req/s band.",
+          "For 8192-token prompts with 300 generated tokens, the rate sweep narrows the single-replica capacity knee to the 1.10-1.15 req/s band, then profile variants show where scheduler caps help or hurt.",
         boundary:
-          "Repeat runs and scheduler/admission-control variants are still pending, so treat the boundary as a measured operating band rather than a final universal limit.",
+          "Treat the boundary as a measured operating band for one model, one GPU class, and one 8192/300 workload. Profile variants were measured near the knee, but repeat runs and admission-control comparisons should still be used before declaring a universal policy.",
+        boundaryPoints: [
+          "The 1.15 req/s long-context-seqs-24 profile reduced p95 latency versus the default long-context profile, but the 1.20 req/s run regressed.",
+          "The long-context-seqs-16 cap protected active sequence count too aggressively and dropped delivery to 97.4% at 1.15 req/s.",
+          "The long-context-batched-16384 profile did not materially improve the 1.15 req/s knee case.",
+        ],
         stats: [
           {
             label: "Clean through",
@@ -238,67 +275,141 @@ export const experimentCatalogContent = {
             context: "20 waiting requests; p95 46.68s",
           },
           {
-            label: "Saturation grows",
-            value: "1.20 req/s",
-            context: "33 waiting requests; p95 56.96s",
+            label: "Best variant",
+            value: "40.57s p95",
+            context: "seqs-24 at 1.15 req/s versus 46.68s baseline",
           },
         ],
-        rows: [
+        sourceReports: [
           {
-            target: "0.75 req/s",
-            outcome: "stable",
-            p95Latency: "6.61s",
-            peakWaiting: "0",
-            gpuMax: "96%",
+            label: "1.10 req/s report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-110-long-context-20260503-231946.md",
           },
           {
-            target: "1.00 req/s",
-            outcome: "stable but slower",
-            p95Latency: "11.91s",
-            peakWaiting: "0",
-            gpuMax: "93%",
+            label: "1.15 baseline report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-long-context-20260503-234633.md",
           },
           {
-            target: "1.05 req/s",
-            outcome: "clean but slower",
-            p95Latency: "16.83s",
-            peakWaiting: "0",
-            gpuMax: "100%",
+            label: "seqs-24 report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-long-context-seqs-24-20260505-165320.md",
           },
           {
-            target: "1.10 req/s",
-            outcome: "clean with rising tail",
-            p95Latency: "28.20s",
-            peakWaiting: "0",
-            gpuMax: "100%",
+            label: "seqs-16 report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-long-context-seqs-16-20260505-171031.md",
+          },
+        ],
+        tables: [
+          {
+            title: "8192/300 rate sweep",
+            summary:
+              "The default long-context profile remains clean through 1.10 req/s and begins sustained queueing at 1.15 req/s.",
+            rows: [
+              {
+                target: "0.75 req/s",
+                outcome: "stable",
+                p95Latency: "6.61s",
+                peakWaiting: "0 waiting / 5 active",
+                gpuMax: "96%",
+              },
+              {
+                target: "1.00 req/s",
+                outcome: "stable but slower",
+                p95Latency: "11.91s",
+                peakWaiting: "0 waiting / 13 active",
+                gpuMax: "93%",
+              },
+              {
+                target: "1.05 req/s",
+                outcome: "clean but slower",
+                p95Latency: "16.83s",
+                peakWaiting: "0 waiting / 18 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "1.10 req/s",
+                outcome: "clean with rising tail",
+                p95Latency: "28.20s",
+                peakWaiting: "0 waiting / 32 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "1.15 req/s",
+                outcome: "queue starts",
+                p95Latency: "46.68s",
+                peakWaiting: "20 waiting / 52 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "1.20 req/s",
+                outcome: "saturation grows",
+                p95Latency: "56.96s",
+                peakWaiting: "33 waiting / 65 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "1.25 req/s",
+                outcome: "saturation is obvious",
+                p95Latency: "85.75s",
+                peakWaiting: "65 waiting / 97 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "1.50 req/s",
+                outcome: "overloaded",
+                p95Latency: "180.27s",
+                peakWaiting: "181 waiting / 213 active",
+                gpuMax: "100%",
+              },
+            ],
           },
           {
-            target: "1.15 req/s",
-            outcome: "queue starts",
-            p95Latency: "46.68s",
-            peakWaiting: "20",
-            gpuMax: "100%",
-          },
-          {
-            target: "1.20 req/s",
-            outcome: "saturation grows",
-            p95Latency: "56.96s",
-            peakWaiting: "33",
-            gpuMax: "100%",
-          },
-          {
-            target: "1.25 req/s",
-            outcome: "saturation is obvious",
-            p95Latency: "85.75s",
-            peakWaiting: "65",
-            gpuMax: "100%",
-          },
-          {
-            target: "1.50 req/s",
-            outcome: "overloaded",
-            p95Latency: "180.27s",
-            peakWaiting: "181",
-            gpuMax: "100%",
+            title: "Profile variants near the knee",
+            summary:
+              "Follow-up runs show that a moderate sequence cap can reduce tail latency at 1.15 req/s, while a smaller cap under-delivers.",
+            columns: {
+              target: "Profile / run",
+              outcome: "Outcome",
+              p95Latency: "p95 latency",
+              peakWaiting: "Waiting / active",
+              gpuMax: "GPU max",
+            },
+            rows: [
+              {
+                target: "long-context @ 1.15",
+                outcome: "baseline queue start",
+                p95Latency: "46.68s",
+                peakWaiting: "20 waiting / 52 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "batched-16384 @ 1.15",
+                outcome: "no material gain",
+                p95Latency: "46.58s",
+                peakWaiting: "20 waiting / 52 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "seqs-24 @ 1.15",
+                outcome: "lower tail latency",
+                p95Latency: "40.57s",
+                peakWaiting: "22 waiting / 46 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "seqs-16 @ 1.15",
+                outcome: "97.4% delivered",
+                p95Latency: "99.12s",
+                peakWaiting: "83 waiting / 99 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "seqs-24 @ 1.20",
+                outcome: "saturation returns",
+                p95Latency: "62.90s",
+                peakWaiting: "47 waiting / 71 active",
+                gpuMax: "100%",
+              },
+            ],
           },
         ],
       },
@@ -333,11 +444,29 @@ export const experimentCatalogContent = {
           outputTokens: 768,
           description: "short prompt long output",
         },
+        {
+          id: "mixed-prefill-decode",
+          promptTokens: 1536,
+          outputTokens: 768,
+          description: "50/50 streamed mix of prompt-heavy and decode-heavy requests",
+        },
       ],
       servingProfiles: [
         {
           id: "default",
           description: "default checked-in serving profile",
+        },
+        {
+          id: "max-seqs-16",
+          description: "sequence cap for mixed streaming comparison",
+        },
+        {
+          id: "max-seqs-8",
+          description: "smaller active-set cap for mixed streaming comparison",
+        },
+        {
+          id: "batched-tokens-4096",
+          description: "batched-token cap without a sequence-count cap",
         },
       ],
       metricGroups: [
@@ -360,55 +489,151 @@ export const experimentCatalogContent = {
         "./scripts/experiment render-report --experiment prefill-decode --case decode-heavy --profile default",
       ],
       liveCommands: [
-        "./scripts/experiment run-stream --experiment prefill-decode --case prefill-heavy --profile default --samples 5",
+        "./scripts/experiment run-stream --experiment prefill-decode --case mixed-prefill-decode --profile default --samples 640 --concurrency 24",
       ],
       resultEvidence: {
-        title: "Prompt prefill vs decode timing",
+        title: "Mixed streaming shape split",
         statusLabel: "Measured streaming split",
         reportDate: "2026-05-06",
         summary:
-          "Streaming runs separate prompt-heavy TTFT from decode-heavy total latency on the default vLLM profile.",
+          "The latest mixed streaming run completed 640 requests at concurrency 24, then split the result by prefill-heavy and decode-heavy request shapes.",
         boundary:
-          "The selected reports cover one default-profile pair at concurrency 16, so use them as a clear shape comparison rather than a full streaming capacity envelope.",
+          "The mixed run is the best current page-level evidence because it exercises both shapes together. Isolated shape runs remain useful supporting baselines, but max-seqs and batched-token variants show the profile matrix still needs a curated conclusion.",
+        boundaryPoints: [
+          "The mixed default run had 1 peak waiting request at 24 active streams and 93% max GPU utilization.",
+          "The max-seqs-8 and batched-tokens-4096 variants produced much worse p99 latency in the 640-sample mixed comparison.",
+          "Cost and SLO fields were not collected for these streaming reports.",
+        ],
         curatedResults: false,
-        tableColumns: {
-          target: "Case",
-          outcome: "Timing split",
-          p95Latency: "p95 total",
-          peakWaiting: "p95 TTFT",
-          gpuMax: "GPU max",
-        },
         stats: [
           {
-            label: "Prefill-heavy TTFT",
-            value: "1.37s p95",
-            context: "1536-token prompt, 64-token output",
+            label: "Mixed run",
+            value: "12.52s p95",
+            context: "640 streamed requests at concurrency 24",
           },
           {
-            label: "Decode-heavy TTFT",
-            value: "149 ms p95",
-            context: "128-token prompt, 768-token output",
+            label: "Prefill shape",
+            value: "1.52s p95",
+            context: "303 mixed-run requests; p95 TTFT 495 ms",
           },
           {
-            label: "Decode-heavy total",
-            value: "8.41s p95",
-            context: "Longer output dominates total latency",
+            label: "Decode shape",
+            value: "12.79s p95",
+            context: "337 mixed-run requests; p95 TTFT 443 ms",
           },
         ],
-        rows: [
+        sourceReports: [
           {
-            target: "prefill-heavy",
-            outcome: "Longer TTFT, short total",
-            p95Latency: "2.24s",
-            peakWaiting: "1.37s",
-            gpuMax: "95%",
+            label: "Mixed run report",
+            path: "docs/reports/experiment-prefill-decode-mixed-prefill-decode-default-20260506-173400.md",
           },
           {
-            target: "decode-heavy",
-            outcome: "Fast TTFT, longer total",
-            p95Latency: "8.41s",
-            peakWaiting: "149 ms",
-            gpuMax: "84%",
+            label: "Prefill isolated report",
+            path: "docs/reports/experiment-prefill-decode-prefill-heavy-default-20260506-110543.md",
+          },
+          {
+            label: "Decode isolated report",
+            path: "docs/reports/experiment-prefill-decode-decode-heavy-default-20260506-111546.md",
+          },
+        ],
+        tables: [
+          {
+            title: "Mixed run shape split",
+            summary:
+              "The overall mixed result hides two very different totals: prefill-heavy requests finish quickly, while decode-heavy requests dominate total latency.",
+            columns: {
+              target: "Shape",
+              outcome: "Completed",
+              p95Latency: "p95 total",
+              peakWaiting: "p95 TTFT",
+              gpuMax: "Tokens/sec",
+            },
+            rows: [
+              {
+                target: "prefill-heavy",
+                outcome: "303 completed",
+                p95Latency: "1.52s",
+                peakWaiting: "495 ms",
+                gpuMax: "69.03",
+              },
+              {
+                target: "decode-heavy",
+                outcome: "337 completed",
+                p95Latency: "12.79s",
+                peakWaiting: "443 ms",
+                gpuMax: "66.97",
+              },
+            ],
+          },
+          {
+            title: "Isolated shape baseline",
+            summary:
+              "The isolated concurrency-16 runs remain useful because they show the single-shape TTFT and total-latency contrast before the mixed workload adds interference.",
+            columns: {
+              target: "Case",
+              outcome: "Timing split",
+              p95Latency: "p95 total",
+              peakWaiting: "p95 TTFT",
+              gpuMax: "GPU max",
+            },
+            rows: [
+              {
+                target: "prefill-heavy",
+                outcome: "Longer TTFT, short total",
+                p95Latency: "2.24s",
+                peakWaiting: "1.37s",
+                gpuMax: "95%",
+              },
+              {
+                target: "decode-heavy",
+                outcome: "Fast TTFT, longer total",
+                p95Latency: "8.41s",
+                peakWaiting: "149 ms",
+                gpuMax: "84%",
+              },
+            ],
+          },
+          {
+            title: "Mixed profile follow-up",
+            summary:
+              "The profile variants show that simply capping sequence count or batched tokens did not improve the latest mixed-shape envelope.",
+            columns: {
+              target: "Profile",
+              outcome: "Run shape",
+              p95Latency: "p95 total",
+              peakWaiting: "p99 total",
+              gpuMax: "GPU max",
+            },
+            rows: [
+              {
+                target: "default",
+                outcome: "640 samples / 24 concurrency",
+                p95Latency: "12.52s",
+                peakWaiting: "12.93s",
+                gpuMax: "93%",
+              },
+              {
+                target: "max-seqs-16",
+                outcome: "640 samples / 32 concurrency",
+                p95Latency: "17.56s",
+                peakWaiting: "18.57s",
+                gpuMax: "97%",
+              },
+              {
+                target: "max-seqs-8",
+                outcome: "640 samples / 32 concurrency",
+                p95Latency: "29.88s",
+                peakWaiting: "133.64s",
+                gpuMax: "90%",
+              },
+              {
+                target: "batched-tokens-4096",
+                outcome: "640 samples / 32 concurrency",
+                p95Latency: "20.89s",
+                peakWaiting: "125.51s",
+                gpuMax: "91%",
+              },
+            ],
           },
         ],
       },
@@ -487,15 +712,13 @@ export const experimentCatalogContent = {
         summary:
           "For the steady 512/128 workload at an 8 req/s target, the vLLM dynamic-default scheduler delivered the full run with low tail latency while tighter sequence caps forced queueing and dropped work.",
         boundary:
-          "The selected matrix covers one steady workload. Burst and mixed-shape cases should be measured before claiming a universal scheduler policy.",
+          "The selected matrix covers one steady workload. Burst and mixed-shape cases should be measured before claiming a universal scheduler policy, and the checked-in results.md file has not yet been promoted from template text.",
+        boundaryPoints: [
+          "The generated reports under docs/reports contain the selected evidence even though experiments/batching/results.md still says no curated run.",
+          "Dynamic-default means vLLM's default scheduler settings, not disabled batching.",
+          "Cost denominators are still unavailable for this measured scheduler comparison.",
+        ],
         curatedResults: false,
-        tableColumns: {
-          target: "Profile",
-          outcome: "Outcome",
-          p95Latency: "p95 latency",
-          peakWaiting: "Delivery",
-          gpuMax: "GPU max",
-        },
         stats: [
           {
             label: "Dynamic default",
@@ -513,27 +736,55 @@ export const experimentCatalogContent = {
             context: "2253 unserved iterations; p95 59.72s",
           },
         ],
-        rows: [
+        sourceReports: [
           {
-            target: "dynamic-default",
-            outcome: "Full delivery, no waiting",
-            p95Latency: "1.66s",
-            peakWaiting: "100%",
-            gpuMax: "85%",
+            label: "Dynamic default report",
+            path: "docs/reports/experiment-batching-steady-512-output-128-dynamic-default-20260505-232357.md",
           },
           {
-            target: "limited-batching",
-            outcome: "Queueing and dropped work",
-            p95Latency: "10.55s",
-            peakWaiting: "80.1%",
-            gpuMax: "85%",
+            label: "Limited batching report",
+            path: "docs/reports/experiment-batching-steady-512-output-128-limited-batching-20260505-233925.md",
           },
           {
-            target: "constrained-scheduler",
-            outcome: "Severe underdelivery",
-            p95Latency: "59.72s",
-            peakWaiting: "15.6%",
-            gpuMax: "88%",
+            label: "Constrained report",
+            path: "docs/reports/experiment-batching-steady-512-output-128-constrained-scheduler-20260505-235019.md",
+          },
+        ],
+        tables: [
+          {
+            title: "Steady scheduler profile comparison",
+            summary:
+              "All three reports use the same steady 512/128 workload, making the scheduler limit tradeoff easy to compare.",
+            columns: {
+              target: "Profile",
+              outcome: "Outcome",
+              p95Latency: "p95 latency",
+              peakWaiting: "Delivery",
+              gpuMax: "GPU max",
+            },
+            rows: [
+              {
+                target: "dynamic-default",
+                outcome: "Full delivery, no waiting",
+                p95Latency: "1.66s",
+                peakWaiting: "100%",
+                gpuMax: "85%",
+              },
+              {
+                target: "limited-batching",
+                outcome: "Queueing and dropped work",
+                p95Latency: "10.55s",
+                peakWaiting: "80.1%",
+                gpuMax: "85%",
+              },
+              {
+                target: "constrained-scheduler",
+                outcome: "Severe underdelivery",
+                p95Latency: "59.72s",
+                peakWaiting: "15.6%",
+                gpuMax: "88%",
+              },
+            ],
           },
         ],
       },
@@ -608,20 +859,37 @@ export const experimentCatalogContent = {
       liveCommands: [
         "./scripts/experiment run --experiment request-patterns --case steady-small --profile default",
       ],
+      pendingNextRuns: [
+        {
+          label: "Steady baseline",
+          command: "./scripts/experiment run --experiment request-patterns --case steady-small --profile default",
+          reason: "Establish the default serving profile's occupancy and latency before interpreting burst or mixed traffic.",
+        },
+        {
+          label: "Burst pressure",
+          command: "./scripts/experiment run --experiment request-patterns --case burst-small --profile default",
+          reason: "Measure whether tail latency and waiting requests come from traffic shape rather than raw serving capacity.",
+        },
+        {
+          label: "Uneven-size mix",
+          command: "./scripts/experiment run --experiment request-patterns --case uneven-size-mix --profile default",
+          reason: "Use the weighted short/medium/long request mix to expose head-of-line effects by request shape.",
+        },
+      ],
     },
     {
       slug: "autoscaling",
       title: "Autoscaling and Queueing Behavior",
       category: "Capacity response",
-      status: experimentStatus("Measurable with run"),
+      status: experimentStatus("Measured with run", "Measured queueing behavior"),
       question:
         "How much traffic must be buffered while GPU capacity and model readiness catch up?",
-      cardSummary: "Burst arrival versus capacity readiness.",
-      metricFocus: ["Provisioning", "Queueing", "Dropped work"],
+      cardSummary: "Scale-from-zero timing and queue policy.",
+      metricFocus: ["Scale-from-zero", "Queue policy", "Dropped work"],
       summary:
-        "Compares direct and bounded-queue client policies during burst and spike-to-zero traffic while capacity catches up.",
+        "Compares direct and bounded-queue client policies during burst and spike-to-zero traffic while GPU capacity and model readiness catch up.",
       whyItMatters:
-        "Autoscaling is not only a replica count. The user-visible cost is the queue and failure behavior between the burst arriving and the model becoming ready.",
+        "Autoscaling is not only a replica count. The May 7 spike reruns show that GPU node launch was fast, while container and model readiness dominated the cold-start window.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/autoscaling/",
@@ -674,11 +942,132 @@ export const experimentCatalogContent = {
       ],
       localCommands: [
         "./scripts/experiment show autoscaling",
-        "./scripts/experiment render-load --experiment autoscaling --case burst-queued",
+        "./scripts/experiment render-load --experiment autoscaling --case spike-queued",
       ],
       liveCommands: [
-        "./scripts/experiment run --experiment autoscaling --case burst-queued --profile default",
+        "./scripts/experiment run --experiment autoscaling --case spike-queued --profile default",
       ],
+      resultEvidence: {
+        title: "Scale-from-zero queue behavior",
+        statusLabel: "Measured queueing behavior",
+        reportDate: "2026-05-07",
+        summary:
+          "Latest autoscaling reports compare direct and bounded-queue clients across burst and spike-to-zero cases. Bounded queues completed all offered work with about 2s p95 latency, while direct clients preserved higher throughput but dropped 237-787 client iterations.",
+        boundary:
+          "Burst cases were run before timeline capture was added, and first-successful-completion timing is still missing. Treat the cold-start timeline as spike-run evidence and the delivery comparison as case-level queueing behavior.",
+        boundaryPoints: [
+          "The scale-from-zero path was dominated by container/image/model readiness, not NodeClaim or GPU node creation.",
+          "The cluster attempted spot capacity first, but EC2 Spot service-linked-role permissions blocked spot replacement; on-demand nodes served the successful runs.",
+          "First-successful-completion timing remains unavailable in the selected reports.",
+        ],
+        stats: [
+          {
+            label: "GPU node ready",
+            value: "35s",
+            context: "NodeClaim in 3-12s; pod scheduled at 65s",
+          },
+          {
+            label: "Model ready",
+            value: "425-439s",
+            context: "container start at 354-357s dominated the cold path",
+          },
+          {
+            label: "Queued delivery",
+            value: "100%",
+            context: "burst-queued and spike-queued dropped 0 client iterations",
+          },
+        ],
+        sourceReports: [
+          {
+            label: "Burst direct report",
+            path: "docs/reports/experiment-autoscaling-burst-direct-default-20260506-221447.md",
+          },
+          {
+            label: "Burst queued report",
+            path: "docs/reports/experiment-autoscaling-burst-queued-default-20260506-222712.md",
+          },
+          {
+            label: "Spike direct report",
+            path: "docs/reports/experiment-autoscaling-spike-direct-default-20260507-002654.md",
+          },
+          {
+            label: "Spike queued report",
+            path: "docs/reports/experiment-autoscaling-spike-queued-default-20260507-004305.md",
+          },
+        ],
+        tables: [
+          {
+            title: "Queue policy outcome",
+            summary:
+              "Direct clients maximize attempted throughput but shed work; bounded queues protect delivery and tail latency by limiting active concurrency.",
+            columns: {
+              target: "Case",
+              outcome: "Delivery",
+              p95Latency: "p95 latency",
+              peakWaiting: "Dropped / active",
+              gpuMax: "GPU max",
+            },
+            rows: [
+              {
+                target: "burst-direct",
+                outcome: "76.98% delivered",
+                p95Latency: "14.62s",
+                peakWaiting: "787 dropped / 255 active",
+                gpuMax: "80%",
+              },
+              {
+                target: "burst-queued",
+                outcome: "100% delivered",
+                p95Latency: "2.19s",
+                peakWaiting: "0 dropped / 24 active",
+                gpuMax: "86%",
+              },
+              {
+                target: "spike-direct",
+                outcome: "88.14% delivered",
+                p95Latency: "14.23s",
+                peakWaiting: "237 dropped / 254 active",
+                gpuMax: "80%",
+              },
+              {
+                target: "spike-queued",
+                outcome: "100% delivered",
+                p95Latency: "1.98s",
+                peakWaiting: "0 dropped / 20 active",
+                gpuMax: "84%",
+              },
+            ],
+          },
+          {
+            title: "Spike cold-start timeline",
+            summary:
+              "The May 7 spike reruns captured the scale-from-zero timeline and show model readiness as the long pole.",
+            columns: {
+              target: "Spike case",
+              outcome: "NodeClaim",
+              p95Latency: "GPU node",
+              peakWaiting: "Container / model",
+              gpuMax: "Pod scheduled",
+            },
+            rows: [
+              {
+                target: "spike-direct",
+                outcome: "3s",
+                p95Latency: "35s",
+                peakWaiting: "354s / 425s",
+                gpuMax: "65s",
+              },
+              {
+                target: "spike-queued",
+                outcome: "12s",
+                p95Latency: "35s",
+                peakWaiting: "357s / 439s",
+                gpuMax: "65s",
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       slug: "cost",
@@ -741,6 +1130,23 @@ export const experimentCatalogContent = {
       ],
       liveCommands: [
         "./scripts/experiment run --experiment cost --case steady-cost-efficiency --profile optimized-batched",
+      ],
+      pendingNextRuns: [
+        {
+          label: "Naive steady baseline",
+          command: "./scripts/experiment run --experiment cost --case steady-cost-efficiency --profile naive-single",
+          reason: "Capture the low-concurrency reference cost denominator before comparing optimized useful work.",
+        },
+        {
+          label: "Optimized steady profile",
+          command: "./scripts/experiment run --experiment cost --case steady-cost-efficiency --profile optimized-batched",
+          reason: "Measure whether more useful requests and generated tokens improve cost without violating the p95/p99 SLO.",
+        },
+        {
+          label: "Burst cost comparison",
+          command: "./scripts/experiment run --experiment cost --case burst-cost-efficiency --profile optimized-batched",
+          reason: "Check whether the optimized profile remains cheaper once tail-latency pressure and dropped work are included.",
+        },
       ],
     },
   ] satisfies ExperimentCatalogItem[],

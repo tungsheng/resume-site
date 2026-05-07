@@ -20,13 +20,14 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha, type SxProps, type Theme } from "@mui/material/styles";
-import { EXPERIMENTS_PATH, PROJECT_PATH, RESUME_PATH } from "../site/content";
+import { EXPERIMENTS_PATH, PROJECT_PATH } from "../site/content";
 import {
   experimentCatalogContent,
   experimentDetailPath,
   experimentSourceLink,
   getExperimentBySlug,
   type ExperimentCatalogItem,
+  type ExperimentResultEvidenceTable,
 } from "../site/experiment-catalog-content";
 import { experimentsContent } from "../site/experiments-content";
 import {
@@ -63,23 +64,22 @@ interface TradeoffCardItem {
 
 const catalogStatusNoteSx: SxProps<Theme> = (theme) => ({
   display: "grid",
-  gridTemplateColumns: {
-    xs: "minmax(0, 1fr)",
-    sm: "auto minmax(0, 1fr)",
-    md: "minmax(0, 1fr)",
-    lg: "auto minmax(0, 1fr)",
-  },
-  gap: { xs: 0.9, md: 1.1 },
-  alignItems: { xs: "start", sm: "center", md: "start", lg: "center" },
-  alignContent: "center",
+  gap: { xs: 0.85, md: 1 },
+  alignContent: "start",
   width: "100%",
-  height: "100%",
-  minHeight: { md: "9.5rem" },
-  p: { xs: 1.25, sm: 1.5, md: 1.6 },
+  p: { xs: 1.25, sm: 1.4, md: 1.5 },
   borderRadius: 2,
   backgroundColor: alpha(theme.palette.warning.light, 0.14),
   border: `1px solid ${alpha(theme.palette.warning.dark, 0.2)}`,
 });
+
+const catalogStatusHeaderSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.75,
+  alignItems: "center",
+  justifyContent: "space-between",
+};
 
 const heroSplitSx: SxProps<Theme> = {
   display: "grid",
@@ -111,14 +111,14 @@ const catalogHeroTopSx: SxProps<Theme> = {
     xs: "minmax(0, 1fr)",
     md: "minmax(0, 1fr) minmax(20rem, 0.52fr)",
   },
-  gap: { xs: 2, md: 3 },
-  alignItems: "stretch",
+  gap: { xs: 1.75, md: 2.5 },
+  alignItems: "start",
   width: "100%",
 };
 
 const catalogHeroPrimarySx: SxProps<Theme> = {
   display: "grid",
-  gap: { xs: 1.5, md: 1.75 },
+  gap: { xs: 1.25, md: 1.5 },
   alignContent: "start",
   minWidth: 0,
   maxWidth: "61rem",
@@ -132,32 +132,29 @@ const catalogHeroSupportSx: SxProps<Theme> = {
 };
 
 const catalogFactStripSx: SxProps<Theme> = (theme) => ({
-  display: "grid",
-  gridTemplateColumns: {
-    xs: "minmax(0, 1fr)",
-    sm: "repeat(2, minmax(0, 1fr))",
-    md: "repeat(5, minmax(0, 1fr))",
-  },
-  gap: 0.75,
+  display: "flex",
+  flexWrap: "wrap",
+  gap: { xs: 0.65, md: 0.75 },
+  alignItems: "center",
   width: "100%",
-  overflow: "hidden",
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.6),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
-  p: 0.75,
 });
 
-const catalogFactItemSx: SxProps<Theme> = (theme) => ({
-  minWidth: 0,
-  display: "grid",
-  alignContent: "center",
-  gap: 0.3,
-  minHeight: { xs: "4.9rem", md: "5.65rem" },
-  px: { xs: 1.25, md: 1.5 },
-  py: { xs: 1.05, md: 1.2 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.5),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+const catalogFactChipSx: SxProps<Theme> = (theme) => ({
+  minHeight: 30,
+  height: "auto",
+  backgroundColor: alpha(theme.palette.common.white, 0.58),
+  borderColor: alpha(theme.palette.text.primary, 0.1),
+  color: alpha(theme.palette.text.primary, 0.72),
+  "& .MuiChip-label": {
+    display: "block",
+    px: 1,
+    py: 0.35,
+    overflowWrap: "anywhere",
+    whiteSpace: "normal",
+    fontSize: "0.76rem",
+    fontWeight: 700,
+    lineHeight: 1.25,
+  },
 });
 
 const conceptSurfaceSx: SxProps<Theme> = (theme) => ({
@@ -536,6 +533,12 @@ const resultTableSx: SxProps<Theme> = (theme) => ({
   border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
 });
 
+const resultTableGroupSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.85,
+  minWidth: 0,
+};
+
 const resultTableRowSx: SxProps<Theme> = (theme) => ({
   display: "grid",
   gridTemplateColumns: {
@@ -582,6 +585,46 @@ const resultBoundarySx: SxProps<Theme> = (theme) => ({
   borderRadius: 2,
   backgroundColor: alpha(theme.palette.warning.light, 0.12),
   border: `1px solid ${alpha(theme.palette.warning.dark, 0.16)}`,
+});
+
+const resultBoundaryListSx: SxProps<Theme> = {
+  m: 0,
+  pl: 2.25,
+  color: "text.secondary",
+  "& li": {
+    pl: 0.25,
+  },
+  "& li + li": {
+    mt: 0.45,
+  },
+};
+
+const resultReportPanelSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.85,
+  p: { xs: 1.15, sm: 1.25 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.5),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+});
+
+const pendingNextRunGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    lg: "repeat(2, minmax(0, 1fr))",
+  },
+  gap: 1,
+};
+
+const pendingNextRunSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gap: 0.85,
+  minWidth: 0,
+  p: { xs: 1.15, sm: 1.25 },
+  borderRadius: 2,
+  backgroundColor: alpha(theme.palette.common.white, 0.56),
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
 });
 
 const tradeoffCardSx: SxProps<Theme> = (theme) => ({
@@ -1119,9 +1162,16 @@ function resolveCurrentPathname(initialPath?: string): string {
 }
 
 function CatalogStatusNote() {
+  const item = experimentCatalogContent.platformValidation;
+
   return (
     <Box role="note" sx={catalogStatusNoteSx}>
-      <Chip label="Catalog ready" color="warning" variant="outlined" />
+      <Box sx={catalogStatusHeaderSx}>
+        <Chip label="Catalog ready" color="warning" variant="outlined" />
+        <Button href={item.href} size="small" endIcon={<ArrowForwardRoundedIcon />}>
+          View project decisions
+        </Button>
+      </Box>
       <Typography variant="body2" color="text.secondary">
         {experimentCatalogContent.statusNote}
       </Typography>
@@ -1137,38 +1187,26 @@ function CatalogFactStrip() {
     experimentCatalogContent.experiments.length - measuredExperimentCount;
   const facts = [
     {
-      value: `${experimentCatalogContent.experiments.length} experiments`,
-      label: "definition catalog",
+      label: `${experimentCatalogContent.experiments.length} experiments`,
     },
     {
-      value: "Local render",
-      label: "inspect manifests and templates",
+      label: "Local render",
     },
     {
-      value: "Live runners",
-      label: "per-experiment run commands",
+      label: "Live runners",
     },
     {
-      value: `${measuredExperimentCount} measured`,
-      label: "selected evidence pages",
+      label: `${measuredExperimentCount} measured`,
     },
     {
-      value: `${pendingExperimentCount} pending`,
-      label: "matrices still being curated",
+      label: `${pendingExperimentCount} pending`,
     },
   ];
 
   return (
     <Box sx={catalogFactStripSx} aria-label="Experiment catalog status facts">
       {facts.map((fact) => (
-        <Box key={fact.label} sx={catalogFactItemSx}>
-          <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
-            {fact.value}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {fact.label}
-          </Typography>
-        </Box>
+        <Chip key={fact.label} label={fact.label} size="small" variant="outlined" sx={catalogFactChipSx} />
       ))}
     </Box>
   );
@@ -1326,11 +1364,13 @@ function RelatedProjectEvidenceBand() {
 function ExperimentCatalogListSection() {
   return (
     <PageSection>
-      <SectionHeader
-        eyebrow="Catalog"
-        title="Browse experiments"
-        copy="Scan by purpose and metric focus, then open the detail page for the full question, run shape, and commands."
-      />
+      <Box id="experiment-catalog-list" sx={{ scrollMarginTop: { xs: 88, md: 112 } }}>
+        <SectionHeader
+          eyebrow="Catalog"
+          title="Browse experiments"
+          copy="Scan by purpose and metric focus, then open the detail page for the full question, run shape, and commands."
+        />
+      </Box>
 
       <Stack spacing={2.25}>
         <Box sx={browseSurfaceSx}>
@@ -1359,8 +1399,8 @@ function ExperimentCatalogRoute() {
     <PublicSiteLayout activeNav="experiments">
       <PageHero
         contentWidth="100%"
-        contentSx={{ gap: { xs: 2, md: 2.5 } }}
-        sx={{ p: { xs: 2.5, md: 3.25 } }}
+        contentSx={{ gap: { xs: 1.75, md: 2 } }}
+        sx={{ p: { xs: 2.25, md: 3 } }}
       >
         <Box sx={catalogHeroTopSx}>
           <Box sx={catalogHeroPrimarySx}>
@@ -1370,13 +1410,14 @@ function ExperimentCatalogRoute() {
             <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
               {experimentCatalogContent.subtitle}
             </Typography>
+            <CatalogFactStrip />
 
             <ActionLinkRow>
-              <Button href={PROJECT_PATH} variant="contained">
-                View project
+              <Button href="#experiment-catalog-list" variant="contained">
+                Browse experiments
               </Button>
-              <Button href={RESUME_PATH} variant="outlined">
-                View resume
+              <Button href={PROJECT_PATH} variant="outlined">
+                View project
               </Button>
             </ActionLinkRow>
           </Box>
@@ -1385,7 +1426,6 @@ function ExperimentCatalogRoute() {
             <CatalogStatusNote />
           </Box>
         </Box>
-        <CatalogFactStrip />
       </PageHero>
 
       <ExperimentCatalogConceptSection />
@@ -1413,6 +1453,33 @@ function ExperimentMetricGroupList({ experiment }: { experiment: ExperimentCatal
   );
 }
 
+function ExperimentPendingNextRuns({ experiment }: { experiment: ExperimentCatalogItem }) {
+  if (!experiment.pendingNextRuns || experiment.pendingNextRuns.length === 0) {
+    return null;
+  }
+
+  return (
+    <Box sx={{ display: "grid", gap: 1 }}>
+      <Typography variant="overline" color="primary">
+        Next runs to curate
+      </Typography>
+      <Box sx={pendingNextRunGridSx}>
+        {experiment.pendingNextRuns.map((run) => (
+          <Box key={run.label} sx={pendingNextRunSx}>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              {run.label}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {run.reason}
+            </Typography>
+            <CommandCodeBlock command={run.command} ariaLabel={`${run.label} next run command`} />
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
 function ExperimentPendingResult({ experiment }: { experiment: ExperimentCatalogItem }) {
   return (
     <Box sx={pendingResultSx}>
@@ -1420,7 +1487,17 @@ function ExperimentPendingResult({ experiment }: { experiment: ExperimentCatalog
       <Typography variant="body2" color="text.secondary">
         The source repo currently treats {experiment.resultsPath} as a result template. Generated Markdown, JSON, and client logs belong under docs/reports/ until representative results are chosen.
       </Typography>
+      <ExperimentPendingNextRuns experiment={experiment} />
       <ActionLinkRow>
+        <Button
+          href={experimentSourceLink(experiment.resultsPath)}
+          target="_blank"
+          rel="noreferrer"
+          size="small"
+          endIcon={<OpenInNewRoundedIcon />}
+        >
+          Results template
+        </Button>
         <Button
           href={experimentSourceLink("docs/reports/README.md")}
           target="_blank"
@@ -1435,54 +1512,40 @@ function ExperimentPendingResult({ experiment }: { experiment: ExperimentCatalog
   );
 }
 
-function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalogItem }) {
-  const evidence = experiment.resultEvidence;
+const defaultResultTableColumns = {
+  target: "Target",
+  outcome: "Outcome",
+  p95Latency: "p95 latency",
+  peakWaiting: "Peak waiting",
+  gpuMax: "GPU max",
+};
 
-  if (!evidence) {
-    return <ExperimentPendingResult experiment={experiment} />;
-  }
-
+function ExperimentResultTable({
+  experiment,
+  table,
+}: {
+  experiment: ExperimentCatalogItem;
+  table: ExperimentResultEvidenceTable;
+}) {
   const tableColumns = {
-    target: "Target",
-    outcome: "Outcome",
-    p95Latency: "p95 latency",
-    peakWaiting: "Peak waiting",
-    gpuMax: "GPU max",
-    ...evidence.tableColumns,
+    ...defaultResultTableColumns,
+    ...table.columns,
   };
-  const resultsLinkLabel = evidence.curatedResults === false ? "Results template" : "Results summary";
 
   return (
-    <Box sx={measuredResultSx}>
-      <Box sx={experimentMetaRowSx}>
-        <Chip label={evidence.statusLabel} color="success" variant="outlined" />
-        <Chip label={`Latest reports: ${evidence.reportDate}`} size="small" variant="outlined" />
-      </Box>
-
-      <Box sx={{ display: "grid", gap: 0.7, minWidth: 0 }}>
-        <Typography variant="h6">{evidence.title}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {evidence.summary}
+    <Box sx={resultTableGroupSx}>
+      <Box sx={{ display: "grid", gap: 0.35, minWidth: 0 }}>
+        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+          {table.title}
         </Typography>
+        {table.summary ? (
+          <Typography variant="body2" color="text.secondary">
+            {table.summary}
+          </Typography>
+        ) : null}
       </Box>
 
-      <Box sx={resultStatGridSx} aria-label={`${experiment.title} measured result highlights`}>
-        {evidence.stats.map((stat) => (
-          <Box key={stat.label} sx={resultStatSx}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
-              {stat.label}
-            </Typography>
-            <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
-              {stat.value}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {stat.context}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-
-      <Box role="table" aria-label={`${experiment.title} measured sweep`} sx={resultTableSx}>
+      <Box role="table" aria-label={`${experiment.title} ${table.title}`} sx={resultTableSx}>
         <Box role="row" sx={resultTableHeaderSx}>
           <span>{tableColumns.target}</span>
           <span>{tableColumns.outcome}</span>
@@ -1490,7 +1553,7 @@ function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalo
           <span>{tableColumns.peakWaiting}</span>
           <span>{tableColumns.gpuMax}</span>
         </Box>
-        {evidence.rows.map((row) => (
+        {table.rows.map((row) => (
           <Box key={row.target} role="row" sx={resultTableRowSx}>
             <Typography role="cell" variant="body2" sx={{ ...resultTableCellSx, fontWeight: 700 }}>
               <Box component="span" sx={resultMobileLabelSx}>
@@ -1525,14 +1588,88 @@ function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalo
           </Box>
         ))}
       </Box>
+    </Box>
+  );
+}
 
-      <Box sx={resultBoundarySx}>
-        <Typography variant="body2" color="text.secondary">
-          {evidence.boundary}
-        </Typography>
-      </Box>
+function buildEvidenceTables(experiment: ExperimentCatalogItem): ExperimentResultEvidenceTable[] {
+  const evidence = experiment.resultEvidence;
+  if (!evidence) return [];
 
+  if (evidence.tables && evidence.tables.length > 0) {
+    return evidence.tables;
+  }
+
+  if (!evidence.rows || evidence.rows.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      title: `${evidence.title} table`,
+      columns: evidence.tableColumns,
+      rows: evidence.rows,
+    },
+  ];
+}
+
+function ExperimentEvidenceBoundary({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const evidence = experiment.resultEvidence;
+  if (!evidence) return null;
+
+  return (
+    <Box sx={resultBoundarySx}>
+      <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.45 }}>
+        Evidence boundary
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {evidence.boundary}
+      </Typography>
+      {evidence.boundaryPoints && evidence.boundaryPoints.length > 0 ? (
+        <Box component="ul" sx={resultBoundaryListSx}>
+          {evidence.boundaryPoints.map((point) => (
+            <li key={point}>
+              <Typography component="span" variant="body2">
+                {point}
+              </Typography>
+            </li>
+          ))}
+        </Box>
+      ) : null}
+    </Box>
+  );
+}
+
+function ExperimentSourceReports({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const evidence = experiment.resultEvidence;
+  const reports = evidence?.sourceReports ?? [];
+  const resultsLinkLabel = evidence?.curatedResults === false ? "Results template" : "Results summary";
+
+  return (
+    <Box sx={resultReportPanelSx}>
+      {reports.length > 0 ? (
+        <Box sx={{ display: "grid", gap: 0.45, minWidth: 0 }}>
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            Selected reports
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            These generated reports are the concrete evidence behind the curated summary.
+          </Typography>
+        </Box>
+      ) : null}
       <ActionLinkRow>
+        {reports.map((report) => (
+          <Button
+            key={report.path}
+            href={experimentSourceLink(report.path)}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            {report.label}
+          </Button>
+        ))}
         <Button
           href={experimentSourceLink(experiment.resultsPath)}
           target="_blank"
@@ -1552,6 +1689,59 @@ function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalo
           Report rules
         </Button>
       </ActionLinkRow>
+    </Box>
+  );
+}
+
+function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const evidence = experiment.resultEvidence;
+
+  if (!evidence) {
+    return <ExperimentPendingResult experiment={experiment} />;
+  }
+
+  const tables = buildEvidenceTables(experiment);
+
+  return (
+    <Box sx={measuredResultSx}>
+      <Box sx={experimentMetaRowSx}>
+        <Chip label={evidence.statusLabel} color="success" variant="outlined" />
+        <Chip label={`Latest reports: ${evidence.reportDate}`} size="small" variant="outlined" />
+      </Box>
+
+      <Box sx={{ display: "grid", gap: 0.7, minWidth: 0 }}>
+        <Typography variant="h6">{evidence.title}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {evidence.summary}
+        </Typography>
+      </Box>
+
+      <Box sx={resultStatGridSx} aria-label={`${experiment.title} measured result highlights`}>
+        {evidence.stats.map((stat) => (
+          <Box key={stat.label} sx={resultStatSx}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+              {stat.label}
+            </Typography>
+            <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
+              {stat.value}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {stat.context}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+
+      {tables.map((table) => (
+        <ExperimentResultTable
+          key={table.title}
+          experiment={experiment}
+          table={table}
+        />
+      ))}
+
+      <ExperimentEvidenceBoundary experiment={experiment} />
+      <ExperimentSourceReports experiment={experiment} />
     </Box>
   );
 }
