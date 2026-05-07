@@ -14,7 +14,7 @@ describe("Resume Service", () => {
     expect(publicResumeData.projects?.title).toBe("Selected Project");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Lab");
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Measured controlled vLLM workloads across long-context, scheduler, and streaming cases: narrowed the 8192/300 capacity knee to 1.10-1.15 req/s, showed dynamic scheduling completing 2,669/2,669 requests at 7.4 req/s with 1.66s p95 latency, and separated prompt-heavy TTFT from decode-heavy total latency.",
+      "Measured vLLM capacity across long-context, scheduler, and streaming workloads to identify throughput, latency, and batching tradeoffs.",
     );
   });
 

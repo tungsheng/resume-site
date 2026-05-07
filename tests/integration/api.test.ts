@@ -29,7 +29,7 @@ describe("API Integration", () => {
 
     const html = await res.text();
     expect(html).toContain("<div id=\"root\"></div>");
-    expect(html).toContain("Tony Lee | ML Inference Infrastructure Engineer");
+    expect(html).toContain("Tony Lee | Platform Infrastructure Engineer");
   });
 
   itIfIntegration("GET /project/cloud-inference-platform serves the project shell", async () => {

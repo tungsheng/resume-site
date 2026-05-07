@@ -4,10 +4,10 @@ import { PROJECT_PATH, RESUME_PATH, siteProfile } from "../site/content";
 import { ActionLinkRow, PageHero, PublicSiteLayout } from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
 
-const PAGE_TITLE = "Tony Lee | ML Inference Infrastructure Engineer";
-const HOME_ROLE = "ML Inference Infrastructure Engineer";
+const PAGE_TITLE = "Tony Lee | Platform Infrastructure Engineer";
+const HOME_ROLE = "Platform Infrastructure Engineer";
 const HOME_LEDE =
-  "I design GPU-backed inference systems on Kubernetes, focused on scaling, latency, and cost under real workloads.";
+  "I build GPU-backed ML inference systems on Kubernetes, focused on measurable scaling, latency, throughput, and cost under real workloads.";
 
 export function HomePage() {
   useDocumentTitle(PAGE_TITLE);

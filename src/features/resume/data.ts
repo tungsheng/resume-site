@@ -5,15 +5,15 @@ export const publicResumeData: ResumeData = {
     name: "Tony Lee",
     badges: [
       "Staff Software Engineer",
-      "Cloud Platform",
-      "ML Inference Infrastructure",
+      "Platform Infrastructure",
+      "ML Inference Systems",
     ],
     contacts: {
       email: "tungsheng@gmail.com",
       linkedin: "tonyslee8",
     },
     summary:
-      "Staff Software Engineer specializing in ML inference infrastructure and distributed systems. Experienced in building GPU-backed inference platforms on Kubernetes, with a focus on latency, throughput, and cost efficiency under burst workloads and real-world constraints.",
+      "Platform infrastructure engineer specializing in ML inference systems, GPU-backed serving, Kubernetes, autoscaling, and distributed systems reliability.",
   },
   skills: {
     "ML Infrastructure / Inference": [
@@ -23,6 +23,11 @@ export const publicResumeData: ResumeData = {
       "Autoscaling",
       "GPU Scheduling (NVIDIA Device Plugin)",
       "Inference Load Testing (k6)",
+    ],
+    Leadership: [
+      "Architecture Design",
+      "Cross-Functional Leadership",
+      "Technical Mentorship",
     ],
     "Infrastructure / Cloud": [
       "Terraform",
@@ -35,11 +40,6 @@ export const publicResumeData: ResumeData = {
     ],
     Languages: ["Go", "Python", "TypeScript", "SQL"],
     Backend: ["Node.js", "GraphQL", "REST"],
-    Leadership: [
-      "Architecture Design",
-      "Cross-Functional Leadership",
-      "Technical Mentorship",
-    ],
   },
   projects: {
     title: "Selected Project",
@@ -47,11 +47,10 @@ export const publicResumeData: ResumeData = {
       {
         title: "GPU Inference Lab (AWS EKS + Karpenter + vLLM)",
         highlights: [
-          "Built an AWS EKS GPU inference lab with Terraform-managed VPC/EKS, public ALB-backed OpenAI-compatible vLLM serving, Prometheus/Grafana observability, and Karpenter-managed on-demand/spot GPU NodePools.",
-          "Reduced serving-GPU idle cost to $0/hr for sparse traffic with a zero-idle profile that starts from 0 GPU nodes, provisions a GPU for a public /v1 completion, and cleans back to 0 serving GPUs after validation.",
-          "Diagnosed queue buildup and delayed scale-out under burst traffic due to model-readiness lag, then redesigned the autoscaling signal around queue depth and request concurrency to manage backpressure.",
-          "Measured burst behavior through policy comparisons and active-target sweeps; active-pressure reached a second Ready replica 43% faster in one warm-baseline compare run (564s vs. 989s).",
-          "Measured controlled vLLM workloads across long-context, scheduler, and streaming cases: narrowed the 8192/300 capacity knee to 1.10-1.15 req/s, showed dynamic scheduling completing 2,669/2,669 requests at 7.4 req/s with 1.66s p95 latency, and separated prompt-heavy TTFT from decode-heavy total latency.",
+          "Built an AWS EKS GPU inference platform with Terraform, Karpenter, vLLM, ALB ingress, Prometheus/Grafana, and OpenAI-compatible serving APIs.",
+          "Proved zero-idle GPU serving from 0 nodes to a successful public /v1 completion, then cleaned back to $0/hr serving-GPU idle cost.",
+          "Redesigned autoscaling around queue depth and request concurrency; active-pressure reached a second Ready replica 43% faster in one measured run (564s vs. 989s).",
+          "Measured vLLM capacity across long-context, scheduler, and streaming workloads to identify throughput, latency, and batching tradeoffs.",
         ],
       },
     ],
