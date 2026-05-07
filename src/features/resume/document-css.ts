@@ -20,10 +20,10 @@ body {
   --resume-accent: #27ae60;
   --ui-font: 'Arial', 'Helvetica', sans-serif;
   --page-x: 0.4in;
-  --column-gap: 0.15in;
-  --sidebar-width: 1.9in;
-  --section-gap: 0.2in;
-  --experience-gap: 0.13in;
+  --column-gap: 0.22in;
+  --sidebar-width: 2.05in;
+  --section-gap: 0.24in;
+  --experience-gap: 0.16in;
 
   width: 8.5in;
   min-height: 11in;
@@ -36,7 +36,7 @@ body {
 }
 
 .resume-document .header {
-  padding: 0.24in var(--page-x) 0.1in;
+  padding: 0.24in var(--page-x) 0.12in;
 }
 
 .resume-document .header-content {
@@ -127,7 +127,7 @@ body {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   align-items: start;
-  padding: 0.13in var(--page-x) 0.12in;
+  padding: 0.16in var(--page-x) 0.12in;
   column-gap: var(--column-gap);
 }
 
@@ -222,9 +222,9 @@ body {
   list-style: none;
   padding: 0;
   display: grid;
-  row-gap: 2px;
+  row-gap: 3px;
   font-size: 8.8pt;
-  line-height: 1.34;
+  line-height: 1.38;
   color: #374151;
 }
 
