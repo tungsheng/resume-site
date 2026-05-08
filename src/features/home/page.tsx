@@ -17,14 +17,8 @@ export function HomePage() {
       <PageHero
         align="center"
         contentWidth="48rem"
-        contentSx={{ gap: { xs: 5, md: 6.5 } }}
-        sx={{
-          py: { xs: 8.5, md: 11 },
-          px: { xs: 3, md: 6 },
-          minHeight: { md: "clamp(540px, 66vh, 720px)" },
-          display: "grid",
-          alignItems: "center",
-        }}
+        variant="home"
+        contentSx={{ gap: { xs: 4, md: 5.25 } }}
       >
         <Stack
           spacing={{ xs: 2.5, md: 3.25 }}
@@ -38,10 +32,12 @@ export function HomePage() {
             variant="h1"
             sx={{
               fontSize: {
-                xs: "clamp(3.2rem, 15vw, 4.5rem)",
-                md: "clamp(4.5rem, 7vw, 6.5rem)",
+                xs: "3.05rem",
+                sm: "3.8rem",
+                md: "4.8rem",
+                lg: "5.15rem",
               },
-              lineHeight: 1,
+              lineHeight: 1.02,
             }}
           >
             {siteProfile.name}
@@ -50,9 +46,9 @@ export function HomePage() {
             component="p"
             sx={{
               color: "secondary.main",
-              fontSize: { xs: "1.16rem", md: "1.4rem" },
-              fontWeight: 700,
-              lineHeight: 1.3,
+              fontSize: { xs: "1.05rem", md: "1.22rem" },
+              fontWeight: 600,
+              lineHeight: 1.35,
             }}
           >
             {HOME_ROLE}
@@ -69,17 +65,17 @@ export function HomePage() {
             variant="body1"
             color="text.secondary"
             sx={{
-              fontSize: { xs: "1.04rem", md: "1.16rem" },
-              lineHeight: 1.8,
+              fontSize: { xs: "1rem", md: "1.08rem" },
+              lineHeight: 1.72,
             }}
           >
             {HOME_LEDE}
           </Typography>
           <ActionLinkRow justifyContent="center">
-            <Button href={PROJECT_PATH} variant="text">
+            <Button href={PROJECT_PATH} variant="contained">
               View project
             </Button>
-            <Button href={RESUME_PATH} variant="text">
+            <Button href={RESUME_PATH} variant="outlined">
               View resume
             </Button>
           </ActionLinkRow>

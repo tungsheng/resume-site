@@ -468,11 +468,7 @@ export function ResumePageContent({
 
   return (
     <PublicSiteLayout activeNav="resume">
-      <PageHero
-        sx={(theme) => ({
-          backgroundImage: `linear-gradient(180deg, rgba(255, 253, 249, 0.98), ${alpha(theme.palette.warning.main, 0.08)})`,
-        })}
-      >
+      <PageHero>
         <Typography component="h1" variant="h3">
           {data.header.name}
         </Typography>
@@ -483,7 +479,7 @@ export function ResumePageContent({
             sx={{
               color: "secondary.main",
               fontWeight: 600,
-              letterSpacing: "-0.01em",
+              letterSpacing: 0,
               overflowWrap: "anywhere",
             }}
           >

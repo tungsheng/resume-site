@@ -8,7 +8,7 @@ describe("Resume Header", () => {
     const html = renderToStaticMarkup(<PublicSiteHeader activeNav="resume" />);
 
     expect(html).toContain("aria-label=\"Tony Lee home\"");
-    expect(html).toContain("T│L");
+    expect(html).toContain("TL");
     expect(html).toContain("aria-current=\"page\">Resume<");
     expect(html).not.toContain("Tony Lee&#x27;s Resume");
     expect(html).not.toContain(">Print<");

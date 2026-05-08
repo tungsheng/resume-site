@@ -17,8 +17,10 @@ body {
 }
 
 .resume-document {
-  --resume-accent: #27ae60;
-  --ui-font: 'Arial', 'Helvetica', sans-serif;
+  --resume-accent: #92530f;
+  --resume-ink: #16222d;
+  --resume-muted: #54616b;
+  --ui-font: 'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --page-x: 0.4in;
   --column-gap: 0.22in;
   --sidebar-width: 2.05in;
@@ -29,7 +31,7 @@ body {
   min-height: 11in;
   margin: 0 auto;
   background: white;
-  color: #1f2937;
+  color: var(--resume-ink);
   font-family: var(--ui-font);
   font-size: 9.2pt;
   line-height: 1.34;
@@ -57,7 +59,7 @@ body {
   margin: 0;
   font-size: 10pt;
   letter-spacing: 0.14px;
-  color: #3f3b37;
+  color: var(--resume-muted);
   font-weight: 500;
   line-height: 1.24;
   font-family: var(--ui-font);
@@ -93,7 +95,7 @@ body {
 
 .resume-document .contact-link {
   font-size: 8.65pt;
-  color: #1f2937;
+  color: var(--resume-ink);
   max-width: 1.95in;
   line-height: 1.28;
   text-align: right;
@@ -105,7 +107,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--resume-muted);
   width: 11px;
   height: 11px;
   line-height: 0;
@@ -150,7 +152,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.15px;
-  color: #1f2937;
+  color: var(--resume-ink);
   font-family: var(--ui-font);
 }
 
@@ -163,14 +165,14 @@ body {
 .resume-document .experience-title {
   font-weight: 600;
   font-size: 9.85pt;
-  color: #4b5563;
+  color: var(--resume-muted);
 }
 
 .resume-document .education-school,
 .resume-document .experience-company,
 .resume-document .skill-category-title {
   font-size: 8.25pt;
-  color: #4b5563;
+  color: var(--resume-muted);
   font-weight: 600;
   letter-spacing: 0.22px;
 }
@@ -178,7 +180,7 @@ body {
 .resume-document .education-date,
 .resume-document .experience-date {
   font-size: 7.85pt;
-  color: #4b5563;
+  color: var(--resume-muted);
   font-style: italic;
   letter-spacing: 0.18px;
 }
@@ -198,7 +200,7 @@ body {
 }
 
 .resume-document .skill-items {
-  color: #374151;
+  color: var(--resume-ink);
 }
 
 .resume-document .summary {
@@ -206,7 +208,7 @@ body {
   font-size: 8.95pt;
   line-height: 1.36;
   text-align: left;
-  color: #374151;
+  color: var(--resume-ink);
 }
 
 .resume-document .project-list {
@@ -225,7 +227,7 @@ body {
   row-gap: 3px;
   font-size: 8.8pt;
   line-height: 1.38;
-  color: #374151;
+  color: var(--resume-ink);
 }
 
 .resume-document .project-item .resume-highlights {
@@ -266,7 +268,7 @@ body {
   bottom: 8px;
   left: 5px;
   width: 2px;
-  background: rgba(39, 174, 96, 0.45);
+  background: rgba(146, 83, 15, 0.4);
 }
 
 .resume-document .experience-item {

@@ -9,11 +9,13 @@ export const monoStack =
 
 const ink = "#16222d";
 const muted = "#54616b";
-const accent = "#ad7b3a";
-const accentDeep = "#88581d";
-const paper = "rgba(255, 252, 247, 0.94)";
-const surfaceBorder = alpha(ink, 0.08);
-const surfaceShadow = "0 20px 60px rgba(30, 41, 47, 0.08)";
+const accentText = "#92530f";
+const accentLive = "#d27a24";
+const accentSoft = "#f3dfc8";
+const supportCool = "#2f6f73";
+const paper = "rgba(255, 255, 255, 0.82)";
+const surfaceBorder = alpha(ink, 0.075);
+const surfaceShadow = "0 14px 40px rgba(22, 34, 45, 0.05)";
 
 let theme = createTheme({
   cssVariables: true,
@@ -24,19 +26,25 @@ let theme = createTheme({
       contrastText: "#ffffff",
     },
     secondary: {
-      main: accentDeep,
-      light: accent,
-      dark: "#6d4513",
+      main: accentText,
+      light: accentLive,
+      dark: "#70400c",
       contrastText: "#ffffff",
     },
     warning: {
-      main: accent,
-      light: "#c99b65",
-      dark: accentDeep,
+      main: accentLive,
+      light: accentSoft,
+      dark: accentText,
       contrastText: ink,
     },
+    info: {
+      main: supportCool,
+      light: "#d6e7e5",
+      dark: "#245a5d",
+      contrastText: "#ffffff",
+    },
     background: {
-      default: "#f8f4ec",
+      default: "#f7f3ec",
       paper,
     },
     text: {
@@ -50,68 +58,68 @@ let theme = createTheme({
     h1: {
       fontFamily: displayStack,
       fontWeight: 600,
-      fontSize: "clamp(3.25rem, 8vw, 5.75rem)",
-      lineHeight: 0.98,
-      letterSpacing: "-0.03em",
+      fontSize: "4.8rem",
+      lineHeight: 1,
+      letterSpacing: 0,
       textWrap: "balance",
     },
     h2: {
       fontFamily: displayStack,
       fontWeight: 600,
-      fontSize: "clamp(2.5rem, 6vw, 4.2rem)",
-      lineHeight: 0.98,
-      letterSpacing: "-0.03em",
+      fontSize: "3.35rem",
+      lineHeight: 1,
+      letterSpacing: 0,
       textWrap: "balance",
     },
     h3: {
       fontFamily: displayStack,
       fontWeight: 600,
-      fontSize: "clamp(1.9rem, 4vw, 2.8rem)",
-      lineHeight: 1.02,
-      letterSpacing: "-0.03em",
+      fontSize: "2.42rem",
+      lineHeight: 1.06,
+      letterSpacing: 0,
       textWrap: "balance",
     },
     h4: {
       fontFamily: displayStack,
       fontWeight: 600,
-      fontSize: "clamp(1.55rem, 2.5vw, 2.1rem)",
-      lineHeight: 1.08,
-      letterSpacing: "-0.02em",
+      fontSize: "1.85rem",
+      lineHeight: 1.12,
+      letterSpacing: 0,
       textWrap: "balance",
     },
     h5: {
       fontFamily: sansStack,
       fontWeight: 600,
-      fontSize: "1.25rem",
+      fontSize: "1.18rem",
       lineHeight: 1.2,
-      letterSpacing: "-0.01em",
+      letterSpacing: 0,
     },
     h6: {
       fontFamily: sansStack,
       fontWeight: 600,
       fontSize: "1.05rem",
       lineHeight: 1.35,
-      letterSpacing: "-0.01em",
+      letterSpacing: 0,
     },
     subtitle1: {
       fontSize: "1rem",
       fontWeight: 600,
       lineHeight: 1.4,
-      letterSpacing: "-0.01em",
+      letterSpacing: 0,
     },
     body1: {
       fontSize: "1rem",
-      lineHeight: 1.68,
+      lineHeight: 1.64,
     },
     body2: {
       fontSize: "0.95rem",
-      lineHeight: 1.6,
+      lineHeight: 1.58,
     },
     overline: {
-      fontSize: "0.78rem",
+      fontSize: "0.74rem",
       lineHeight: 1.35,
-      letterSpacing: "0.14em",
-      fontWeight: 700,
+      letterSpacing: "0.1em",
+      fontWeight: 600,
       textTransform: "uppercase",
     },
     button: {
@@ -120,7 +128,7 @@ let theme = createTheme({
       textTransform: "none",
     },
     caption: {
-      fontSize: "0.88rem",
+      fontSize: "0.84rem",
       lineHeight: 1.5,
     },
   },
@@ -132,7 +140,7 @@ let theme = createTheme({
         },
         body: {
           margin: 0,
-          background: `radial-gradient(circle at top right, ${alpha(accent, 0.16)}, transparent 28%), linear-gradient(180deg, #fbf8f2 0%, ${themeParam.palette.background.default} 50%, #ece3d4 100%)`,
+          background: `linear-gradient(180deg, #fdfaf5 0%, ${themeParam.palette.background.default} 48%, #f4eee3 100%)`,
           color: themeParam.palette.text.primary,
           fontFamily: themeParam.typography.fontFamily,
         },
@@ -154,7 +162,7 @@ let theme = createTheme({
           overflowX: "auto",
         },
         "::selection": {
-          backgroundColor: alpha(themeParam.palette.warning.main, 0.22),
+          backgroundColor: alpha(themeParam.palette.warning.main, 0.2),
         },
       }),
     },

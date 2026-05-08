@@ -31,19 +31,20 @@ const NAV_ITEMS: Array<{ key: PublicNavKey; label: string; href: string }> = [
 function getNavButtonStyles(theme: Theme, active: boolean) {
   return {
     color: active ? theme.palette.text.primary : theme.palette.text.secondary,
-    bgcolor: active ? alpha(theme.palette.warning.main, 0.06) : "transparent",
-    borderColor: active ? alpha(theme.palette.warning.main, 0.18) : "transparent",
+    bgcolor: active ? alpha(theme.palette.secondary.light, 0.055) : "transparent",
+    borderColor: active ? alpha(theme.palette.secondary.light, 0.2) : "transparent",
     flexShrink: 0,
-    minHeight: 40,
+    minHeight: 38,
     minWidth: "auto",
     px: { xs: 1.25, sm: 1.5 },
+    fontWeight: active ? 600 : 500,
     "&:hover": {
       color: theme.palette.text.primary,
       bgcolor: active
-        ? alpha(theme.palette.warning.main, 0.09)
+        ? alpha(theme.palette.secondary.light, 0.075)
         : alpha(theme.palette.text.primary, 0.04),
       borderColor: active
-        ? alpha(theme.palette.warning.main, 0.24)
+        ? alpha(theme.palette.secondary.light, 0.26)
         : alpha(theme.palette.text.primary, 0.08),
     },
   };
@@ -71,16 +72,17 @@ export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
       elevation={0}
       sx={(theme) => ({
         top: 0,
-        backdropFilter: "blur(18px)",
-        backgroundColor: alpha(theme.palette.background.default, 0.82),
-        borderBottom: `1px solid ${theme.palette.divider}`,
+        backdropFilter: "blur(16px)",
+        backgroundColor: alpha(theme.palette.common.white, 0.88),
+        borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.07)}`,
+        boxShadow: `0 10px 28px ${alpha(theme.palette.text.primary, 0.035)}`,
       })}
     >
       <Container maxWidth="lg">
         <Toolbar
           disableGutters
           sx={{
-            py: { xs: 1, md: 1.75 },
+            py: { xs: 0.8, md: 1.35 },
             gap: { xs: 1, md: 2.5 },
             flexWrap: "nowrap",
             alignItems: "center",
@@ -105,13 +107,13 @@ export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
               component="span"
               sx={{
                 fontFamily: monoStack,
-                fontSize: { xs: "1.1rem", md: "1.4rem" },
-                fontWeight: 600,
-                letterSpacing: "-0.08em",
+                fontSize: { xs: "1.05rem", md: "1.28rem" },
+                fontWeight: 650,
+                letterSpacing: 0,
                 lineHeight: 1,
               }}
             >
-              T│L
+              TL
             </Typography>
           </Link>
 
@@ -274,6 +276,7 @@ interface PageHeroProps {
   children: React.ReactNode;
   align?: "left" | "center";
   contentWidth?: React.CSSProperties["maxWidth"];
+  variant?: "default" | "home" | "compact";
   sx?: SxProps<Theme>;
   contentSx?: SxProps<Theme>;
 }
@@ -282,23 +285,38 @@ export function PageHero({
   children,
   align = "left",
   contentWidth = "58rem",
+  variant = "default",
   sx,
   contentSx,
 }: PageHeroProps) {
   const heroBaseSx: SxProps<Theme> = {
-    p: { xs: 3, md: 4 },
+    p: { xs: 2.75, md: 3.5 },
     mb: { xs: 3, md: 4 },
     backgroundColor: "background.paper",
     overflow: "hidden",
     position: "relative",
   };
+  const heroVariantSx: SxProps<Theme> =
+    variant === "home"
+      ? {
+          py: { xs: 8.5, md: 11 },
+          px: { xs: 3, md: 6 },
+          minHeight: { md: "clamp(500px, 62vh, 660px)" },
+          display: "grid",
+          alignItems: "center",
+        }
+      : variant === "compact"
+        ? {
+            p: { xs: 2.25, md: 3 },
+          }
+        : {};
   const contentBaseSx: SxProps<Theme> = {
     maxWidth: contentWidth,
     alignItems: align === "center" ? "center" : "flex-start",
     textAlign: align,
     ...(align === "center" ? { mx: "auto" } : {}),
   };
-  const heroSx = mergeSx(heroBaseSx, sx);
+  const heroSx = mergeSx(mergeSx(heroBaseSx, heroVariantSx), sx);
   const heroContentSx = mergeSx(contentBaseSx, contentSx);
 
   return (
@@ -340,7 +358,7 @@ export function SectionHeader({
           {eyebrow}
         </Typography>
       ) : null}
-      <Typography component="h2" variant="h3">
+      <Typography component="h2" variant="h4">
         {title}
       </Typography>
       {copy ? (

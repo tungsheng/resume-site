@@ -29,6 +29,14 @@ import {
   PublicSiteLayout,
   SectionHeader,
 } from "../site/layout";
+import {
+  accentPanelBaseSx,
+  composeSx,
+  mutedChipSx,
+  softPanelBaseSx,
+  subtlePanelBaseSx,
+  warningPanelBaseSx,
+} from "../site/styles";
 import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "Cloud Inference Platform | Tony Lee";
@@ -47,16 +55,11 @@ const overviewFactGridSx: SxProps<Theme> = {
   gap: { xs: 1.25, md: 1.5 },
 };
 
-const overviewFactSx: SxProps<Theme> = (theme) => ({
+const overviewFactSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gap: 0.55,
   alignContent: "start",
-  minWidth: 0,
   p: { xs: 1.5, sm: 1.65, md: 1.75 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.54),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
-  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.65)}`,
 });
 
 const workflowSurfaceSx: SxProps<Theme> = {
@@ -65,14 +68,10 @@ const workflowSurfaceSx: SxProps<Theme> = {
   gap: { xs: 1.25, md: 1.35 },
 };
 
-const workflowFoundationSx: SxProps<Theme> = (theme) => ({
+const workflowFoundationSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gap: { xs: 1.35, md: 1.5 },
   p: { xs: 1.5, sm: 1.65, md: 1.75 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.54),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
-  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.65)}`,
 });
 
 const workflowFoundationNodesSx: SxProps<Theme> = {
@@ -119,25 +118,25 @@ const workflowNodeLinkSx: SxProps<Theme> = (theme) => ({
   px: 0.875,
   py: 0.375,
   borderRadius: 999,
-  backgroundColor: alpha(theme.palette.secondary.main, 0.04),
-  border: `1px solid ${alpha(theme.palette.secondary.main, 0.12)}`,
+  backgroundColor: alpha(theme.palette.secondary.light, 0.04),
+  border: `1px solid ${alpha(theme.palette.secondary.light, 0.12)}`,
   color: alpha(theme.palette.secondary.dark, 0.72),
   boxShadow: "none",
   fontSize: "0.72rem",
-  fontWeight: 700,
+  fontWeight: 600,
   lineHeight: 1,
   whiteSpace: "nowrap",
   transition:
     "transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease",
   "&:hover, &:focus-visible": {
     backgroundColor: alpha(theme.palette.common.white, 0.96),
-    borderColor: alpha(theme.palette.secondary.main, 0.28),
+    borderColor: alpha(theme.palette.secondary.light, 0.28),
     color: theme.palette.text.primary,
     boxShadow: `0 12px 24px ${alpha(theme.palette.text.primary, 0.08)}`,
     transform: "translateY(-1px)",
   },
   "&:focus-visible": {
-    outline: `2px solid ${alpha(theme.palette.secondary.main, 0.4)}`,
+    outline: `2px solid ${alpha(theme.palette.secondary.light, 0.4)}`,
     outlineOffset: 2,
   },
 });
@@ -160,7 +159,7 @@ const workflowFlowSx: SxProps<Theme> = (theme) => ({
     top: 4,
     bottom: 4,
     width: "1px",
-    backgroundColor: alpha(theme.palette.secondary.main, 0.12),
+    backgroundColor: alpha(theme.palette.secondary.light, 0.12),
   },
   "& .project-workflow-flow-arrow": {
     display: { xs: "none", md: "inline-flex" },
@@ -182,7 +181,7 @@ const workflowFlowSx: SxProps<Theme> = (theme) => ({
       height: "9px",
       borderRadius: "50%",
       backgroundColor: theme.palette.background.paper,
-      border: `2px solid ${alpha(theme.palette.secondary.main, 0.42)}`,
+      border: `2px solid ${alpha(theme.palette.secondary.light, 0.42)}`,
       transform: "translateY(-50%)",
     },
   },
@@ -199,15 +198,10 @@ const workflowPathsSx: SxProps<Theme> = {
   gap: { xs: 1.25, md: 1.35 },
 };
 
-const workflowPathRowSx: SxProps<Theme> = (theme) => ({
+const workflowPathRowSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gap: { xs: 1.35, md: 1.5 },
-  minWidth: 0,
   p: { xs: 1.5, sm: 1.65, md: 1.75 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.54),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
-  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.65)}`,
 });
 
 const workflowMetaSx: SxProps<Theme> = {
@@ -216,15 +210,10 @@ const workflowMetaSx: SxProps<Theme> = {
   alignContent: "start",
 };
 
-const workflowRejoinSx: SxProps<Theme> = (theme) => ({
+const workflowRejoinSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gap: { xs: 1.35, md: 1.5 },
-  minWidth: 0,
   p: { xs: 1.5, sm: 1.65, md: 1.75 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.54),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
-  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.65)}`,
 });
 
 const quickStartCommandSx: SxProps<Theme> = {
@@ -259,21 +248,16 @@ const quickStartStepListSx: SxProps<Theme> = (theme) => ({
     top: 4,
     bottom: 4,
     width: "1px",
-    backgroundColor: alpha(theme.palette.secondary.main, 0.12),
+    backgroundColor: alpha(theme.palette.secondary.light, 0.12),
   },
 });
 
-const quickStartStepRowSx: SxProps<Theme> = (theme) => ({
+const quickStartStepRowSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => ({
   position: "relative",
   display: "grid",
   gap: { xs: 1.15, md: 1.2 },
   alignContent: "start",
-  minWidth: 0,
   p: { xs: 1.5, sm: 1.65, md: 1.75 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.54),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
-  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.65)}`,
   "&::before": {
     content: '""',
     display: { xs: "block", md: "none" },
@@ -284,10 +268,10 @@ const quickStartStepRowSx: SxProps<Theme> = (theme) => ({
     height: "9px",
     borderRadius: "50%",
     backgroundColor: theme.palette.background.paper,
-    border: `2px solid ${alpha(theme.palette.secondary.main, 0.42)}`,
+    border: `2px solid ${alpha(theme.palette.secondary.light, 0.42)}`,
     transform: "translateY(-50%)",
   },
-});
+}));
 
 const quickStartStepBadgeSx: SxProps<Theme> = (theme) => ({
   display: "inline-flex",
@@ -296,8 +280,8 @@ const quickStartStepBadgeSx: SxProps<Theme> = (theme) => ({
   width: "1.7rem",
   height: "1.45rem",
   borderRadius: 999,
-  backgroundColor: alpha(theme.palette.secondary.main, 0.04),
-  border: `1px solid ${alpha(theme.palette.secondary.main, 0.12)}`,
+  backgroundColor: alpha(theme.palette.secondary.light, 0.04),
+  border: `1px solid ${alpha(theme.palette.secondary.light, 0.12)}`,
   color: alpha(theme.palette.secondary.dark, 0.58),
   fontSize: "0.66rem",
   fontWeight: 500,
@@ -348,16 +332,12 @@ const quickStartProofListSx: SxProps<Theme> = {
   gap: { xs: 1, md: 1.25 },
 };
 
-const quickStartProofItemSx: SxProps<Theme> = (theme) => ({
+const quickStartProofItemSx: SxProps<Theme> = composeSx(subtlePanelBaseSx, {
   display: "grid",
   gridTemplateColumns: "1.35rem minmax(0, 1fr)",
   gap: 0.85,
   alignItems: "start",
-  minWidth: 0,
   p: { xs: 1.35, sm: 1.5 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.text.primary, 0.025),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
 });
 
 const quickStartCheckIconSx: SxProps<Theme> = (theme) => ({
@@ -366,12 +346,7 @@ const quickStartCheckIconSx: SxProps<Theme> = (theme) => ({
   fontSize: "1rem",
 });
 
-const quickStartOutputChipSx: SxProps<Theme> = (theme) => ({
-  backgroundColor: alpha(theme.palette.text.primary, 0.035),
-  borderColor: alpha(theme.palette.text.primary, 0.1),
-  color: alpha(theme.palette.text.primary, 0.72),
-  fontWeight: 600,
-});
+const quickStartOutputChipSx: SxProps<Theme> = mutedChipSx;
 
 const usageSurfaceSx: SxProps<Theme> = {
   p: { xs: 2, sm: 2.5, md: 3 },
@@ -386,18 +361,13 @@ const usageWorkflowGridSx: SxProps<Theme> = {
   alignItems: "stretch",
 };
 
-const usageWorkflowItemSx: SxProps<Theme> = (theme) => ({
+const usageWorkflowItemSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gridTemplateRows: { xs: "auto auto auto", lg: "auto minmax(8.5rem, 1fr) auto" },
   gap: 1.25,
   alignContent: "stretch",
-  minWidth: 0,
   height: "100%",
   p: { xs: 1.5, sm: 1.65, md: 1.75 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.54),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
-  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.65)}`,
 });
 
 const usageWorkflowHeaderSx: SxProps<Theme> = {
@@ -421,13 +391,10 @@ const usageWorkflowActionsSx: SxProps<Theme> = {
   minWidth: 0,
 };
 
-const usageDefaultPathSx: SxProps<Theme> = (theme) => ({
+const usageDefaultPathSx: SxProps<Theme> = composeSx(subtlePanelBaseSx, {
   display: "grid",
   gap: { xs: 1.5, md: 1.75 },
   p: { xs: 1.5, sm: 1.75, md: 2 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.text.primary, 0.025),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
 });
 
 const usageDefaultHeaderSx: SxProps<Theme> = {
@@ -436,13 +403,10 @@ const usageDefaultHeaderSx: SxProps<Theme> = {
   maxWidth: "52rem",
 };
 
-const usageConceptSx: SxProps<Theme> = (theme) => ({
+const usageConceptSx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
   display: "grid",
   gap: { xs: 1.5, md: 1.75 },
   p: { xs: 1.5, sm: 1.75, md: 2 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.secondary.main, 0.035),
-  border: `1px solid ${alpha(theme.palette.secondary.main, 0.14)}`,
 });
 
 const usageConceptHeaderSx: SxProps<Theme> = {
@@ -472,7 +436,7 @@ const usageConceptStepSx: SxProps<Theme> = (theme) => ({
   backgroundColor: alpha(theme.palette.common.white, 0.72),
   border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
   fontSize: "0.86rem",
-  fontWeight: 700,
+  fontWeight: 600,
   lineHeight: 1.2,
 });
 
@@ -488,14 +452,10 @@ const evidenceGridSx: SxProps<Theme> = {
   gap: { xs: 1.25, md: 1.5 },
 };
 
-const evidenceItemSx: SxProps<Theme> = (theme) => ({
+const evidenceItemSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gap: 0.75,
-  minWidth: 0,
   p: { xs: 1.5, sm: 1.65, md: 1.75 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.54),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
 });
 
 const validationHeroFactsSx: SxProps<Theme> = {
@@ -511,7 +471,7 @@ const validationSurfaceSx: SxProps<Theme> = {
   gap: { xs: 1.5, md: 1.75 },
 };
 
-const validationDecisionSx: SxProps<Theme> = (theme) => ({
+const validationDecisionSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gridTemplateColumns: {
     xs: "minmax(0, 1fr)",
@@ -519,11 +479,7 @@ const validationDecisionSx: SxProps<Theme> = (theme) => ({
   },
   gap: { xs: 1.25, md: 2 },
   alignItems: "start",
-  minWidth: 0,
   p: { xs: 1.45, sm: 1.6, md: 1.75 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.54),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
   "& + &": {
     mt: { xs: 1.2, md: 1.35 },
   },
@@ -541,25 +497,18 @@ const validationDecisionBodySx: SxProps<Theme> = {
   minWidth: 0,
 };
 
-const validationProofSx: SxProps<Theme> = (theme) => ({
+const validationProofSx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
   display: "grid",
   gap: 0.2,
   alignContent: "center",
-  minWidth: 0,
   width: "fit-content",
   maxWidth: "100%",
   px: 1.25,
   py: 1,
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.secondary.main, 0.045),
-  border: `1px solid ${alpha(theme.palette.secondary.main, 0.13)}`,
 });
 
-const validationCaveatSx: SxProps<Theme> = (theme) => ({
+const validationCaveatSx: SxProps<Theme> = composeSx(warningPanelBaseSx, {
   p: 1.15,
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.warning.light, 0.12),
-  border: `1px solid ${alpha(theme.palette.warning.dark, 0.16)}`,
 });
 
 const validationSourceStripSx: SxProps<Theme> = {
@@ -571,14 +520,10 @@ const validationSourceStripSx: SxProps<Theme> = {
   gap: { xs: 1, md: 1.25 },
 };
 
-const validationSourceFactSx: SxProps<Theme> = (theme) => ({
+const validationSourceFactSx: SxProps<Theme> = composeSx(subtlePanelBaseSx, {
   display: "grid",
   gap: 0.2,
-  minWidth: 0,
   p: { xs: 1.2, sm: 1.3 },
-  borderRadius: 2,
-  backgroundColor: alpha(theme.palette.text.primary, 0.025),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
 });
 
 function resolveCurrentPathname(initialPath?: string): string {
@@ -694,7 +639,7 @@ function LabUsageSection() {
           {projectContent.usage.workflows.map((item) => (
             <Box key={item.title} component="section" sx={usageWorkflowItemSx}>
               <Box sx={usageWorkflowHeaderSx}>
-                <Typography variant="overline" color="primary">
+                <Typography variant="overline" color="secondary">
                   Workflow
                 </Typography>
                 <Typography variant="h6">{item.title}</Typography>
@@ -744,7 +689,7 @@ function LabUsageSection() {
 
         <Box component="section" sx={usageDefaultPathSx}>
           <Box sx={usageDefaultHeaderSx}>
-            <Typography variant="overline" color="primary">
+            <Typography variant="overline" color="secondary">
               {implementation.defaultPathTitle}
             </Typography>
             <Typography variant="body1" color="text.secondary">
@@ -787,7 +732,7 @@ function LabUsageSection() {
           </Box>
 
           <Box component="section" sx={quickStartSupportBlockSx}>
-            <Typography variant="overline" color="primary">
+            <Typography variant="overline" color="secondary">
               {implementation.verifyProofTitle}
             </Typography>
             <Box sx={quickStartProofListSx}>
@@ -795,7 +740,7 @@ function LabUsageSection() {
                 <Box key={item.title} sx={quickStartProofItemSx}>
                   <CheckRoundedIcon aria-hidden="true" sx={quickStartCheckIconSx} />
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {item.title}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -810,7 +755,7 @@ function LabUsageSection() {
 
         <Box component="section" sx={usageConceptSx}>
           <Box sx={usageConceptHeaderSx}>
-            <Typography variant="overline" color="primary">
+            <Typography variant="overline" color="secondary">
               {projectContent.usage.conceptTitle}
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -858,18 +803,18 @@ function ProjectValidationDecision({ decision }: { decision: ValidationDecision 
   return (
     <Box component="section" sx={validationDecisionSx}>
       <Box sx={validationDecisionMetaSx}>
-        <Typography variant="overline" color="primary">
+        <Typography variant="overline" color="secondary">
           Decision
         </Typography>
         <Typography variant="h6">{decision.title}</Typography>
-        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
           {decision.call}
         </Typography>
       </Box>
 
       <Box sx={validationDecisionBodySx}>
         <Box sx={validationProofSx}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
             {decision.proofLabel}
           </Typography>
           <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
@@ -938,10 +883,10 @@ function ProjectValidationRoute() {
           <Box sx={validationSourceStripSx} aria-label="Validation source facts">
             {projectContent.validation.sourceFacts.map((fact) => (
               <Box key={fact.label} sx={validationSourceFactSx}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                   {fact.label}
                 </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, overflowWrap: "anywhere" }}>
                   {fact.value}
                 </Typography>
               </Box>
@@ -1061,7 +1006,7 @@ function ProjectOverviewRoute() {
             <Box sx={overviewFactGridSx}>
               {projectContent.overviewFacts.map((item) => (
                 <Box key={item.label} component="section" sx={overviewFactSx}>
-                  <Typography variant="overline" color="primary">
+                  <Typography variant="overline" color="secondary">
                     {item.label}
                   </Typography>
                   <Typography variant="h6">{item.value}</Typography>
@@ -1086,7 +1031,7 @@ function ProjectOverviewRoute() {
         <Paper variant="outlined" sx={workflowSurfaceSx}>
           <Box component="section" sx={workflowFoundationSx}>
             <Box sx={workflowMetaSx}>
-              <Typography variant="overline" color="primary">
+              <Typography variant="overline" color="secondary">
                 {projectContent.workflowFoundation.title}
               </Typography>
               <Typography variant="body2" color="text.secondary">

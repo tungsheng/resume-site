@@ -121,27 +121,9 @@ export const experimentCatalogContent = {
   statusNote:
     "Catalog ready; KV-cache, batching, streaming timing, and autoscaling have selected measured evidence, with request-pattern and cost matrices still pending.",
   platformValidation: {
-    slug: "platform-validation",
-    title: "Project validation",
-    category: "Platform evidence",
     status: "Related project evidence",
     question:
       "Warm baseline, active-pressure scale-out, and target tuning are project rollout decisions, not catalog experiments.",
-    metricFocus: ["Warm path", "Active-pressure", "Target 4"],
-    summaryFacts: [
-      {
-        label: "First response",
-        value: "93s vs 423s",
-      },
-      {
-        label: "Replica 2",
-        value: "564s vs 989s",
-      },
-      {
-        label: "Target call",
-        value: "Keep 4",
-      },
-    ],
     href: PROJECT_VALIDATION_PATH,
   },
   conceptLead:
