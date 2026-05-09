@@ -278,8 +278,8 @@ export function PageHero({
   contentSx,
 }: PageHeroProps) {
   const heroBaseSx: SxProps<Theme> = {
-    p: { xs: 2.75, md: 3.5 },
-    mb: { xs: 3, md: 4 },
+    p: { xs: 2.25, sm: 2.75, md: 3 },
+    mb: { xs: 3, md: 3.5 },
     backgroundColor: "background.paper",
     overflow: "hidden",
     position: "relative",
@@ -287,9 +287,12 @@ export function PageHero({
   const heroVariantSx: SxProps<Theme> =
     variant === "home"
       ? {
-          py: { xs: 8.5, md: 11 },
-          px: { xs: 3, md: 6 },
-          minHeight: { md: "clamp(500px, 62vh, 660px)" },
+          py: { xs: 6.5, sm: 7.5, md: 9 },
+          px: { xs: 2.5, md: 5 },
+          minHeight: {
+            xs: "clamp(400px, calc(100svh - 260px), 560px)",
+            md: "clamp(460px, 58vh, 580px)",
+          },
           display: "grid",
           alignItems: "center",
         }
@@ -324,8 +327,8 @@ export function PageHero({
 
 export function PageSection({ children }: { children: React.ReactNode }) {
   return (
-    <Box component="section" sx={{ mb: { xs: 4, md: 5 } }}>
-      <Stack spacing={3.5}>{children}</Stack>
+    <Box component="section" sx={{ mb: { xs: 3.5, md: 4.25 } }}>
+      <Stack spacing={{ xs: 2.5, md: 3 }}>{children}</Stack>
     </Box>
   );
 }
@@ -350,7 +353,7 @@ export function SectionHeader({
         {title}
       </Typography>
       {copy ? (
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "46rem" }}>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "44rem" }}>
           {copy}
         </Typography>
       ) : null}
@@ -372,6 +375,7 @@ export function ActionLinkRow({
       useFlexGap
       sx={{
         flexWrap: "wrap",
+        rowGap: 1,
         justifyContent,
         "& .MuiButton-root": {
           minHeight: 40,

@@ -36,9 +36,9 @@ interface Toast {
 let toastId = 0;
 
 const resumeCardContentSx = {
-  p: { xs: 2.25, md: 2.5 },
+  p: { xs: 1.75, sm: 2, md: 2.25 },
   "&:last-child": {
-    pb: { xs: 2.25, md: 2.5 },
+    pb: { xs: 1.75, sm: 2, md: 2.25 },
   },
 } as const;
 
@@ -312,11 +312,11 @@ function ResumeWebView({ data }: { data: ResumeData }) {
           xs: "minmax(0, 1fr)",
           md: "minmax(0, 1.6fr) minmax(280px, 0.85fr)",
         },
-        gap: { xs: 2, md: 2.5 },
+        gap: { xs: 1.75, md: 2 },
         alignItems: "start",
       }}
     >
-      <Stack spacing={2.5}>
+      <Stack spacing={{ xs: 2, md: 2.25 }}>
         {view.summary ? (
           <Card variant="outlined">
             <CardContent sx={resumeCardContentSx}>
@@ -332,7 +332,7 @@ function ResumeWebView({ data }: { data: ResumeData }) {
 
         {view.projects.length > 0 ? (
           <ResumeSection title={view.projectsTitle}>
-            <Stack spacing={2}>
+            <Stack spacing={1.5}>
               {view.projects.map((project, index) => (
                 <Card key={`${project.title}-${index}`} variant="outlined">
                   <CardContent sx={resumeCardContentSx}>
@@ -349,7 +349,7 @@ function ResumeWebView({ data }: { data: ResumeData }) {
 
         {view.experience.length > 0 ? (
           <ResumeSection title="Experience">
-            <Stack spacing={2}>
+            <Stack spacing={1.5}>
               {view.experience.map((experience, index) => (
                 <Card key={`${experience.title}-${index}`} variant="outlined">
                   <CardContent sx={resumeCardContentSx}>
@@ -379,7 +379,7 @@ function ResumeWebView({ data }: { data: ResumeData }) {
         ) : null}
       </Stack>
 
-      <Stack spacing={2.5}>
+      <Stack spacing={{ xs: 2, md: 2.25 }}>
         {(view.header.contacts.email || linkedinHref) ? (
           <Card variant="outlined" sx={{ display: { xs: "none", md: "block" } }}>
             <CardContent sx={resumeCardContentSx}>
@@ -421,7 +421,7 @@ function ResumeWebView({ data }: { data: ResumeData }) {
 
         {view.education.length > 0 ? (
           <ResumeSection title="Education">
-            <Stack spacing={2}>
+            <Stack spacing={1.5}>
               {view.education.map((education, index) => (
                 <Card key={`${education.school}-${index}`} variant="outlined">
                   <CardContent sx={resumeCardContentSx}>

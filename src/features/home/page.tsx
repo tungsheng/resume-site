@@ -18,10 +18,10 @@ export function HomePage() {
         align="center"
         contentWidth="48rem"
         variant="home"
-        contentSx={{ gap: { xs: 4, md: 5.25 } }}
+        contentSx={{ gap: { xs: 3.25, md: 4.25 } }}
       >
         <Stack
-          spacing={{ xs: 2.5, md: 3.25 }}
+          spacing={{ xs: 2, md: 2.5 }}
           sx={{
             alignItems: "center",
             maxWidth: "100%",
@@ -35,7 +35,7 @@ export function HomePage() {
                 xs: "3.05rem",
                 sm: "3.8rem",
                 md: "4.8rem",
-                lg: "5.15rem",
+                lg: "5rem",
               },
               lineHeight: 1.02,
             }}
@@ -55,7 +55,7 @@ export function HomePage() {
           </Typography>
         </Stack>
         <Stack
-          spacing={{ xs: 2, md: 2.5 }}
+          spacing={{ xs: 1.75, md: 2.25 }}
           sx={{
             alignItems: "center",
             maxWidth: "40rem",

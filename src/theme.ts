@@ -1,17 +1,17 @@
 import { alpha, createTheme, responsiveFontSizes } from "@mui/material/styles";
 
-export const sansStack =
+const sansStack =
   '"Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif';
-export const displayStack =
+const displayStack =
   '"Iowan Old Style", "Palatino Linotype", Georgia, serif';
 export const monoStack =
   '"JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace';
 
 const ink = "#16231f";
 const muted = "#465750";
-const accentText = "#007a5e";
-const accentLive = "#00a878";
-const accentSoft = "#e4f5ec";
+const accentText = "#007a63";
+const accentLive = "#00a86b";
+const accentSoft = "#dff6ee";
 const warningWarm = "#a95718";
 const warningSoft = "#f5e0cb";
 const supportCool = "#276f89";
@@ -30,7 +30,7 @@ let theme = createTheme({
     secondary: {
       main: accentText,
       light: accentLive,
-      dark: "#005f49",
+      dark: "#005f4d",
       contrastText: "#ffffff",
     },
     warning: {
@@ -42,7 +42,7 @@ let theme = createTheme({
     success: {
       main: accentText,
       light: accentSoft,
-      dark: "#005f49",
+      dark: "#005f4d",
       contrastText: "#ffffff",
     },
     info: {

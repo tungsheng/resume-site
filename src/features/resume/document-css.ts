@@ -17,7 +17,7 @@ body {
 }
 
 .resume-document {
-  --resume-accent: #007a5e;
+  --resume-accent: #007a63;
   --resume-ink: #16231f;
   --resume-muted: #465750;
   --ui-font: 'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;

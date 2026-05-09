@@ -46,12 +46,12 @@ const EXPERIMENT_DETAIL_PREFIX = `${EXPERIMENTS_PATH}/`;
 const catalogStatusNoteSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => ({
   position: "relative",
   display: "grid",
-  gap: { xs: 0.85, md: 1 },
+  gap: { xs: 0.75, md: 0.85 },
   alignContent: "start",
   width: "100%",
   overflow: "hidden",
-  p: { xs: 1.25, sm: 1.4, md: 1.5 },
-  pl: { xs: 1.45, sm: 1.65, md: 1.8 },
+  p: { xs: 1.15, sm: 1.25, md: 1.35 },
+  pl: { xs: 1.4, sm: 1.5, md: 1.65 },
   "&::before": {
     content: '""',
     position: "absolute",
@@ -73,7 +73,7 @@ const catalogStatusHeaderSx: SxProps<Theme> = {
 const heroSplitSx: SxProps<Theme> = {
   display: "grid",
   gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "minmax(0, 0.95fr) minmax(23rem, 0.75fr)" },
-  gap: { xs: 2.25, md: 3 },
+  gap: { xs: 1.75, md: 2.5 },
   alignItems: "start",
   width: "100%",
 };
@@ -100,14 +100,14 @@ const catalogHeroTopSx: SxProps<Theme> = {
     xs: "minmax(0, 1fr)",
     md: "minmax(0, 1fr) minmax(20rem, 0.52fr)",
   },
-  gap: { xs: 1.75, md: 2.5 },
+  gap: { xs: 1.5, md: 2.25 },
   alignItems: "start",
   width: "100%",
 };
 
 const catalogHeroPrimarySx: SxProps<Theme> = {
   display: "grid",
-  gap: { xs: 1.25, md: 1.5 },
+  gap: { xs: 1.05, md: 1.25 },
   alignContent: "start",
   minWidth: 0,
   maxWidth: "61rem",
@@ -153,8 +153,8 @@ const conceptSurfaceSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => (
   flexWrap: "wrap",
   gap: { xs: 0.85, sm: 0.75, md: 1 },
   alignItems: { xs: "stretch", sm: "center" },
-  p: { xs: 1.25, sm: 1.5, md: 1.75 },
-  pl: { xs: "var(--experiment-concept-step-indent)", sm: 1.5, md: 1.75 },
+  p: { xs: 1.15, sm: 1.3, md: 1.5 },
+  pl: { xs: "var(--experiment-concept-step-indent)", sm: 1.3, md: 1.5 },
   "&::before": {
     content: '""',
     display: { xs: "block", sm: "none" },
@@ -242,9 +242,9 @@ const browseRowSx: SxProps<Theme> = (theme) => ({
   gap: { xs: 0.9, md: 1.25 },
   alignItems: "stretch",
   minWidth: 0,
-  minHeight: { md: "5.9rem" },
-  px: { xs: 1.35, md: 1.5 },
-  py: { xs: 1.35, md: 1.2 },
+  minHeight: { md: "5.25rem" },
+  px: { xs: 1.25, md: 1.35 },
+  py: { xs: 1.2, md: 1.05 },
   "& + &": {
     borderTop: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
   },
@@ -268,6 +268,13 @@ const mobileFieldLabelSx: SxProps<Theme> = {
   color: "text.secondary",
 };
 
+const experimentCategoryLabelSx: SxProps<Theme> = {
+  color: "text.secondary",
+  fontSize: "0.74rem",
+  fontWeight: 600,
+  lineHeight: 1.25,
+};
+
 const browseActionSx: SxProps<Theme> = {
   justifySelf: { xs: "start", md: "end" },
   alignSelf: "center",
@@ -279,7 +286,7 @@ const platformValidationBandSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 1fr) auto" },
   gap: { xs: 1, md: 1.5 },
   alignItems: "center",
-  p: { xs: 1.25, sm: 1.4, md: 1.5 },
+  p: { xs: 1.15, sm: 1.25, md: 1.35 },
 });
 
 const experimentMetaRowSx: SxProps<Theme> = {
@@ -305,7 +312,7 @@ const detailSummaryItemSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   alignContent: "center",
   gap: 0.2,
-  minHeight: "4.35rem",
+  minHeight: "4rem",
   height: "100%",
   px: { xs: 1.25, md: 1.4 },
   py: { xs: 1, md: 1.1 },
@@ -316,8 +323,8 @@ const metricGroupSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   gap: 0.8,
   alignContent: "start",
   height: "100%",
-  minHeight: "8.75rem",
-  p: { xs: 1.35, sm: 1.5 },
+  minHeight: "7.5rem",
+  p: { xs: 1.2, sm: 1.35 },
 });
 
 type CatalogStatusTone = "ready" | "measured" | "pending";
@@ -330,33 +337,33 @@ const catalogStatusStackSx: SxProps<Theme> = {
   maxWidth: { md: "12rem" },
 };
 
-const catalogStatusLineSx: SxProps<Theme> = {
-  display: "flex",
-  gap: 0.55,
-  alignItems: "baseline",
-  minWidth: 0,
-  color: "text.secondary",
-};
-
-function catalogStatusDotSx(tone: CatalogStatusTone): SxProps<Theme> {
+function catalogStatusLineSx(tone: CatalogStatusTone): SxProps<Theme> {
   return (theme) => {
     const toneColor =
       tone === "measured"
-        ? theme.palette.info.dark
+        ? theme.palette.info.main
         : tone === "pending"
-          ? theme.palette.warning.dark
-          : theme.palette.success.dark;
+          ? theme.palette.warning.main
+          : theme.palette.secondary.main;
 
     return {
-      width: "0.45rem",
-      height: "0.45rem",
-      mt: "0.15rem",
-      borderRadius: "50%",
-      backgroundColor: toneColor,
-      flexShrink: 0,
+      display: "flex",
+      gap: 0.55,
+      alignItems: "baseline",
+      minWidth: 0,
+      color: toneColor,
     };
   };
 }
+
+const catalogStatusDotSx: SxProps<Theme> = {
+  width: "0.45rem",
+  height: "0.45rem",
+  mt: "0.15rem",
+  borderRadius: "50%",
+  backgroundColor: "currentColor",
+  flexShrink: 0,
+};
 
 const catalogStatusTextSx: SxProps<Theme> = {
   minWidth: 0,
@@ -376,14 +383,14 @@ const catalogStatusMutedSx: SxProps<Theme> = {
 
 const detailIntroSx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
   display: "grid",
-  gap: { xs: 1.25, md: 1.5 },
-  p: { xs: 1.5, sm: 1.75, md: 2 },
+  gap: { xs: 1, md: 1.25 },
+  p: { xs: 1.25, sm: 1.5, md: 1.65 },
 });
 
 const runMatrixSx: SxProps<Theme> = {
   display: "grid",
   gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "repeat(2, minmax(0, 1fr))" },
-  gap: { xs: 2, md: 2.5 },
+  gap: { xs: 1.5, md: 1.75 },
   alignItems: "stretch",
 };
 
@@ -406,8 +413,8 @@ const matrixItemSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gap: 0.6,
   alignContent: "start",
-  minHeight: "8.25rem",
-  p: { xs: 1.35, sm: 1.5 },
+  minHeight: "7rem",
+  p: { xs: 1.2, sm: 1.35 },
 });
 
 const commandListSx: SxProps<Theme> = {
@@ -426,8 +433,8 @@ const pendingResultSx: SxProps<Theme> = composeSx(warningPanelBaseSx, {
 
 const measuredResultSx: SxProps<Theme> = composeSx(successPanelBaseSx, {
   display: "grid",
-  gap: { xs: 1.35, md: 1.5 },
-  p: { xs: 1.5, sm: 1.75, md: 2 },
+  gap: { xs: 1.15, md: 1.3 },
+  p: { xs: 1.3, sm: 1.5, md: 1.7 },
 });
 
 const resultStatGridSx: SxProps<Theme> = {
@@ -671,14 +678,14 @@ function ExperimentStatusChips({ experiment }: { experiment: ExperimentCatalogIt
 
   return (
     <Box sx={catalogStatusStackSx} aria-label={`${experiment.title} status`}>
-      <Box component="span" sx={catalogStatusLineSx}>
-        <Box component="span" sx={catalogStatusDotSx("ready")} aria-hidden="true" />
+      <Box component="span" sx={catalogStatusLineSx("ready")}>
+        <Box component="span" sx={catalogStatusDotSx} aria-hidden="true" />
         <Box component="span" sx={catalogStatusTextSx}>
           Run ready
         </Box>
       </Box>
-      <Box component="span" sx={catalogStatusLineSx}>
-        <Box component="span" sx={catalogStatusDotSx(evidenceTone)} aria-hidden="true" />
+      <Box component="span" sx={catalogStatusLineSx(evidenceTone)}>
+        <Box component="span" sx={catalogStatusDotSx} aria-hidden="true" />
         <Box component="span" sx={catalogStatusTextSx}>
           {evidenceValue}
           {evidenceDetail ? (
@@ -697,8 +704,8 @@ function ExperimentBrowseRow({ experiment }: { experiment: ExperimentCatalogItem
   return (
     <Box component="section" sx={browseRowSx}>
       <BrowseField label="Experiment">
-        <Box sx={{ mb: 0.55 }}>
-          <Chip label={experiment.category} size="small" variant="outlined" />
+        <Box component="span" sx={experimentCategoryLabelSx}>
+          {experiment.category}
         </Box>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
           {experiment.title}

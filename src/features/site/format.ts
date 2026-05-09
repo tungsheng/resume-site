@@ -6,8 +6,3 @@ export function formatDurationLabel(seconds: number): string {
   if (remainder === 0) return `${minutes}m`;
   return `${minutes}m ${remainder}s`;
 }
-
-export function formatCurrencyLabel(value: number): string {
-  if (value === 0) return "$0.00";
-  return `$${value.toFixed(3)}`;
-}

@@ -62,24 +62,25 @@ const overviewFactSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
 });
 
 const workflowSurfaceSx: SxProps<Theme> = {
-  p: { xs: 2, sm: 2.5, md: 3 },
+  p: { xs: 1.5, sm: 1.75, md: 2 },
   display: "grid",
-  gap: { xs: 1.25, md: 1.35 },
+  gap: { xs: 1, md: 1.1 },
 };
 
 const workflowFoundationSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
-  gap: { xs: 1.35, md: 1.5 },
-  p: { xs: 1.5, sm: 1.65, md: 1.75 },
+  gap: { xs: 1.05, md: 1.15 },
+  p: { xs: 1.25, sm: 1.4, md: 1.5 },
 });
 
 const workflowFoundationNodesSx: SxProps<Theme> = {
-  display: "grid",
-  gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
-  gap: { xs: 1, sm: 1.25 },
+  display: "flex",
+  flexWrap: "wrap",
+  gap: { xs: 0.75, sm: 0.85 },
   "& .project-workflow-node": {
     justifyContent: "flex-start",
-    width: "100%",
+    width: { xs: "100%", sm: "auto" },
+    minWidth: { sm: "12.25rem" },
   },
 };
 
@@ -92,9 +93,9 @@ const workflowNodePillSx: SxProps<Theme> = (theme) => ({
   gap: 1,
   width: "fit-content",
   maxWidth: "100%",
-  minHeight: "2.7rem",
-  px: { xs: 1.25, md: 1.5 },
-  py: 1,
+  minHeight: "2.45rem",
+  px: { xs: 1.1, md: 1.2 },
+  py: 0.75,
   borderRadius: 2,
   backgroundColor: theme.palette.background.paper,
   border: `1px solid ${theme.palette.divider}`,
@@ -147,7 +148,7 @@ const workflowFlowSx: SxProps<Theme> = (theme) => ({
   alignItems: { xs: "start", md: "center" },
   justifyItems: { xs: "start", md: "initial" },
   backgroundColor: "transparent",
-  gap: { xs: 0.85, md: 1 },
+  gap: { xs: 0.85, md: 0.55 },
   pl: { xs: 2.75, md: 0 },
   pr: { xs: 0.25, md: 0 },
   "&::before": {
@@ -162,6 +163,17 @@ const workflowFlowSx: SxProps<Theme> = (theme) => ({
   },
   "& .project-workflow-flow-arrow": {
     display: { xs: "none", md: "inline-flex" },
+    flex: "0 0 auto",
+    color: alpha(theme.palette.secondary.dark, 0.42),
+    fontSize: "1rem",
+    lineHeight: 1,
+  },
+  "& .project-workflow-step": {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: { xs: 0, md: 0.55 },
+    maxWidth: "100%",
+    minWidth: 0,
   },
   "& .project-workflow-node": {
     position: { xs: "relative", md: "static" },
@@ -186,33 +198,27 @@ const workflowFlowSx: SxProps<Theme> = (theme) => ({
   },
 });
 
-const workflowFlowArrowSx: SxProps<Theme> = (theme) => ({
-  color: alpha(theme.palette.secondary.dark, 0.42),
-  flexShrink: 0,
-  fontSize: "1rem",
-});
-
 const workflowPathsSx: SxProps<Theme> = {
   display: "grid",
-  gap: { xs: 1.25, md: 1.35 },
+  gap: { xs: 1, md: 1.1 },
 };
 
 const workflowPathRowSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
-  gap: { xs: 1.35, md: 1.5 },
-  p: { xs: 1.5, sm: 1.65, md: 1.75 },
+  gap: { xs: 1.05, md: 1.15 },
+  p: { xs: 1.25, sm: 1.4, md: 1.5 },
 });
 
 const workflowMetaSx: SxProps<Theme> = {
   display: "grid",
-  gap: 1,
+  gap: 0.45,
   alignContent: "start",
 };
 
 const workflowRejoinSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
-  gap: { xs: 1.35, md: 1.5 },
-  p: { xs: 1.5, sm: 1.65, md: 1.75 },
+  gap: { xs: 1.05, md: 1.15 },
+  p: { xs: 1.25, sm: 1.4, md: 1.5 },
 });
 
 const quickStartCommandSx: SxProps<Theme> = {
@@ -235,7 +241,7 @@ const quickStartStepListSx: SxProps<Theme> = (theme) => ({
     xs: "minmax(0, 1fr)",
     md: "minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr)",
   },
-  gap: { xs: 1.25, md: 1.35 },
+  gap: { xs: 1, md: 1.1 },
   alignItems: "stretch",
   pl: { xs: 2.75, md: 0 },
   pr: { xs: 0.25, md: 0 },
@@ -254,9 +260,9 @@ const quickStartStepListSx: SxProps<Theme> = (theme) => ({
 const quickStartStepRowSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => ({
   position: "relative",
   display: "grid",
-  gap: { xs: 1.15, md: 1.2 },
+  gap: { xs: 1, md: 1.05 },
   alignContent: "start",
-  p: { xs: 1.5, sm: 1.65, md: 1.75 },
+  p: { xs: 1.35, sm: 1.5, md: 1.6 },
   "&::before": {
     content: '""',
     display: { xs: "block", md: "none" },
@@ -322,7 +328,7 @@ const quickStartStepConnectorSx: SxProps<Theme> = (theme) => ({
 
 const quickStartSupportBlockSx: SxProps<Theme> = {
   display: "grid",
-  gap: 1.25,
+  gap: 1,
 };
 
 const quickStartProofListSx: SxProps<Theme> = {
@@ -346,25 +352,25 @@ const quickStartCheckIconSx: SxProps<Theme> = (theme) => ({
 });
 
 const usageSurfaceSx: SxProps<Theme> = {
-  p: { xs: 2, sm: 2.5, md: 3 },
+  p: { xs: 1.5, sm: 1.75, md: 2.25 },
   display: "grid",
-  gap: { xs: 2.25, md: 2.75 },
+  gap: { xs: 1.75, md: 2.25 },
 };
 
 const usageWorkflowGridSx: SxProps<Theme> = {
   display: "grid",
   gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "repeat(3, minmax(0, 1fr))" },
-  gap: { xs: 1.25, md: 1.5 },
+  gap: { xs: 1, md: 1.25 },
   alignItems: "stretch",
 };
 
 const usageWorkflowItemSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
-  gridTemplateRows: { xs: "auto auto auto", lg: "auto minmax(8.5rem, 1fr) auto" },
-  gap: 1.25,
+  gridTemplateRows: { xs: "auto auto auto", lg: "auto minmax(7.5rem, 1fr) auto" },
+  gap: 1,
   alignContent: "stretch",
   height: "100%",
-  p: { xs: 1.5, sm: 1.65, md: 1.75 },
+  p: { xs: 1.35, sm: 1.5, md: 1.6 },
 });
 
 const usageWorkflowHeaderSx: SxProps<Theme> = {
@@ -390,8 +396,8 @@ const usageWorkflowActionsSx: SxProps<Theme> = {
 
 const usageDefaultPathSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
-  gap: { xs: 1.5, md: 1.75 },
-  p: { xs: 1.5, sm: 1.75, md: 2 },
+  gap: { xs: 1.25, md: 1.5 },
+  p: { xs: 1.35, sm: 1.5, md: 1.75 },
 });
 
 const usageDefaultHeaderSx: SxProps<Theme> = {
@@ -402,8 +408,8 @@ const usageDefaultHeaderSx: SxProps<Theme> = {
 
 const usageConceptSx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
   display: "grid",
-  gap: { xs: 1.5, md: 1.75 },
-  p: { xs: 1.5, sm: 1.75, md: 2 },
+  gap: { xs: 1.25, md: 1.5 },
+  p: { xs: 1.35, sm: 1.5, md: 1.75 },
 });
 
 const usageConceptHeaderSx: SxProps<Theme> = {
@@ -438,9 +444,9 @@ const usageConceptStepSx: SxProps<Theme> = (theme) => ({
 });
 
 const evidenceSurfaceSx: SxProps<Theme> = {
-  p: { xs: 2, sm: 2.5, md: 3 },
+  p: { xs: 1.5, sm: 1.75, md: 2.25 },
   display: "grid",
-  gap: { xs: 1.75, md: 2 },
+  gap: { xs: 1.4, md: 1.75 },
 };
 
 const evidenceGridSx: SxProps<Theme> = {
@@ -463,9 +469,9 @@ const validationHeroFactsSx: SxProps<Theme> = {
 };
 
 const validationSurfaceSx: SxProps<Theme> = {
-  p: { xs: 2, sm: 2.5, md: 3 },
+  p: { xs: 1.5, sm: 1.75, md: 2.25 },
   display: "grid",
-  gap: { xs: 1.5, md: 1.75 },
+  gap: { xs: 1.25, md: 1.5 },
 };
 
 const validationDecisionSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
@@ -594,16 +600,19 @@ function WorkflowFlow({
   return (
     <Box sx={workflowFlowSx} aria-label={ariaLabel}>
       {nodes.map((node, index) => (
-        <React.Fragment key={`${node.label}-${index}`}>
-          <WorkflowNodePill node={node} />
-          {index < nodes.length - 1 ? (
+        <Box
+          component="span"
+          className="project-workflow-step"
+          key={`${node.label}-${index}`}
+        >
+          {index > 0 ? (
             <ArrowForwardIcon
               className="project-workflow-flow-arrow"
               aria-hidden="true"
-              sx={workflowFlowArrowSx}
             />
           ) : null}
-        </React.Fragment>
+          <WorkflowNodePill node={node} />
+        </Box>
       ))}
     </Box>
   );

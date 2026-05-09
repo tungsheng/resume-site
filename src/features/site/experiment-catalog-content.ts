@@ -2,12 +2,12 @@ import { PROJECT_VALIDATION_PATH } from "./content";
 
 const GPU_INFERENCE_REPO_BASE = "https://github.com/tungsheng/gpu-inference-lab/blob/main";
 
-export type ExperimentMetricGroup = {
+type ExperimentMetricGroup = {
   label: string;
   metrics: string[];
 };
 
-export type ExperimentResultEvidenceRow = {
+type ExperimentResultEvidenceRow = {
   target: string;
   outcome: string;
   p95Latency: string;
@@ -15,7 +15,7 @@ export type ExperimentResultEvidenceRow = {
   gpuMax: string;
 };
 
-export type ExperimentResultEvidenceColumns = {
+type ExperimentResultEvidenceColumns = {
   target: string;
   outcome: string;
   p95Latency: string;
@@ -30,18 +30,18 @@ export type ExperimentResultEvidenceTable = {
   rows: ExperimentResultEvidenceRow[];
 };
 
-export type ExperimentResultEvidenceStat = {
+type ExperimentResultEvidenceStat = {
   label: string;
   value: string;
   context: string;
 };
 
-export type ExperimentSourceReport = {
+type ExperimentSourceReport = {
   label: string;
   path: string;
 };
 
-export type ExperimentResultEvidence = {
+type ExperimentResultEvidence = {
   title: string;
   statusLabel: string;
   reportDate: string;
@@ -56,19 +56,19 @@ export type ExperimentResultEvidence = {
   curatedResults?: boolean;
 };
 
-export type ExperimentCase = {
+type ExperimentCase = {
   id: string;
   description: string;
   promptTokens: number;
   outputTokens: number;
 };
 
-export type ExperimentServingProfile = {
+type ExperimentServingProfile = {
   id: string;
   description: string;
 };
 
-export type ExperimentStatus = {
+type ExperimentStatus = {
   definition: string;
   local: string;
   measurement: string;
