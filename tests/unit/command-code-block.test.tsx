@@ -22,4 +22,19 @@ describe("CommandCodeBlock", () => {
     expect(html).toContain("command-token--value");
     expect(html).toContain("command-token--separator");
   });
+
+  test("renders shell-specific syntax token classes", () => {
+    const html = renderToStaticMarkup(
+      <CommandCodeBlock command="PROFILE=zero-idle ./scripts/evaluate --profile $PROFILE && echo done # dry run" />,
+    );
+
+    expect(html).toContain("PROFILE=zero-idle");
+    expect(html).toContain("$PROFILE");
+    expect(html).toContain("&amp;&amp;");
+    expect(html).toContain("# dry run");
+    expect(html).toContain("command-token--assignment");
+    expect(html).toContain("command-token--variable");
+    expect(html).toContain("command-token--separator");
+    expect(html).toContain("command-token--comment");
+  });
 });

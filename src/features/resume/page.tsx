@@ -461,10 +461,6 @@ export function ResumePageContent({
   onRemoveToast,
 }: ResumePageContentProps) {
   const linkedinHref = getLinkedinHref(data.header.contacts.linkedin);
-  const secondaryLinks = [
-    { label: "View project", href: PROJECT_PATH, external: false },
-    { label: "View experiments", href: EXPERIMENTS_PATH, external: false },
-  ];
 
   return (
     <PublicSiteLayout activeNav="resume">
@@ -518,17 +514,12 @@ export function ResumePageContent({
             {downloading ? "Preparing PDF..." : "Download PDF"}
           </Button>
 
-          {secondaryLinks.map((link) => (
-            <Button
-              key={link.label}
-              href={link.href}
-              variant="outlined"
-              target={link.external ? "_blank" : undefined}
-              rel={link.external ? "noreferrer" : undefined}
-            >
-              {link.label}
-            </Button>
-          ))}
+          <Button href={PROJECT_PATH} variant="outlined">
+            View project
+          </Button>
+          <Button href={EXPERIMENTS_PATH} variant="outlined">
+            View experiments
+          </Button>
         </ActionLinkRow>
       </PageHero>
 

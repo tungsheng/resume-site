@@ -69,28 +69,39 @@ describe("API Integration", () => {
     expect(res.status).toBe(200);
 
     const html = await res.text();
-    expect(html).toContain("<title>Resume</title>");
+    expect(html).toContain("<title>Tony Lee | Resume</title>");
   });
 
   itIfIntegration("POST /api/public-pdf - 429 after rate limit exceeded", async () => {
-    const uniqueHeader = `test-${Date.now()}`;
+    const controllers = Array.from({ length: 6 }, () => new AbortController());
+    const requests = controllers.map((controller) =>
+      fetch(`${BASE_URL}/api/public-pdf`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+        signal: controller.signal,
+      })
+    );
 
-    const requests = [];
-    for (let i = 0; i < 6; i++) {
-      requests.push(
-        fetch(`${BASE_URL}/api/public-pdf`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Forwarded-For": uniqueHeader,
-          },
-          body: JSON.stringify({}),
+    try {
+      const status = await Promise.any(
+        requests.map(async (request) => {
+          const response = await request;
+          if (response.status !== 429) {
+            throw new Error(`Expected a rate-limited response, got ${response.status}`);
+          }
+          return response.status;
         })
       );
-    }
 
-    const responses = await Promise.all(requests);
-    const statusCodes = responses.map((r) => r.status);
-    expect(statusCodes).toContain(429);
+      expect(status).toBe(429);
+    } finally {
+      for (const controller of controllers) {
+        controller.abort();
+      }
+      await Promise.allSettled(requests);
+    }
   });
 });

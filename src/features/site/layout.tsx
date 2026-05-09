@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { alpha, type SxProps, type Theme } from "@mui/material/styles";
 import { EXPERIMENTS_PATH, PROJECT_PATH, RESUME_PATH, siteProfile } from "./content";
+import { composeSx } from "./styles";
 import { monoStack } from "../../theme";
 
 export type PublicNavKey = "home" | "project" | "experiments" | "resume";
@@ -50,18 +51,6 @@ function getNavButtonStyles(theme: Theme, active: boolean) {
   };
 }
 
-function getNavButtonSx(active: boolean): SxProps<Theme> {
-  return (theme) => getNavButtonStyles(theme, active);
-}
-
-function mergeSx(base: SxProps<Theme>, extra?: SxProps<Theme>): SxProps<Theme> {
-  if (!extra) {
-    return base;
-  }
-
-  return (Array.isArray(extra) ? [base, ...extra] : [base, extra]) as SxProps<Theme>;
-}
-
 export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
 
@@ -72,10 +61,9 @@ export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
       elevation={0}
       sx={(theme) => ({
         top: 0,
-        backdropFilter: "blur(16px)",
-        backgroundColor: alpha(theme.palette.common.white, 0.88),
-        borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.07)}`,
-        boxShadow: `0 10px 28px ${alpha(theme.palette.text.primary, 0.035)}`,
+        backgroundColor: theme.palette.background.paper,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        boxShadow: "none",
       })}
     >
       <Container maxWidth="lg">
@@ -141,7 +129,7 @@ export function PublicSiteHeader({ activeNav }: { activeNav: PublicNavKey }) {
                   variant={item.key === activeNav ? "outlined" : "text"}
                   size="small"
                   aria-current={item.key === activeNav ? "page" : undefined}
-                  sx={getNavButtonSx(item.key === activeNav)}
+                  sx={(theme) => getNavButtonStyles(theme, item.key === activeNav)}
                 >
                   {item.label}
                 </Button>
@@ -316,8 +304,8 @@ export function PageHero({
     textAlign: align,
     ...(align === "center" ? { mx: "auto" } : {}),
   };
-  const heroSx = mergeSx(mergeSx(heroBaseSx, heroVariantSx), sx);
-  const heroContentSx = mergeSx(contentBaseSx, contentSx);
+  const heroSx = composeSx(heroBaseSx, heroVariantSx, sx);
+  const heroContentSx = composeSx(contentBaseSx, contentSx);
 
   return (
     <Paper

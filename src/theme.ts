@@ -7,15 +7,17 @@ export const displayStack =
 export const monoStack =
   '"JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace';
 
-const ink = "#16222d";
-const muted = "#54616b";
-const accentText = "#92530f";
-const accentLive = "#d27a24";
-const accentSoft = "#f3dfc8";
-const supportCool = "#2f6f73";
-const paper = "rgba(255, 255, 255, 0.82)";
-const surfaceBorder = alpha(ink, 0.075);
-const surfaceShadow = "0 14px 40px rgba(22, 34, 45, 0.05)";
+const ink = "#16231f";
+const muted = "#465750";
+const accentText = "#007a5e";
+const accentLive = "#00a878";
+const accentSoft = "#e4f5ec";
+const warningWarm = "#a95718";
+const warningSoft = "#f5e0cb";
+const supportCool = "#276f89";
+const paper = "#ffffff";
+const surfaceBorder = "#d8ded8";
+const surfaceShadow = "0 1px 0 rgba(22, 35, 31, 0.04)";
 
 let theme = createTheme({
   cssVariables: true,
@@ -28,23 +30,29 @@ let theme = createTheme({
     secondary: {
       main: accentText,
       light: accentLive,
-      dark: "#70400c",
+      dark: "#005f49",
       contrastText: "#ffffff",
     },
     warning: {
-      main: accentLive,
+      main: warningWarm,
+      light: warningSoft,
+      dark: "#743914",
+      contrastText: "#ffffff",
+    },
+    success: {
+      main: accentText,
       light: accentSoft,
-      dark: accentText,
-      contrastText: ink,
+      dark: "#005f49",
+      contrastText: "#ffffff",
     },
     info: {
       main: supportCool,
-      light: "#d6e7e5",
-      dark: "#245a5d",
+      light: "#d9edf2",
+      dark: "#1f596e",
       contrastText: "#ffffff",
     },
     background: {
-      default: "#f7f3ec",
+      default: "#f7f8f5",
       paper,
     },
     text: {
@@ -140,7 +148,7 @@ let theme = createTheme({
         },
         body: {
           margin: 0,
-          background: `linear-gradient(180deg, #fdfaf5 0%, ${themeParam.palette.background.default} 48%, #f4eee3 100%)`,
+          background: themeParam.palette.background.default,
           color: themeParam.palette.text.primary,
           fontFamily: themeParam.typography.fontFamily,
         },
@@ -190,6 +198,30 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           borderColor: surfaceBorder,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: ({ theme: themeParam }) => ({
+          fontWeight: 600,
+          "&.MuiChip-outlined": {
+            backgroundColor: alpha(themeParam.palette.secondary.light, 0.075),
+            borderColor: alpha(themeParam.palette.secondary.main, 0.3),
+          },
+          "&.MuiChip-colorWarning.MuiChip-outlined": {
+            backgroundColor: alpha(themeParam.palette.warning.light, 0.45),
+            borderColor: alpha(themeParam.palette.warning.main, 0.38),
+            color: themeParam.palette.warning.dark,
+          },
+          "&.MuiChip-colorSuccess.MuiChip-outlined": {
+            backgroundColor: alpha(themeParam.palette.success.light, 0.08),
+            borderColor: alpha(themeParam.palette.success.main, 0.28),
+            color: themeParam.palette.success.dark,
+          },
+        }),
+        label: {
+          fontWeight: 600,
         },
       },
     },

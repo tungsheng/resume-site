@@ -33,7 +33,6 @@ import {
   composeSx,
   mutedChipSx,
   softPanelBaseSx,
-  subtlePanelBaseSx,
   successPanelBaseSx,
   warningPanelBaseSx,
 } from "../site/styles";
@@ -44,13 +43,24 @@ const PAGE_TITLE = "Experiments | Tony Lee";
 
 const EXPERIMENT_DETAIL_PREFIX = `${EXPERIMENTS_PATH}/`;
 
-const catalogStatusNoteSx: SxProps<Theme> = composeSx(warningPanelBaseSx, {
+const catalogStatusNoteSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => ({
+  position: "relative",
   display: "grid",
   gap: { xs: 0.85, md: 1 },
   alignContent: "start",
   width: "100%",
+  overflow: "hidden",
   p: { xs: 1.25, sm: 1.4, md: 1.5 },
-});
+  pl: { xs: 1.45, sm: 1.65, md: 1.8 },
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    insetBlock: 0,
+    left: 0,
+    width: "0.28rem",
+    backgroundColor: theme.palette.secondary.main,
+  },
+}));
 
 const catalogStatusHeaderSx: SxProps<Theme> = {
   display: "flex",
@@ -180,7 +190,7 @@ const conceptStepItemSx: SxProps<Theme> = (theme) => ({
   },
 });
 
-const conceptStepSx: SxProps<Theme> = composeSx(subtlePanelBaseSx, {
+const conceptStepSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "inline-flex",
   alignItems: "center",
   minHeight: "2.35rem",
@@ -201,12 +211,10 @@ const conceptArrowSx: SxProps<Theme> = (theme) => ({
   display: { xs: "none", sm: "inline-flex" },
 });
 
-function buildBrowseRowColumns() {
-  return {
-    xs: "minmax(0, 1fr)",
-    md: "minmax(14rem, 1fr) minmax(11rem, 0.75fr) minmax(12rem, 1fr) minmax(11rem, 0.85fr) 8rem",
-  };
-}
+const browseRowColumns = {
+  xs: "minmax(0, 1fr)",
+  md: "minmax(14rem, 1fr) minmax(11rem, 0.75fr) minmax(12rem, 1fr) minmax(11rem, 0.85fr) 8rem",
+};
 
 const browseSurfaceSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   overflow: "hidden",
@@ -214,7 +222,7 @@ const browseSurfaceSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
 
 const browseHeaderSx: SxProps<Theme> = (theme) => ({
   display: { xs: "none", md: "grid" },
-  gridTemplateColumns: buildBrowseRowColumns().md,
+  gridTemplateColumns: browseRowColumns.md,
   gap: 1.25,
   alignItems: "center",
   px: 1.5,
@@ -230,7 +238,7 @@ const browseHeaderSx: SxProps<Theme> = (theme) => ({
 
 const browseRowSx: SxProps<Theme> = (theme) => ({
   display: "grid",
-  gridTemplateColumns: buildBrowseRowColumns(),
+  gridTemplateColumns: browseRowColumns,
   gap: { xs: 0.9, md: 1.25 },
   alignItems: "stretch",
   minWidth: 0,
@@ -312,8 +320,6 @@ const metricGroupSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   p: { xs: 1.35, sm: 1.5 },
 });
 
-const compactMetricChipSx: SxProps<Theme> = accentChipSx;
-
 type CatalogStatusTone = "ready" | "measured" | "pending";
 
 const catalogStatusStackSx: SxProps<Theme> = {
@@ -335,18 +341,18 @@ const catalogStatusLineSx: SxProps<Theme> = {
 function catalogStatusDotSx(tone: CatalogStatusTone): SxProps<Theme> {
   return (theme) => {
     const toneColor =
-      tone === "pending"
-        ? theme.palette.warning.dark
-        : tone === "measured"
-          ? theme.palette.success.dark
-          : theme.palette.success.main;
+      tone === "measured"
+        ? theme.palette.info.dark
+        : tone === "pending"
+          ? theme.palette.warning.dark
+          : theme.palette.success.dark;
 
     return {
       width: "0.45rem",
       height: "0.45rem",
       mt: "0.15rem",
       borderRadius: "50%",
-      backgroundColor: alpha(toneColor, tone === "pending" ? 0.72 : 0.78),
+      backgroundColor: toneColor,
       flexShrink: 0,
     };
   };
@@ -566,7 +572,7 @@ function CatalogStatusNote() {
   return (
     <Box role="note" sx={catalogStatusNoteSx}>
       <Box sx={catalogStatusHeaderSx}>
-        <Chip label="Catalog ready" color="warning" variant="outlined" />
+        <Chip label="Catalog ready" variant="outlined" sx={accentChipSx} />
         <Button href={item.href} size="small" endIcon={<ArrowForwardRoundedIcon />}>
           View project decisions
         </Button>
@@ -711,7 +717,7 @@ function ExperimentBrowseRow({ experiment }: { experiment: ExperimentCatalogItem
               label={metric}
               size="small"
               variant="outlined"
-              sx={compactMetricChipSx}
+              sx={accentChipSx}
             />
           ))}
         </Stack>

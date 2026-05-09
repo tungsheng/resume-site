@@ -34,7 +34,6 @@ import {
   composeSx,
   mutedChipSx,
   softPanelBaseSx,
-  subtlePanelBaseSx,
   warningPanelBaseSx,
 } from "../site/styles";
 import { useDocumentTitle } from "../site/use-document-title";
@@ -97,10 +96,10 @@ const workflowNodePillSx: SxProps<Theme> = (theme) => ({
   px: { xs: 1.25, md: 1.5 },
   py: 1,
   borderRadius: 2,
-  backgroundColor: alpha(theme.palette.common.white, 0.56),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.085)}`,
+  backgroundColor: theme.palette.background.paper,
+  border: `1px solid ${theme.palette.divider}`,
   color: theme.palette.text.primary,
-  boxShadow: `inset 0 1px 0 ${alpha(theme.palette.common.white, 0.62)}`,
+  boxShadow: "none",
   fontSize: "0.88rem",
   fontWeight: 600,
   lineHeight: 1.35,
@@ -129,7 +128,7 @@ const workflowNodeLinkSx: SxProps<Theme> = (theme) => ({
   transition:
     "transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease",
   "&:hover, &:focus-visible": {
-    backgroundColor: alpha(theme.palette.common.white, 0.96),
+    backgroundColor: theme.palette.background.paper,
     borderColor: alpha(theme.palette.secondary.light, 0.28),
     color: theme.palette.text.primary,
     boxShadow: `0 12px 24px ${alpha(theme.palette.text.primary, 0.08)}`,
@@ -332,7 +331,7 @@ const quickStartProofListSx: SxProps<Theme> = {
   gap: { xs: 1, md: 1.25 },
 };
 
-const quickStartProofItemSx: SxProps<Theme> = composeSx(subtlePanelBaseSx, {
+const quickStartProofItemSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gridTemplateColumns: "1.35rem minmax(0, 1fr)",
   gap: 0.85,
@@ -345,8 +344,6 @@ const quickStartCheckIconSx: SxProps<Theme> = (theme) => ({
   color: alpha(theme.palette.secondary.dark, 0.7),
   fontSize: "1rem",
 });
-
-const quickStartOutputChipSx: SxProps<Theme> = mutedChipSx;
 
 const usageSurfaceSx: SxProps<Theme> = {
   p: { xs: 2, sm: 2.5, md: 3 },
@@ -391,7 +388,7 @@ const usageWorkflowActionsSx: SxProps<Theme> = {
   minWidth: 0,
 };
 
-const usageDefaultPathSx: SxProps<Theme> = composeSx(subtlePanelBaseSx, {
+const usageDefaultPathSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gap: { xs: 1.5, md: 1.75 },
   p: { xs: 1.5, sm: 1.75, md: 2 },
@@ -433,8 +430,8 @@ const usageConceptStepSx: SxProps<Theme> = (theme) => ({
   px: { xs: 1.15, md: 1.35 },
   py: 0.75,
   borderRadius: 999,
-  backgroundColor: alpha(theme.palette.common.white, 0.72),
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.09)}`,
+  backgroundColor: theme.palette.background.paper,
+  border: `1px solid ${theme.palette.divider}`,
   fontSize: "0.86rem",
   fontWeight: 600,
   lineHeight: 1.2,
@@ -520,7 +517,7 @@ const validationSourceStripSx: SxProps<Theme> = {
   gap: { xs: 1, md: 1.25 },
 };
 
-const validationSourceFactSx: SxProps<Theme> = composeSx(subtlePanelBaseSx, {
+const validationSourceFactSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   gap: 0.2,
   p: { xs: 1.2, sm: 1.3 },
@@ -659,7 +656,7 @@ function LabUsageSection() {
                       label={output}
                       size="small"
                       variant="outlined"
-                      sx={quickStartOutputChipSx}
+                      sx={mutedChipSx}
                     />
                   ))}
                 </Stack>

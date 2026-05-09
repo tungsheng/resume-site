@@ -17,9 +17,9 @@ body {
 }
 
 .resume-document {
-  --resume-accent: #92530f;
-  --resume-ink: #16222d;
-  --resume-muted: #54616b;
+  --resume-accent: #007a5e;
+  --resume-ink: #16231f;
+  --resume-muted: #465750;
   --ui-font: 'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --page-x: 0.4in;
   --column-gap: 0.22in;
@@ -268,7 +268,7 @@ body {
   bottom: 8px;
   left: 5px;
   width: 2px;
-  background: rgba(146, 83, 15, 0.4);
+  background: rgba(0, 122, 94, 0.5);
 }
 
 .resume-document .experience-item {

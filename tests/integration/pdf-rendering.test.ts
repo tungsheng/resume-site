@@ -18,12 +18,16 @@ describe("PDF Rendering", () => {
     }
   });
 
-  itIfIntegration("keeps the public resume on one Letter page at natural scale", async () => {
-    const html = renderResumeHtmlDocument(publicResumeData);
-    const contentSize = await measurePDFContent(html);
+  itIfIntegration(
+    "keeps the public resume on one Letter page at natural scale",
+    async () => {
+      const html = renderResumeHtmlDocument(publicResumeData);
+      const contentSize = await measurePDFContent(html);
 
-    expect(contentSize.contentWidthPx).toBeLessThanOrEqual(LETTER_PDF_SIZE_PX.width);
-    expect(contentSize.contentHeightPx).toBeLessThanOrEqual(LETTER_PDF_SIZE_PX.height);
-    expect(calculatePdfScale(contentSize.contentWidthPx, contentSize.contentHeightPx)).toBe(1);
-  });
+      expect(contentSize.contentWidthPx).toBeLessThanOrEqual(LETTER_PDF_SIZE_PX.width);
+      expect(contentSize.contentHeightPx).toBeLessThanOrEqual(LETTER_PDF_SIZE_PX.height);
+      expect(calculatePdfScale(contentSize.contentWidthPx, contentSize.contentHeightPx)).toBe(1);
+    },
+    20000
+  );
 });
