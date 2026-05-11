@@ -231,15 +231,13 @@ export function PublicSiteFooter() {
   );
 }
 
-interface PublicSiteLayoutProps {
-  activeNav: PublicNavKey;
-  children: React.ReactNode;
-}
-
 export function PublicSiteLayout({
   activeNav,
   children,
-}: PublicSiteLayoutProps) {
+}: {
+  activeNav: PublicNavKey;
+  children: React.ReactNode;
+}) {
   return (
     <Box
       sx={{
@@ -260,15 +258,6 @@ export function PublicSiteLayout({
   );
 }
 
-interface PageHeroProps {
-  children: React.ReactNode;
-  align?: "left" | "center";
-  contentWidth?: React.CSSProperties["maxWidth"];
-  variant?: "default" | "home" | "compact";
-  sx?: SxProps<Theme>;
-  contentSx?: SxProps<Theme>;
-}
-
 export function PageHero({
   children,
   align = "left",
@@ -276,7 +265,14 @@ export function PageHero({
   variant = "default",
   sx,
   contentSx,
-}: PageHeroProps) {
+}: {
+  children: React.ReactNode;
+  align?: "left" | "center";
+  contentWidth?: React.CSSProperties["maxWidth"];
+  variant?: "default" | "home" | "compact";
+  sx?: SxProps<Theme>;
+  contentSx?: SxProps<Theme>;
+}) {
   const heroBaseSx: SxProps<Theme> = {
     p: { xs: 2.25, sm: 2.75, md: 3 },
     mb: { xs: 3, md: 3.5 },

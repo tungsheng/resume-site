@@ -562,15 +562,7 @@ export function getExperimentSlugFromPath(pathname: string): string | null {
 }
 
 function resolveCurrentPathname(initialPath?: string): string {
-  if (initialPath) {
-    return initialPath;
-  }
-
-  if (typeof window === "undefined") {
-    return EXPERIMENTS_PATH;
-  }
-
-  return window.location.pathname;
+  return initialPath ?? (typeof window === "undefined" ? EXPERIMENTS_PATH : window.location.pathname);
 }
 
 function CatalogStatusNote() {
@@ -598,27 +590,17 @@ function CatalogFactStrip() {
   const pendingExperimentCount =
     experimentCatalogContent.experiments.length - measuredExperimentCount;
   const facts = [
-    {
-      label: `${experimentCatalogContent.experiments.length} experiments`,
-    },
-    {
-      label: "Local render",
-    },
-    {
-      label: "Live runners",
-    },
-    {
-      label: `${measuredExperimentCount} measured`,
-    },
-    {
-      label: `${pendingExperimentCount} pending`,
-    },
+    `${experimentCatalogContent.experiments.length} experiments`,
+    "Local render",
+    "Live runners",
+    `${measuredExperimentCount} measured`,
+    `${pendingExperimentCount} pending`,
   ];
 
   return (
     <Box sx={catalogFactStripSx} aria-label="Experiment catalog status facts">
       {facts.map((fact) => (
-        <Chip key={fact.label} label={fact.label} size="small" variant="outlined" sx={catalogFactChipSx} />
+        <Chip key={fact} label={fact} size="small" variant="outlined" sx={catalogFactChipSx} />
       ))}
     </Box>
   );
@@ -931,6 +913,13 @@ const defaultResultTableColumns = {
   peakWaiting: "Peak waiting",
   gpuMax: "GPU max",
 };
+const resultTableColumnKeys = [
+  "target",
+  "outcome",
+  "p95Latency",
+  "peakWaiting",
+  "gpuMax",
+] as const;
 
 function ExperimentResultTable({
   experiment,
@@ -959,44 +948,25 @@ function ExperimentResultTable({
 
       <Box role="table" aria-label={`${experiment.title} ${table.title}`} sx={resultTableSx}>
         <Box role="row" sx={resultTableHeaderSx}>
-          <span>{tableColumns.target}</span>
-          <span>{tableColumns.outcome}</span>
-          <span>{tableColumns.p95Latency}</span>
-          <span>{tableColumns.peakWaiting}</span>
-          <span>{tableColumns.gpuMax}</span>
+          {resultTableColumnKeys.map((key) => (
+            <span key={key}>{tableColumns[key]}</span>
+          ))}
         </Box>
         {table.rows.map((row) => (
           <Box key={row.target} role="row" sx={resultTableRowSx}>
-            <Typography role="cell" variant="body2" sx={{ ...resultTableCellSx, fontWeight: 600 }}>
-              <Box component="span" sx={resultMobileLabelSx}>
-                {tableColumns.target}
-              </Box>
-              {row.target}
-            </Typography>
-            <Typography role="cell" variant="body2" sx={resultTableCellSx}>
-              <Box component="span" sx={resultMobileLabelSx}>
-                {tableColumns.outcome}
-              </Box>
-              {row.outcome}
-            </Typography>
-            <Typography role="cell" variant="body2" sx={resultTableCellSx}>
-              <Box component="span" sx={resultMobileLabelSx}>
-                {tableColumns.p95Latency}
-              </Box>
-              {row.p95Latency}
-            </Typography>
-            <Typography role="cell" variant="body2" sx={resultTableCellSx}>
-              <Box component="span" sx={resultMobileLabelSx}>
-                {tableColumns.peakWaiting}
-              </Box>
-              {row.peakWaiting}
-            </Typography>
-            <Typography role="cell" variant="body2" sx={resultTableCellSx}>
-              <Box component="span" sx={resultMobileLabelSx}>
-                {tableColumns.gpuMax}
-              </Box>
-              {row.gpuMax}
-            </Typography>
+            {resultTableColumnKeys.map((key, index) => (
+              <Typography
+                key={key}
+                role="cell"
+                variant="body2"
+                sx={{ ...resultTableCellSx, ...(index === 0 ? { fontWeight: 600 } : {}) }}
+              >
+                <Box component="span" sx={resultMobileLabelSx}>
+                  {tableColumns[key]}
+                </Box>
+                {row[key]}
+              </Typography>
+            ))}
           </Box>
         ))}
       </Box>

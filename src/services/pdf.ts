@@ -1,5 +1,3 @@
-// PDF generation
-
 import puppeteer, { type Browser, type Page } from "puppeteer-core";
 
 const BROWSER_ARGS = [
@@ -9,10 +7,6 @@ const BROWSER_ARGS = [
   "--disable-gpu",
 ];
 const PX_PER_INCH = 96;
-const LETTER_WIDTH_IN = 8.5;
-const LETTER_HEIGHT_IN = 11;
-const LETTER_WIDTH_PX = LETTER_WIDTH_IN * PX_PER_INCH;
-const LETTER_HEIGHT_PX = LETTER_HEIGHT_IN * PX_PER_INCH;
 const EXECUTABLE_CANDIDATES = [
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   "/Applications/Chromium.app/Contents/MacOS/Chromium",
@@ -25,8 +19,8 @@ const EXECUTABLE_CANDIDATES = [
 let browser: Browser | null = null;
 
 export const LETTER_PDF_SIZE_PX = {
-  width: LETTER_WIDTH_PX,
-  height: LETTER_HEIGHT_PX,
+  width: 8.5 * PX_PER_INCH,
+  height: 11 * PX_PER_INCH,
 } as const;
 
 export interface PdfContentSize {
@@ -43,8 +37,8 @@ export function calculatePdfScale(
   contentWidthPx: number,
   contentHeightPx: number
 ): number {
-  const widthScale = LETTER_WIDTH_PX / Math.max(contentWidthPx, LETTER_WIDTH_PX);
-  const heightScale = LETTER_HEIGHT_PX / Math.max(contentHeightPx, LETTER_HEIGHT_PX);
+  const widthScale = LETTER_PDF_SIZE_PX.width / Math.max(contentWidthPx, LETTER_PDF_SIZE_PX.width);
+  const heightScale = LETTER_PDF_SIZE_PX.height / Math.max(contentHeightPx, LETTER_PDF_SIZE_PX.height);
 
   return clampPdfScale(Math.min(1, widthScale, heightScale));
 }
@@ -89,8 +83,8 @@ async function createPDFPage(html: string): Promise<Page> {
 
   try {
     await page.setViewport({
-      width: Math.ceil(LETTER_WIDTH_PX),
-      height: Math.ceil(LETTER_HEIGHT_PX),
+      width: Math.ceil(LETTER_PDF_SIZE_PX.width),
+      height: Math.ceil(LETTER_PDF_SIZE_PX.height),
       deviceScaleFactor: 1,
     });
     await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 0 });
@@ -137,7 +131,7 @@ export async function measurePDFContentSize(page: Page): Promise<PdfContentSize>
         contentHeightPx: Math.ceil(Math.max(bottomEdge - topEdge, letterHeightPx)),
       };
     },
-    { letterWidthPx: LETTER_WIDTH_PX, letterHeightPx: LETTER_HEIGHT_PX }
+    { letterWidthPx: LETTER_PDF_SIZE_PX.width, letterHeightPx: LETTER_PDF_SIZE_PX.height }
   );
 }
 
@@ -171,8 +165,7 @@ export async function generatePDF(html: string): Promise<Buffer> {
 }
 
 export async function closePDFBrowser(): Promise<void> {
-  if (!browser) return;
-  if (browser.connected) {
+  if (browser?.connected) {
     await browser.close();
   }
   browser = null;

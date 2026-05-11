@@ -530,15 +530,7 @@ const validationSourceFactSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
 });
 
 function resolveCurrentPathname(initialPath?: string): string {
-  if (initialPath) {
-    return initialPath;
-  }
-
-  if (typeof window === "undefined") {
-    return PROJECT_PATH;
-  }
-
-  return window.location.pathname;
+  return initialPath ?? (typeof window === "undefined" ? PROJECT_PATH : window.location.pathname);
 }
 
 function isProjectValidationPath(pathname: string): boolean {
@@ -570,22 +562,6 @@ function WorkflowNodePill({ node }: { node: WorkflowNode }) {
           {linkLabel}
         </Link>
       ) : null}
-    </Box>
-  );
-}
-
-function WorkflowFoundationFlow({
-  nodes,
-  ariaLabel,
-}: {
-  nodes: WorkflowNode[];
-  ariaLabel: string;
-}) {
-  return (
-    <Box sx={workflowFoundationNodesSx} aria-label={ariaLabel}>
-      {nodes.map((node, index) => (
-        <WorkflowNodePill node={node} key={`${node.label}-${index}`} />
-      ))}
     </Box>
   );
 }
@@ -1044,10 +1020,11 @@ function ProjectOverviewRoute() {
                 {projectContent.workflowFoundation.summary}
               </Typography>
             </Box>
-            <WorkflowFoundationFlow
-              nodes={projectContent.workflowFoundation.nodes}
-              ariaLabel="Foundation workflow"
-            />
+            <Box sx={workflowFoundationNodesSx} aria-label="Foundation workflow">
+              {projectContent.workflowFoundation.nodes.map((node, index) => (
+                <WorkflowNodePill node={node} key={`${node.label}-${index}`} />
+              ))}
+            </Box>
           </Box>
 
           <Box sx={workflowPathsSx}>
