@@ -19,6 +19,7 @@ This variant:
 - binds the app to `127.0.0.1:3000`
 - enables `TRUST_PROXY=1`
 - expects an image-based deploy through `IMAGE_REPOSITORY` and `IMAGE_TAG`
+- caps PDF export concurrency through `PDF_MAX_CONCURRENT_EXPORTS`
 - keeps the restart and log settings intended for a reverse-proxy setup
 
 Example `deploy.env`:
@@ -26,6 +27,8 @@ Example `deploy.env`:
 ```bash
 IMAGE_REPOSITORY=ghcr.io/your-github-owner/resume-site
 IMAGE_TAG=latest
+PDF_MAX_CONCURRENT_EXPORTS=2
+PDF_RENDER_TIMEOUT_MS=30000
 ```
 
 ## Reverse Proxy
@@ -47,6 +50,9 @@ PDF export depends on a Chrome or Chromium executable.
 - In Docker, the image installs Alpine Chromium and sets `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser`
 - Outside Docker, the app tries common Chrome and Chromium paths automatically
 - If auto-detection fails, set `PUPPETEER_EXECUTABLE_PATH` yourself
+- PDF typography is bundled into the static render HTML so local and deployed exports do not depend on host OS fonts
+- `PDF_MAX_CONCURRENT_EXPORTS` limits process-wide PDF renders; the default is `2`
+- `PDF_RENDER_TIMEOUT_MS` caps the Puppeteer PDF call; the default is `30000`
 
 ## Health Check
 
@@ -57,6 +63,8 @@ GET /resume
 ```
 
 That route is lightweight and works well as a simple readiness probe for the public site.
+
+Deploys also smoke-test `POST /api/public-pdf` after the container is ready so Chromium, bundled fonts, and the PDF route are checked before the workflow succeeds.
 
 ## What the Container Serves
 

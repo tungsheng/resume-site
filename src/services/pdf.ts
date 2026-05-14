@@ -7,6 +7,7 @@ const BROWSER_ARGS = [
   "--disable-gpu",
 ];
 const PX_PER_INCH = 96;
+const DEFAULT_PDF_RENDER_TIMEOUT_MS = 30_000;
 const EXECUTABLE_CANDIDATES = [
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   "/Applications/Chromium.app/Contents/MacOS/Chromium",
@@ -26,6 +27,20 @@ export const LETTER_PDF_SIZE_PX = {
 export interface PdfContentSize {
   contentWidthPx: number;
   contentHeightPx: number;
+}
+
+function getPositiveIntegerEnv(name: string, fallback: number): number {
+  const rawValue = process.env[name];
+  if (!rawValue) return fallback;
+
+  const parsedValue = Number(rawValue);
+  if (!Number.isInteger(parsedValue) || parsedValue <= 0) return fallback;
+
+  return parsedValue;
+}
+
+export function getPDFRenderTimeoutMs(): number {
+  return getPositiveIntegerEnv("PDF_RENDER_TIMEOUT_MS", DEFAULT_PDF_RENDER_TIMEOUT_MS);
 }
 
 function clampPdfScale(scale: number): number {
@@ -88,6 +103,9 @@ async function createPDFPage(html: string): Promise<Page> {
       deviceScaleFactor: 1,
     });
     await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 0 });
+    await page.evaluate(async () => {
+      await document.fonts?.ready;
+    });
     return page;
   } catch (error) {
     await page.close();
@@ -157,6 +175,7 @@ export async function generatePDF(html: string): Promise<Buffer> {
       printBackground: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
       scale: pdfScale,
+      timeout: getPDFRenderTimeoutMs(),
     });
     return Buffer.from(pdf);
   } finally {

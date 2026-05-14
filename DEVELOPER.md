@@ -76,6 +76,8 @@ Any other request falls through to `src/server/routes/static.ts`, which serves f
 | `PORT` | `3000` | HTTP port for the Bun server |
 | `TRUST_PROXY` | unset | When set to `1`, rate limiting trusts forwarded IP headers |
 | `PUPPETEER_EXECUTABLE_PATH` | unset | Absolute path to Chrome or Chromium for PDF export |
+| `PDF_MAX_CONCURRENT_EXPORTS` | `2` | Process-wide cap for simultaneous PDF renders |
+| `PDF_RENDER_TIMEOUT_MS` | `30000` | Puppeteer PDF generation timeout in milliseconds |
 
 ## PDF Export
 
@@ -84,7 +86,10 @@ Any other request falls through to `src/server/routes/static.ts`, which serves f
 Notes:
 
 - Requests are rate-limited per client IP.
+- PDF rendering has a process-wide concurrency cap.
+- PDF typography is bundled into the static render HTML instead of relying on host OS fonts.
 - The route returns `429` when the rate limit is exceeded.
+- The route returns `503` when the PDF renderer is already at capacity.
 - If no browser binary can be launched, the route returns `500` with a PDF engine error.
 
 ## Docker
@@ -128,5 +133,5 @@ Current tests cover:
 
 What is not fully covered:
 
-- successful PDF generation against a real Chrome/Chromium binary
+- successful PDF generation against a real Chrome/Chromium binary through the optional integration test and deploy smoke test
 - live browser interaction with the rendered pages

@@ -1,5 +1,7 @@
+import { getResumePdfFontFaceCss, RESUME_PDF_FONT_FAMILY } from "./pdf-fonts";
+
 export function getResumeDocumentCss(): string {
-  return `
+  return `${getResumePdfFontFaceCss()}
 .resume-document,
 .resume-document * {
   box-sizing: border-box;
@@ -20,7 +22,7 @@ body {
   --resume-accent: #00AB66;
   --resume-ink: #16231f;
   --resume-muted: #465750;
-  --ui-font: 'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --ui-font: '${RESUME_PDF_FONT_FAMILY}', Arial, sans-serif;
   --page-x: 0.4in;
   --column-gap: 0.22in;
   --sidebar-width: 2.05in;

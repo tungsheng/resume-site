@@ -1,9 +1,9 @@
-FROM oven/bun:1-alpine AS deps
+FROM oven/bun:1.3.4-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
 
-FROM oven/bun:1-alpine AS release
+FROM oven/bun:1.3.4-alpine AS release
 WORKDIR /app
 
 # Install Chromium (Alpine package is smaller than Debian)

@@ -7,6 +7,8 @@ services:
     environment:
       NODE_ENV: production
       TRUST_PROXY: "1"
+      PDF_MAX_CONCURRENT_EXPORTS: "${PDF_MAX_CONCURRENT_EXPORTS:-2}"
+      PDF_RENDER_TIMEOUT_MS: "${PDF_RENDER_TIMEOUT_MS:-30000}"
     restart: always
     logging:
       driver: json-file

@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { calculatePdfScale, LETTER_PDF_SIZE_PX } from "../../src/services/pdf";
+import {
+  calculatePdfScale,
+  getPDFRenderTimeoutMs,
+  LETTER_PDF_SIZE_PX,
+} from "../../src/services/pdf";
 
 describe("PDF Service", () => {
   test("keeps scale at 1 when content already fits letter size", () => {
@@ -26,5 +30,23 @@ describe("PDF Service", () => {
       LETTER_PDF_SIZE_PX.height / 1200,
       5
     );
+  });
+
+  test("allows a positive PDF render timeout override", () => {
+    const originalTimeout = process.env.PDF_RENDER_TIMEOUT_MS;
+
+    try {
+      process.env.PDF_RENDER_TIMEOUT_MS = "45000";
+      expect(getPDFRenderTimeoutMs()).toBe(45000);
+
+      process.env.PDF_RENDER_TIMEOUT_MS = "0";
+      expect(getPDFRenderTimeoutMs()).toBe(30000);
+    } finally {
+      if (originalTimeout === undefined) {
+        delete process.env.PDF_RENDER_TIMEOUT_MS;
+      } else {
+        process.env.PDF_RENDER_TIMEOUT_MS = originalTimeout;
+      }
+    }
   });
 });

@@ -132,6 +132,26 @@ jobs:
             fi
             sleep 2
           done
+          pdf_headers="\$(mktemp)"
+          pdf_file="\$(mktemp)"
+          if ! curl -fsS -X POST -D "\${pdf_headers}" -o "\${pdf_file}" http://127.0.0.1:3000/api/public-pdf; then
+            echo "PDF export smoke test failed after deploy"
+            docker compose --env-file deploy.env -f docker-compose.prod.yml logs --tail=120
+            rm -f "\${pdf_headers}" "\${pdf_file}"
+            exit 1
+          fi
+          if ! grep -qi '^content-type: application/pdf' "\${pdf_headers}"; then
+            echo "PDF export smoke test returned an unexpected content type"
+            cat "\${pdf_headers}"
+            rm -f "\${pdf_headers}" "\${pdf_file}"
+            exit 1
+          fi
+          if [ ! -s "\${pdf_file}" ]; then
+            echo "PDF export smoke test returned an empty PDF"
+            rm -f "\${pdf_headers}" "\${pdf_file}"
+            exit 1
+          fi
+          rm -f "\${pdf_headers}" "\${pdf_file}"
           docker compose --env-file deploy.env -f docker-compose.prod.yml ps
           docker image prune -f
           EOF

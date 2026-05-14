@@ -76,6 +76,16 @@ describe("Resume Service", () => {
     expect(html).toContain("class=\"resume-document\"");
   });
 
+  test("renderResumeHtmlDocument embeds deterministic PDF fonts", () => {
+    const html = renderResumeHtmlDocument(publicResumeData);
+    const embeddedFontCount = html.match(/data:font\/woff2;base64,/g)?.length ?? 0;
+
+    expect(html).toContain("@font-face");
+    expect(html).toContain("font-family: 'ResumePDFSans'");
+    expect(embeddedFontCount).toBe(2);
+    expect(html).not.toContain("'Avenir Next'");
+  });
+
   test("renderResumeHtmlDocument escapes XSS", () => {
     const xssData: ResumeData = {
       header: {
