@@ -748,7 +748,7 @@ function RelatedProjectEvidenceBand() {
   return (
     <Box component="section" sx={platformValidationBandSx}>
       <Box sx={{ display: "grid", gap: 0.4, minWidth: 0 }}>
-        <Typography variant="overline" color="secondary">
+        <Typography variant="overline" sx={{ color: "secondary.dark" }}>
           {item.status}
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
@@ -870,7 +870,7 @@ function ExperimentPendingNextRuns({ experiment }: { experiment: ExperimentCatal
 
   return (
     <Box sx={{ display: "grid", gap: 1 }}>
-      <Typography variant="overline" color="secondary">
+      <Typography variant="overline" sx={{ color: "secondary.dark" }}>
         Next runs to curate
       </Typography>
       <Box sx={pendingNextRunGridSx}>
@@ -1264,7 +1264,7 @@ function RunShapeColumn({
   return (
     <Box sx={matrixListSx}>
       <Box sx={matrixColumnHeaderSx}>
-        <Typography variant="overline" color="secondary">
+        <Typography variant="overline" sx={{ color: "secondary.dark" }}>
           {title}
         </Typography>
         <Typography variant="caption" color="text.secondary">
@@ -1398,7 +1398,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={commandListSx}>
-              <Typography variant="overline" color="secondary">
+              <Typography variant="overline" sx={{ color: "secondary.dark" }}>
                 Example local command
               </Typography>
               {localCommand ? (
@@ -1411,7 +1411,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={commandListSx}>
-              <Typography variant="overline" color="secondary">
+              <Typography variant="overline" sx={{ color: "secondary.dark" }}>
                 Example live command
               </Typography>
               {liveCommand ? (

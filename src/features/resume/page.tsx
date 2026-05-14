@@ -148,7 +148,7 @@ function ScreenResumeBulletList({ items }: { items: string[] }) {
           py: 0,
           "&::before": {
             content: '"•"',
-            color: "secondary.main",
+            color: "secondary.dark",
             lineHeight: 1.5,
           },
         },
@@ -255,7 +255,7 @@ function ResumeContactLinks({
     <Stack className="resume-sidebar-contact" spacing={1.5}>
       {email ? (
         <div>
-          <Typography variant="overline" sx={{ color: "secondary.main" }}>
+          <Typography variant="overline" sx={{ color: "secondary.dark" }}>
             Email
           </Typography>
           <Typography variant="body2">
@@ -275,7 +275,7 @@ function ResumeContactLinks({
       ) : null}
       {linkedinHref ? (
         <div>
-          <Typography variant="overline" sx={{ color: "secondary.main" }}>
+          <Typography variant="overline" sx={{ color: "secondary.dark" }}>
             LinkedIn
           </Typography>
           <Typography variant="body2">
@@ -473,7 +473,7 @@ export function ResumePageContent({
           <Typography
             variant="body1"
             sx={{
-              color: "secondary.main",
+              color: "secondary.dark",
               fontWeight: 600,
               letterSpacing: 0,
               overflowWrap: "anywhere",

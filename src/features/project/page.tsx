@@ -711,7 +711,7 @@ function LabUsageSection() {
           {projectContent.usage.workflows.map((item) => (
             <Box key={item.title} component="section" sx={usageWorkflowItemSx}>
               <Box sx={usageWorkflowHeaderSx}>
-                <Typography variant="overline" color="secondary">
+                <Typography variant="overline" sx={{ color: "secondary.dark" }}>
                   Workflow
                 </Typography>
                 <Typography variant="h6">{item.title}</Typography>
@@ -761,7 +761,7 @@ function LabUsageSection() {
 
         <Box component="section" sx={usageDefaultPathSx}>
           <Box sx={usageDefaultHeaderSx}>
-            <Typography variant="overline" color="secondary">
+            <Typography variant="overline" sx={{ color: "secondary.dark" }}>
               {implementation.defaultPathTitle}
             </Typography>
             <Typography variant="body1" color="text.secondary">
@@ -804,7 +804,7 @@ function LabUsageSection() {
           </Box>
 
           <Box component="section" sx={quickStartSupportBlockSx}>
-            <Typography variant="overline" color="secondary">
+            <Typography variant="overline" sx={{ color: "secondary.dark" }}>
               {implementation.verifyProofTitle}
             </Typography>
             <Box sx={quickStartProofListSx}>
@@ -827,7 +827,7 @@ function LabUsageSection() {
 
         <Box component="section" sx={usageConceptSx}>
           <Box sx={usageConceptHeaderSx}>
-            <Typography variant="overline" color="secondary">
+            <Typography variant="overline" sx={{ color: "secondary.dark" }}>
               {projectContent.usage.conceptTitle}
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -875,7 +875,7 @@ function ProjectValidationDecision({ decision }: { decision: ValidationDecision 
   return (
     <Box component="section" sx={validationDecisionSx}>
       <Box sx={validationDecisionMetaSx}>
-        <Typography variant="overline" color="secondary">
+        <Typography variant="overline" sx={{ color: "secondary.dark" }}>
           Decision
         </Typography>
         <Typography variant="h6">{decision.title}</Typography>
@@ -950,7 +950,7 @@ function LongContextProofCard({ row }: { row: LongContextProofRow }) {
   return (
     <Box component="section" sx={proofCardSx}>
       <Box>
-        <Typography variant="overline" color="secondary">
+        <Typography variant="overline" sx={{ color: "secondary.dark" }}>
           {row.rate}
         </Typography>
         <Typography variant="h6">{row.outcome}</Typography>
@@ -1181,7 +1181,7 @@ function ProjectOverviewRoute() {
             <Box sx={overviewFactGridSx}>
               {projectContent.overviewFacts.map((item) => (
                 <Box key={item.label} component="section" sx={overviewFactSx}>
-                  <Typography variant="overline" color="secondary">
+                  <Typography variant="overline" sx={{ color: "secondary.dark" }}>
                     {item.label}
                   </Typography>
                   <Typography variant="h6">{item.value}</Typography>
@@ -1206,7 +1206,7 @@ function ProjectOverviewRoute() {
         <Paper variant="outlined" sx={workflowSurfaceSx}>
           <Box component="section" sx={workflowFoundationSx}>
             <Box sx={workflowMetaSx}>
-              <Typography variant="overline" color="secondary">
+              <Typography variant="overline" sx={{ color: "secondary.dark" }}>
                 {projectContent.workflowFoundation.title}
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -1233,7 +1233,7 @@ function ProjectOverviewRoute() {
 
           <Box component="section" sx={workflowRejoinSx}>
             <Box sx={workflowMetaSx}>
-              <Typography variant="overline" color="secondary">
+              <Typography variant="overline" sx={{ color: "secondary.dark" }}>
                 Rejoin point
               </Typography>
               <Typography variant="body2" color="text.secondary">

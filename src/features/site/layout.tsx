@@ -341,7 +341,7 @@ export function SectionHeader({
   return (
     <Stack spacing={1.25}>
       {eyebrow ? (
-        <Typography variant="overline" sx={{ color: "secondary.main" }}>
+        <Typography variant="overline" sx={{ color: "secondary.dark" }}>
           {eyebrow}
         </Typography>
       ) : null}

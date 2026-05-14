@@ -45,7 +45,7 @@ export function HomePage() {
           <Typography
             component="p"
             sx={{
-              color: "secondary.main",
+              color: "secondary.dark",
               fontSize: { xs: "1.05rem", md: "1.22rem" },
               fontWeight: 600,
               lineHeight: 1.35,

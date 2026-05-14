@@ -9,8 +9,8 @@ export const monoStack =
 
 const ink = "#16231f";
 const muted = "#465750";
-const accentText = "#007a63";
-const accentLive = "#00a86b";
+const goGreen = "#00AB66";
+const goGreenDark = "#006B40";
 const accentSoft = "#dff6ee";
 const warningWarm = "#a95718";
 const warningSoft = "#f5e0cb";
@@ -28,9 +28,9 @@ let theme = createTheme({
       contrastText: "#ffffff",
     },
     secondary: {
-      main: accentText,
-      light: accentLive,
-      dark: "#005f4d",
+      main: goGreen,
+      light: goGreen,
+      dark: goGreenDark,
       contrastText: "#ffffff",
     },
     warning: {
@@ -40,9 +40,9 @@ let theme = createTheme({
       contrastText: "#ffffff",
     },
     success: {
-      main: accentText,
+      main: goGreen,
       light: accentSoft,
-      dark: "#005f4d",
+      dark: goGreenDark,
       contrastText: "#ffffff",
     },
     info: {
