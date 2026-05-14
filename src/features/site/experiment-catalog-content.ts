@@ -511,7 +511,7 @@ export const experimentCatalogContent = {
         statusLabel: "Measured streaming split",
         reportDate: "2026-05-06",
         summary:
-          "The mixed streaming run completed 640 requests at concurrency 24 and splits results by prefill-heavy versus decode-heavy shapes.",
+          "The mixed streaming run completed 640 requests at concurrency 24, split by prefill-heavy versus decode-heavy shapes.",
         boundary:
           "The mixed run is the best page-level evidence because it exercises both shapes together. Isolated runs are baselines; max-seqs and batched-token variants still need a curated conclusion.",
         boundaryPoints: [
@@ -555,7 +555,7 @@ export const experimentCatalogContent = {
           {
             title: "Mixed run shape split",
             summary:
-              "The mixed result hides two totals: prefill-heavy requests finish quickly, while decode-heavy requests dominate total latency.",
+              "The mixed result hides two latency profiles: prefill-heavy requests finish quickly, while decode-heavy requests dominate total latency.",
             columns: {
               target: "Shape",
               outcome: "Completed",

@@ -50,7 +50,7 @@ export const projectContent = {
     {
       label: "Results",
       value: "Decided + open",
-      body: "Evidence marks supported calls, regressions, and gaps.",
+      body: "Evidence marks supported calls, rejected options, and open gaps.",
     },
   ],
   usage: {
@@ -184,7 +184,7 @@ export const projectContent = {
           state: "Rejected",
           title: "FP8 KV on g4dn",
           body:
-            "FP8 KV variants failed the stable g4dn/vLLM path and should stay out of this workload.",
+            "FP8 KV variants failed on the stable g4dn/vLLM path and should not be used for this workload.",
           evidence: "47.58-69.12% delivery versus 100% baseline",
         },
         {
@@ -227,7 +227,7 @@ export const projectContent = {
         proofValue: "425-439s",
         body:
           "Karpenter produced a NodeClaim in 3-12s and a GPU node in 35s; image, container, and model readiness drove the wait.",
-        caveat: "First successful completion still needs selected-report capture.",
+        caveat: "Selected reports still need first-successful-completion timing.",
       },
       {
         title: "Long-context boundary",
