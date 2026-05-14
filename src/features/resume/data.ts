@@ -13,7 +13,7 @@ export const publicResumeData: ResumeData = {
       linkedin: "tonyslee8",
     },
     summary:
-      "Platform infrastructure engineer specializing in ML inference systems, GPU-backed serving, Kubernetes, autoscaling, and distributed systems reliability.",
+      "Platform infrastructure engineer specializing in ML inference systems, GPU-backed serving, Kubernetes, autoscaling, admission control, and distributed systems reliability.",
   },
   skills: {
     "ML Infrastructure / Inference": [
@@ -21,6 +21,10 @@ export const publicResumeData: ResumeData = {
       "LLM Serving",
       "OpenAI-Compatible APIs",
       "Autoscaling",
+      "Admission Control",
+      "KV Cache / Context Length",
+      "Quantization Evaluation",
+      "GPU Capacity Planning",
       "GPU Scheduling (NVIDIA Device Plugin)",
       "Inference Load Testing (k6)",
     ],
@@ -47,10 +51,11 @@ export const publicResumeData: ResumeData = {
       {
         title: "GPU Inference Lab (AWS EKS + Karpenter + vLLM)",
         highlights: [
-          "Built an AWS EKS GPU inference platform with Terraform, Karpenter, vLLM, ALB ingress, Prometheus/Grafana, and OpenAI-compatible serving APIs.",
+          "Built an AWS EKS/vLLM inference lab that turns serving measurements into architecture decisions across autoscaling, admission control, long-context capacity, scheduler behavior, and quantization.",
           "Proved zero-idle GPU serving from 0 nodes to a successful public /v1 completion, then cleaned back to $0/hr serving-GPU idle cost.",
-          "Redesigned autoscaling around queue depth and request concurrency; active-pressure reached a second Ready replica 43% faster in one measured run (564s vs. 989s).",
-          "Measured vLLM capacity across long-context, scheduler, and streaming workloads to identify throughput, latency, and batching tradeoffs.",
+          "Measured burst and spike-to-zero admission behavior, showing bounded queues preserved 100% delivery with about 2s p95 latency while direct clients dropped 237-787 iterations.",
+          "Identified the 8192/300 long-context boundary where 1.10 req/s had no queueing, 1.15 req/s began waiting pressure, and 1.20 req/s still delivered 100% but reached 54.35s p95 latency.",
+          "Added Blackwell FP4 experiment scaffolding for BF16, plain NVFP4, and SmoothQuant comparisons across accuracy, memory, latency, throughput, serving cost, and build cost.",
         ],
       },
     ],

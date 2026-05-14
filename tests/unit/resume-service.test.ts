@@ -8,13 +8,21 @@ describe("Resume Service", () => {
     expect(publicResumeData.header.name).toBe("Tony Lee");
     expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("vLLM");
     expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Inference Load Testing (k6)");
+    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Admission Control");
+    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Quantization Evaluation");
     expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("AWS (VPC, IAM, EC2, ALB)");
     expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("DCGM Exporter");
     expect(publicResumeData.skills["Languages"]).toBeArray();
     expect(publicResumeData.projects?.title).toBe("Selected Project");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Lab");
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Measured vLLM capacity across long-context, scheduler, and streaming workloads to identify throughput, latency, and batching tradeoffs.",
+      "Measured burst and spike-to-zero admission behavior, showing bounded queues preserved 100% delivery with about 2s p95 latency while direct clients dropped 237-787 iterations.",
+    );
+    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
+      "Identified the 8192/300 long-context boundary where 1.10 req/s had no queueing, 1.15 req/s began waiting pressure, and 1.20 req/s still delivered 100% but reached 54.35s p95 latency.",
+    );
+    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
+      "Added Blackwell FP4 experiment scaffolding for BF16, plain NVFP4, and SmoothQuant comparisons across accuracy, memory, latency, throughput, serving cost, and build cost.",
     );
   });
 

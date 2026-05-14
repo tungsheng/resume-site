@@ -13,12 +13,12 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Experiment Catalog");
     expect(html).toContain("Focused GPU inference experiments");
     expect(html).toContain("Catalog ready");
-    expect(html).toContain("KV-cache, batching, streaming timing, and autoscaling");
-    expect(html).toContain("6 experiments");
+    expect(html).toContain("request-pattern, cost, and FP4 quantization matrices still pending");
+    expect(html).toContain("7 experiments");
     expect(html).toContain("Local render");
     expect(html).toContain("Live runners");
     expect(html).toContain("4 measured");
-    expect(html).toContain("2 pending");
+    expect(html).toContain("3 pending");
     expect(html).toContain("href=\"#experiment-catalog-list\"");
     expect(html).not.toContain("definition catalog");
     expect(html).not.toContain(">View resume<");
@@ -42,24 +42,27 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Request Pattern Utilization");
     expect(html).toContain("Autoscaling and Queueing Behavior");
     expect(html).toContain("Cost per Useful Work");
+    expect(html).toContain("FP4 Quantization Optimization");
     expect(html).toContain("href=\"/experiments/kv-cache\"");
     expect(html).toContain("href=\"/experiments/prefill-decode\"");
     expect(html).toContain("href=\"/experiments/batching\"");
     expect(html).toContain("href=\"/experiments/request-patterns\"");
     expect(html).toContain("href=\"/experiments/autoscaling\"");
     expect(html).toContain("href=\"/experiments/cost\"");
+    expect(html).toContain("href=\"/experiments/fp4\"");
     expect(html).toContain("Related project evidence");
     expect(html).toContain("Platform decisions live with the project");
     expect(html).toContain("not catalog experiments");
     expect(html).toContain("href=\"/project/cloud-inference-platform/validation\"");
     expect(html).not.toContain("href=\"/experiments/platform-validation\"");
-    expect(html).toContain("Long-context capacity knee.");
+    expect(html).toContain("Full delivery can hide queueing.");
     expect(html).toContain("Concurrency");
     expect(html).toContain("KV memory");
     expect(html).toContain("knee refinement");
     expect(html).toContain("streaming split");
     expect(html).toContain("scheduler compare");
     expect(html).toContain("queueing behavior");
+    expect(html).toContain("BF16 vs NVFP4 vs SmoothQuant.");
     expect(html).not.toContain("Evaluate evidence from the platform");
     expect(html).not.toContain("Choose an evaluate decision");
     expect(html).not.toContain("experiment-decision-workspace");
@@ -72,6 +75,7 @@ describe("ExperimentsPage", () => {
     const slugs = [
       "request-patterns",
       "cost",
+      "fp4",
     ];
 
     for (const slug of slugs) {
@@ -118,29 +122,29 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("KV Cache vs Concurrency example live command");
     expect(html).toContain("Measured result");
     expect(html).toContain("Result evidence");
-    expect(html).toContain("Long-context capacity knee");
-    expect(html).toContain("Latest reports: 2026-05-06");
-    expect(html).toContain("1.10-1.15 req/s band");
+    expect(html).toContain("Full delivery is not enough");
+    expect(html).toContain("Latest reports: 2026-05-13");
+    expect(html).toContain("every request still completes");
     expect(html).toContain("Clean through");
     expect(html).toContain("1.10 req/s");
     expect(html).toContain("Queue starts");
     expect(html).toContain("1.15 req/s");
-    expect(html).toContain("Best variant");
-    expect(html).toContain("40.57s p95");
+    expect(html).toContain("Practical edge");
+    expect(html).toContain("100% delivered; p95 54.35s; 30 waiting");
     expect(html).toContain("8192/300 rate sweep");
     expect(html).toContain("Profile variants near the knee");
     expect(html).toContain("seqs-24 @ 1.15");
     expect(html).toContain("seqs-16 @ 1.15");
     expect(html).toContain("97.4% delivered");
-    expect(html).toContain("16.83s");
-    expect(html).toContain("28.20s");
-    expect(html).toContain("46.68s");
-    expect(html).toContain("56.96s");
-    expect(html).toContain("85.75s");
+    expect(html).toContain("14.31s");
+    expect(html).toContain("21.67s");
+    expect(html).toContain("35.35s");
+    expect(html).toContain("54.35s");
+    expect(html).toContain("93.78s");
     expect(html).toContain("180.27s");
     expect(html).toContain("Evidence boundary");
     expect(html).toContain("Selected reports");
-    expect(html).toContain("seqs-24 report");
+    expect(html).toContain("1.20 req/s report");
     expect(html).toContain("Results summary");
     expect(html).not.toContain("Curated live results pending");
     expect(html).toContain(

@@ -9,22 +9,22 @@ describe("ProjectPage", () => {
 
     expect(html).toContain("Cloud Inference Platform");
     expect(html).toContain(
-      "A GPU inference lab on EKS that turns vLLM serving pressure into autoscaling and GPU node provisioning, with platform validation runs and a catalog of focused serving experiments."
+      "A GPU inference lab on EKS that turns vLLM serving measurements into architecture decisions for admission, autoscaling, context length, scheduler behavior, and quantization."
     );
     expect(html).toContain("GitHub");
     expect(html).toContain("View experiments");
     expect(html).toContain("View resume");
     expect(html).toContain("At a glance");
     expect(html).toContain(
-      "The lab has one public serving path, one observable scale path, and three workflows for proving or measuring behavior."
+      "The lab has one public serving path, one observable scale path, and a decision loop for separating supported conclusions from partial claims."
     );
     expect(html).toContain("AWS EKS + vLLM");
     expect(html).toContain("0 serving GPUs");
     expect(html).toContain("Verify / Evaluate / Experiment");
-    expect(html).toContain("6 experiments");
-    expect(html).toContain("Validation + studies");
+    expect(html).toContain("7 experiments");
+    expect(html).toContain("Supported + partial");
     expect(html).toContain("Choose the right workflow");
-    expect(html).toContain("Use verify for path proof, evaluate for platform comparisons, and experiment for catalog-defined serving questions.");
+    expect(html).toContain("Use verify for path proof, evaluate for platform comparisons, and experiment for catalog-defined serving questions that feed the decision engine.");
     expect(html).toContain("Verify");
     expect(html).toContain("Evaluate");
     expect(html).toContain("Experiment");
@@ -35,14 +35,16 @@ describe("ProjectPage", () => {
     expect(html).toContain("Public /v1 response");
     expect(html).toContain("Catalog validation");
     expect(html).toContain("Decision evidence");
-    expect(html).toContain("Experiment contract");
-    expect(html).toContain("Question");
-    expect(html).toContain("Cases");
-    expect(html).toContain("Serving profile");
-    expect(html).toContain("Metrics");
-    expect(html).toContain("Result");
-    expect(html).toContain("Experiment summary");
+    expect(html).toContain("Decision contract");
+    expect(html).toContain("Workload");
+    expect(html).toContain("Profile");
+    expect(html).toContain("Run");
+    expect(html).toContain("Evidence gate");
+    expect(html).toContain("Decision");
+    expect(html).toContain("Decision engine");
+    expect(html).toContain("Experiment catalog");
     expect(html).toContain("Experiment runner");
+    expect(html).toContain("Runbook");
     expect(html).toContain("How the platform serves and scales");
     expect(html).toContain("Default path");
     expect(html).toContain(
@@ -72,14 +74,16 @@ describe("ProjectPage", () => {
       "Confirm one successful public /v1 inference response."
     );
     expect(html).toContain(
-      "Evidence and outputs"
+      "Evidence and decisions"
     );
-    expect(html).toContain("Measured platform validation, generated reports, and catalog experiments are related, but they are not the same artifact.");
-    expect(html).toContain("Measured evaluate runs support warm baseline, scale-out signal, and target tuning decisions.");
-    expect(html).toContain("Selected KV-cache, batching, streaming timing, and autoscaling reports now support measured study pages");
-    expect(html).toContain("Generated Markdown, JSON, and logs stay under docs/reports until selected for the project narrative.");
+    expect(html).toContain("Generated reports are inputs. Curated conclusions are the product");
+    expect(html).toContain("Bounded admission, the 8192/300 long-context knee, and the current FP8 KV-cache rejection are supported by measured runs.");
+    expect(html).toContain("A claim needs the right fields");
+    expect(html).toContain("Active-pressure targets, batching matrices, request-pattern utilization, cost, streaming, and Blackwell FP4 remain partial");
+    expect(html).toContain("Evidence");
+    expect(html).toContain("Decision engine");
     expect(html).toContain("Reports docs");
-    expect(html).toContain("Scaling docs");
+    expect(html).toContain("Experiment catalog");
     expect(html).toContain("Serve path");
     expect(html).toContain("Scale path");
     expect(html).toContain("Foundation");
@@ -112,7 +116,10 @@ describe("ProjectPage", () => {
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/scripts/experiment\""
     );
     expect(html).toContain(
-      "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/experiments-summary.md\""
+      "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/decision-engine.md\""
+    );
+    expect(html).toContain(
+      "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/experiment-catalog.md\""
     );
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/reports/README.md\""
@@ -133,7 +140,7 @@ describe("ProjectPage", () => {
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/platform/inference/hpa-active-pressure.yaml\""
     );
     expect(html).toContain(
-      "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/scaling.md\""
+      "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/platform-reference.md\""
     );
     expect(html).toContain("href=\"/experiments\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
@@ -144,21 +151,23 @@ describe("ProjectPage", () => {
       <ProjectPage initialPath="/project/cloud-inference-platform/validation" />,
     );
 
-    expect(html).toContain("Platform Decisions");
-    expect(html).toContain("Operational validation from evaluate runs");
-    expect(html).toContain("Decision record");
-    expect(html).toContain("This is not an experiment catalog entry.");
-    expect(html).toContain("Keep 1 warm path");
-    expect(html).toContain("93s vs 423s");
-    expect(html).toContain("$0.526/hr idle cost");
-    expect(html).toContain("Use active-pressure");
-    expect(html).toContain("564s vs 989s");
-    expect(html).toContain("Burst cost rises by about $0.038");
-    expect(html).toContain("Keep target 4");
-    expect(html).toContain("952s at $0.484");
-    expect(html).toContain("Provisional: GPU efficiency fields were unavailable");
-    expect(html).toContain("Generated: May 1, 2026");
-    expect(html).toContain("Workflow: ./scripts/evaluate");
+    expect(html).toContain("Architecture Decisions");
+    expect(html).toContain("Curated lab conclusions");
+    expect(html).toContain("portfolio-facing decision record");
+    expect(html).toContain("Bound burst traffic");
+    expect(html).toContain("100% vs 76.98-88.14%");
+    expect(html).toContain("dropped 237-787 iterations");
+    expect(html).toContain("Optimize readiness");
+    expect(html).toContain("425-439s");
+    expect(html).toContain("container and model readiness dominated");
+    expect(html).toContain("Gate 8192/300");
+    expect(html).toContain("1.20 req/s, 54.35s p95");
+    expect(html).toContain("can still deliver every request at 1.20 req/s");
+    expect(html).toContain("Reject FP8 KV here");
+    expect(html).toContain("47.58-69.12%");
+    expect(html).toContain("Updated: May 13, 2026");
+    expect(html).toContain("Workflow: ./scripts/evaluate + ./scripts/experiment");
+    expect(html).toContain("Evidence type: Curated conclusions");
     expect(html).toContain("Project overview");
     expect(html).toContain("Experiment catalog");
     expect(html).toContain("href=\"/project/cloud-inference-platform\"");

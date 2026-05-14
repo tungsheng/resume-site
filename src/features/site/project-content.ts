@@ -3,20 +3,23 @@ const SETUP_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/up`;
 const VERIFY_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/verify`;
 const EVALUATE_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/evaluate`;
 const EXPERIMENT_SCRIPT_LINK = `${GPU_INFERENCE_REPO_BASE}/scripts/experiment`;
-const EXPERIMENT_SUMMARY_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/experiments-summary.md`;
+const DECISION_ENGINE_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/decision-engine.md`;
+const EVIDENCE_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/evidence.md`;
+const EXPERIMENT_CATALOG_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/experiment-catalog.md`;
+const PLATFORM_REFERENCE_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/platform-reference.md`;
 const REPORTS_DOC_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/reports/README.md`;
+const RUNBOOK_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/runbook.md`;
 const INGRESS_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/ingress.yaml`;
 const SERVICE_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/service.yaml`;
 const VLLM_DEPLOYMENT_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/vllm-openai.yaml`;
 const ACTIVE_PRESSURE_HPA_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/hpa-active-pressure.yaml`;
-const SCALING_DOC_LINK = `${GPU_INFERENCE_REPO_BASE}/docs/scaling.md`;
 
 export const projectContent = {
   title: "Cloud Inference Platform",
   lede:
-    "A GPU inference lab on EKS that turns vLLM serving pressure into autoscaling and GPU node provisioning, with platform validation runs and a catalog of focused serving experiments.",
+    "A GPU inference lab on EKS that turns vLLM serving measurements into architecture decisions for admission, autoscaling, context length, scheduler behavior, and quantization.",
   overviewSummary:
-    "The lab has one public serving path, one observable scale path, and three workflows for proving or measuring behavior.",
+    "The lab has one public serving path, one observable scale path, and a decision loop for separating supported conclusions from partial claims.",
   overviewFacts: [
     {
       label: "Platform",
@@ -44,21 +47,21 @@ export const projectContent = {
     },
     {
       label: "Catalog",
-      value: "6 experiments",
+      value: "7 experiments",
       body:
-        "Focused definitions for memory, latency, batching, traffic, autoscaling, and cost.",
+        "Focused definitions for memory, latency, batching, traffic, autoscaling, cost, and quantization.",
     },
     {
       label: "Results",
-      value: "Validation + studies",
+      value: "Supported + partial",
       body:
-        "Platform evidence and selected serving studies are measured; remaining catalog matrices are still being curated.",
+        "Curated evidence records what is supported, what regressed, and what still needs measurement.",
     },
   ],
   usage: {
     title: "Choose the right workflow",
     lead:
-      "Use verify for path proof, evaluate for platform comparisons, and experiment for catalog-defined serving questions.",
+      "Use verify for path proof, evaluate for platform comparisons, and experiment for catalog-defined serving questions that feed the decision engine.",
     workflows: [
       {
         title: "Verify",
@@ -88,111 +91,131 @@ export const projectContent = {
         href: EXPERIMENT_SCRIPT_LINK,
       },
     ],
-    conceptTitle: "Experiment contract",
+    conceptTitle: "Decision contract",
     conceptLead:
-      "The experiment page carries the full catalog; this page only shows the repeatable contract.",
+      "The experiment page carries the full catalog; this page shows how a workload question becomes evidence, then a recommendation, rejection, or documented gap.",
     conceptSteps: [
-      "Question",
-      "Cases",
-      "Serving profile",
-      "Metrics",
-      "Result",
+      "Workload",
+      "Profile",
+      "Run",
+      "Evidence gate",
+      "Decision",
     ],
     links: [
       {
-        label: "Experiment summary",
-        href: EXPERIMENT_SUMMARY_LINK,
+        label: "Decision engine",
+        href: DECISION_ENGINE_LINK,
+      },
+      {
+        label: "Experiment catalog",
+        href: EXPERIMENT_CATALOG_LINK,
       },
       {
         label: "Experiment runner",
         href: EXPERIMENT_SCRIPT_LINK,
       },
+      {
+        label: "Runbook",
+        href: RUNBOOK_LINK,
+      },
     ],
   },
   evidence: {
-    title: "Evidence and outputs",
+    title: "Evidence and decisions",
     lead:
-      "Measured platform validation, generated reports, and catalog experiments are related, but they are not the same artifact.",
+      "Generated reports are inputs. Curated conclusions are the product: the evidence page records what the lab can support today and what remains a hypothesis.",
     items: [
       {
-        title: "Platform validation",
+        title: "Supported conclusions",
         body:
-          "Measured evaluate runs support warm baseline, scale-out signal, and target tuning decisions.",
+          "Bounded admission, the 8192/300 long-context knee, and the current FP8 KV-cache rejection are supported by measured runs.",
       },
       {
-        title: "Experiment catalog",
+        title: "Evidence gate",
         body:
-          "Selected KV-cache, batching, streaming timing, and autoscaling reports now support measured study pages while the broader request-pattern and cost matrices remain pending.",
+          "A claim needs the right fields: completed, dropped, interrupted, p95/p99 latency, throughput, queue pressure, GPU metrics, cost, or accuracy depending on the decision.",
       },
       {
-        title: "Report rules",
+        title: "Open gaps",
         body:
-          "Generated Markdown, JSON, and logs stay under docs/reports until selected for the project narrative.",
+          "Active-pressure targets, batching matrices, request-pattern utilization, cost, streaming, and Blackwell FP4 remain partial until their result fields are complete.",
       },
     ],
     links: [
+      {
+        label: "Evidence",
+        href: EVIDENCE_LINK,
+      },
+      {
+        label: "Decision engine",
+        href: DECISION_ENGINE_LINK,
+      },
       {
         label: "Reports docs",
         href: REPORTS_DOC_LINK,
       },
       {
-        label: "Scaling docs",
-        href: SCALING_DOC_LINK,
-      },
-      {
-        label: "Experiment summary",
-        href: EXPERIMENT_SUMMARY_LINK,
+        label: "Experiment catalog",
+        href: EXPERIMENT_CATALOG_LINK,
       },
     ],
   },
   validation: {
-    title: "Platform Decisions",
+    title: "Architecture Decisions",
     lede:
-      "Operational validation from evaluate runs: the platform posture, autoscaling signal, and active-pressure target Tony would ship next.",
+      "Curated lab conclusions: what the current EKS/vLLM evidence supports, what it rejects, and where the boundary stays explicit.",
     summary:
-      "This is not an experiment catalog entry. It is the decision record that turns measured platform runs into rollout calls.",
+      "This is not a catalog entry. It is the portfolio-facing decision record that turns measured runs into architecture calls.",
     decisions: [
       {
-        title: "Warm baseline",
-        call: "Keep 1 warm path",
-        proofLabel: "First public response",
-        proofValue: "93s vs 423s",
+        title: "Admission model",
+        call: "Bound burst traffic",
+        proofLabel: "Delivery ratio",
+        proofValue: "100% vs 76.98-88.14%",
         body:
-          "One ready path cuts the first public wait by more than five minutes compared with zero-idle.",
-        caveat: "$0.526/hr idle cost for the warm path.",
+          "Bounded queued clients protected delivery ratio and p95 latency during burst and spike-to-zero runs by limiting active concurrency.",
+        caveat: "Direct clients completed more work in the same wall-clock window but dropped 237-787 iterations.",
       },
       {
-        title: "Scale-out signal",
-        call: "Use active-pressure",
-        proofLabel: "Second ready replica",
-        proofValue: "564s vs 989s",
+        title: "Cold-start bottleneck",
+        call: "Optimize readiness",
+        proofLabel: "Model ready",
+        proofValue: "425-439s",
         body:
-          "The active-pressure HPA signal brings the second replica online sooner than running-request pressure.",
-        caveat: "Burst cost rises by about $0.038 in the compare run.",
+          "Karpenter produced a NodeClaim in 3-12s and a GPU node in 35s; container and model readiness dominated the scale-from-zero wait.",
+        caveat: "First-successful-completion timing still needs to be captured in the selected reports.",
       },
       {
-        title: "Target tuning",
-        call: "Keep target 4",
-        proofLabel: "Target sweep",
-        proofValue: "952s at $0.484",
+        title: "Long-context boundary",
+        call: "Gate 8192/300",
+        proofLabel: "Practical edge",
+        proofValue: "1.20 req/s, 54.35s p95",
         body:
-          "Target 4 has complete latency and queue fields, zero peak waiting requests, and nearly the same burst cost as target 2.",
-        caveat:
-          "Provisional: GPU efficiency fields were unavailable, and target 8 was missing key metrics.",
+          "The long-context profile has no waiting at 1.10 req/s, starts queueing at 1.15 req/s, and can still deliver every request at 1.20 req/s while missing a practical latency envelope.",
+        caveat: "Boundary applies to the measured model, GPU class, vLLM path, and 8192/300 workload.",
+      },
+      {
+        title: "KV-cache dtype",
+        call: "Reject FP8 KV here",
+        proofLabel: "Delivery ratio",
+        proofValue: "47.58-69.12%",
+        body:
+          "FP8 KV-cache variants saved little memory and regressed delivery, p95 latency, and generated tokens/sec on the current g4dn/vLLM path.",
+        caveat: "Retest only with a newer vLLM image or different GPU backend.",
       },
     ],
     sourceFacts: [
       {
-        label: "Generated",
-        value: "May 1, 2026",
+        label: "Updated",
+        value: "May 13, 2026",
       },
       {
         label: "Workflow",
-        value: "./scripts/evaluate",
+        value: "./scripts/evaluate + ./scripts/experiment",
       },
       {
         label: "Evidence type",
-        value: "Decision record",
+        value: "Curated conclusions",
       },
     ],
   },
@@ -219,17 +242,17 @@ export const projectContent = {
       },
       {
         label: "Prometheus",
-        href: SCALING_DOC_LINK,
+        href: PLATFORM_REFERENCE_LINK,
         linkLabel: "Docs",
       },
       {
         label: "Adapter / custom metrics API",
-        href: SCALING_DOC_LINK,
+        href: PLATFORM_REFERENCE_LINK,
         linkLabel: "Docs",
       },
       {
         label: "GPU NodePools",
-        href: SCALING_DOC_LINK,
+        href: PLATFORM_REFERENCE_LINK,
         linkLabel: "Docs",
       },
       {
@@ -278,12 +301,12 @@ export const projectContent = {
         },
         {
           label: "Prometheus",
-          href: SCALING_DOC_LINK,
+          href: PLATFORM_REFERENCE_LINK,
           linkLabel: "Docs",
         },
         {
           label: "Adapter",
-          href: SCALING_DOC_LINK,
+          href: PLATFORM_REFERENCE_LINK,
           linkLabel: "Docs",
         },
         {
@@ -296,7 +319,7 @@ export const projectContent = {
         },
         {
           label: "Karpenter / NodeClaim",
-          href: SCALING_DOC_LINK,
+          href: PLATFORM_REFERENCE_LINK,
           linkLabel: "Docs",
         },
         {

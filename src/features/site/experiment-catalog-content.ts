@@ -117,13 +117,13 @@ function experimentStatus(
 export const experimentCatalogContent = {
   title: "Experiment Catalog",
   subtitle:
-    "Focused GPU inference experiments for memory pressure, streaming latency, batching, request shape, autoscaling, and cost efficiency.",
+    "Focused GPU inference experiments for memory pressure, streaming latency, batching, request shape, autoscaling, cost efficiency, and quantization.",
   statusNote:
-    "Catalog ready; KV-cache, batching, streaming timing, and autoscaling have selected measured evidence, with request-pattern and cost matrices still pending.",
+    "Catalog ready; KV-cache, batching, streaming timing, and autoscaling have selected page-level evidence, with request-pattern, cost, and FP4 quantization matrices still pending.",
   platformValidation: {
     status: "Related project evidence",
     question:
-      "Warm baseline, active-pressure scale-out, and target tuning are project rollout decisions, not catalog experiments.",
+      "Admission, cold-start, long-context, and FP8 KV-cache conclusions are project architecture decisions, not catalog experiments.",
     href: PROJECT_VALIDATION_PATH,
   },
   conceptLead:
@@ -158,7 +158,7 @@ export const experimentCatalogContent = {
       status: experimentStatus("Measurable with run", "Measured knee refinement"),
       question:
         "How does longer prompt context reduce stable concurrency and throughput?",
-      cardSummary: "Long-context capacity knee.",
+      cardSummary: "Full delivery can hide queueing.",
       metricFocus: ["Concurrency", "KV memory", "Tail latency"],
       summary:
         "Compares short, medium, and long prompt contexts, then uses an 8192-token sweep to find where long-context serving begins to queue.",
@@ -230,61 +230,61 @@ export const experimentCatalogContent = {
         "./scripts/experiment render-serving --experiment kv-cache --profile long-context",
       ],
       liveCommands: [
-        "./scripts/experiment run --experiment kv-cache --case prompt-8192-output-300-rate-115 --profile long-context",
+        "./scripts/experiment run --experiment kv-cache --case prompt-8192-output-300-rate-120 --profile long-context",
       ],
       resultEvidence: {
-        title: "Long-context capacity knee",
+        title: "Full delivery is not enough",
         statusLabel: "Measured knee refinement",
-        reportDate: "2026-05-06",
+        reportDate: "2026-05-13",
         summary:
-          "For 8192-token prompts with 300 generated tokens, the rate sweep narrows the single-replica capacity knee to the 1.10-1.15 req/s band, then profile variants show where scheduler caps help or hurt.",
+          "For 8192-token prompts with 300 generated tokens, the latest long-context sweep shows clean delivery through 1.10 req/s, queueing at 1.15 req/s, and an operational edge at 1.20 req/s even though every request still completes.",
         boundary:
-          "Treat the boundary as a measured operating band for one model, one GPU class, and one 8192/300 workload. Profile variants were measured near the knee, but repeat runs and admission-control comparisons should still be used before declaring a universal policy.",
+          "Treat the boundary as a measured operating band for one model, one GPU class, one vLLM image, and one 8192/300 workload. The latest direct-profile reports include offered, unserved, queue, delivery, GPU utilization, and memory fields, but repeat runs and admission-control comparisons should still be used before declaring a universal policy.",
         boundaryPoints: [
-          "The 1.15 req/s long-context-seqs-24 profile reduced p95 latency versus the default long-context profile, but the 1.20 req/s run regressed.",
-          "The long-context-seqs-16 cap protected active sequence count too aggressively and dropped delivery to 97.4% at 1.15 req/s.",
-          "The long-context-batched-16384 profile did not materially improve the 1.15 req/s knee case.",
+          "At 1.20 req/s, the profile delivered 100% of offered work with zero failures, zero dropped iterations, and zero interrupted iterations, but p95 latency still reached 54.35s.",
+          "The scheduler hit 32 running requests while waiting depth climbed from 0 at 1.10 req/s to 8 at 1.15 req/s and 30 at 1.20 req/s.",
+          "Profile variants remain useful follow-ups, but the May 13 direct-profile sweep is now the freshest baseline evidence for the operating boundary.",
         ],
         stats: [
           {
             label: "Clean through",
             value: "1.10 req/s",
-            context: "0 waiting requests; p95 28.20s",
+            context: "0 waiting requests; p95 21.67s",
           },
           {
             label: "Queue starts",
             value: "1.15 req/s",
-            context: "20 waiting requests; p95 46.68s",
+            context: "8 waiting requests; p95 35.35s",
           },
           {
-            label: "Best variant",
-            value: "40.57s p95",
-            context: "seqs-24 at 1.15 req/s versus 46.68s baseline",
+            label: "Practical edge",
+            value: "1.20 req/s",
+            context: "100% delivered; p95 54.35s; 30 waiting",
           },
         ],
         sourceReports: [
           {
+            label: "1.05 req/s report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-105-long-context-20260513-165340.md",
+          },
+          {
             label: "1.10 req/s report",
-            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-110-long-context-20260503-231946.md",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-110-long-context-20260513-171317.md",
           },
           {
-            label: "1.15 baseline report",
-            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-long-context-20260503-234633.md",
+            label: "1.15 req/s report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-long-context-20260513-172605.md",
           },
           {
-            label: "seqs-24 report",
-            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-long-context-seqs-24-20260505-165320.md",
-          },
-          {
-            label: "seqs-16 report",
-            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-long-context-seqs-16-20260505-171031.md",
+            label: "1.20 req/s report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-120-long-context-20260513-173923.md",
           },
         ],
         tables: [
           {
             title: "8192/300 rate sweep",
             summary:
-              "The default long-context profile remains clean through 1.10 req/s and begins sustained queueing at 1.15 req/s.",
+              "The default long-context profile still completes every request at 1.20 req/s, but waiting depth and p95 latency make that point an operational edge.",
             rows: [
               {
                 target: "0.75 req/s",
@@ -296,43 +296,43 @@ export const experimentCatalogContent = {
               {
                 target: "1.00 req/s",
                 outcome: "stable but slower",
-                p95Latency: "11.91s",
-                peakWaiting: "0 waiting / 13 active",
-                gpuMax: "93%",
+                p95Latency: "11.92s",
+                peakWaiting: "0 waiting / 12 active",
+                gpuMax: "100%",
               },
               {
                 target: "1.05 req/s",
                 outcome: "clean but slower",
-                p95Latency: "16.83s",
-                peakWaiting: "0 waiting / 18 active",
+                p95Latency: "14.31s",
+                peakWaiting: "0 waiting / 16 active",
                 gpuMax: "100%",
               },
               {
                 target: "1.10 req/s",
                 outcome: "clean with rising tail",
-                p95Latency: "28.20s",
-                peakWaiting: "0 waiting / 32 active",
+                p95Latency: "21.67s",
+                peakWaiting: "0 waiting / 24 active",
                 gpuMax: "100%",
               },
               {
                 target: "1.15 req/s",
                 outcome: "queue starts",
-                p95Latency: "46.68s",
-                peakWaiting: "20 waiting / 52 active",
+                p95Latency: "35.35s",
+                peakWaiting: "8 waiting / 40 active",
                 gpuMax: "100%",
               },
               {
                 target: "1.20 req/s",
-                outcome: "saturation grows",
-                p95Latency: "56.96s",
-                peakWaiting: "33 waiting / 65 active",
+                outcome: "practical edge",
+                p95Latency: "54.35s",
+                peakWaiting: "30 waiting / 62 active",
                 gpuMax: "100%",
               },
               {
                 target: "1.25 req/s",
                 outcome: "saturation is obvious",
-                p95Latency: "85.75s",
-                peakWaiting: "65 waiting / 97 active",
+                p95Latency: "93.78s",
+                peakWaiting: "72 waiting / 104 active",
                 gpuMax: "100%",
               },
               {
@@ -1128,6 +1128,91 @@ export const experimentCatalogContent = {
           label: "Burst cost comparison",
           command: "./scripts/experiment run --experiment cost --case burst-cost-efficiency --profile optimized-batched",
           reason: "Check whether the optimized profile remains cheaper once tail-latency pressure and dropped work are included.",
+        },
+      ],
+    },
+    {
+      slug: "fp4",
+      title: "FP4 Quantization Optimization",
+      category: "Quantization",
+      status: experimentStatus("Renderable with quantization jobs", "Blackwell capacity blocked"),
+      question:
+        "Does SmoothQuant improve NVFP4 W4A4 accuracy recovery enough to justify its memory, latency, throughput, and cost tradeoffs?",
+      cardSummary: "BF16 vs NVFP4 vs SmoothQuant.",
+      metricFocus: ["Accuracy recovery", "Memory", "Build cost"],
+      summary:
+        "Defines a Blackwell FP4 comparison across BF16, plain NVFP4, and SmoothQuant plus NVFP4 artifacts, with latency, throughput, accuracy, memory, serving cost, and quantization build cost tracked separately.",
+      whyItMatters:
+        "Quantization only helps if the memory or cost gain survives accuracy, latency, throughput, and artifact-build tradeoffs. This experiment keeps those claims measurable instead of treating FP4 as an automatic win.",
+      runner: "k6 completion load + accuracy client",
+      endpoint: "/v1/completions",
+      sourcePath: "experiments/fp4/",
+      resultsPath: "experiments/fp4/results.md",
+      cases: [
+        {
+          id: "steady-512-output-128",
+          promptTokens: 512,
+          outputTokens: 128,
+          description: "steady latency, throughput, and serving cost comparison",
+        },
+        {
+          id: "prefill-2048-output-128",
+          promptTokens: 2048,
+          outputTokens: 128,
+          description: "prefill-heavy memory and TTFT comparison",
+        },
+      ],
+      servingProfiles: [
+        {
+          id: "bf16-baseline",
+          description: "Qwen2.5 7B BF16 baseline on a full p6-b200 instance",
+        },
+        {
+          id: "nvfp4-plain",
+          description: "NVFP4 W4A4 artifact without pre-optimization",
+        },
+        {
+          id: "nvfp4-smoothquant",
+          description: "SmoothQuant preprocessing followed by NVFP4 W4A4 quantization",
+        },
+      ],
+      metricGroups: [
+        {
+          label: "Serving",
+          metrics: ["p95 request latency", "p99 request latency", "requests/sec", "generated tokens/sec"],
+        },
+        {
+          label: "Accuracy and memory",
+          metrics: ["average accuracy score", "FP4 recovery vs BF16", "GPU memory used", "GPU memory free"],
+        },
+        {
+          label: "Cost",
+          metrics: ["serving cost", "cost per 1M generated tokens", "quantization build cost"],
+        },
+      ],
+      localCommands: [
+        "./scripts/experiment show fp4",
+        "./scripts/experiment render-quantization --experiment fp4 --profile nvfp4-plain",
+        "./scripts/experiment render-accuracy --experiment fp4 --profile nvfp4-smoothquant",
+      ],
+      liveCommands: [
+        "./scripts/experiment run --experiment fp4 --case steady-512-output-128 --profile bf16-baseline",
+      ],
+      pendingNextRuns: [
+        {
+          label: "Capacity retry",
+          command: "./scripts/up",
+          reason: "Retry the Blackwell path only when p6-b200.48xlarge capacity is available or reserved in the target us-west-2 zones.",
+        },
+        {
+          label: "Plain NVFP4 build",
+          command: "./scripts/experiment render-quantization --experiment fp4 --profile nvfp4-plain",
+          reason: "Produce the first quantized artifact before comparing BF16, plain NVFP4, and SmoothQuant serving behavior.",
+        },
+        {
+          label: "SmoothQuant comparison",
+          command: "./scripts/experiment render-accuracy --experiment fp4 --profile nvfp4-smoothquant",
+          reason: "Measure whether SmoothQuant improves NVFP4 accuracy recovery enough to justify its extra build cost.",
         },
       ],
     },
