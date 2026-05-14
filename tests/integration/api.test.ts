@@ -37,7 +37,7 @@ describe("API Integration", () => {
     expect(res.status).toBe(200);
 
     const html = await res.text();
-    expect(html).toContain("Cloud Inference Platform | Tony Lee");
+    expect(html).toContain("GPU Inference Decision Lab | Tony Lee");
   });
 
   itIfIntegration("GET /project/cloud-inference-platform/validation serves the project shell", async () => {
@@ -45,7 +45,7 @@ describe("API Integration", () => {
     expect(res.status).toBe(200);
 
     const html = await res.text();
-    expect(html).toContain("Cloud Inference Platform | Tony Lee");
+    expect(html).toContain("GPU Inference Decision Lab | Tony Lee");
   });
 
   itIfIntegration("GET /experiments serves the experiments shell", async () => {

@@ -13,7 +13,7 @@ export const publicResumeData: ResumeData = {
       linkedin: "tonyslee8",
     },
     summary:
-      "Platform infrastructure engineer specializing in ML inference systems, GPU-backed serving, Kubernetes, autoscaling, admission control, and distributed systems reliability.",
+      "Platform infrastructure engineer focused on ML inference architecture, GPU-backed serving, Kubernetes, autoscaling, admission control, and distributed systems reliability.",
   },
   skills: {
     "ML Infrastructure / Inference": [
@@ -49,13 +49,14 @@ export const publicResumeData: ResumeData = {
     title: "Selected Project",
     items: [
       {
-        title: "GPU Inference Lab (AWS EKS + Karpenter + vLLM)",
+        title: "GPU Inference Decision Lab (AWS EKS + Karpenter + vLLM)",
         highlights: [
-          "Built an AWS EKS/vLLM inference lab that turns serving measurements into architecture decisions across autoscaling, admission control, long-context capacity, scheduler behavior, and quantization.",
-          "Proved zero-idle GPU serving from 0 nodes to a successful public /v1 completion, then cleaned back to $0/hr serving-GPU idle cost.",
-          "Measured burst and spike-to-zero admission behavior, showing bounded queues preserved 100% delivery with about 2s p95 latency while direct clients dropped 237-787 iterations.",
-          "Identified the 8192/300 long-context boundary where 1.10 req/s had no queueing, 1.15 req/s began waiting pressure, and 1.20 req/s still delivered 100% but reached 54.35s p95 latency.",
-          "Added Blackwell FP4 experiment scaffolding for BF16, plain NVFP4, and SmoothQuant comparisons across accuracy, memory, latency, throughput, serving cost, and build cost.",
+          "Built an AWS EKS/vLLM decision lab that turns serving measurements into supported, rejected, pending, or blocked architecture calls across autoscaling, admission control, long-context capacity, scheduling, and quantization.",
+          "Proved zero-idle GPU serving from 0 nodes to a public /v1 completion, then cleaned back to $0/hr serving-GPU idle cost.",
+          "Measured burst and spike-to-zero admission behavior: bounded queues kept 100% delivery at about 2s p95 while direct clients dropped 237-787 iterations.",
+          "Mapped the 8192/300 long-context boundary: 1.10 req/s had no queueing, 1.15 began waiting pressure, and 1.20 still delivered 100% but reached 54.35s p95 latency.",
+          "Rejected FP8 KV cache on g4dn/vLLM after variants cut delivery to 47.58-69.12% and generated throughput to 114-166 tokens/sec versus a 249.58 baseline.",
+          "Designed a Blackwell FP4 path for BF16, plain NVFP4, and SmoothQuant across accuracy, memory, latency, throughput, serving cost, and build cost; the first p6-b200 attempt was blocked by EC2 capacity.",
         ],
       },
     ],
@@ -67,11 +68,11 @@ export const publicResumeData: ResumeData = {
       startDate: "Sep 2024",
       endDate: "Present",
       highlights: [
-        "Designed and delivered distributed platform services with a focus on reliability, deployment safety, and cross-service coordination across UI, API, data, and infrastructure boundaries.",
-        "Applied distributed systems and scaling principles to evaluate platform behavior under load, focusing on latency, throughput, deployment failure modes, and recovery paths.",
-        "Improved release stability by containerizing UI services, decoupling shared dependencies, and isolating deployment surfaces for high-risk changes.",
-        "Led a launch-critical OpenSearch Dashboards migration, resolving deployment and environment consistency issues across production systems in partnership with AWS/OpenSearch engineers.",
-        "Built local development and validation automation that reduced dev/test iteration latency by 20% and improved onboarding for service changes.",
+        "Designed distributed platform services across UI, API, data, and infrastructure boundaries, with emphasis on reliability, deployment safety, and cross-service coordination.",
+        "Evaluated platform behavior under load across latency, throughput, failure modes, and recovery paths.",
+        "Improved release stability by containerizing UI services, decoupling shared dependencies, and isolating high-risk deployment surfaces.",
+        "Led a launch-critical OpenSearch Dashboards migration, resolving deployment and environment issues with AWS/OpenSearch engineers.",
+        "Built local development and validation automation that cut dev/test iteration latency by 20% and improved onboarding.",
       ],
     },
     {
@@ -80,8 +81,8 @@ export const publicResumeData: ResumeData = {
       startDate: "Aug 2019",
       endDate: "Apr 2024",
       highlights: [
-        "Led architecture and technical strategy for the Onboarding Experience platform, helping enterprise customers complete onboarding in under 30 minutes.",
-        "Drove system design across frontend, backend, APIs, and integrations, resolving cross-team tradeoffs across US, Europe, and India engineering groups.",
+        "Led architecture for the Onboarding Experience platform, helping enterprise customers complete onboarding in under 30 minutes.",
+        "Drove system design across frontend, backend, APIs, and integrations, resolving tradeoffs across US, Europe, and India engineering groups.",
         "Led AngularJS-to-React modernization to remove security risk and improve maintainability; introduced Cypress end-to-end testing that cut test creation time by 50%.",
         "Built CI/CD and test automation improvements that reduced regression risk in high-visibility customer onboarding flows.",
       ],

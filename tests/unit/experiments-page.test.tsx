@@ -11,14 +11,16 @@ describe("ExperimentsPage", () => {
     const html = renderToStaticMarkup(<ExperimentsPage />);
 
     expect(html).toContain("Experiment Catalog");
-    expect(html).toContain("Focused GPU inference experiments");
+    expect(html).toContain("Focused experiments for memory pressure");
     expect(html).toContain("Catalog ready");
-    expect(html).toContain("request-pattern, cost, and FP4 quantization matrices still pending");
+    expect(html).toContain("Rows show whether each experiment is supported, selected, rejected, pending, or blocked.");
     expect(html).toContain("7 experiments");
-    expect(html).toContain("Local render");
-    expect(html).toContain("Live runners");
-    expect(html).toContain("4 measured");
-    expect(html).toContain("3 pending");
+    expect(html).toContain("Run-ready");
+    expect(html).toContain("2 supported");
+    expect(html).toContain("2 selected reports");
+    expect(html).toContain("2 pending");
+    expect(html).toContain("1 blocked");
+    expect(html).toContain("1 rejected call");
     expect(html).toContain("href=\"#experiment-catalog-list\"");
     expect(html).not.toContain("definition catalog");
     expect(html).not.toContain(">View resume<");
@@ -34,8 +36,11 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Scheduler behavior");
     expect(html).toContain("Purpose");
     expect(html).toContain("Run ready");
-    expect(html).toContain("Result measured");
-    expect(html).toContain("Result pending");
+    expect(html).toContain("Supported");
+    expect(html).toContain("Selected report");
+    expect(html).toContain("Pending");
+    expect(html).toContain("Blocked");
+    expect(html).toContain("Rejected");
     expect(html).toContain("KV Cache vs Concurrency");
     expect(html).toContain("Prefill vs Decode Timing");
     expect(html).toContain("Batching Scheduler Tradeoffs");
@@ -51,17 +56,19 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("href=\"/experiments/cost\"");
     expect(html).toContain("href=\"/experiments/fp4\"");
     expect(html).toContain("Related project evidence");
-    expect(html).toContain("Platform decisions live with the project");
-    expect(html).toContain("not catalog experiments");
+    expect(html).toContain("Architecture decisions live in the project record");
+    expect(html).toContain("not catalog entries");
     expect(html).toContain("href=\"/project/cloud-inference-platform/validation\"");
     expect(html).not.toContain("href=\"/experiments/platform-validation\"");
     expect(html).toContain("Full delivery can hide queueing.");
     expect(html).toContain("Concurrency");
     expect(html).toContain("KV memory");
-    expect(html).toContain("knee refinement");
-    expect(html).toContain("streaming split");
-    expect(html).toContain("scheduler compare");
-    expect(html).toContain("queueing behavior");
+    expect(html).toContain("Long-context knee");
+    expect(html).toContain("FP8 KV on g4dn");
+    expect(html).toContain("Streaming split");
+    expect(html).toContain("Scheduler compare");
+    expect(html).toContain("Admission behavior");
+    expect(html).toContain("Blackwell capacity");
     expect(html).toContain("BF16 vs NVFP4 vs SmoothQuant.");
     expect(html).not.toContain("Evaluate evidence from the platform");
     expect(html).not.toContain("Choose an evaluate decision");
@@ -89,7 +96,11 @@ describe("ExperimentsPage", () => {
       expect(html).toContain("How to run");
       expect(html).toContain("Example local command");
       expect(html).toContain("Example live command");
-      expect(html).toContain("Curated live results pending");
+      if (slug === "fp4") {
+        expect(html).toContain("Blackwell capacity blocked");
+      } else {
+        expect(html).toContain("Live result pending");
+      }
       expect(html).toContain("Result status");
       expect(html).toContain("Category");
       expect(html).toContain("Profiles");
@@ -110,7 +121,7 @@ describe("ExperimentsPage", () => {
     );
 
     expect(html).toContain("KV Cache vs Concurrency");
-    expect(html).toContain("How does longer prompt context reduce stable concurrency and throughput?");
+    expect(html).toContain("How does longer prompt context change concurrency and throughput?");
     expect(html).toContain("5 profiles");
     expect(html).toContain("512-8,192 prompt tokens");
     expect(html).toContain("prompt-512-output-100");
@@ -120,11 +131,12 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("max stable concurrency");
     expect(html).toContain("KV Cache vs Concurrency example local command");
     expect(html).toContain("KV Cache vs Concurrency example live command");
-    expect(html).toContain("Measured result");
+    expect(html).toContain("Supported: Long-context knee");
+    expect(html).toContain("Rejected: FP8 KV on g4dn");
     expect(html).toContain("Result evidence");
     expect(html).toContain("Full delivery is not enough");
     expect(html).toContain("Latest reports: 2026-05-13");
-    expect(html).toContain("every request still completes");
+    expect(html).toContain("even with 100% delivery");
     expect(html).toContain("Clean through");
     expect(html).toContain("1.10 req/s");
     expect(html).toContain("Queue starts");
@@ -146,7 +158,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Selected reports");
     expect(html).toContain("1.20 req/s report");
     expect(html).toContain("Results summary");
-    expect(html).not.toContain("Curated live results pending");
+    expect(html).not.toContain("Live result pending");
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/experiments/kv-cache/\"",
     );
@@ -158,10 +170,10 @@ describe("ExperimentsPage", () => {
     );
 
     expect(html).toContain("Batching Scheduler Tradeoffs");
-    expect(html).toContain("Measured result");
+    expect(html).toContain("Selected report: Scheduler compare");
     expect(html).toContain("Scheduler limits under steady load");
     expect(html).toContain("Latest reports: 2026-05-06");
-    expect(html).toContain("vLLM dynamic-default scheduler delivered the full run");
+    expect(html).toContain("vLLM dynamic-default delivered the full run");
     expect(html).toContain("Dynamic default");
     expect(html).toContain("7.41 req/s");
     expect(html).toContain("Limited batching");
@@ -174,7 +186,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("1.66s");
     expect(html).toContain("10.55s");
     expect(html).toContain("59.72s");
-    expect(html).not.toContain("Curated live results pending");
+    expect(html).not.toContain("Live result pending");
   });
 
   test("renders measured prefill/decode detail content", () => {
@@ -183,7 +195,7 @@ describe("ExperimentsPage", () => {
     );
 
     expect(html).toContain("Prefill vs Decode Timing");
-    expect(html).toContain("Measured result");
+    expect(html).toContain("Selected report: Streaming split");
     expect(html).toContain("Mixed streaming shape split");
     expect(html).toContain("Latest reports: 2026-05-06");
     expect(html).toContain("640 requests at concurrency 24");
@@ -203,7 +215,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Mixed run report");
     expect(html).toContain("prefill-heavy");
     expect(html).toContain("decode-heavy");
-    expect(html).not.toContain("Curated live results pending");
+    expect(html).not.toContain("Live result pending");
   });
 
   test("renders measured autoscaling detail content", () => {
@@ -212,7 +224,7 @@ describe("ExperimentsPage", () => {
     );
 
     expect(html).toContain("Autoscaling and Queueing Behavior");
-    expect(html).toContain("Measured result");
+    expect(html).toContain("Supported: Admission behavior");
     expect(html).toContain("Scale-from-zero queue behavior");
     expect(html).toContain("Latest reports: 2026-05-07");
     expect(html).toContain("bounded-queue clients across burst and spike-to-zero cases");
@@ -236,7 +248,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("354s / 425s");
     expect(html).toContain("357s / 439s");
     expect(html).toContain("Spike queued report");
-    expect(html).not.toContain("Curated live results pending");
+    expect(html).not.toContain("Live result pending");
   });
 
   test("does not render platform validation as an experiment detail route", () => {

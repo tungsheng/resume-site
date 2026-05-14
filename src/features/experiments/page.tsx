@@ -18,6 +18,8 @@ import {
   experimentSourceLink,
   getExperimentBySlug,
   type ExperimentCatalogItem,
+  type ExperimentReadinessSignal,
+  type ExperimentReadinessTone,
   type ExperimentResultEvidenceTable,
 } from "../site/experiment-catalog-content";
 import {
@@ -327,7 +329,7 @@ const metricGroupSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   p: { xs: 1.2, sm: 1.35 },
 });
 
-type CatalogStatusTone = "ready" | "measured" | "pending";
+type CatalogStatusTone = "ready" | ExperimentReadinessTone;
 
 const catalogStatusStackSx: SxProps<Theme> = {
   display: "grid",
@@ -340,11 +342,15 @@ const catalogStatusStackSx: SxProps<Theme> = {
 function catalogStatusLineSx(tone: CatalogStatusTone): SxProps<Theme> {
   return (theme) => {
     const toneColor =
-      tone === "measured"
-        ? theme.palette.info.main
-        : tone === "pending"
-          ? theme.palette.warning.main
-          : theme.palette.secondary.main;
+      tone === "supported"
+        ? theme.palette.success.main
+        : tone === "selected"
+          ? theme.palette.info.main
+          : tone === "rejected"
+            ? theme.palette.error.main
+            : tone === "pending" || tone === "blocked"
+              ? theme.palette.warning.main
+              : theme.palette.secondary.main;
 
     return {
       display: "flex",
@@ -354,6 +360,13 @@ function catalogStatusLineSx(tone: CatalogStatusTone): SxProps<Theme> {
       color: toneColor,
     };
   };
+}
+
+function readinessChipColor(tone: ExperimentReadinessTone): "success" | "info" | "warning" | "error" {
+  if (tone === "supported") return "success";
+  if (tone === "selected") return "info";
+  if (tone === "rejected") return "error";
+  return "warning";
 }
 
 const catalogStatusDotSx: SxProps<Theme> = {
@@ -584,17 +597,22 @@ function CatalogStatusNote() {
 }
 
 function CatalogFactStrip() {
-  const measuredExperimentCount = experimentCatalogContent.experiments.filter(
-    (experiment) => experiment.resultEvidence,
+  const primaryReadiness = experimentCatalogContent.experiments.map(
+    (experiment) => experiment.readiness.primary,
+  );
+  const countPrimaryTone = (tone: ExperimentReadinessTone) =>
+    primaryReadiness.filter((item) => item.tone === tone).length;
+  const rejectedCallCount = experimentCatalogContent.experiments.filter(
+    (experiment) => experiment.readiness.secondary?.tone === "rejected",
   ).length;
-  const pendingExperimentCount =
-    experimentCatalogContent.experiments.length - measuredExperimentCount;
   const facts = [
     `${experimentCatalogContent.experiments.length} experiments`,
-    "Local render",
-    "Live runners",
-    `${measuredExperimentCount} measured`,
-    `${pendingExperimentCount} pending`,
+    "Run-ready",
+    `${countPrimaryTone("supported")} supported`,
+    `${countPrimaryTone("selected")} selected reports`,
+    `${countPrimaryTone("pending")} pending`,
+    `${countPrimaryTone("blocked")} blocked`,
+    `${rejectedCallCount} rejected call`,
   ];
 
   return (
@@ -651,12 +669,10 @@ function BrowseField({
 }
 
 function ExperimentStatusChips({ experiment }: { experiment: ExperimentCatalogItem }) {
-  const hasMeasuredResult = Boolean(experiment.resultEvidence);
-  const evidenceValue = hasMeasuredResult ? "Result measured" : "Result pending";
-  const evidenceDetail = hasMeasuredResult
-    ? experiment.resultEvidence?.statusLabel.replace(/^Measured\s+/i, "") ?? experiment.status.result
-    : null;
-  const evidenceTone: CatalogStatusTone = hasMeasuredResult ? "measured" : "pending";
+  const readinessSignals: ExperimentReadinessSignal[] = [
+    experiment.readiness.primary,
+    ...(experiment.readiness.secondary ? [experiment.readiness.secondary] : []),
+  ];
 
   return (
     <Box sx={catalogStatusStackSx} aria-label={`${experiment.title} status`}>
@@ -666,18 +682,18 @@ function ExperimentStatusChips({ experiment }: { experiment: ExperimentCatalogIt
           Run ready
         </Box>
       </Box>
-      <Box component="span" sx={catalogStatusLineSx(evidenceTone)}>
-        <Box component="span" sx={catalogStatusDotSx} aria-hidden="true" />
-        <Box component="span" sx={catalogStatusTextSx}>
-          {evidenceValue}
-          {evidenceDetail ? (
+      {readinessSignals.map((signal) => (
+        <Box key={`${signal.label}-${signal.detail}`} component="span" sx={catalogStatusLineSx(signal.tone)}>
+          <Box component="span" sx={catalogStatusDotSx} aria-hidden="true" />
+          <Box component="span" sx={catalogStatusTextSx}>
+            {signal.label}
             <Box component="span" sx={catalogStatusMutedSx}>
               {" "}
-              · {evidenceDetail}
+              · {signal.detail}
             </Box>
-          ) : null}
+          </Box>
         </Box>
-      </Box>
+      ))}
     </Box>
   );
 }
@@ -736,7 +752,7 @@ function RelatedProjectEvidenceBand() {
           {item.status}
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          Platform decisions live with the project
+          Architecture decisions live in the project record
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {item.question}
@@ -762,7 +778,7 @@ function ExperimentCatalogListSection() {
         <SectionHeader
           eyebrow="Catalog"
           title="Browse experiments"
-          copy="Scan by purpose and metric focus, then open the detail page for the full question, run shape, and commands."
+          copy="Scan by purpose and metric focus, then open a detail page for the question, run shape, and commands."
         />
       </Box>
 
@@ -875,11 +891,17 @@ function ExperimentPendingNextRuns({ experiment }: { experiment: ExperimentCatal
 }
 
 function ExperimentPendingResult({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const isBlocked = experiment.readiness.primary.tone === "blocked";
+
   return (
     <Box sx={pendingResultSx}>
-      <Typography variant="h6">Curated live results pending</Typography>
+      <Typography variant="h6">
+        {isBlocked ? "Blackwell capacity blocked" : "Live result pending"}
+      </Typography>
       <Typography variant="body2" color="text.secondary">
-        The source repo currently treats {experiment.resultsPath} as a result template. Generated Markdown, JSON, and client logs belong under docs/reports/ until representative results are chosen.
+        {isBlocked
+          ? `Blackwell capacity blocked the live run. Store generated Markdown, JSON, and client logs in docs/reports/ until a comparable result is selected.`
+          : `${experiment.resultsPath} is still a template. Store generated Markdown, JSON, and client logs in docs/reports/ until a representative run is selected.`}
       </Typography>
       <ExperimentPendingNextRuns experiment={experiment} />
       <ActionLinkRow>
@@ -1035,7 +1057,7 @@ function ExperimentSourceReports({ experiment }: { experiment: ExperimentCatalog
             Selected reports
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            These generated reports are the concrete evidence behind the curated summary.
+            Generated reports behind this summary.
           </Typography>
         </Box>
       ) : null}
@@ -1087,8 +1109,20 @@ function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalo
   return (
     <Box sx={measuredResultSx}>
       <Box sx={experimentMetaRowSx}>
-        <Chip label={evidence.statusLabel} color="success" variant="outlined" />
+        <Chip
+          label={`${experiment.readiness.primary.label}: ${experiment.readiness.primary.detail}`}
+          color={readinessChipColor(experiment.readiness.primary.tone)}
+          variant="outlined"
+        />
         <Chip label={`Latest reports: ${evidence.reportDate}`} size="small" variant="outlined" />
+        {experiment.readiness.secondary ? (
+          <Chip
+            label={`${experiment.readiness.secondary.label}: ${experiment.readiness.secondary.detail}`}
+            color="error"
+            size="small"
+            variant="outlined"
+          />
+        ) : null}
       </Box>
 
       <Box sx={{ display: "grid", gap: 0.7, minWidth: 0 }}>
@@ -1130,16 +1164,19 @@ function ExperimentMeasuredResult({ experiment }: { experiment: ExperimentCatalo
 
 function ExperimentResultSection({ experiment }: { experiment: ExperimentCatalogItem }) {
   const hasMeasuredResult = Boolean(experiment.resultEvidence);
+  const readiness = experiment.readiness.primary;
 
   return (
     <PageSection>
       <SectionHeader
-        eyebrow={hasMeasuredResult ? "Measured result" : "Artifacts"}
+        eyebrow={readiness.label}
         title={hasMeasuredResult ? "Result evidence" : "Result status"}
         copy={
           hasMeasuredResult
-            ? "A selected live-cluster run set is now part of this experiment story, with its evidence boundary kept explicit."
-            : "Generated artifacts stay separate from curated conclusions until a run is selected for the project narrative."
+            ? "Selected live-cluster runs, readiness state, and evidence boundary are shown together."
+            : readiness.tone === "blocked"
+              ? "Definition is ready; the live attempt stopped before a comparable result."
+              : "Artifacts stay separate from conclusions until a run is selected."
         }
       />
 
@@ -1186,9 +1223,17 @@ function ExperimentDetailSummaryStrip({ experiment }: { experiment: ExperimentCa
       value: experiment.endpoint,
     },
     {
-      label: "Result",
-      value: experiment.status.result,
+      label: "Readiness",
+      value: `${experiment.readiness.primary.label}: ${experiment.readiness.primary.detail}`,
     },
+    ...(experiment.readiness.secondary
+      ? [
+          {
+            label: experiment.readiness.secondary.label,
+            value: experiment.readiness.secondary.detail,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -1338,7 +1383,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
         <SectionHeader
           eyebrow="Measurement focus"
           title="Metrics to capture"
-          copy="Metric groups show the signal this experiment needs without repeating the catalog contract."
+          copy="Metric groups show the signal this experiment needs."
         />
         <ExperimentMetricGroupList experiment={experiment} />
       </PageSection>
@@ -1347,7 +1392,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
         <SectionHeader
           eyebrow="Usage"
           title="How to run"
-          copy="These examples show the local render path and the live cluster runner without pretending to list every valid combination."
+          copy="Examples show one local render path and one live-cluster path."
         />
 
         <Grid container spacing={3}>
@@ -1416,7 +1461,7 @@ function UnknownExperimentRoute({ slug }: { slug: string }) {
           Experiment not found
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "54rem" }}>
-          No experiment is published for "{slug}". Use the catalog to choose a current experiment page.
+          No experiment is published for "{slug}". Choose from the catalog.
         </Typography>
         <ActionLinkRow>
           <Button href={EXPERIMENTS_PATH} variant="contained" startIcon={<ArrowBackRoundedIcon />}>

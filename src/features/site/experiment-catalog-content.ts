@@ -75,11 +75,25 @@ type ExperimentStatus = {
   result: string;
 };
 
+export type ExperimentReadinessTone = "supported" | "selected" | "rejected" | "pending" | "blocked";
+
+export type ExperimentReadinessSignal = {
+  label: string;
+  detail: string;
+  tone: ExperimentReadinessTone;
+};
+
+type ExperimentReadiness = {
+  primary: ExperimentReadinessSignal;
+  secondary?: ExperimentReadinessSignal;
+};
+
 export type ExperimentCatalogItem = {
   slug: string;
   title: string;
   category: string;
   status: ExperimentStatus;
+  readiness: ExperimentReadiness;
   question: string;
   cardSummary: string;
   metricFocus: string[];
@@ -117,17 +131,17 @@ function experimentStatus(
 export const experimentCatalogContent = {
   title: "Experiment Catalog",
   subtitle:
-    "Focused GPU inference experiments for memory pressure, streaming latency, batching, request shape, autoscaling, cost efficiency, and quantization.",
+    "Focused experiments for memory pressure, streaming latency, batching, traffic shape, autoscaling, cost, and quantization.",
   statusNote:
-    "Catalog ready; KV-cache, batching, streaming timing, and autoscaling have selected page-level evidence, with request-pattern, cost, and FP4 quantization matrices still pending.",
+    "Rows show whether each experiment is supported, selected, rejected, pending, or blocked.",
   platformValidation: {
     status: "Related project evidence",
     question:
-      "Admission, cold-start, long-context, and FP8 KV-cache conclusions are project architecture decisions, not catalog experiments.",
+      "Admission, cold start, long context, FP8 KV cache, and Blackwell FP4 readiness are architecture decisions, not catalog entries.",
     href: PROJECT_VALIDATION_PATH,
   },
   conceptLead:
-    "Every experiment follows the same simple path from a serving question to a curated result.",
+    "Each experiment moves from a serving question to a run shape, metrics, and a promoted result.",
   conceptSteps: [
     {
       label: "Question",
@@ -156,14 +170,26 @@ export const experimentCatalogContent = {
       title: "KV Cache vs Concurrency",
       category: "Memory pressure",
       status: experimentStatus("Measurable with run", "Measured knee refinement"),
+      readiness: {
+        primary: {
+          label: "Supported",
+          detail: "Long-context knee",
+          tone: "supported",
+        },
+        secondary: {
+          label: "Rejected",
+          detail: "FP8 KV on g4dn",
+          tone: "rejected",
+        },
+      },
       question:
-        "How does longer prompt context reduce stable concurrency and throughput?",
+        "How does longer prompt context change concurrency and throughput?",
       cardSummary: "Full delivery can hide queueing.",
       metricFocus: ["Concurrency", "KV memory", "Tail latency"],
       summary:
-        "Compares short, medium, and long prompt contexts, then uses an 8192-token sweep to find where long-context serving begins to queue.",
+        "Compares prompt lengths, then sweeps an 8192-token workload to find where serving starts to queue.",
       whyItMatters:
-        "Long prompts can make a GPU serving endpoint look healthy until arrival rate crosses a narrow operating boundary. The latest sweep turns that risk into measured latency, queue depth, and GPU-utilization evidence.",
+        "Long prompts can look healthy until arrival rate crosses a narrow boundary. The May 13 sweep turns that risk into latency, queue depth, and GPU-utilization evidence.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/kv-cache/",
@@ -237,13 +263,13 @@ export const experimentCatalogContent = {
         statusLabel: "Measured knee refinement",
         reportDate: "2026-05-13",
         summary:
-          "For 8192-token prompts with 300 generated tokens, the latest long-context sweep shows clean delivery through 1.10 req/s, queueing at 1.15 req/s, and an operational edge at 1.20 req/s even though every request still completes.",
+          "With 8192-token prompts and 300 generated tokens, the sweep stays clean through 1.10 req/s, queues at 1.15, and hits an operational edge at 1.20 even with 100% delivery.",
         boundary:
-          "Treat the boundary as a measured operating band for one model, one GPU class, one vLLM image, and one 8192/300 workload. The latest direct-profile reports include offered, unserved, queue, delivery, GPU utilization, and memory fields, but repeat runs and admission-control comparisons should still be used before declaring a universal policy.",
+          "Treat this as an operating band for one model, GPU class, vLLM image, and 8192/300 workload. The reports include offered, unserved, queue, delivery, GPU, and memory fields; repeat runs and admission comparisons are still needed before a universal policy.",
         boundaryPoints: [
-          "At 1.20 req/s, the profile delivered 100% of offered work with zero failures, zero dropped iterations, and zero interrupted iterations, but p95 latency still reached 54.35s.",
-          "The scheduler hit 32 running requests while waiting depth climbed from 0 at 1.10 req/s to 8 at 1.15 req/s and 30 at 1.20 req/s.",
-          "Profile variants remain useful follow-ups, but the May 13 direct-profile sweep is now the freshest baseline evidence for the operating boundary.",
+          "At 1.20 req/s, the profile delivered 100% of offered work with zero failures, drops, or interruptions, but p95 still reached 54.35s.",
+          "The scheduler hit 32 running requests while waiting depth climbed from 0 at 1.10 req/s to 8 at 1.15 and 30 at 1.20.",
+          "Profile variants remain useful follow-ups; the May 13 direct-profile sweep is the freshest baseline.",
         ],
         stats: [
           {
@@ -284,7 +310,7 @@ export const experimentCatalogContent = {
           {
             title: "8192/300 rate sweep",
             summary:
-              "The default long-context profile still completes every request at 1.20 req/s, but waiting depth and p95 latency make that point an operational edge.",
+              "The default long-context profile still completes every request at 1.20 req/s, but waiting depth and p95 make that point an operational edge.",
             rows: [
               {
                 target: "0.75 req/s",
@@ -401,14 +427,21 @@ export const experimentCatalogContent = {
       title: "Prefill vs Decode Timing",
       category: "Streaming latency",
       status: experimentStatus("Measurable with run-stream", "Measured streaming split"),
+      readiness: {
+        primary: {
+          label: "Selected report",
+          detail: "Streaming split",
+          tone: "selected",
+        },
+      },
       question:
-        "How do prompt-heavy and decode-heavy requests shift TTFT and inter-token timing?",
+        "How do prompt-heavy and decode-heavy requests change TTFT and inter-token timing?",
       cardSummary: "Streaming timing by request shape.",
       metricFocus: ["TTFT", "Inter-token latency", "Throughput"],
       summary:
         "Uses a streaming client to separate time to first token from inter-token latency across prompt-heavy and decode-heavy shapes.",
       whyItMatters:
-        "Two requests can have similar total duration but stress different serving phases. Separating prefill from decode makes streaming user experience easier to reason about.",
+        "Similar total durations can stress different serving phases. Splitting prefill from decode makes streaming UX easier to reason about.",
       runner: "Python streaming client",
       endpoint: "/v1/completions",
       sourcePath: "experiments/prefill-decode/",
@@ -478,12 +511,12 @@ export const experimentCatalogContent = {
         statusLabel: "Measured streaming split",
         reportDate: "2026-05-06",
         summary:
-          "The latest mixed streaming run completed 640 requests at concurrency 24, then split the result by prefill-heavy and decode-heavy request shapes.",
+          "The mixed streaming run completed 640 requests at concurrency 24 and splits results by prefill-heavy versus decode-heavy shapes.",
         boundary:
-          "The mixed run is the best current page-level evidence because it exercises both shapes together. Isolated shape runs remain useful supporting baselines, but max-seqs and batched-token variants show the profile matrix still needs a curated conclusion.",
+          "The mixed run is the best page-level evidence because it exercises both shapes together. Isolated runs are baselines; max-seqs and batched-token variants still need a curated conclusion.",
         boundaryPoints: [
           "The mixed default run had 1 peak waiting request at 24 active streams and 93% max GPU utilization.",
-          "The max-seqs-8 and batched-tokens-4096 variants produced much worse p99 latency in the 640-sample mixed comparison.",
+          "The max-seqs-8 and batched-tokens-4096 variants produced much worse p99 latency in the 640-sample comparison.",
           "Cost and SLO fields were not collected for these streaming reports.",
         ],
         curatedResults: false,
@@ -522,7 +555,7 @@ export const experimentCatalogContent = {
           {
             title: "Mixed run shape split",
             summary:
-              "The overall mixed result hides two very different totals: prefill-heavy requests finish quickly, while decode-heavy requests dominate total latency.",
+              "The mixed result hides two totals: prefill-heavy requests finish quickly, while decode-heavy requests dominate total latency.",
             columns: {
               target: "Shape",
               outcome: "Completed",
@@ -550,7 +583,7 @@ export const experimentCatalogContent = {
           {
             title: "Isolated shape baseline",
             summary:
-              "The isolated concurrency-16 runs remain useful because they show the single-shape TTFT and total-latency contrast before the mixed workload adds interference.",
+              "The isolated concurrency-16 runs show the single-shape TTFT and total-latency contrast before mixed-workload interference.",
             columns: {
               target: "Case",
               outcome: "Timing split",
@@ -578,7 +611,7 @@ export const experimentCatalogContent = {
           {
             title: "Mixed profile follow-up",
             summary:
-              "The profile variants show that simply capping sequence count or batched tokens did not improve the latest mixed-shape envelope.",
+              "The profile variants show that capping sequence count or batched tokens did not improve the mixed-shape envelope.",
             columns: {
               target: "Profile",
               outcome: "Run shape",
@@ -625,6 +658,13 @@ export const experimentCatalogContent = {
       title: "Batching Scheduler Tradeoffs",
       category: "Scheduler behavior",
       status: experimentStatus("Measurable with run", "Measured scheduler compare"),
+      readiness: {
+        primary: {
+          label: "Selected report",
+          detail: "Scheduler compare",
+          tone: "selected",
+        },
+      },
       question:
         "How do vLLM scheduler limits trade throughput for p95/p99 latency?",
       cardSummary: "Scheduler limits versus tail latency.",
@@ -632,7 +672,7 @@ export const experimentCatalogContent = {
       summary:
         "Compares constrained, limited, and default vLLM scheduler settings under steady and burst traffic.",
       whyItMatters:
-        "Batching can improve useful work per GPU, but the same knobs can also stretch p95 and p99 latency. This experiment makes that tradeoff visible.",
+        "Scheduler knobs can improve useful work per GPU or stretch p95/p99 latency. This experiment makes the tradeoff visible.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/batching/",
@@ -692,13 +732,13 @@ export const experimentCatalogContent = {
         statusLabel: "Measured scheduler compare",
         reportDate: "2026-05-06",
         summary:
-          "For the steady 512/128 workload at an 8 req/s target, the vLLM dynamic-default scheduler delivered the full run with low tail latency while tighter sequence caps forced queueing and dropped work.",
+          "At 8 req/s on the steady 512/128 workload, vLLM dynamic-default delivered the full run with low tail latency; tighter caps queued and dropped work.",
         boundary:
-          "The selected matrix covers one steady workload. Burst and mixed-shape cases should be measured before claiming a universal scheduler policy, and the checked-in results.md file has not yet been promoted from template text.",
+          "The selected matrix covers one steady workload. Burst and mixed-shape cases are needed before a general scheduler policy; checked-in results.md still contains template text.",
         boundaryPoints: [
-          "The generated reports under docs/reports contain the selected evidence even though experiments/batching/results.md still says no curated run.",
+          "Generated reports under docs/reports contain the selected evidence even though experiments/batching/results.md still says no curated run.",
           "Dynamic-default means vLLM's default scheduler settings, not disabled batching.",
-          "Cost denominators are still unavailable for this measured scheduler comparison.",
+          "Cost denominators are unavailable for this scheduler comparison.",
         ],
         curatedResults: false,
         stats: [
@@ -776,14 +816,21 @@ export const experimentCatalogContent = {
       title: "Request Pattern Utilization",
       category: "Traffic shape",
       status: experimentStatus("Measurable with run"),
+      readiness: {
+        primary: {
+          label: "Pending",
+          detail: "Matrix pending",
+          tone: "pending",
+        },
+      },
       question:
         "How do steady, burst, uneven-size, and spike-to-zero traffic patterns affect GPU occupancy?",
       cardSummary: "Traffic shape versus GPU occupancy.",
       metricFocus: ["Utilization", "Queue depth", "Request mix"],
       summary:
-        "Runs several traffic shapes against the same serving profile before changing scheduler or autoscaling settings.",
+        "Runs traffic shapes against the same serving profile before changing scheduler or autoscaling settings.",
       whyItMatters:
-        "Average load hides the real operating problem. This experiment shows whether utilization dips and tail-latency spikes come from traffic shape rather than raw capacity.",
+        "Average load can hide the operating problem. This experiment shows whether utilization dips and tail spikes come from traffic shape rather than raw capacity.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/request-patterns/",
@@ -845,12 +892,12 @@ export const experimentCatalogContent = {
         {
           label: "Steady baseline",
           command: "./scripts/experiment run --experiment request-patterns --case steady-small --profile default",
-          reason: "Establish the default serving profile's occupancy and latency before interpreting burst or mixed traffic.",
+          reason: "Establish default occupancy and latency before interpreting burst or mixed traffic.",
         },
         {
           label: "Burst pressure",
           command: "./scripts/experiment run --experiment request-patterns --case burst-small --profile default",
-          reason: "Measure whether tail latency and waiting requests come from traffic shape rather than raw serving capacity.",
+          reason: "Measure whether tail latency and waiting requests come from traffic shape rather than raw capacity.",
         },
         {
           label: "Uneven-size mix",
@@ -864,6 +911,13 @@ export const experimentCatalogContent = {
       title: "Autoscaling and Queueing Behavior",
       category: "Capacity response",
       status: experimentStatus("Measured with run", "Measured queueing behavior"),
+      readiness: {
+        primary: {
+          label: "Supported",
+          detail: "Admission behavior",
+          tone: "supported",
+        },
+      },
       question:
         "How much traffic must be buffered while GPU capacity and model readiness catch up?",
       cardSummary: "Scale-from-zero timing and queue policy.",
@@ -871,7 +925,7 @@ export const experimentCatalogContent = {
       summary:
         "Compares direct and bounded-queue client policies during burst and spike-to-zero traffic while GPU capacity and model readiness catch up.",
       whyItMatters:
-        "Autoscaling is not only a replica count. The May 7 spike reruns show that GPU node launch was fast, while container and model readiness dominated the cold-start window.",
+        "Autoscaling is more than replica count. The May 7 spike reruns show fast GPU node launch and slow container/model readiness.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/autoscaling/",
@@ -934,13 +988,13 @@ export const experimentCatalogContent = {
         statusLabel: "Measured queueing behavior",
         reportDate: "2026-05-07",
         summary:
-          "Latest autoscaling reports compare direct and bounded-queue clients across burst and spike-to-zero cases. Bounded queues completed all offered work with about 2s p95 latency, while direct clients preserved higher throughput but dropped 237-787 client iterations.",
+          "Autoscaling reports compare direct and bounded-queue clients across burst and spike-to-zero cases. Bounded queues delivered all work at about 2s p95; direct clients ran hotter but dropped 237-787 iterations.",
         boundary:
-          "Burst cases were run before timeline capture was added, and first-successful-completion timing is still missing. Treat the cold-start timeline as spike-run evidence and the delivery comparison as case-level queueing behavior.",
+          "Burst cases predate timeline capture, and first-successful-completion timing is missing. Use spike runs for cold-start timing and all cases for queue policy.",
         boundaryPoints: [
           "The scale-from-zero path was dominated by container/image/model readiness, not NodeClaim or GPU node creation.",
-          "The cluster attempted spot capacity first, but EC2 Spot service-linked-role permissions blocked spot replacement; on-demand nodes served the successful runs.",
-          "First-successful-completion timing remains unavailable in the selected reports.",
+          "The cluster tried spot capacity first, but EC2 Spot service-linked-role permissions blocked spot replacement; on-demand nodes served the successful runs.",
+          "First-successful-completion timing is not in the selected reports.",
         ],
         stats: [
           {
@@ -981,7 +1035,7 @@ export const experimentCatalogContent = {
           {
             title: "Queue policy outcome",
             summary:
-              "Direct clients maximize attempted throughput but shed work; bounded queues protect delivery and tail latency by limiting active concurrency.",
+              "Direct clients maximize attempted throughput but shed work; bounded queues protect delivery and tail latency by limiting concurrency.",
             columns: {
               target: "Case",
               outcome: "Delivery",
@@ -1056,6 +1110,13 @@ export const experimentCatalogContent = {
       title: "Cost per Useful Work",
       category: "Cost efficiency",
       status: experimentStatus("Measurable with run"),
+      readiness: {
+        primary: {
+          label: "Pending",
+          detail: "Cost matrix",
+          tone: "pending",
+        },
+      },
       question:
         "How much cheaper does the same GPU become when concurrency and batching produce more successful work?",
       cardSummary: "Serving cost tied to successful work.",
@@ -1063,7 +1124,7 @@ export const experimentCatalogContent = {
       summary:
         "Compares naive and optimized serving profiles under steady and burst workloads with cost denominators tied to successful work.",
       whyItMatters:
-        "A cheaper run is not actually cheaper if it drops useful work or blows past latency goals. This experiment keeps cost tied to successful requests and generated tokens.",
+        "A cheaper run is not cheaper if it drops work or misses latency goals. This experiment ties cost to successful requests and generated tokens.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/cost/",
@@ -1117,12 +1178,12 @@ export const experimentCatalogContent = {
         {
           label: "Naive steady baseline",
           command: "./scripts/experiment run --experiment cost --case steady-cost-efficiency --profile naive-single",
-          reason: "Capture the low-concurrency reference cost denominator before comparing optimized useful work.",
+          reason: "Capture the low-concurrency cost denominator before comparing optimized useful work.",
         },
         {
           label: "Optimized steady profile",
           command: "./scripts/experiment run --experiment cost --case steady-cost-efficiency --profile optimized-batched",
-          reason: "Measure whether more useful requests and generated tokens improve cost without violating the p95/p99 SLO.",
+          reason: "Measure whether more successful requests and generated tokens improve cost without violating p95/p99 SLOs.",
         },
         {
           label: "Burst cost comparison",
@@ -1136,14 +1197,21 @@ export const experimentCatalogContent = {
       title: "FP4 Quantization Optimization",
       category: "Quantization",
       status: experimentStatus("Renderable with quantization jobs", "Blackwell capacity blocked"),
+      readiness: {
+        primary: {
+          label: "Blocked",
+          detail: "Blackwell capacity",
+          tone: "blocked",
+        },
+      },
       question:
         "Does SmoothQuant improve NVFP4 W4A4 accuracy recovery enough to justify its memory, latency, throughput, and cost tradeoffs?",
       cardSummary: "BF16 vs NVFP4 vs SmoothQuant.",
       metricFocus: ["Accuracy recovery", "Memory", "Build cost"],
       summary:
-        "Defines a Blackwell FP4 comparison across BF16, plain NVFP4, and SmoothQuant plus NVFP4 artifacts, with latency, throughput, accuracy, memory, serving cost, and quantization build cost tracked separately.",
+        "Defines a Blackwell FP4 comparison for BF16, plain NVFP4, and SmoothQuant, with latency, throughput, accuracy, memory, serving cost, and build cost tracked separately.",
       whyItMatters:
-        "Quantization only helps if the memory or cost gain survives accuracy, latency, throughput, and artifact-build tradeoffs. This experiment keeps those claims measurable instead of treating FP4 as an automatic win.",
+        "Quantization helps only if memory or cost gains survive accuracy, latency, throughput, and build-cost tradeoffs. This experiment keeps FP4 claims measurable.",
       runner: "k6 completion load + accuracy client",
       endpoint: "/v1/completions",
       sourcePath: "experiments/fp4/",
@@ -1202,7 +1270,7 @@ export const experimentCatalogContent = {
         {
           label: "Capacity retry",
           command: "./scripts/up",
-          reason: "Retry the Blackwell path only when p6-b200.48xlarge capacity is available or reserved in the target us-west-2 zones.",
+          reason: "Retry only when p6-b200.48xlarge capacity is available or reserved in the target us-west-2 zones.",
         },
         {
           label: "Plain NVFP4 build",

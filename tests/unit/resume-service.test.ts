@@ -14,15 +14,21 @@ describe("Resume Service", () => {
     expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("DCGM Exporter");
     expect(publicResumeData.skills["Languages"]).toBeArray();
     expect(publicResumeData.projects?.title).toBe("Selected Project");
-    expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Lab");
+    expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Measured burst and spike-to-zero admission behavior, showing bounded queues preserved 100% delivery with about 2s p95 latency while direct clients dropped 237-787 iterations.",
+      "Built an AWS EKS/vLLM decision lab that turns serving measurements into supported, rejected, pending, or blocked architecture calls across autoscaling, admission control, long-context capacity, scheduling, and quantization.",
     );
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Identified the 8192/300 long-context boundary where 1.10 req/s had no queueing, 1.15 req/s began waiting pressure, and 1.20 req/s still delivered 100% but reached 54.35s p95 latency.",
+      "Measured burst and spike-to-zero admission behavior: bounded queues kept 100% delivery at about 2s p95 while direct clients dropped 237-787 iterations.",
     );
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Added Blackwell FP4 experiment scaffolding for BF16, plain NVFP4, and SmoothQuant comparisons across accuracy, memory, latency, throughput, serving cost, and build cost.",
+      "Mapped the 8192/300 long-context boundary: 1.10 req/s had no queueing, 1.15 began waiting pressure, and 1.20 still delivered 100% but reached 54.35s p95 latency.",
+    );
+    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
+      "Rejected FP8 KV cache on g4dn/vLLM after variants cut delivery to 47.58-69.12% and generated throughput to 114-166 tokens/sec versus a 249.58 baseline.",
+    );
+    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
+      "Designed a Blackwell FP4 path for BF16, plain NVFP4, and SmoothQuant across accuracy, memory, latency, throughput, serving cost, and build cost; the first p6-b200 attempt was blocked by EC2 capacity.",
     );
   });
 

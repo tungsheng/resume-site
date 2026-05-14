@@ -7,7 +7,7 @@ import { useDocumentTitle } from "../site/use-document-title";
 const PAGE_TITLE = "Tony Lee | Platform Infrastructure Engineer";
 const HOME_ROLE = "Platform Infrastructure Engineer";
 const HOME_LEDE =
-  "I build GPU-backed ML inference systems on Kubernetes, focused on measurable scaling, latency, throughput, and cost under real workloads.";
+  "I build Kubernetes-based ML inference systems where scaling, latency, throughput, and cost are measured under real GPU workloads.";
 
 export function HomePage() {
   useDocumentTitle(PAGE_TITLE);

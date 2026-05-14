@@ -15,60 +15,55 @@ const VLLM_DEPLOYMENT_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/vllm
 const ACTIVE_PRESSURE_HPA_LINK = `${GPU_INFERENCE_REPO_BASE}/platform/inference/hpa-active-pressure.yaml`;
 
 export const projectContent = {
-  title: "Cloud Inference Platform",
+  title: "GPU Inference Decision Lab",
   lede:
-    "A GPU inference lab on EKS that turns vLLM serving measurements into architecture decisions for admission, autoscaling, context length, scheduler behavior, and quantization.",
+    "An EKS/vLLM lab that turns serving measurements into architecture decisions for admission, autoscaling, context limits, scheduling, and quantization.",
   overviewSummary:
-    "The lab has one public serving path, one observable scale path, and a decision loop for separating supported conclusions from partial claims.",
+    "One public request path, one observable scale path, and an evidence gate that separates supported decisions from open work.",
   overviewFacts: [
     {
       label: "Platform",
       value: "AWS EKS + vLLM",
-      body:
-        "Real OpenAI-compatible serving on Karpenter-managed GPU nodes.",
+      body: "OpenAI-compatible serving on Karpenter-managed GPU nodes.",
     },
     {
       label: "Scale signal",
       value: "Prometheus -> HPA",
-      body:
-        "Serving pressure becomes desired replicas and pending GPU pods.",
+      body: "Serving pressure drives replica targets and pending GPU pods.",
     },
     {
       label: "Baseline",
       value: "0 serving GPUs",
-      body:
-        "After setup, serving capacity can start from zero for cold-start proof.",
+      body: "Serving capacity starts from zero for cold-start proof.",
     },
     {
       label: "Workflows",
       value: "Verify / Evaluate / Experiment",
-      body:
-        "Use the smallest command path that matches the question being asked.",
+      body: "Pick the command path that matches the question.",
     },
     {
       label: "Catalog",
       value: "7 experiments",
       body:
-        "Focused definitions for memory, latency, batching, traffic, autoscaling, cost, and quantization.",
+        "Definitions for memory, latency, batching, traffic, autoscaling, cost, and quantization.",
     },
     {
       label: "Results",
-      value: "Supported + partial",
-      body:
-        "Curated evidence records what is supported, what regressed, and what still needs measurement.",
+      value: "Decided + open",
+      body: "Evidence marks supported calls, regressions, and gaps.",
     },
   ],
   usage: {
-    title: "Choose the right workflow",
+    title: "Pick the right workflow",
     lead:
-      "Use verify for path proof, evaluate for platform comparisons, and experiment for catalog-defined serving questions that feed the decision engine.",
+      "Verify the path, evaluate platform behavior, or run catalog experiments; each workflow feeds the decision record.",
     workflows: [
       {
         title: "Verify",
         command: "./scripts/verify",
         body:
-          "End-to-end proof that a GPU node appears, vLLM becomes Ready, /v1 returns 200, and cleanup returns serving GPUs to zero.",
-        when: "Use after ./scripts/up for a fast path check.",
+          "Proves GPU node launch, vLLM readiness, public /v1 success, and cleanup back to zero.",
+        when: "Run after ./scripts/up for a fast path check.",
         outputs: ["GPU node appears", "Public /v1 response", "Cleanup to zero"],
         href: VERIFY_SCRIPT_LINK,
       },
@@ -76,8 +71,8 @@ export const projectContent = {
         title: "Evaluate",
         command: "./scripts/evaluate --profile zero-idle",
         body:
-          "Measured platform comparisons for cold start, warm capacity, HPA policy, active-pressure targets, and resilience drills.",
-        when: "Use for profile, scale signal, or target tuning decisions.",
+          "Compares cold start, warm capacity, HPA policy, active-pressure targets, and resilience drills.",
+        when: "Use for scale signals, profile choices, and target tuning.",
         outputs: ["Markdown report", "JSON report", "Decision evidence"],
         href: EVALUATE_SCRIPT_LINK,
       },
@@ -85,15 +80,15 @@ export const projectContent = {
         title: "Experiment",
         command: "./scripts/experiment validate",
         body:
-          "Catalog-defined ML-serving studies for workload cases, serving profiles, metrics, and generated reports.",
-        when: "Use locally to validate or render; use run after ./scripts/up for measurements.",
+          "Runs catalog studies for workload cases, serving profiles, metrics, and generated reports.",
+        when: "Use validate/render locally; use run after ./scripts/up for live measurements.",
         outputs: ["Catalog validation", "Rendered manifests", "Generated reports"],
         href: EXPERIMENT_SCRIPT_LINK,
       },
     ],
     conceptTitle: "Decision contract",
     conceptLead:
-      "The experiment page carries the full catalog; this page shows how a workload question becomes evidence, then a recommendation, rejection, or documented gap.",
+      "Catalog experiments ask the question; evidence gates decide whether the answer is supported, rejected, or still open.",
     conceptSteps: [
       "Workload",
       "Profile",
@@ -121,24 +116,24 @@ export const projectContent = {
     ],
   },
   evidence: {
-    title: "Evidence and decisions",
+    title: "Evidence gates",
     lead:
-      "Generated reports are inputs. Curated conclusions are the product: the evidence page records what the lab can support today and what remains a hypothesis.",
+      "Generated reports are inputs; decisions are promoted only when the required fields support them.",
     items: [
       {
-        title: "Supported conclusions",
+        title: "Supported decisions",
         body:
-          "Bounded admission, the 8192/300 long-context knee, and the current FP8 KV-cache rejection are supported by measured runs.",
+          "Bounded admission, the 8192/300 long-context boundary, and the g4dn FP8 KV-cache rejection are backed by measured runs.",
       },
       {
-        title: "Evidence gate",
+        title: "Gate criteria",
         body:
-          "A claim needs the right fields: completed, dropped, interrupted, p95/p99 latency, throughput, queue pressure, GPU metrics, cost, or accuracy depending on the decision.",
+          "Each claim needs the right fields: completion, drops, p95/p99 latency, throughput, queue pressure, GPU metrics, cost, or accuracy.",
       },
       {
-        title: "Open gaps",
+        title: "Open work",
         body:
-          "Active-pressure targets, batching matrices, request-pattern utilization, cost, streaming, and Blackwell FP4 remain partial until their result fields are complete.",
+          "Active-pressure targets, request-pattern utilization, cost, and Blackwell FP4 stay open until comparable results exist.",
       },
     ],
     links: [
@@ -163,9 +158,58 @@ export const projectContent = {
   validation: {
     title: "Architecture Decisions",
     lede:
-      "Curated lab conclusions: what the current EKS/vLLM evidence supports, what it rejects, and where the boundary stays explicit.",
+      "What the EKS/vLLM evidence supports, what it rejects, and what remains open.",
     summary:
-      "This is not a catalog entry. It is the portfolio-facing decision record that turns measured runs into architecture calls.",
+      "Portfolio-facing decision record for turning measured runs into architecture calls.",
+    readiness: {
+      title: "Decision readiness",
+      lead:
+        "Every call is labeled by its evidence state: supported, selected, rejected, pending, or blocked.",
+      items: [
+        {
+          state: "Supported",
+          title: "Bounded admission",
+          body:
+            "Burst and spike runs support bounded admission when traffic arrives before GPU capacity and model readiness.",
+          evidence: "100% queued delivery; direct clients dropped 237-787 iterations",
+        },
+        {
+          state: "Supported",
+          title: "Long-context boundary",
+          body:
+            "The 8192/300 sweep supports a conservative boundary: latency and waiting depth rise before failures appear.",
+          evidence: "1.15 req/s starts queueing; 1.20 req/s reaches 54.35s p95",
+        },
+        {
+          state: "Rejected",
+          title: "FP8 KV on g4dn",
+          body:
+            "FP8 KV variants failed the stable g4dn/vLLM path and should stay out of this workload.",
+          evidence: "47.58-69.12% delivery versus 100% baseline",
+        },
+        {
+          state: "Pending",
+          title: "Active-pressure target",
+          body:
+            "The workflow exists; the target recommendation still needs ordered latency, queue, and DCGM comparisons.",
+          evidence: "Compare/sweep reports need a complete evidence matrix",
+        },
+        {
+          state: "Pending",
+          title: "Useful-work cost",
+          body:
+            "Cost needs successful work, generated tokens, p95/p99 latency, failure rate, and serving cost in one matrix.",
+          evidence: "Request-pattern, batching, and cost matrices remain incomplete",
+        },
+        {
+          state: "Blocked",
+          title: "Blackwell FP4",
+          body:
+            "The FP4 path covers BF16, plain NVFP4, and SmoothQuant, but the live p6-b200 attempt never launched a B200 node.",
+          evidence: "EC2 UnfulfillableCapacity; no quantized artifact produced",
+        },
+      ],
+    },
     decisions: [
       {
         title: "Admission model",
@@ -173,8 +217,8 @@ export const projectContent = {
         proofLabel: "Delivery ratio",
         proofValue: "100% vs 76.98-88.14%",
         body:
-          "Bounded queued clients protected delivery ratio and p95 latency during burst and spike-to-zero runs by limiting active concurrency.",
-        caveat: "Direct clients completed more work in the same wall-clock window but dropped 237-787 iterations.",
+          "Bounded queues kept delivery at 100% and held p95 near 2s during burst and spike-to-zero runs.",
+        caveat: "Direct clients attempted more work in the same window but dropped 237-787 iterations.",
       },
       {
         title: "Cold-start bottleneck",
@@ -182,8 +226,8 @@ export const projectContent = {
         proofLabel: "Model ready",
         proofValue: "425-439s",
         body:
-          "Karpenter produced a NodeClaim in 3-12s and a GPU node in 35s; container and model readiness dominated the scale-from-zero wait.",
-        caveat: "First-successful-completion timing still needs to be captured in the selected reports.",
+          "Karpenter produced a NodeClaim in 3-12s and a GPU node in 35s; image, container, and model readiness drove the wait.",
+        caveat: "First successful completion still needs selected-report capture.",
       },
       {
         title: "Long-context boundary",
@@ -191,8 +235,8 @@ export const projectContent = {
         proofLabel: "Practical edge",
         proofValue: "1.20 req/s, 54.35s p95",
         body:
-          "The long-context profile has no waiting at 1.10 req/s, starts queueing at 1.15 req/s, and can still deliver every request at 1.20 req/s while missing a practical latency envelope.",
-        caveat: "Boundary applies to the measured model, GPU class, vLLM path, and 8192/300 workload.",
+          "The profile is clean at 1.10 req/s, queues at 1.15, and still delivers 100% at 1.20 while missing the latency envelope.",
+        caveat: "Boundary applies to this model, GPU class, vLLM path, and 8192/300 workload.",
       },
       {
         title: "KV-cache dtype",
@@ -200,10 +244,45 @@ export const projectContent = {
         proofLabel: "Delivery ratio",
         proofValue: "47.58-69.12%",
         body:
-          "FP8 KV-cache variants saved little memory and regressed delivery, p95 latency, and generated tokens/sec on the current g4dn/vLLM path.",
+          "FP8 KV-cache variants saved little memory while regressing delivery, tail latency, and generated tokens/sec on g4dn/vLLM.",
         caveat: "Retest only with a newer vLLM image or different GPU backend.",
       },
     ],
+    longContextProof: {
+      title: "Long-context SLO proof",
+      lead:
+        "The 8192-token prompt/300-token output sweep shows why delivery ratio alone is not a serving SLO.",
+      rows: [
+        {
+          rate: "1.10 req/s",
+          outcome: "Clean, tail rising",
+          delivery: "100%",
+          p95: "21.67s",
+          waiting: "0 waiting / 24 active",
+        },
+        {
+          rate: "1.15 req/s",
+          outcome: "Queue starts",
+          delivery: "100%",
+          p95: "35.35s",
+          waiting: "8 waiting / 40 active",
+        },
+        {
+          rate: "1.20 req/s",
+          outcome: "Practical edge",
+          delivery: "100%",
+          p95: "54.35s",
+          waiting: "30 waiting / 62 active",
+        },
+        {
+          rate: "1.25 req/s",
+          outcome: "Saturation",
+          delivery: "100%",
+          p95: "93.78s",
+          waiting: "72 waiting / 104 active",
+        },
+      ],
+    },
     sourceFacts: [
       {
         label: "Updated",
@@ -215,17 +294,17 @@ export const projectContent = {
       },
       {
         label: "Evidence type",
-        value: "Curated conclusions",
+        value: "Curated decisions",
       },
     ],
   },
-  workflowSectionTitle: "How the platform serves and scales",
+  workflowSectionTitle: "How serving scales",
   workflowLead:
-    "Requests follow one stable public path. Load signals follow a separate control path that adds GPU capacity only when another replica cannot schedule.",
+    "Requests stay on one public path while metrics drive capacity in a separate control path.",
   workflowFoundation: {
     title: "Foundation",
     summary:
-      "After the ./scripts/up setup step, the cluster already has ingress, observability, and GPU admission pieces in place, while GPU serving node count still stays at zero.",
+      "After ./scripts/up, ingress, observability, and GPU admission are ready while serving GPU nodes stay at zero.",
     nodes: [
       {
         label: "Setup via scripts/up",
@@ -264,7 +343,7 @@ export const projectContent = {
     {
       title: "Serve path",
       summary:
-        "The public request path stays stable from the internet edge to the first ready inference replica.",
+        "Public requests follow the same edge-to-ready-replica path.",
       nodes: [
         {
           label: "Internet",
@@ -292,7 +371,7 @@ export const projectContent = {
     {
       title: "Scale path",
       summary:
-        "Serving pressure is exported as metrics, translated into custom metrics, and turned into an HPA replica target that can create another ready replica.",
+        "Serving pressure becomes custom metrics, HPA targets, pending pods, and Karpenter GPU capacity.",
       nodes: [
         {
           label: "vLLM metrics",
@@ -335,7 +414,7 @@ export const projectContent = {
   ],
   workflowRejoin: {
     body:
-      "The added replica rejoins the same in-cluster Service, so the public path stays unchanged while capacity increases underneath it.",
+      "New replicas join the same Service, so the public path stays stable as capacity grows.",
     nodes: [
       {
         label: "Second Ready vLLM pod",
@@ -354,7 +433,7 @@ export const projectContent = {
 export const implementation = {
   defaultPathTitle: "Default path",
   defaultPathLead:
-    "Shortest path: bring up the platform, prove one public response, then clean it up.",
+    "Bring up the platform, prove one public response, then clean it up.",
   defaultPathSteps: [
     {
       title: "Start the lab",
@@ -377,17 +456,17 @@ export const implementation = {
     {
       title: "GPU capacity appears",
       body:
-        "A real serving GPU node is launched for the workload instead of assuming capacity is already present.",
+        "A serving GPU node launches for the workload instead of assuming capacity is already present.",
     },
     {
       title: "Public inference works",
       body:
-        "The deployment reaches Ready and the script waits for one successful public inference response through the real /v1 path.",
+        "The deployment reaches Ready and returns one successful public /v1 response.",
     },
     {
       title: "Cleanup returns to zero",
       body:
-        "Cleanup removes the workload and confirms the serving GPU node count falls back to zero.",
+        "Cleanup removes the workload and confirms serving GPU node count returns to zero.",
     },
   ],
 };

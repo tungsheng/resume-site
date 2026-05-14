@@ -38,11 +38,13 @@ import {
 } from "../site/styles";
 import { useDocumentTitle } from "../site/use-document-title";
 
-const PAGE_TITLE = "Cloud Inference Platform | Tony Lee";
+const PAGE_TITLE = "GPU Inference Decision Lab | Tony Lee";
 
 type WorkflowNode = (typeof projectContent.workflowFoundation.nodes)[number];
 type WorkflowTrack = (typeof projectContent.workflowPaths)[number];
 type ValidationDecision = (typeof projectContent.validation.decisions)[number];
+type DecisionReadinessItem = (typeof projectContent.validation.readiness.items)[number];
+type LongContextProofRow = (typeof projectContent.validation.longContextProof.rows)[number];
 
 const overviewFactGridSx: SxProps<Theme> = {
   display: "grid",
@@ -468,6 +470,60 @@ const validationHeroFactsSx: SxProps<Theme> = {
   alignItems: "center",
 };
 
+const readinessGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "repeat(2, minmax(0, 1fr))",
+    xl: "repeat(3, minmax(0, 1fr))",
+  },
+  gap: { xs: 1.1, md: 1.25 },
+};
+
+const readinessCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
+  display: "grid",
+  gap: 0.85,
+  alignContent: "start",
+  minHeight: "13rem",
+  p: { xs: 1.35, sm: 1.5, md: 1.6 },
+});
+
+const readinessHeaderSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.75,
+  alignItems: "center",
+  justifyContent: "space-between",
+};
+
+const readinessEvidenceSx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
+  display: "grid",
+  gap: 0.25,
+  alignSelf: "end",
+  px: 1,
+  py: 0.85,
+});
+
+function readinessChipSx(state: DecisionReadinessItem["state"]): SxProps<Theme> {
+  return (theme) => {
+    const color =
+      state === "Supported"
+        ? theme.palette.success.main
+        : state === "Rejected"
+          ? theme.palette.error.main
+          : state === "Blocked"
+            ? theme.palette.warning.dark
+            : theme.palette.info.main;
+
+    return {
+      borderColor: alpha(color, 0.35),
+      backgroundColor: alpha(color, 0.055),
+      color,
+      fontWeight: 700,
+    };
+  };
+}
+
 const validationSurfaceSx: SxProps<Theme> = {
   p: { xs: 1.5, sm: 1.75, md: 2.25 },
   display: "grid",
@@ -528,6 +584,40 @@ const validationSourceFactSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   gap: 0.2,
   p: { xs: 1.2, sm: 1.3 },
 });
+
+const proofStripSx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 1, md: 1.1 },
+  p: { xs: 1.5, sm: 1.75, md: 2.25 },
+};
+
+const proofGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    sm: "repeat(2, minmax(0, 1fr))",
+    lg: "repeat(4, minmax(0, 1fr))",
+  },
+  gap: { xs: 1, md: 1.1 },
+};
+
+const proofCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
+  display: "grid",
+  gap: 0.75,
+  minHeight: "10.75rem",
+  p: { xs: 1.25, sm: 1.35 },
+});
+
+const proofMetricGridSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.45,
+};
+
+const proofMetricSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.05,
+  minWidth: 0,
+};
 
 function resolveCurrentPathname(initialPath?: string): string {
   return initialPath ?? (typeof window === "undefined" ? PROJECT_PATH : window.location.pathname);
@@ -816,6 +906,105 @@ function ProjectValidationDecision({ decision }: { decision: ValidationDecision 
   );
 }
 
+function DecisionReadinessCard({ item }: { item: DecisionReadinessItem }) {
+  return (
+    <Box component="section" sx={readinessCardSx}>
+      <Box sx={readinessHeaderSx}>
+        <Typography variant="h6">{item.title}</Typography>
+        <Chip label={item.state} size="small" variant="outlined" sx={readinessChipSx(item.state)} />
+      </Box>
+      <Typography variant="body2" color="text.secondary">
+        {item.body}
+      </Typography>
+      <Box sx={readinessEvidenceSx}>
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+          Evidence boundary
+        </Typography>
+        <Typography variant="body2" sx={{ fontWeight: 600, overflowWrap: "anywhere" }}>
+          {item.evidence}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+function DecisionReadinessSection() {
+  return (
+    <PageSection>
+      <SectionHeader
+        eyebrow="Evidence status"
+        title={projectContent.validation.readiness.title}
+        copy={projectContent.validation.readiness.lead}
+      />
+
+      <Box sx={readinessGridSx}>
+        {projectContent.validation.readiness.items.map((item) => (
+          <DecisionReadinessCard key={`${item.state}-${item.title}`} item={item} />
+        ))}
+      </Box>
+    </PageSection>
+  );
+}
+
+function LongContextProofCard({ row }: { row: LongContextProofRow }) {
+  return (
+    <Box component="section" sx={proofCardSx}>
+      <Box>
+        <Typography variant="overline" color="secondary">
+          {row.rate}
+        </Typography>
+        <Typography variant="h6">{row.outcome}</Typography>
+      </Box>
+      <Box sx={proofMetricGridSx}>
+        <Box sx={proofMetricSx}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+            Delivery
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {row.delivery}
+          </Typography>
+        </Box>
+        <Box sx={proofMetricSx}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+            p95 latency
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {row.p95}
+          </Typography>
+        </Box>
+        <Box sx={proofMetricSx}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+            Waiting / active
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: "anywhere" }}>
+            {row.waiting}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+function LongContextProofSection() {
+  return (
+    <PageSection>
+      <SectionHeader
+        eyebrow="Long-context SLO"
+        title={projectContent.validation.longContextProof.title}
+        copy={projectContent.validation.longContextProof.lead}
+      />
+
+      <Paper variant="outlined" sx={proofStripSx}>
+        <Box sx={proofGridSx} aria-label="8192/300 long-context proof strip">
+          {projectContent.validation.longContextProof.rows.map((row) => (
+            <LongContextProofCard key={row.rate} row={row} />
+          ))}
+        </Box>
+      </Paper>
+    </PageSection>
+  );
+}
+
 function ProjectValidationRoute() {
   useDocumentTitle(`${projectContent.validation.title} | Tony Lee`);
 
@@ -847,6 +1036,8 @@ function ProjectValidationRoute() {
           </Button>
         </ActionLinkRow>
       </PageHero>
+
+      <DecisionReadinessSection />
 
       <PageSection>
         <SectionHeader
@@ -897,6 +1088,8 @@ function ProjectValidationRoute() {
           </ActionLinkRow>
         </Paper>
       </PageSection>
+
+      <LongContextProofSection />
     </PublicSiteLayout>
   );
 }
@@ -923,7 +1116,7 @@ function ProjectEvidenceSection() {
 
         <ActionLinkRow>
           <Button href={PROJECT_VALIDATION_PATH} variant="contained">
-            Platform decisions
+            Architecture decisions
           </Button>
           <Button href={EXPERIMENTS_PATH} variant="outlined">
             Experiment catalog

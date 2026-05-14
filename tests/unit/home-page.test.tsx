@@ -12,7 +12,7 @@ describe("HomePage", () => {
     expect(html).toContain("aria-current=\"page\">Home<");
     expect(html).toContain("Platform Infrastructure Engineer");
     expect(html).toContain(
-      "I build GPU-backed ML inference systems on Kubernetes, focused on measurable scaling, latency, throughput, and cost under real workloads."
+      "I build Kubernetes-based ML inference systems where scaling, latency, throughput, and cost are measured under real GPU workloads."
     );
     expect(html).not.toContain("Selected inference proof points");
     expect(html).toContain("href=\"/project/cloud-inference-platform\"");
