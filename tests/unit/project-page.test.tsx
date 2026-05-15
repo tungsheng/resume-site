@@ -73,13 +73,21 @@ describe("ProjectPage", () => {
     expect(html).toContain(
       "Confirm one successful public /v1 inference response."
     );
-    expect(html).toContain(
-      "Evidence gates"
-    );
-    expect(html).toContain("Generated reports are inputs; decisions are promoted only when the required fields support them.");
-    expect(html).toContain("Bounded admission, the 8192/300 long-context boundary, and the g4dn FP8 KV-cache rejection are backed by measured runs.");
-    expect(html).toContain("Each claim needs the right fields");
-    expect(html).toContain("Active-pressure targets, request-pattern utilization, cost, and Blackwell FP4 stay open");
+    expect(html).toContain("Architecture Readout");
+    expect(html).toContain("Workload measurements map to direct serving calls");
+    expect(html).toContain("Use bounded admission when traffic can arrive before the model is ready.");
+    expect(html).toContain("Set a long-context boundary before failures appear.");
+    expect(html).toContain("Keep vLLM dynamic defaults for small steady and burst traffic.");
+    expect(html).toContain("Treat cheap burst runs as incomplete unless latency passes.");
+    expect(html).toContain("Keep active-pressure HPA in the matrix, but do not call target 8 production-optimal.");
+    expect(html).toContain("Reject FP8 KV on the current g4dn/vLLM path.");
+    expect(html).toContain("Hold Blackwell FP4 until B200 capacity produces comparable runs.");
+    expect(html).toContain("Supported");
+    expect(html).toContain("Caveated");
+    expect(html).toContain("Partial");
+    expect(html).toContain("Rejected");
+    expect(html).toContain("Blocked");
+    expect(html).not.toContain("Active-pressure targets, request-pattern utilization, cost, and Blackwell FP4 stay open");
     expect(html).toContain("Evidence");
     expect(html).toContain("Decision engine");
     expect(html).toContain("Reports docs");
@@ -153,18 +161,21 @@ describe("ProjectPage", () => {
 
     expect(html).toContain("Architecture Decisions");
     expect(html).toContain("What the EKS/vLLM evidence supports");
-    expect(html).toContain("Decision readiness");
+    expect(html).toContain("Decision table");
+    expect(html).toContain("Architecture decision table");
+    expect(html).toContain("Best evidence");
     expect(html).toContain("Supported");
     expect(html).toContain("Bounded admission");
     expect(html).toContain("Long-context boundary");
+    expect(html).toContain("Small-request scheduler");
     expect(html).toContain("Rejected");
     expect(html).toContain("FP8 KV on g4dn");
-    expect(html).toContain("Pending");
+    expect(html).toContain("Partial");
     expect(html).toContain("Active-pressure target");
     expect(html).toContain("Useful-work cost");
     expect(html).toContain("Blocked");
     expect(html).toContain("Blackwell FP4");
-    expect(html).toContain("Portfolio-facing decision record");
+    expect(html).toContain("Scan-first record");
     expect(html).toContain("Bound burst traffic");
     expect(html).toContain("100% vs 76.98-88.14%");
     expect(html).toContain("dropped 237-787 iterations");
@@ -176,12 +187,16 @@ describe("ProjectPage", () => {
     expect(html).toContain("still delivers 100% at 1.20");
     expect(html).toContain("Reject FP8 KV here");
     expect(html).toContain("47.58-69.12%");
-    expect(html).toContain("Long-context SLO proof");
-    expect(html).toContain("Delivery");
-    expect(html).toContain("Queue starts");
-    expect(html).toContain("Saturation");
-    expect(html).toContain("72 waiting / 104 active");
-    expect(html).toContain("Updated: May 13, 2026");
+    expect(html).toContain("Decision evidence visuals");
+    expect(html).toContain("Local MUI visuals recreate the key proof points");
+    expect(html).toContain("Long-context knee");
+    expect(html).toContain("Cost per useful work");
+    expect(html).toContain("Peak waiting");
+    expect(html).toContain("65 waiting");
+    expect(html).toContain("$0.019752");
+    expect(html).toContain("burst optimized");
+    expect(html).toContain("10.91s");
+    expect(html).toContain("Updated: May 15, 2026");
     expect(html).toContain("Workflow: ./scripts/evaluate + ./scripts/experiment");
     expect(html).toContain("Evidence type: Curated decisions");
     expect(html).toContain("Project overview");

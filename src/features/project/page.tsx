@@ -15,6 +15,12 @@ import {
 import { alpha, type SxProps, type Theme } from "@mui/material/styles";
 import { CommandCodeBlock } from "../site/command-code-block";
 import {
+  DecisionReadoutStrip,
+  TwoMetricEvidenceMatrix,
+  type DecisionReadoutItem,
+  type EvidenceMatrixColumn,
+} from "../site/evidence-visuals";
+import {
   EXPERIMENTS_PATH,
   PROJECT_PATH,
   PROJECT_VALIDATION_PATH,
@@ -44,7 +50,6 @@ type WorkflowNode = (typeof projectContent.workflowFoundation.nodes)[number];
 type WorkflowTrack = (typeof projectContent.workflowPaths)[number];
 type ValidationDecision = (typeof projectContent.validation.decisions)[number];
 type DecisionReadinessItem = (typeof projectContent.validation.readiness.items)[number];
-type LongContextProofRow = (typeof projectContent.validation.longContextProof.rows)[number];
 
 const overviewFactGridSx: SxProps<Theme> = {
   display: "grid",
@@ -451,18 +456,6 @@ const evidenceSurfaceSx: SxProps<Theme> = {
   gap: { xs: 1.4, md: 1.75 },
 };
 
-const evidenceGridSx: SxProps<Theme> = {
-  display: "grid",
-  gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(3, minmax(0, 1fr))" },
-  gap: { xs: 1.25, md: 1.5 },
-};
-
-const evidenceItemSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
-  display: "grid",
-  gap: 0.75,
-  p: { xs: 1.5, sm: 1.65, md: 1.75 },
-});
-
 const validationHeroFactsSx: SxProps<Theme> = {
   display: "flex",
   flexWrap: "wrap",
@@ -470,38 +463,9 @@ const validationHeroFactsSx: SxProps<Theme> = {
   alignItems: "center",
 };
 
-const readinessGridSx: SxProps<Theme> = {
+const readinessTableSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
-  gridTemplateColumns: {
-    xs: "minmax(0, 1fr)",
-    md: "repeat(2, minmax(0, 1fr))",
-    xl: "repeat(3, minmax(0, 1fr))",
-  },
-  gap: { xs: 1.1, md: 1.25 },
-};
-
-const readinessCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
-  display: "grid",
-  gap: 0.85,
-  alignContent: "start",
-  minHeight: "13rem",
-  p: { xs: 1.35, sm: 1.5, md: 1.6 },
-});
-
-const readinessHeaderSx: SxProps<Theme> = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 0.75,
-  alignItems: "center",
-  justifyContent: "space-between",
-};
-
-const readinessEvidenceSx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
-  display: "grid",
-  gap: 0.25,
-  alignSelf: "end",
-  px: 1,
-  py: 0.85,
+  overflow: "hidden",
 });
 
 function readinessChipSx(state: DecisionReadinessItem["state"]): SxProps<Theme> {
@@ -511,8 +475,10 @@ function readinessChipSx(state: DecisionReadinessItem["state"]): SxProps<Theme> 
         ? theme.palette.success.main
         : state === "Rejected"
           ? theme.palette.error.main
-          : state === "Blocked"
-            ? theme.palette.warning.dark
+        : state === "Blocked"
+          ? theme.palette.warning.dark
+          : state === "Partial"
+            ? theme.palette.info.main
             : theme.palette.info.main;
 
     return {
@@ -523,6 +489,42 @@ function readinessChipSx(state: DecisionReadinessItem["state"]): SxProps<Theme> 
     };
   };
 }
+
+const readinessTableRowSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "minmax(10rem, 0.75fr) minmax(14rem, 1.35fr) minmax(7rem, 0.55fr) minmax(13rem, 1.1fr)",
+  },
+  gap: { xs: 0.55, md: 1.25 },
+  alignItems: "center",
+  minWidth: 0,
+  px: { xs: 1.2, md: 1.35 },
+  py: { xs: 1.1, md: 1 },
+  "& + &": {
+    borderTop: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+  },
+});
+
+const readinessTableHeaderSx: SxProps<Theme> = (theme) => ({
+  ...readinessTableRowSx(theme),
+  display: { xs: "none", md: "grid" },
+  backgroundColor: alpha(theme.palette.text.primary, 0.035),
+  color: theme.palette.text.secondary,
+  fontSize: "0.72rem",
+  fontWeight: 600,
+  lineHeight: 1.2,
+  textTransform: "uppercase",
+});
+
+const readinessMobileLabelSx: SxProps<Theme> = {
+  display: { xs: "inline", md: "none" },
+  mr: 0.5,
+  color: "text.secondary",
+  fontSize: "0.7rem",
+  fontWeight: 600,
+  textTransform: "uppercase",
+};
 
 const validationSurfaceSx: SxProps<Theme> = {
   p: { xs: 1.5, sm: 1.75, md: 2.25 },
@@ -585,38 +587,13 @@ const validationSourceFactSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   p: { xs: 1.2, sm: 1.3 },
 });
 
-const proofStripSx: SxProps<Theme> = {
-  display: "grid",
-  gap: { xs: 1, md: 1.1 },
-  p: { xs: 1.5, sm: 1.75, md: 2.25 },
-};
-
-const proofGridSx: SxProps<Theme> = {
+const validationVisualGridSx: SxProps<Theme> = {
   display: "grid",
   gridTemplateColumns: {
     xs: "minmax(0, 1fr)",
-    sm: "repeat(2, minmax(0, 1fr))",
-    lg: "repeat(4, minmax(0, 1fr))",
+    lg: "repeat(2, minmax(0, 1fr))",
   },
-  gap: { xs: 1, md: 1.1 },
-};
-
-const proofCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
-  display: "grid",
-  gap: 0.75,
-  minHeight: "10.75rem",
-  p: { xs: 1.25, sm: 1.35 },
-});
-
-const proofMetricGridSx: SxProps<Theme> = {
-  display: "grid",
-  gap: 0.45,
-};
-
-const proofMetricSx: SxProps<Theme> = {
-  display: "grid",
-  gap: 0.05,
-  minWidth: 0,
+  gap: { xs: 1.25, md: 1.5 },
 };
 
 function resolveCurrentPathname(initialPath?: string): string {
@@ -906,24 +883,44 @@ function ProjectValidationDecision({ decision }: { decision: ValidationDecision 
   );
 }
 
-function DecisionReadinessCard({ item }: { item: DecisionReadinessItem }) {
+const readinessColumns = ["Decision", "Call", "Confidence", "Best evidence"];
+
+function DecisionReadinessTable({ items }: { items: DecisionReadinessItem[] }) {
   return (
-    <Box component="section" sx={readinessCardSx}>
-      <Box sx={readinessHeaderSx}>
-        <Typography variant="h6">{item.title}</Typography>
-        <Chip label={item.state} size="small" variant="outlined" sx={readinessChipSx(item.state)} />
+    <Box role="table" aria-label="Architecture decision table" sx={readinessTableSx}>
+      <Box role="row" sx={readinessTableHeaderSx}>
+        {readinessColumns.map((column) => (
+          <span key={column}>{column}</span>
+        ))}
       </Box>
-      <Typography variant="body2" color="text.secondary">
-        {item.body}
-      </Typography>
-      <Box sx={readinessEvidenceSx}>
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          Evidence boundary
-        </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600, overflowWrap: "anywhere" }}>
-          {item.evidence}
-        </Typography>
-      </Box>
+      {items.map((item) => (
+        <Box key={`${item.state}-${item.title}`} role="row" sx={readinessTableRowSx}>
+          <Typography role="cell" variant="body2" sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
+            <Box component="span" sx={readinessMobileLabelSx}>
+              Decision
+            </Box>
+            {item.title}
+          </Typography>
+          <Typography role="cell" variant="body2" color="text.secondary">
+            <Box component="span" sx={readinessMobileLabelSx}>
+              Call
+            </Box>
+            {item.call}
+          </Typography>
+          <Box role="cell">
+            <Box component="span" sx={readinessMobileLabelSx}>
+              Confidence
+            </Box>
+            <Chip label={item.state} size="small" variant="outlined" sx={readinessChipSx(item.state)} />
+          </Box>
+          <Typography role="cell" variant="body2" sx={{ fontWeight: 600, overflowWrap: "anywhere" }}>
+            <Box component="span" sx={readinessMobileLabelSx}>
+              Best evidence
+            </Box>
+            {item.evidence}
+          </Typography>
+        </Box>
+      ))}
     </Box>
   );
 }
@@ -937,69 +934,76 @@ function DecisionReadinessSection() {
         copy={projectContent.validation.readiness.lead}
       />
 
-      <Box sx={readinessGridSx}>
-        {projectContent.validation.readiness.items.map((item) => (
-          <DecisionReadinessCard key={`${item.state}-${item.title}`} item={item} />
+      <DecisionReadinessTable items={projectContent.validation.readiness.items} />
+    </PageSection>
+  );
+}
+
+function ValidationEvidenceVisualsSection() {
+  return (
+    <PageSection>
+      <SectionHeader
+        eyebrow="Evidence visuals"
+        title="Decision evidence visuals"
+        copy="Local MUI visuals recreate the key proof points without depending on the lab repository at runtime."
+      />
+
+      <Box sx={validationVisualGridSx}>
+        {projectContent.validation.evidenceVisuals.map((visual) => (
+          <TwoMetricEvidenceMatrix
+            key={visual.title}
+            title={visual.title}
+            takeaway={visual.takeaway}
+            sourceLabel={visual.sourceLabel}
+            columns={visual.columns as EvidenceMatrixColumn[]}
+            rows={visual.rows}
+          />
         ))}
       </Box>
     </PageSection>
   );
 }
 
-function LongContextProofCard({ row }: { row: LongContextProofRow }) {
-  return (
-    <Box component="section" sx={proofCardSx}>
-      <Box>
-        <Typography variant="overline" sx={{ color: "secondary.dark" }}>
-          {row.rate}
-        </Typography>
-        <Typography variant="h6">{row.outcome}</Typography>
-      </Box>
-      <Box sx={proofMetricGridSx}>
-        <Box sx={proofMetricSx}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            Delivery
-          </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {row.delivery}
-          </Typography>
-        </Box>
-        <Box sx={proofMetricSx}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            p95 latency
-          </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {row.p95}
-          </Typography>
-        </Box>
-        <Box sx={proofMetricSx}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            Waiting / active
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: "anywhere" }}>
-            {row.waiting}
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
-  );
-}
-
-function LongContextProofSection() {
+function ProjectEvidenceSection() {
   return (
     <PageSection>
       <SectionHeader
-        eyebrow="Long-context SLO"
-        title={projectContent.validation.longContextProof.title}
-        copy={projectContent.validation.longContextProof.lead}
+        title={projectContent.evidence.title}
+        copy={projectContent.evidence.lead}
       />
 
-      <Paper variant="outlined" sx={proofStripSx}>
-        <Box sx={proofGridSx} aria-label="8192/300 long-context proof strip">
-          {projectContent.validation.longContextProof.rows.map((row) => (
-            <LongContextProofCard key={row.rate} row={row} />
+      <Paper variant="outlined" sx={evidenceSurfaceSx}>
+        <DecisionReadoutStrip
+          ariaLabel="Architecture readout"
+          items={projectContent.evidence.items.map((item) => ({
+            label: item.title,
+            statusLabel: item.statusLabel,
+            value: item.call,
+            detail: item.proof,
+            tone: item.tone,
+          })) as DecisionReadoutItem[]}
+        />
+
+        <ActionLinkRow>
+          <Button href={PROJECT_VALIDATION_PATH} variant="contained">
+            Architecture decisions
+          </Button>
+          <Button href={EXPERIMENTS_PATH} variant="outlined">
+            Experiment catalog
+          </Button>
+          {projectContent.evidence.links.map((link) => (
+            <Button
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noreferrer"
+              size="small"
+              endIcon={<OpenInNewRoundedIcon />}
+            >
+              {link.label}
+            </Button>
           ))}
-        </Box>
+        </ActionLinkRow>
       </Paper>
     </PageSection>
   );
@@ -1089,53 +1093,8 @@ function ProjectValidationRoute() {
         </Paper>
       </PageSection>
 
-      <LongContextProofSection />
+      <ValidationEvidenceVisualsSection />
     </PublicSiteLayout>
-  );
-}
-
-function ProjectEvidenceSection() {
-  return (
-    <PageSection>
-      <SectionHeader
-        title={projectContent.evidence.title}
-        copy={projectContent.evidence.lead}
-      />
-
-      <Paper variant="outlined" sx={evidenceSurfaceSx}>
-        <Box sx={evidenceGridSx}>
-          {projectContent.evidence.items.map((item) => (
-            <Box key={item.title} component="section" sx={evidenceItemSx}>
-              <Typography variant="h6">{item.title}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {item.body}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-
-        <ActionLinkRow>
-          <Button href={PROJECT_VALIDATION_PATH} variant="contained">
-            Architecture decisions
-          </Button>
-          <Button href={EXPERIMENTS_PATH} variant="outlined">
-            Experiment catalog
-          </Button>
-          {projectContent.evidence.links.map((link) => (
-            <Button
-              key={link.href}
-              href={link.href}
-              target="_blank"
-              rel="noreferrer"
-              size="small"
-              endIcon={<OpenInNewRoundedIcon />}
-            >
-              {link.label}
-            </Button>
-          ))}
-        </ActionLinkRow>
-      </Paper>
-    </PageSection>
   );
 }
 

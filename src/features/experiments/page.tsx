@@ -1333,6 +1333,8 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
         </Box>
       </PageSection>
 
+      <ExperimentResultSection experiment={experiment} />
+
       <PageSection>
         <SectionHeader
           eyebrow="Run shape"
@@ -1445,8 +1447,6 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
           </Button>
         </ActionLinkRow>
       </PageSection>
-
-      <ExperimentResultSection experiment={experiment} />
     </PublicSiteLayout>
   );
 }

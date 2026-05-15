@@ -116,24 +116,58 @@ export const projectContent = {
     ],
   },
   evidence: {
-    title: "Evidence gates",
+    title: "Architecture Readout",
     lead:
-      "Generated reports are inputs; decisions are promoted only when the required fields support them.",
+      "Workload measurements map to direct serving calls, with the boundary called out when the evidence is partial or blocked.",
     items: [
       {
-        title: "Supported decisions",
-        body:
-          "Bounded admission, the 8192/300 long-context boundary, and the g4dn FP8 KV-cache rejection are backed by measured runs.",
+        title: "Admission",
+        statusLabel: "Supported",
+        call: "Use bounded admission when traffic can arrive before the model is ready.",
+        proof: "Queued burst and spike runs delivered 100%; direct clients dropped work.",
+        tone: "success",
       },
       {
-        title: "Gate criteria",
-        body:
-          "Each claim needs the right fields: completion, drops, p95/p99 latency, throughput, queue pressure, GPU metrics, cost, or accuracy.",
+        title: "Long context",
+        statusLabel: "Supported",
+        call: "Set a long-context boundary before failures appear.",
+        proof: "The 8192/300 run starts queueing at 1.15 req/s while delivery remains 100%.",
+        tone: "success",
       },
       {
-        title: "Open work",
-        body:
-          "Active-pressure targets, request-pattern utilization, cost, and Blackwell FP4 stay open until comparable results exist.",
+        title: "Scheduler",
+        statusLabel: "Supported",
+        call: "Keep vLLM dynamic defaults for small steady and burst traffic.",
+        proof: "Explicit sequence and batched-token caps under-delivered on the 512/128 matrix.",
+        tone: "success",
+      },
+      {
+        title: "Cost",
+        statusLabel: "Caveated",
+        call: "Treat cheap burst runs as incomplete unless latency passes.",
+        proof: "Optimized batching lowers cost per useful request; burst p95 still misses the SLO.",
+        tone: "info",
+      },
+      {
+        title: "Autoscaling",
+        statusLabel: "Partial",
+        call: "Keep active-pressure HPA in the matrix, but do not call target 8 production-optimal.",
+        proof: "All target 2/4/6/8 sweep points stayed underutilized.",
+        tone: "warning",
+      },
+      {
+        title: "KV dtype",
+        statusLabel: "Rejected",
+        call: "Reject FP8 KV on the current g4dn/vLLM path.",
+        proof: "FP8 KV reduced delivery and tokens/sec versus the stable baseline.",
+        tone: "error",
+      },
+      {
+        title: "FP4",
+        statusLabel: "Blocked",
+        call: "Hold Blackwell FP4 until B200 capacity produces comparable runs.",
+        proof: "The p6-b200 live attempt was blocked before a quantized artifact existed.",
+        tone: "warning",
       },
     ],
     links: [
@@ -160,52 +194,52 @@ export const projectContent = {
     lede:
       "What the EKS/vLLM evidence supports, what it rejects, and what remains open.",
     summary:
-      "Portfolio-facing decision record for turning measured runs into architecture calls.",
+      "Scan-first record for turning measured runs into architecture calls.",
     readiness: {
-      title: "Decision readiness",
+      title: "Decision table",
       lead:
-        "Every call is labeled by its evidence state: supported, selected, rejected, pending, or blocked.",
+        "Each row shows the architecture call, confidence, and the shortest proof behind it.",
       items: [
         {
           state: "Supported",
           title: "Bounded admission",
-          body:
-            "Burst and spike runs support bounded admission when traffic arrives before GPU capacity and model readiness.",
+          call: "Use bounded admission when requests can arrive before model readiness.",
           evidence: "100% queued delivery; direct clients dropped 237-787 iterations",
         },
         {
           state: "Supported",
           title: "Long-context boundary",
-          body:
-            "The 8192/300 sweep supports a conservative boundary: latency and waiting depth rise before failures appear.",
+          call: "Set a concurrency or admission boundary for 8192/300 traffic.",
           evidence: "1.15 req/s starts queueing; 1.20 req/s reaches 54.35s p95",
+        },
+        {
+          state: "Supported",
+          title: "Small-request scheduler",
+          call: "Keep vLLM dynamic defaults for current 512/128 steady and burst traffic.",
+          evidence: "Dynamic default kept the best delivery and token throughput",
+        },
+        {
+          state: "Supported",
+          title: "Useful-work cost",
+          call: "Use batching for small-request economics, but gate burst SLO claims.",
+          evidence: "$0.019752/1K steady optimized; burst optimized p95 still 10.91s",
+        },
+        {
+          state: "Partial",
+          title: "Active-pressure target",
+          call: "Keep active-pressure HPA testing, but do not treat target 8 as optimal.",
+          evidence: "Targets 2/4/6/8 were all underutilized",
         },
         {
           state: "Rejected",
           title: "FP8 KV on g4dn",
-          body:
-            "FP8 KV variants failed on the stable g4dn/vLLM path and should not be used for this workload.",
+          call: "Do not select FP8 KV for this current long-context path.",
           evidence: "47.58-69.12% delivery versus 100% baseline",
-        },
-        {
-          state: "Pending",
-          title: "Active-pressure target",
-          body:
-            "The workflow exists; the target recommendation still needs ordered latency, queue, and DCGM comparisons.",
-          evidence: "Compare/sweep reports need a complete evidence matrix",
-        },
-        {
-          state: "Pending",
-          title: "Useful-work cost",
-          body:
-            "Cost needs successful work, generated tokens, p95/p99 latency, failure rate, and serving cost in one matrix.",
-          evidence: "Request-pattern, batching, and cost matrices remain incomplete",
         },
         {
           state: "Blocked",
           title: "Blackwell FP4",
-          body:
-            "The FP4 path covers BF16, plain NVFP4, and SmoothQuant, but the live p6-b200 attempt never launched a B200 node.",
+          call: "Hold the FP4 architecture decision until B200 results exist.",
           evidence: "EC2 UnfulfillableCapacity; no quantized artifact produced",
         },
       ],
@@ -249,7 +283,7 @@ export const projectContent = {
       },
     ],
     longContextProof: {
-      title: "Long-context SLO proof",
+      title: "Long-context knee",
       lead:
         "The 8192-token prompt/300-token output sweep shows why delivery ratio alone is not a serving SLO.",
       rows: [
@@ -278,15 +312,173 @@ export const projectContent = {
           rate: "1.25 req/s",
           outcome: "Saturation",
           delivery: "100%",
-          p95: "93.78s",
-          waiting: "72 waiting / 104 active",
+          p95: "85.75s",
+          waiting: "65 waiting / 97 active",
         },
       ],
     },
+    evidenceVisuals: [
+      {
+        title: "Long-context knee",
+        takeaway:
+          "The 8192/300 workload reaches a practical edge before failures appear; waiting depth is the warning sign.",
+        sourceLabel: "Local static readout from curated 8192/300 reports",
+        columns: [
+          {
+            key: "p95",
+            label: "p95 latency",
+            max: 90,
+            tone: "warning",
+          },
+          {
+            key: "waiting",
+            label: "Peak waiting",
+            max: 70,
+            tone: "info",
+          },
+        ],
+        rows: [
+          {
+            label: "1.10 req/s",
+            context: "clean, tail rising",
+            values: {
+              p95: {
+                value: 21.67,
+                label: "21.67s",
+              },
+              waiting: {
+                value: 0,
+                label: "0 waiting",
+              },
+            },
+          },
+          {
+            label: "1.15 req/s",
+            context: "queue starts",
+            values: {
+              p95: {
+                value: 35.35,
+                label: "35.35s",
+              },
+              waiting: {
+                value: 8,
+                label: "8 waiting",
+              },
+            },
+          },
+          {
+            label: "1.20 req/s",
+            context: "practical edge",
+            values: {
+              p95: {
+                value: 54.35,
+                label: "54.35s",
+              },
+              waiting: {
+                value: 30,
+                label: "30 waiting",
+              },
+            },
+          },
+          {
+            label: "1.25 req/s",
+            context: "saturation begins",
+            values: {
+              p95: {
+                value: 85.75,
+                label: "85.75s",
+              },
+              waiting: {
+                value: 65,
+                label: "65 waiting",
+              },
+            },
+          },
+        ],
+      },
+      {
+        title: "Cost per useful work",
+        takeaway:
+          "Batching makes small-request serving cheaper, but the burst result still needs admission or more capacity before it is latency-safe.",
+        sourceLabel: "Local static readout from curated cost reports",
+        columns: [
+          {
+            key: "cost",
+            label: "Cost / 1K successful",
+            max: 0.17,
+            tone: "success",
+          },
+          {
+            key: "p95",
+            label: "p95 latency",
+            max: 120,
+            tone: "warning",
+          },
+        ],
+        rows: [
+          {
+            label: "steady naive",
+            context: "low useful work",
+            values: {
+              cost: {
+                value: 0.137976,
+                label: "$0.137976",
+              },
+              p95: {
+                value: 60.31,
+                label: "60.31s",
+              },
+            },
+          },
+          {
+            label: "steady optimized",
+            context: "SLO pass",
+            values: {
+              cost: {
+                value: 0.019752,
+                label: "$0.019752",
+              },
+              p95: {
+                value: 1.61,
+                label: "1.61s",
+              },
+            },
+          },
+          {
+            label: "burst naive",
+            context: "failed profile",
+            values: {
+              cost: {
+                value: 0.164137,
+                label: "$0.164137",
+              },
+              p95: {
+                value: 120,
+                label: "120.00s",
+              },
+            },
+          },
+          {
+            label: "burst optimized",
+            context: "cheap, SLO miss",
+            values: {
+              cost: {
+                value: 0.012768,
+                label: "$0.012768",
+              },
+              p95: {
+                value: 10.91,
+                label: "10.91s",
+              },
+            },
+          },
+        ],
+      },
+    ],
     sourceFacts: [
       {
         label: "Updated",
-        value: "May 13, 2026",
+        value: "May 15, 2026",
       },
       {
         label: "Workflow",

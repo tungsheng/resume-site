@@ -131,17 +131,17 @@ function experimentStatus(
 export const experimentCatalogContent = {
   title: "Experiment Catalog",
   subtitle:
-    "Focused experiments for memory pressure, streaming latency, batching, traffic shape, autoscaling, cost, and quantization.",
+    "Serving experiments that turn workload shape into a measured architecture call.",
   statusNote:
-    "Rows show whether each experiment is supported, selected, rejected, pending, or blocked.",
+    "Rows show what each experiment currently proves and which decisions still need stronger evidence.",
   platformValidation: {
     status: "Related project evidence",
     question:
-      "Admission, cold start, long context, FP8 KV cache, and Blackwell FP4 readiness are architecture decisions, not catalog entries.",
+      "Admission, cold start, active-pressure HPA, FP8 KV cache, and Blackwell FP4 readiness are architecture decisions, not standalone catalog entries.",
     href: PROJECT_VALIDATION_PATH,
   },
   conceptLead:
-    "Each experiment moves from a serving question to a run shape, metrics, and a promoted result.",
+    "Each experiment starts with one serving question and ends with a result, rejection, or bounded gap.",
   conceptSteps: [
     {
       label: "Question",
@@ -657,11 +657,11 @@ export const experimentCatalogContent = {
       slug: "batching",
       title: "Batching Scheduler Tradeoffs",
       category: "Scheduler behavior",
-      status: experimentStatus("Measurable with run", "Measured scheduler compare"),
+      status: experimentStatus("Measured with run", "Measured steady/burst compare"),
       readiness: {
         primary: {
           label: "Selected report",
-          detail: "Scheduler compare",
+          detail: "Scheduler matrix",
           tone: "selected",
         },
       },
@@ -670,9 +670,9 @@ export const experimentCatalogContent = {
       cardSummary: "Scheduler limits versus tail latency.",
       metricFocus: ["Batching", "p99 latency", "Tokens/sec"],
       summary:
-        "Compares constrained, limited, and default vLLM scheduler settings under steady and burst traffic.",
+        "Compares constrained, limited, and default vLLM scheduler settings under steady and burst small-request traffic.",
       whyItMatters:
-        "Scheduler knobs can improve useful work per GPU or stretch p95/p99 latency. This experiment makes the tradeoff visible.",
+        "Scheduler caps should earn their keep. In the current 512/128 matrix, explicit caps shed useful work before they improve the latency envelope.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/batching/",
@@ -728,34 +728,33 @@ export const experimentCatalogContent = {
         "./scripts/experiment run --experiment batching --case steady-512-output-128 --profile dynamic-default",
       ],
       resultEvidence: {
-        title: "Scheduler limits under steady load",
-        statusLabel: "Measured scheduler compare",
-        reportDate: "2026-05-06",
+        title: "Dynamic defaults beat explicit caps",
+        statusLabel: "Measured steady/burst compare",
+        reportDate: "2026-05-14",
         summary:
-          "At 8 req/s on the steady 512/128 workload, vLLM dynamic-default delivered the full run with low tail latency; tighter caps queued and dropped work.",
+          "For steady and burst 512/128 traffic, the default vLLM scheduler delivered the most useful work with the best tail-latency profile among the tested options.",
         boundary:
-          "The selected matrix covers one steady workload. Burst and mixed-shape cases are needed before a general scheduler policy; checked-in results.md still contains template text.",
+          "This supports dynamic defaults for the current small homogeneous workload. Mixed-size and fairness-oriented runs are still needed before making a general scheduler-cap policy.",
         boundaryPoints: [
-          "Generated reports under docs/reports contain the selected evidence even though experiments/batching/results.md still says no curated run.",
           "Dynamic-default means vLLM's default scheduler settings, not disabled batching.",
-          "Cost denominators are unavailable for this scheduler comparison.",
+          "The matrix covers 512/128 steady and burst traffic; it does not prove behavior for long-context or mixed-size workloads.",
+          "Cost denominators are covered by the separate cost experiment, not this scheduler matrix.",
         ],
-        curatedResults: false,
         stats: [
           {
-            label: "Dynamic default",
-            value: "7.41 req/s",
-            context: "2669/2669 delivered; p95 1.66s",
+            label: "Steady default",
+            value: "100% delivered",
+            context: "p95 1.66s; 948.98 generated tokens/sec",
           },
           {
-            label: "Limited batching",
-            value: "80.1% delivered",
-            context: "531 unserved iterations; p95 10.55s",
+            label: "Burst default",
+            value: "97.6% delivered",
+            context: "p95 6.79s; peak waiting 1",
           },
           {
-            label: "Constrained",
-            value: "15.6% delivered",
-            context: "2253 unserved iterations; p95 59.72s",
+            label: "Caps under-delivered",
+            value: "8.4-80.1%",
+            context: "delivery range for limited and constrained profiles",
           },
         ],
         sourceReports: [
@@ -770,6 +769,18 @@ export const experimentCatalogContent = {
           {
             label: "Constrained report",
             path: "docs/reports/experiment-batching-steady-512-output-128-constrained-scheduler-20260505-235019.md",
+          },
+          {
+            label: "Burst dynamic report",
+            path: "docs/reports/experiment-batching-burst-512-output-128-dynamic-default-20260514-155838.md",
+          },
+          {
+            label: "Burst limited report",
+            path: "docs/reports/experiment-batching-burst-512-output-128-limited-batching-20260514-160416.md",
+          },
+          {
+            label: "Burst constrained report",
+            path: "docs/reports/experiment-batching-burst-512-output-128-constrained-scheduler-20260514-160946.md",
           },
         ],
         tables: [
@@ -808,6 +819,41 @@ export const experimentCatalogContent = {
               },
             ],
           },
+          {
+            title: "Burst scheduler profile comparison",
+            summary:
+              "Under burst pressure, the default profile still keeps delivery near 98% while explicit caps shed much more work.",
+            columns: {
+              target: "Profile",
+              outcome: "Outcome",
+              p95Latency: "p95 latency",
+              peakWaiting: "Delivery",
+              gpuMax: "Peak waiting",
+            },
+            rows: [
+              {
+                target: "dynamic-default",
+                outcome: "Best burst profile",
+                p95Latency: "6.79s",
+                peakWaiting: "97.6%",
+                gpuMax: "1",
+              },
+              {
+                target: "limited-batching",
+                outcome: "Queue-limited",
+                p95Latency: "20.53s",
+                peakWaiting: "45.5%",
+                gpuMax: "120",
+              },
+              {
+                target: "constrained-scheduler",
+                outcome: "Overloaded reference",
+                p95Latency: "119.09s",
+                peakWaiting: "8.4%",
+                gpuMax: "127",
+              },
+            ],
+          },
         ],
       },
     },
@@ -815,22 +861,22 @@ export const experimentCatalogContent = {
       slug: "request-patterns",
       title: "Request Pattern Utilization",
       category: "Traffic shape",
-      status: experimentStatus("Measurable with run"),
+      status: experimentStatus("Measured with run", "Measured pattern matrix"),
       readiness: {
         primary: {
-          label: "Pending",
-          detail: "Matrix pending",
-          tone: "pending",
+          label: "Selected report",
+          detail: "Pattern matrix",
+          tone: "selected",
         },
       },
       question:
         "How do steady, burst, uneven-size, and spike-to-zero traffic patterns affect GPU occupancy?",
-      cardSummary: "Traffic shape versus GPU occupancy.",
-      metricFocus: ["Utilization", "Queue depth", "Request mix"],
+      cardSummary: "Same profile, different traffic outcome.",
+      metricFocus: ["Delivery", "Tail latency", "Active concurrency"],
       summary:
-        "Runs traffic shapes against the same serving profile before changing scheduler or autoscaling settings.",
+        "Runs steady, burst, uneven-size, and spike-to-zero traffic against the same default profile.",
       whyItMatters:
-        "Average load can hide the operating problem. This experiment shows whether utilization dips and tail spikes come from traffic shape rather than raw capacity.",
+        "Average load can hide the operating problem. The same serving profile behaves differently when traffic arrives steadily, in bursts, or as a mixed-size workload.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/request-patterns/",
@@ -888,23 +934,99 @@ export const experimentCatalogContent = {
       liveCommands: [
         "./scripts/experiment run --experiment request-patterns --case steady-small --profile default",
       ],
-      pendingNextRuns: [
-        {
-          label: "Steady baseline",
-          command: "./scripts/experiment run --experiment request-patterns --case steady-small --profile default",
-          reason: "Establish default occupancy and latency before interpreting burst or mixed traffic.",
-        },
-        {
-          label: "Burst pressure",
-          command: "./scripts/experiment run --experiment request-patterns --case burst-small --profile default",
-          reason: "Measure whether tail latency and waiting requests come from traffic shape rather than raw capacity.",
-        },
-        {
-          label: "Uneven-size mix",
-          command: "./scripts/experiment run --experiment request-patterns --case uneven-size-mix --profile default",
-          reason: "Use the weighted short/medium/long request mix to expose head-of-line effects by request shape.",
-        },
-      ],
+      resultEvidence: {
+        title: "Traffic shape changes the result",
+        statusLabel: "Measured pattern matrix",
+        reportDate: "2026-05-15",
+        summary:
+          "The default profile stayed clean under steady traffic, but burst and spike-to-zero traffic pushed active concurrency to the edge and dropped client-side work.",
+        boundary:
+          "These reports use direct clients with no admission buffer. Dropped iterations are unserved client work, not successful backpressure handling.",
+        boundaryPoints: [
+          "Steady 512/128 traffic delivered 100% of work with p95 near 1.3s.",
+          "Burst and spike-to-zero traffic reached 127-128 active requests and dropped work.",
+          "The uneven-size mix preserved delivery but widened the tail; the report does not include per-shape latency buckets.",
+        ],
+        stats: [
+          {
+            label: "Steady traffic",
+            value: "1.29s p95",
+            context: "100% delivered; peak active 7",
+          },
+          {
+            label: "Burst traffic",
+            value: "87.5% delivered",
+            context: "8.56s p95; peak active 127",
+          },
+          {
+            label: "Uneven mix",
+            value: "99.7% delivered",
+            context: "7.87s p95; mixed tail widened",
+          },
+        ],
+        sourceReports: [
+          {
+            label: "Steady report",
+            path: "docs/reports/experiment-request-patterns-steady-small-default-20260514-164928.md",
+          },
+          {
+            label: "Burst report",
+            path: "docs/reports/experiment-request-patterns-burst-small-default-20260514-170305.md",
+          },
+          {
+            label: "Uneven mix report",
+            path: "docs/reports/experiment-request-patterns-uneven-size-mix-default-20260514-170637.md",
+          },
+          {
+            label: "Spike report",
+            path: "docs/reports/experiment-request-patterns-spike-to-zero-default-20260514-171308.md",
+          },
+        ],
+        tables: [
+          {
+            title: "Default-profile traffic matrix",
+            summary:
+              "The same serving profile has different delivery and latency behavior depending on traffic shape.",
+            columns: {
+              target: "Pattern",
+              outcome: "Delivery",
+              p95Latency: "p95 latency",
+              peakWaiting: "Peak active",
+              gpuMax: "Avg / max GPU",
+            },
+            rows: [
+              {
+                target: "steady-small",
+                outcome: "100.0%",
+                p95Latency: "1.29s",
+                peakWaiting: "7",
+                gpuMax: "69.0% / 84%",
+              },
+              {
+                target: "burst-small",
+                outcome: "87.5%",
+                p95Latency: "8.56s",
+                peakWaiting: "127",
+                gpuMax: "77.3% / 79%",
+              },
+              {
+                target: "uneven-size-mix",
+                outcome: "99.7%",
+                p95Latency: "7.87s",
+                peakWaiting: "25",
+                gpuMax: "65.2% / 84%",
+              },
+              {
+                target: "spike-to-zero",
+                outcome: "79.8%",
+                p95Latency: "8.45s",
+                peakWaiting: "128",
+                gpuMax: "75.5% / 76%",
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       slug: "autoscaling",
@@ -1109,22 +1231,22 @@ export const experimentCatalogContent = {
       slug: "cost",
       title: "Cost per Useful Work",
       category: "Cost efficiency",
-      status: experimentStatus("Measurable with run"),
+      status: experimentStatus("Measured with run", "Measured useful-work cost"),
       readiness: {
         primary: {
-          label: "Pending",
-          detail: "Cost matrix",
-          tone: "pending",
+          label: "Supported",
+          detail: "Useful-work cost",
+          tone: "supported",
         },
       },
       question:
         "How much cheaper does the same GPU become when concurrency and batching produce more successful work?",
-      cardSummary: "Serving cost tied to successful work.",
+      cardSummary: "Cheap only counts when useful work passes.",
       metricFocus: ["Cost/request", "Cost/token", "SLO pass"],
       summary:
-        "Compares naive and optimized serving profiles under steady and burst workloads with cost denominators tied to successful work.",
+        "Compares naive and optimized serving profiles with cost tied to successful requests and generated tokens.",
       whyItMatters:
-        "A cheaper run is not cheaper if it drops work or misses latency goals. This experiment ties cost to successful requests and generated tokens.",
+        "A cheaper run is not cheaper if it drops work or misses latency goals. This matrix makes cost, useful work, and SLO status visible together.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/cost/",
@@ -1174,23 +1296,99 @@ export const experimentCatalogContent = {
       liveCommands: [
         "./scripts/experiment run --experiment cost --case steady-cost-efficiency --profile optimized-batched",
       ],
-      pendingNextRuns: [
-        {
-          label: "Naive steady baseline",
-          command: "./scripts/experiment run --experiment cost --case steady-cost-efficiency --profile naive-single",
-          reason: "Capture the low-concurrency cost denominator before comparing optimized useful work.",
-        },
-        {
-          label: "Optimized steady profile",
-          command: "./scripts/experiment run --experiment cost --case steady-cost-efficiency --profile optimized-batched",
-          reason: "Measure whether more successful requests and generated tokens improve cost without violating p95/p99 SLOs.",
-        },
-        {
-          label: "Burst cost comparison",
-          command: "./scripts/experiment run --experiment cost --case burst-cost-efficiency --profile optimized-batched",
-          reason: "Check whether the optimized profile remains cheaper once tail-latency pressure and dropped work are included.",
-        },
-      ],
+      resultEvidence: {
+        title: "Useful work beats raw cheapness",
+        statusLabel: "Measured useful-work cost",
+        reportDate: "2026-05-15",
+        summary:
+          "Optimized batching sharply reduced cost per successful request for steady and burst traffic, but only the steady optimized run passed the latency SLO.",
+        boundary:
+          "Costs include the serving GPU model only. They do not include control plane, networking, storage, observability, idle platform cost, or operator time.",
+        boundaryPoints: [
+          "The steady optimized profile completed 2670 successful requests with no dropped work and p95 1.61s.",
+          "The burst optimized profile was cheapest per useful request but still missed latency with p95 10.91s.",
+          "Burst SLO compliance still needs admission, autoscaling, or a different capacity shape.",
+        ],
+        stats: [
+          {
+            label: "Steady optimized",
+            value: "$0.019752",
+            context: "per 1K successful requests; SLO pass",
+          },
+          {
+            label: "Naive steady",
+            value: "$0.137976",
+            context: "per 1K successful requests; 2227 dropped",
+          },
+          {
+            label: "Burst optimized",
+            value: "10.91s p95",
+            context: "$0.012768 per 1K, but SLO miss",
+          },
+        ],
+        sourceReports: [
+          {
+            label: "Steady naive report",
+            path: "docs/reports/experiment-cost-steady-cost-efficiency-naive-single-20260514-171552.md",
+          },
+          {
+            label: "Steady optimized report",
+            path: "docs/reports/experiment-cost-steady-cost-efficiency-optimized-batched-20260514-172916.md",
+          },
+          {
+            label: "Burst naive report",
+            path: "docs/reports/experiment-cost-burst-cost-efficiency-naive-single-20260514-172403.md",
+          },
+          {
+            label: "Burst optimized report",
+            path: "docs/reports/experiment-cost-burst-cost-efficiency-optimized-batched-20260514-173650.md",
+          },
+        ],
+        tables: [
+          {
+            title: "Useful-work cost matrix",
+            summary:
+              "Optimized batching wins the useful-work denominator, but burst latency still fails the serving SLO.",
+            columns: {
+              target: "Run",
+              outcome: "Successful / dropped",
+              p95Latency: "p95 latency",
+              peakWaiting: "Cost / 1K",
+              gpuMax: "SLO",
+            },
+            rows: [
+              {
+                target: "steady naive",
+                outcome: "413 / 2227",
+                p95Latency: "60.31s",
+                peakWaiting: "$0.137976",
+                gpuMax: "miss",
+              },
+              {
+                target: "steady optimized",
+                outcome: "2670 / 0",
+                p95Latency: "1.61s",
+                peakWaiting: "$0.019752",
+                gpuMax: "pass",
+              },
+              {
+                target: "burst naive",
+                outcome: "227 / 2882",
+                p95Latency: "120.00s",
+                peakWaiting: "$0.164137",
+                gpuMax: "miss",
+              },
+              {
+                target: "burst optimized",
+                outcome: "2570 / 677",
+                p95Latency: "10.91s",
+                peakWaiting: "$0.012768",
+                gpuMax: "miss",
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       slug: "fp4",

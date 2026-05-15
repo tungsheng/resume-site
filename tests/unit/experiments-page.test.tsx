@@ -11,14 +11,14 @@ describe("ExperimentsPage", () => {
     const html = renderToStaticMarkup(<ExperimentsPage />);
 
     expect(html).toContain("Experiment Catalog");
-    expect(html).toContain("Focused experiments for memory pressure");
+    expect(html).toContain("Serving experiments that turn workload shape into a measured architecture call.");
     expect(html).toContain("Catalog ready");
-    expect(html).toContain("Rows show whether each experiment is supported, selected, rejected, pending, or blocked.");
+    expect(html).toContain("Rows show what each experiment currently proves");
     expect(html).toContain("7 experiments");
     expect(html).toContain("Run-ready");
-    expect(html).toContain("2 supported");
-    expect(html).toContain("2 selected reports");
-    expect(html).toContain("2 pending");
+    expect(html).toContain("3 supported");
+    expect(html).toContain("3 selected reports");
+    expect(html).toContain("0 pending");
     expect(html).toContain("1 blocked");
     expect(html).toContain("1 rejected call");
     expect(html).toContain("href=\"#experiment-catalog-list\"");
@@ -38,7 +38,6 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Run ready");
     expect(html).toContain("Supported");
     expect(html).toContain("Selected report");
-    expect(html).toContain("Pending");
     expect(html).toContain("Blocked");
     expect(html).toContain("Rejected");
     expect(html).toContain("KV Cache vs Concurrency");
@@ -57,7 +56,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("href=\"/experiments/fp4\"");
     expect(html).toContain("Related project evidence");
     expect(html).toContain("Architecture decisions live in the project record");
-    expect(html).toContain("not catalog entries");
+    expect(html).toContain("not standalone catalog entries");
     expect(html).toContain("href=\"/project/cloud-inference-platform/validation\"");
     expect(html).not.toContain("href=\"/experiments/platform-validation\"");
     expect(html).toContain("Full delivery can hide queueing.");
@@ -66,7 +65,9 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Long-context knee");
     expect(html).toContain("FP8 KV on g4dn");
     expect(html).toContain("Streaming split");
-    expect(html).toContain("Scheduler compare");
+    expect(html).toContain("Scheduler matrix");
+    expect(html).toContain("Pattern matrix");
+    expect(html).toContain("Useful-work cost");
     expect(html).toContain("Admission behavior");
     expect(html).toContain("Blackwell capacity");
     expect(html).toContain("BF16 vs NVFP4 vs SmoothQuant.");
@@ -78,12 +79,8 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("href=\"/project/cloud-inference-platform\"");
   });
 
-  test("renders pending experiment detail pages with the shared template", () => {
-    const slugs = [
-      "request-patterns",
-      "cost",
-      "fp4",
-    ];
+  test("renders blocked experiment detail pages with the shared template", () => {
+    const slugs = ["fp4"];
 
     for (const slug of slugs) {
       const html = renderToStaticMarkup(
@@ -96,11 +93,7 @@ describe("ExperimentsPage", () => {
       expect(html).toContain("How to run");
       expect(html).toContain("Example local command");
       expect(html).toContain("Example live command");
-      if (slug === "fp4") {
-        expect(html).toContain("Blackwell capacity blocked");
-      } else {
-        expect(html).toContain("Live result pending");
-      }
+      expect(html).toContain("Blackwell capacity blocked");
       expect(html).toContain("Result status");
       expect(html).toContain("Category");
       expect(html).toContain("Profiles");
@@ -159,6 +152,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("1.20 req/s report");
     expect(html).toContain("Results summary");
     expect(html).not.toContain("Live result pending");
+    expect(html.indexOf("Result evidence")).toBeLessThan(html.indexOf("How to run"));
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/experiments/kv-cache/\"",
     );
@@ -170,23 +164,70 @@ describe("ExperimentsPage", () => {
     );
 
     expect(html).toContain("Batching Scheduler Tradeoffs");
-    expect(html).toContain("Selected report: Scheduler compare");
-    expect(html).toContain("Scheduler limits under steady load");
-    expect(html).toContain("Latest reports: 2026-05-06");
-    expect(html).toContain("vLLM dynamic-default delivered the full run");
-    expect(html).toContain("Dynamic default");
-    expect(html).toContain("7.41 req/s");
-    expect(html).toContain("Limited batching");
-    expect(html).toContain("80.1% delivered");
-    expect(html).toContain("Constrained");
-    expect(html).toContain("15.6% delivered");
+    expect(html).toContain("Selected report: Scheduler matrix");
+    expect(html).toContain("Dynamic defaults beat explicit caps");
+    expect(html).toContain("Latest reports: 2026-05-14");
+    expect(html).toContain("For steady and burst 512/128 traffic");
+    expect(html).toContain("Steady default");
+    expect(html).toContain("100% delivered");
+    expect(html).toContain("Burst default");
+    expect(html).toContain("97.6% delivered");
+    expect(html).toContain("Caps under-delivered");
+    expect(html).toContain("8.4-80.1%");
     expect(html).toContain("Steady scheduler profile comparison");
-    expect(html).toContain("Dynamic default report");
+    expect(html).toContain("Burst scheduler profile comparison");
+    expect(html).toContain("Burst dynamic report");
     expect(html).toContain("dynamic-default");
     expect(html).toContain("1.66s");
     expect(html).toContain("10.55s");
     expect(html).toContain("59.72s");
+    expect(html).toContain("119.09s");
     expect(html).not.toContain("Live result pending");
+  });
+
+  test("renders measured request-pattern detail content", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/request-patterns" />,
+    );
+
+    expect(html).toContain("Request Pattern Utilization");
+    expect(html).toContain("Selected report: Pattern matrix");
+    expect(html).toContain("Traffic shape changes the result");
+    expect(html).toContain("Latest reports: 2026-05-15");
+    expect(html).toContain("same serving profile behaves differently");
+    expect(html).toContain("Steady traffic");
+    expect(html).toContain("1.29s p95");
+    expect(html).toContain("Burst traffic");
+    expect(html).toContain("87.5% delivered");
+    expect(html).toContain("Uneven mix");
+    expect(html).toContain("99.7% delivered");
+    expect(html).toContain("Default-profile traffic matrix");
+    expect(html).toContain("spike-to-zero");
+    expect(html).toContain("79.8%");
+    expect(html).not.toContain("Live result pending");
+    expect(html).not.toContain("Next runs to curate");
+  });
+
+  test("renders measured cost detail content", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/cost" />,
+    );
+
+    expect(html).toContain("Cost per Useful Work");
+    expect(html).toContain("Supported: Useful-work cost");
+    expect(html).toContain("Useful work beats raw cheapness");
+    expect(html).toContain("Latest reports: 2026-05-15");
+    expect(html).toContain("Optimized batching sharply reduced cost per successful request");
+    expect(html).toContain("Steady optimized");
+    expect(html).toContain("$0.019752");
+    expect(html).toContain("Naive steady");
+    expect(html).toContain("$0.137976");
+    expect(html).toContain("Burst optimized");
+    expect(html).toContain("10.91s p95");
+    expect(html).toContain("Useful-work cost matrix");
+    expect(html).toContain("2570 / 677");
+    expect(html).not.toContain("Live result pending");
+    expect(html).not.toContain("Next runs to curate");
   });
 
   test("renders measured prefill/decode detail content", () => {
