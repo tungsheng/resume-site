@@ -135,6 +135,13 @@ export const projectContent = {
         tone: "success",
       },
       {
+        title: "LC caps",
+        statusLabel: "Rejected",
+        call: "Do not use scheduler caps as the first fix for the 1.20 req/s long-context knee.",
+        proof: "seqs-16, seqs-24, and batched-16384 were worse or unchanged versus baseline p95.",
+        tone: "error",
+      },
+      {
         title: "Scheduler",
         statusLabel: "Supported",
         call: "Keep vLLM dynamic defaults for small steady and burst traffic.",
@@ -213,6 +220,12 @@ export const projectContent = {
           evidence: "1.15 req/s starts queueing; 1.20 req/s reaches 54.35s p95",
         },
         {
+          state: "Rejected",
+          title: "Long-context scheduler caps",
+          call: "Do not use seq caps or larger batched-token caps as the first 1.20 req/s fix.",
+          evidence: "seqs-16 hit 76.24s p95; seqs-24 hit 61.36s; batched-16384 hit 55.58s",
+        },
+        {
           state: "Supported",
           title: "Small-request scheduler",
           call: "Keep vLLM dynamic defaults for current 512/128 steady and burst traffic.",
@@ -271,6 +284,15 @@ export const projectContent = {
         body:
           "The profile is clean at 1.10 req/s, queues at 1.15, and still delivers 100% at 1.20 while missing the latency envelope.",
         caveat: "Boundary applies to this model, GPU class, vLLM path, and 8192/300 workload.",
+      },
+      {
+        title: "Scheduler cap tuning",
+        call: "Reject as first fix",
+        proofLabel: "1.20 req/s variants",
+        proofValue: "55.58-76.24s p95",
+        body:
+          "Lowering max sequences or raising max batched tokens did not beat the baseline long-context edge.",
+        caveat: "Use admission/backpressure before deeper scheduler-cap tuning on the current g4dn/vLLM path.",
       },
       {
         title: "KV-cache dtype",
@@ -397,6 +419,100 @@ export const projectContent = {
         ],
       },
       {
+        title: "Long-context fix attempt",
+        takeaway:
+          "Scheduler-cap variants did not move the 1.20 req/s knee; bounded admission made overload explicit and lowered p95.",
+        sourceLabel: "Local static readout from May 15/16 KV-cache reports",
+        columns: [
+          {
+            key: "p95",
+            label: "p95 latency",
+            max: 80,
+            tone: "warning",
+          },
+          {
+            key: "waiting",
+            label: "Peak waiting",
+            max: 70,
+            tone: "info",
+          },
+        ],
+        rows: [
+          {
+            label: "baseline @ 1.20",
+            context: "edge: 30 waiting / 62 active",
+            values: {
+              p95: {
+                value: 54.35,
+                label: "54.35s",
+              },
+              waiting: {
+                value: 30,
+                label: "30 waiting",
+              },
+            },
+          },
+          {
+            label: "seqs-16 @ 1.20",
+            context: "worse: 66 waiting / 82 active",
+            values: {
+              p95: {
+                value: 76.24,
+                label: "76.24s",
+              },
+              waiting: {
+                value: 66,
+                label: "66 waiting",
+              },
+            },
+          },
+          {
+            label: "seqs-24 @ 1.20",
+            context: "worse: 45 waiting / 69 active",
+            values: {
+              p95: {
+                value: 61.36,
+                label: "61.36s",
+              },
+              waiting: {
+                value: 45,
+                label: "45 waiting",
+              },
+            },
+          },
+          {
+            label: "batched-16384 @ 1.20",
+            context: "no improvement: 31 waiting / 63 active",
+            values: {
+              p95: {
+                value: 55.58,
+                label: "55.58s",
+              },
+              waiting: {
+                value: 31,
+                label: "31 waiting",
+              },
+            },
+          },
+          {
+            label: "admission-032 @ 1.25",
+            context: "bounded: 52 unserved / 32 active",
+            values: {
+              p95: {
+                value: 27.83,
+                label: "27.83s",
+                tone: "success",
+              },
+              waiting: {
+                value: 0,
+                label: "0 waiting",
+                tone: "success",
+              },
+            },
+          },
+        ],
+      },
+      {
         title: "Cost per useful work",
         takeaway:
           "Batching makes small-request serving cheaper, but the burst result still needs admission or more capacity before it is latency-safe.",
@@ -478,7 +594,7 @@ export const projectContent = {
     sourceFacts: [
       {
         label: "Updated",
-        value: "May 15, 2026",
+        value: "May 16, 2026 UTC",
       },
       {
         label: "Workflow",

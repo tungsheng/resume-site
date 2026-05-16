@@ -169,7 +169,7 @@ export const experimentCatalogContent = {
       slug: "kv-cache",
       title: "KV Cache vs Concurrency",
       category: "Memory pressure",
-      status: experimentStatus("Measurable with run", "Measured knee refinement"),
+      status: experimentStatus("Measurable with run", "Measured scheduler-cap rejection"),
       readiness: {
         primary: {
           label: "Supported",
@@ -187,9 +187,9 @@ export const experimentCatalogContent = {
       cardSummary: "Full delivery can hide queueing.",
       metricFocus: ["Concurrency", "KV memory", "Tail latency"],
       summary:
-        "Compares prompt lengths, then sweeps an 8192-token workload to find where serving starts to queue.",
+        "Compares prompt lengths, sweeps the 8192/300 knee, then tests whether scheduler caps fix it.",
       whyItMatters:
-        "Long prompts can look healthy until arrival rate crosses a narrow boundary. The May 13 sweep turns that risk into latency, queue depth, and GPU-utilization evidence.",
+        "Long prompts can look healthy until arrival rate crosses a narrow boundary. The May 15/16 follow-up shows scheduler-cap tuning is not the first fix for that knee.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/kv-cache/",
@@ -225,15 +225,15 @@ export const experimentCatalogContent = {
         },
         {
           id: "long-context-seqs-24",
-          description: "reduced sequence cap for long-context knee comparison",
+          description: "reduced sequence cap that worsened the 1.20 req/s tail",
         },
         {
           id: "long-context-seqs-16",
-          description: "more conservative sequence cap that tested delivery tradeoffs",
+          description: "more conservative sequence cap that increased waiting pressure",
         },
         {
           id: "long-context-batched-16384",
-          description: "larger batched-token budget for long-context prefill comparison",
+          description: "larger batched-token budget that did not improve the knee",
         },
       ],
       metricGroups: [
@@ -259,17 +259,17 @@ export const experimentCatalogContent = {
         "./scripts/experiment run --experiment kv-cache --case prompt-8192-output-300-rate-120 --profile long-context",
       ],
       resultEvidence: {
-        title: "Full delivery is not enough",
-        statusLabel: "Measured knee refinement",
-        reportDate: "2026-05-13",
+        title: "Cap tuning is not the fix",
+        statusLabel: "Measured scheduler-cap rejection",
+        reportDate: "2026-05-16 UTC",
         summary:
-          "With 8192-token prompts and 300 generated tokens, the sweep stays clean through 1.10 req/s, queues at 1.15, and hits an operational edge at 1.20 even with 100% delivery.",
+          "With 8192-token prompts and 300 generated tokens, the profile still reaches an operational edge at 1.20 req/s. Lower sequence caps and a larger batched-token cap did not beat the baseline.",
         boundary:
-          "Treat this as an operating band for one model, GPU class, vLLM image, and 8192/300 workload. The reports include offered, unserved, queue, delivery, GPU, and memory fields; repeat runs and admission comparisons are still needed before a universal policy.",
+          "Treat this as an operating band for one model, GPU class, vLLM image, and 8192/300 workload. Use admission/backpressure before deeper scheduler-cap tuning on the current g4dn/vLLM path.",
         boundaryPoints: [
           "At 1.20 req/s, the profile delivered 100% of offered work with zero failures, drops, or interruptions, but p95 still reached 54.35s.",
-          "The scheduler hit 32 running requests while waiting depth climbed from 0 at 1.10 req/s to 8 at 1.15 and 30 at 1.20.",
-          "Profile variants remain useful follow-ups; the May 13 direct-profile sweep is the freshest baseline.",
+          "At the same rate, seqs-16 hit 76.24s p95, seqs-24 hit 61.36s, and batched-16384 hit 55.58s.",
+          "The 1.25 req/s admission-capped run exposed 52 unserved iterations and reduced p95 to 27.83s with zero serving-side waiting.",
         ],
         stats: [
           {
@@ -287,23 +287,45 @@ export const experimentCatalogContent = {
             value: "1.20 req/s",
             context: "100% delivered; p95 54.35s; 30 waiting",
           },
+          {
+            label: "Cap variants",
+            value: "0 wins",
+            context: "seqs-16, seqs-24, and batched-16384 did not beat baseline",
+          },
+          {
+            label: "Admission result",
+            value: "27.83s p95",
+            context: "52 unserved; 0 waiting; 32 active",
+          },
         ],
         sourceReports: [
           {
-            label: "1.05 req/s report",
-            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-105-long-context-20260513-165340.md",
-          },
-          {
-            label: "1.10 req/s report",
+            label: "1.10 req/s baseline",
             path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-110-long-context-20260513-171317.md",
           },
           {
-            label: "1.15 req/s report",
+            label: "1.15 req/s baseline",
             path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-long-context-20260513-172605.md",
           },
           {
-            label: "1.20 req/s report",
+            label: "1.20 req/s baseline",
             path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-120-long-context-20260513-173923.md",
+          },
+          {
+            label: "seqs-16 @ 1.20 report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-120-long-context-seqs-16-20260515-224110.md",
+          },
+          {
+            label: "seqs-24 @ 1.20 report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-120-long-context-seqs-24-20260515-230052.md",
+          },
+          {
+            label: "batched-16384 @ 1.20 report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-120-long-context-batched-16384-20260515-231435.md",
+          },
+          {
+            label: "admission-032 @ 1.25 report",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-125-admission-032-long-context-20260515-221138.md",
           },
         ],
         tables: [
@@ -357,8 +379,8 @@ export const experimentCatalogContent = {
               {
                 target: "1.25 req/s",
                 outcome: "saturation is obvious",
-                p95Latency: "93.78s",
-                peakWaiting: "72 waiting / 104 active",
+                p95Latency: "85.75s",
+                peakWaiting: "65 waiting / 97 active",
                 gpuMax: "100%",
               },
               {
@@ -371,9 +393,9 @@ export const experimentCatalogContent = {
             ],
           },
           {
-            title: "Profile variants near the knee",
+            title: "Long-context fix attempts",
             summary:
-              "Follow-up runs show that a moderate sequence cap can reduce tail latency at 1.15 req/s, while a smaller cap under-delivers.",
+              "The 1.20 req/s scheduler variants did not beat the baseline; bounded admission at 1.25 req/s made overload explicit and lowered p95.",
             columns: {
               target: "Profile / run",
               outcome: "Outcome",
@@ -383,38 +405,38 @@ export const experimentCatalogContent = {
             },
             rows: [
               {
-                target: "long-context @ 1.15",
-                outcome: "baseline queue start",
-                p95Latency: "46.68s",
-                peakWaiting: "20 waiting / 52 active",
+                target: "long-context @ 1.20",
+                outcome: "baseline practical edge",
+                p95Latency: "54.35s",
+                peakWaiting: "30 waiting / 62 active",
                 gpuMax: "100%",
               },
               {
-                target: "batched-16384 @ 1.15",
-                outcome: "no material gain",
-                p95Latency: "46.58s",
-                peakWaiting: "20 waiting / 52 active",
-                gpuMax: "100%",
-              },
-              {
-                target: "seqs-24 @ 1.15",
-                outcome: "lower tail latency",
-                p95Latency: "40.57s",
-                peakWaiting: "22 waiting / 46 active",
-                gpuMax: "100%",
-              },
-              {
-                target: "seqs-16 @ 1.15",
-                outcome: "97.4% delivered",
-                p95Latency: "99.12s",
-                peakWaiting: "83 waiting / 99 active",
-                gpuMax: "100%",
+                target: "seqs-16 @ 1.20",
+                outcome: "worse tail and waiting",
+                p95Latency: "76.24s",
+                peakWaiting: "66 waiting / 82 active",
+                gpuMax: "97%",
               },
               {
                 target: "seqs-24 @ 1.20",
-                outcome: "saturation returns",
-                p95Latency: "62.90s",
-                peakWaiting: "47 waiting / 71 active",
+                outcome: "worse tail and waiting",
+                p95Latency: "61.36s",
+                peakWaiting: "45 waiting / 69 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "batched-16384 @ 1.20",
+                outcome: "no improvement",
+                p95Latency: "55.58s",
+                peakWaiting: "31 waiting / 63 active",
+                gpuMax: "100%",
+              },
+              {
+                target: "admission-032 @ 1.25",
+                outcome: "bounded admission",
+                p95Latency: "27.83s",
+                peakWaiting: "0 waiting / 32 active",
                 gpuMax: "100%",
               },
             ],

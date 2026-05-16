@@ -19,6 +19,7 @@ import {
   TwoMetricEvidenceMatrix,
   type DecisionReadoutItem,
   type EvidenceMatrixColumn,
+  type EvidenceMatrixRow,
 } from "../site/evidence-visuals";
 import {
   EXPERIMENTS_PATH,
@@ -956,7 +957,7 @@ function ValidationEvidenceVisualsSection() {
             takeaway={visual.takeaway}
             sourceLabel={visual.sourceLabel}
             columns={visual.columns as EvidenceMatrixColumn[]}
-            rows={visual.rows}
+            rows={visual.rows as EvidenceMatrixRow[]}
           />
         ))}
       </Box>
