@@ -169,7 +169,7 @@ export const experimentCatalogContent = {
       slug: "kv-cache",
       title: "KV Cache vs Concurrency",
       category: "Memory pressure",
-      status: experimentStatus("Measurable with run", "Measured scheduler-cap rejection"),
+      status: experimentStatus("Measurable with run", "Measured queue boundary"),
       readiness: {
         primary: {
           label: "Supported",
@@ -189,7 +189,7 @@ export const experimentCatalogContent = {
       summary:
         "Compares prompt lengths, sweeps the 8192/300 knee, then tests whether scheduler caps fix it.",
       whyItMatters:
-        "Long prompts can look healthy until arrival rate crosses a narrow boundary. The May 15/16 follow-up shows scheduler-cap tuning is not the first fix for that knee.",
+        "Long prompts can look healthy until arrival rate crosses a narrow boundary. The May 18 server-timing follow-up attributes the tail to queue and TTFT inflation, not decode.",
       runner: "k6 completion load",
       endpoint: "/v1/completions",
       sourcePath: "experiments/kv-cache/",
@@ -259,33 +259,34 @@ export const experimentCatalogContent = {
         "./scripts/experiment run --experiment kv-cache --case prompt-8192-output-300-rate-120 --profile long-context",
       ],
       resultEvidence: {
-        title: "Cap tuning is not the fix",
-        statusLabel: "Measured scheduler-cap rejection",
-        reportDate: "2026-05-16 UTC",
+        title: "Queueing sets the boundary",
+        statusLabel: "Measured queue boundary",
+        reportDate: "2026-05-18 UTC",
         summary:
-          "With 8192-token prompts and 300 generated tokens, the profile still reaches an operational edge at 1.20 req/s. Lower sequence caps and a larger batched-token cap did not beat the baseline.",
+          "With 8192-token prompts and 300 generated tokens, the profile is usable through 1.10 req/s, queues repeatably at 1.15 req/s, and is queue-dominated by 1.20 req/s. Server timing shows admission removes queue and TTFT inflation while decode stays roughly unchanged.",
         boundary:
-          "Treat this as an operating band for one model, GPU class, vLLM image, and 8192/300 workload. Use admission/backpressure before deeper scheduler-cap tuning on the current g4dn/vLLM path.",
+          "Treat this as an operating band for one model, GPU class, vLLM image, and 8192/300 workload. Use admission/backpressure before deeper scheduler-cap tuning on the current g4dn/vLLM path, and compare queue delay, TTFT, dropped demand, and p95 request latency together.",
         boundaryPoints: [
-          "At 1.20 req/s, the profile delivered 100% of offered work with zero failures, drops, or interruptions, but p95 still reached 54.35s.",
+          "At 1.20 req/s, the latest repeats delivered 100% of offered work with zero failures, drops, or interruptions, but p95 request latency reached 62.66-63.40s.",
+          "The 1.20 req/s r3 report shows p95 server queue delay at 36.93s and p95 TTFT at 37.61s while p95 decode stays near 29.43s.",
           "At the same rate, seqs-16 hit 76.24s p95, seqs-24 hit 61.36s, and batched-16384 hit 55.58s.",
-          "The 1.25 req/s admission-capped run exposed 52 unserved iterations and reduced p95 to 27.83s with zero serving-side waiting.",
+          "The latest 1.25 req/s admission-capped run exposed 59 unserved iterations, reduced p95 to 27.98s, and kept p95 server queue delay at 0.285s.",
         ],
         stats: [
           {
-            label: "Clean through",
+            label: "Stable repeat",
             value: "1.10 req/s",
-            context: "0 waiting requests; p95 21.67s",
+            context: "0 waiting; p95 25.23s; p95 queue 0.285s",
           },
           {
             label: "Queue starts",
             value: "1.15 req/s",
-            context: "8 waiting requests; p95 35.35s",
+            context: "16 waiting; p95 42.49s; p95 queue 14.02s",
           },
           {
-            label: "Practical edge",
+            label: "Queue dominated",
             value: "1.20 req/s",
-            context: "100% delivered; p95 54.35s; 30 waiting",
+            context: "100% delivered; p95 63.40s; p95 queue 36.93s",
           },
           {
             label: "Cap variants",
@@ -294,22 +295,26 @@ export const experimentCatalogContent = {
           },
           {
             label: "Admission result",
-            value: "27.83s p95",
-            context: "52 unserved; 0 waiting; 32 active",
+            value: "27.98s p95",
+            context: "59 unserved; p95 queue 0.285s; 32 active",
           },
         ],
         sourceReports: [
           {
-            label: "1.10 req/s baseline",
-            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-110-long-context-20260513-171317.md",
+            label: "1.10 req/s r3 timing",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-110-r3-long-context-20260518-000954.md",
           },
           {
-            label: "1.15 req/s baseline",
-            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-long-context-20260513-172605.md",
+            label: "1.15 req/s r3 timing",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-115-r3-long-context-20260518-003524.md",
           },
           {
-            label: "1.20 req/s baseline",
-            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-120-long-context-20260513-173923.md",
+            label: "1.20 req/s r3 timing",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-120-r3-long-context-20260518-010100.md",
+          },
+          {
+            label: "1.25 req/s direct timing",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-125-long-context-20260517-224635.md",
           },
           {
             label: "seqs-16 @ 1.20 report",
@@ -325,14 +330,14 @@ export const experimentCatalogContent = {
           },
           {
             label: "admission-032 @ 1.25 report",
-            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-125-admission-032-long-context-20260515-221138.md",
+            path: "docs/reports/experiment-kv-cache-prompt-8192-output-300-rate-125-admission-032-long-context-20260517-230018.md",
           },
         ],
         tables: [
           {
             title: "8192/300 rate sweep",
             summary:
-              "The default long-context profile still completes every request at 1.20 req/s, but waiting depth and p95 make that point an operational edge.",
+              "The default long-context profile still completes every request at 1.20 req/s, but repeated queue delay and p95 make that point an operational edge.",
             rows: [
               {
                 target: "0.75 req/s",
@@ -357,30 +362,30 @@ export const experimentCatalogContent = {
               },
               {
                 target: "1.10 req/s",
-                outcome: "clean with rising tail",
-                p95Latency: "21.67s",
-                peakWaiting: "0 waiting / 24 active",
+                outcome: "stable repeat",
+                p95Latency: "25.23s",
+                peakWaiting: "0 waiting / 28 active",
                 gpuMax: "100%",
               },
               {
                 target: "1.15 req/s",
-                outcome: "queue starts",
-                p95Latency: "35.35s",
-                peakWaiting: "8 waiting / 40 active",
+                outcome: "queueing repeats",
+                p95Latency: "42.49s",
+                peakWaiting: "16 waiting / 48 active",
                 gpuMax: "100%",
               },
               {
                 target: "1.20 req/s",
-                outcome: "practical edge",
-                p95Latency: "54.35s",
-                peakWaiting: "30 waiting / 62 active",
+                outcome: "queue-dominated",
+                p95Latency: "63.40s",
+                peakWaiting: "39 waiting / 71 active",
                 gpuMax: "100%",
               },
               {
                 target: "1.25 req/s",
                 outcome: "saturation is obvious",
-                p95Latency: "85.75s",
-                peakWaiting: "65 waiting / 97 active",
+                p95Latency: "77.51s",
+                peakWaiting: "57 waiting / 89 active",
                 gpuMax: "100%",
               },
               {
@@ -389,6 +394,55 @@ export const experimentCatalogContent = {
                 p95Latency: "180.27s",
                 peakWaiting: "181 waiting / 213 active",
                 gpuMax: "100%",
+              },
+            ],
+          },
+          {
+            title: "Server timing attribution",
+            summary:
+              "Queue delay and TTFT inflate together as load crosses the boundary; decode remains around 29.4s, and admission removes queue inflation.",
+            columns: {
+              target: "Run",
+              outcome: "Outcome",
+              p95Latency: "p95 request",
+              peakWaiting: "p95 queue / TTFT",
+              gpuMax: "p95 decode",
+            },
+            rows: [
+              {
+                target: "1.10 req/s r3",
+                outcome: "stable repeat",
+                p95Latency: "25.23s",
+                peakWaiting: "0.285s / 0.733s",
+                gpuMax: "29.32s",
+              },
+              {
+                target: "1.15 req/s r3",
+                outcome: "queueing repeats",
+                p95Latency: "42.49s",
+                peakWaiting: "14.02s / 18.12s",
+                gpuMax: "29.41s",
+              },
+              {
+                target: "1.20 req/s r3",
+                outcome: "queue-dominated",
+                p95Latency: "63.40s",
+                peakWaiting: "36.93s / 37.61s",
+                gpuMax: "29.43s",
+              },
+              {
+                target: "1.25 req/s direct",
+                outcome: "saturation begins",
+                p95Latency: "77.51s",
+                peakWaiting: "48.11s / 71.24s",
+                gpuMax: "29.44s",
+              },
+              {
+                target: "1.25 admission-032",
+                outcome: "bounded admission",
+                p95Latency: "27.98s",
+                peakWaiting: "0.285s / 0.718s",
+                gpuMax: "29.39s",
               },
             ],
           },
@@ -435,7 +489,7 @@ export const experimentCatalogContent = {
               {
                 target: "admission-032 @ 1.25",
                 outcome: "bounded admission",
-                p95Latency: "27.83s",
+                p95Latency: "27.98s",
                 peakWaiting: "0 waiting / 32 active",
                 gpuMax: "100%",
               },

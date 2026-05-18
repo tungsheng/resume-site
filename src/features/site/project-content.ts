@@ -131,7 +131,7 @@ export const projectContent = {
         title: "Long context",
         statusLabel: "Supported",
         call: "Set a long-context boundary before failures appear.",
-        proof: "The 8192/300 run starts queueing at 1.15 req/s while delivery remains 100%.",
+        proof: "1.15 req/s repeats queueing; 1.20 req/s repeats 36.8s p95 server queue delay.",
         tone: "success",
       },
       {
@@ -217,7 +217,7 @@ export const projectContent = {
           state: "Supported",
           title: "Long-context boundary",
           call: "Set a concurrency or admission boundary for 8192/300 traffic.",
-          evidence: "1.15 req/s starts queueing; 1.20 req/s reaches 54.35s p95",
+          evidence: "1.20 req/s still delivers 100%, but repeats 36.8s p95 queue delay",
         },
         {
           state: "Rejected",
@@ -280,10 +280,20 @@ export const projectContent = {
         title: "Long-context boundary",
         call: "Gate 8192/300",
         proofLabel: "Practical edge",
-        proofValue: "1.20 req/s, 54.35s p95",
+        proofValue: "1.20 req/s, 36.8s queue",
         body:
-          "The profile is clean at 1.10 req/s, queues at 1.15, and still delivers 100% at 1.20 while missing the latency envelope.",
+          "The latest repeats still deliver 100% at 1.20 req/s, but p95 request latency reaches 62.66-63.40s as p95 server queue delay reaches 36.73-36.93s.",
         caveat: "Boundary applies to this model, GPU class, vLLM path, and 8192/300 workload.",
+      },
+      {
+        title: "Queue attribution",
+        call: "Bound queue before decode tuning",
+        proofLabel: "Queue -> TTFT",
+        proofValue: "36.93s -> 0.285s",
+        body:
+          "vLLM server timing shows the long tail is queue and TTFT inflation. Admission-capped 1.25 req/s keeps p95 queue at 0.285s while p95 decode stays about 29.4s.",
+        caveat:
+          "Admission trades completed volume for explicit unserved demand, so compare mechanism and SLO behavior before raw throughput.",
       },
       {
         title: "Scheduler cap tuning",
@@ -311,31 +321,31 @@ export const projectContent = {
       rows: [
         {
           rate: "1.10 req/s",
-          outcome: "Clean, tail rising",
+          outcome: "Stable repeat",
           delivery: "100%",
-          p95: "21.67s",
-          waiting: "0 waiting / 24 active",
+          p95: "25.23s",
+          waiting: "0 waiting / 28 active",
         },
         {
           rate: "1.15 req/s",
-          outcome: "Queue starts",
+          outcome: "Queue repeats",
           delivery: "100%",
-          p95: "35.35s",
-          waiting: "8 waiting / 40 active",
+          p95: "42.49s",
+          waiting: "16 waiting / 48 active",
         },
         {
           rate: "1.20 req/s",
-          outcome: "Practical edge",
+          outcome: "Queue-dominated",
           delivery: "100%",
-          p95: "54.35s",
-          waiting: "30 waiting / 62 active",
+          p95: "63.40s",
+          waiting: "39 waiting / 71 active",
         },
         {
           rate: "1.25 req/s",
           outcome: "Saturation",
           delivery: "100%",
-          p95: "85.75s",
-          waiting: "65 waiting / 97 active",
+          p95: "77.51s",
+          waiting: "57 waiting / 89 active",
         },
       ],
     },
@@ -343,30 +353,30 @@ export const projectContent = {
       {
         title: "Long-context knee",
         takeaway:
-          "The 8192/300 workload reaches a practical edge before failures appear; waiting depth is the warning sign.",
-        sourceLabel: "Local static readout from curated 8192/300 reports",
+          "The 8192/300 workload reaches a practical edge before failures appear; repeated server queue delay is the warning sign.",
+        sourceLabel: "Local static readout from May 18 8192/300 queue-timing reports",
         columns: [
           {
             key: "p95",
             label: "p95 latency",
-            max: 90,
+            max: 80,
             tone: "warning",
           },
           {
             key: "waiting",
             label: "Peak waiting",
-            max: 70,
+            max: 60,
             tone: "info",
           },
         ],
         rows: [
           {
             label: "1.10 req/s",
-            context: "clean, tail rising",
+            context: "stable repeat",
             values: {
               p95: {
-                value: 21.67,
-                label: "21.67s",
+                value: 25.23,
+                label: "25.23s",
               },
               waiting: {
                 value: 0,
@@ -376,29 +386,29 @@ export const projectContent = {
           },
           {
             label: "1.15 req/s",
-            context: "queue starts",
+            context: "queueing repeats",
             values: {
               p95: {
-                value: 35.35,
-                label: "35.35s",
+                value: 42.49,
+                label: "42.49s",
               },
               waiting: {
-                value: 8,
-                label: "8 waiting",
+                value: 16,
+                label: "16 waiting",
               },
             },
           },
           {
             label: "1.20 req/s",
-            context: "practical edge",
+            context: "queue-dominated repeat",
             values: {
               p95: {
-                value: 54.35,
-                label: "54.35s",
+                value: 63.4,
+                label: "63.40s",
               },
               waiting: {
-                value: 30,
-                label: "30 waiting",
+                value: 39,
+                label: "39 waiting",
               },
             },
           },
@@ -407,12 +417,94 @@ export const projectContent = {
             context: "saturation begins",
             values: {
               p95: {
-                value: 85.75,
-                label: "85.75s",
+                value: 77.51,
+                label: "77.51s",
               },
               waiting: {
-                value: 65,
-                label: "65 waiting",
+                value: 57,
+                label: "57 waiting",
+              },
+            },
+          },
+        ],
+      },
+      {
+        title: "Queue attribution",
+        takeaway:
+          "vLLM timing separates queue, TTFT, and decode; admission removes queue inflation while decode stays roughly unchanged.",
+        sourceLabel: "Server timing from May 17-18 direct and admission-capped long-context reports",
+        columns: [
+          {
+            key: "queue",
+            label: "p95 queue",
+            max: 50,
+            tone: "warning",
+          },
+          {
+            key: "ttft",
+            label: "p95 TTFT",
+            max: 75,
+            tone: "info",
+          },
+        ],
+        rows: [
+          {
+            label: "1.10 req/s",
+            context: "stable repeat; p95 decode 29.32s",
+            values: {
+              queue: {
+                value: 0.285,
+                label: "0.285s",
+                tone: "success",
+              },
+              ttft: {
+                value: 0.733,
+                label: "0.733s",
+                tone: "success",
+              },
+            },
+          },
+          {
+            label: "1.15 req/s",
+            context: "queueing repeat; p95 decode 29.41s",
+            values: {
+              queue: {
+                value: 14.02,
+                label: "14.02s",
+              },
+              ttft: {
+                value: 18.12,
+                label: "18.12s",
+              },
+            },
+          },
+          {
+            label: "1.20 req/s",
+            context: "queue-dominated; p95 decode 29.43s",
+            values: {
+              queue: {
+                value: 36.93,
+                label: "36.93s",
+              },
+              ttft: {
+                value: 37.61,
+                label: "37.61s",
+              },
+            },
+          },
+          {
+            label: "1.25 admission",
+            context: "59 unserved; p95 decode 29.39s",
+            values: {
+              queue: {
+                value: 0.285,
+                label: "0.285s",
+                tone: "success",
+              },
+              ttft: {
+                value: 0.718,
+                label: "0.718s",
+                tone: "success",
               },
             },
           },
@@ -422,7 +514,7 @@ export const projectContent = {
         title: "Long-context fix attempt",
         takeaway:
           "Scheduler-cap variants did not move the 1.20 req/s knee; bounded admission made overload explicit and lowered p95.",
-        sourceLabel: "Local static readout from May 15/16 KV-cache reports",
+        sourceLabel: "Local static readout from May 15-18 KV-cache reports",
         columns: [
           {
             key: "p95",
@@ -496,11 +588,11 @@ export const projectContent = {
           },
           {
             label: "admission-032 @ 1.25",
-            context: "bounded: 52 unserved / 32 active",
+            context: "bounded: 59 unserved / 32 active",
             values: {
               p95: {
-                value: 27.83,
-                label: "27.83s",
+                value: 27.98,
+                label: "27.98s",
                 tone: "success",
               },
               waiting: {
@@ -594,7 +686,7 @@ export const projectContent = {
     sourceFacts: [
       {
         label: "Updated",
-        value: "May 16, 2026 UTC",
+        value: "May 18, 2026 UTC",
       },
       {
         label: "Workflow",

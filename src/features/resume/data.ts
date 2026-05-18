@@ -54,7 +54,7 @@ export const publicResumeData: ResumeData = {
           "Built an AWS EKS/vLLM decision lab that turns serving measurements into supported, rejected, pending, or blocked architecture calls across autoscaling, admission control, long-context capacity, scheduling, and quantization.",
           "Proved zero-idle GPU serving from 0 nodes to a public /v1 completion, then cleaned back to $0/hr serving-GPU idle cost.",
           "Measured burst and spike-to-zero admission behavior: bounded queues kept 100% delivery at about 2s p95 while direct clients dropped 237-787 iterations.",
-          "Mapped the 8192/300 long-context boundary: 1.10 req/s had no queueing, 1.15 began waiting pressure, and 1.20 still delivered 100% but reached 54.35s p95 latency.",
+          "Mapped the 8192/300 long-context boundary with server timing: 1.15 req/s repeated 14.02s p95 queue delay, 1.20 delivered 100% but reached 62.66-63.40s p95 latency, and admission-capped 1.25 cut p95 to 27.98s with 59 explicit unserved iterations.",
           "Rejected FP8 KV cache on g4dn/vLLM after variants cut delivery to 47.58-69.12% and generated throughput to 114-166 tokens/sec versus a 249.58 tokens/sec baseline.",
           "Designed a Blackwell FP4 path for BF16, plain NVFP4, and SmoothQuant across accuracy, memory, latency, throughput, serving cost, and build cost; the first p6-b200 attempt was blocked by EC2 capacity.",
         ],
