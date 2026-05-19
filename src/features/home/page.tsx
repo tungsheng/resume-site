@@ -4,8 +4,8 @@ import { EXPERIMENTS_PATH, PROJECTS_PATH, RESUME_PATH, siteProfile } from "../si
 import { ActionLinkRow, PageHero, PublicSiteLayout } from "../site/layout";
 import { useDocumentTitle } from "../site/use-document-title";
 
-const PAGE_TITLE = "Tony Lee | ML Inference Systems Performance Optimization";
-const HOME_ROLE = "ML Inference Systems Performance Optimization";
+const PAGE_TITLE = "Tony Lee | ML Inference Performance Engineering";
+const HOME_ROLE = "ML Inference Performance Engineering";
 const HOME_LEDE =
   "I optimize GPU serving paths from Kubernetes scheduling to CUDA kernels with reproducible latency, throughput, and cost measurements.";
 

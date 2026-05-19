@@ -29,7 +29,7 @@ describe("API Integration", () => {
 
     const html = await res.text();
     expect(html).toContain("<div id=\"root\"></div>");
-    expect(html).toContain("Tony Lee | ML Inference Systems Performance Optimization");
+    expect(html).toContain("Tony Lee | ML Inference Performance Engineering");
   });
 
   itIfIntegration("GET /projects serves the projects shell", async () => {

@@ -51,7 +51,7 @@ describe("ResumePageContent", () => {
     expect(html).toContain("aria-current=\"page\">Resume<");
     expect(html).toContain("aria-label=\"Tony Lee home\"");
     expect(html).toContain("TL");
-    expect(html).toContain("ML inference infrastructure");
+    expect(html).toContain("ML Inference Performance Engineering");
     expect(html).toContain("Professional Summary");
     expect(html).toContain("View projects");
     expect(html).toContain("View experiments");

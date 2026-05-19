@@ -223,7 +223,7 @@ export function PublicSiteFooter() {
             sx={{ display: { xs: "none", sm: "block" } }}
           />
           <Typography variant="caption" color="text.secondary">
-            ML inference infrastructure
+            ML Inference Performance Engineering
           </Typography>
         </Stack>
       </Container>
