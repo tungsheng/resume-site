@@ -4,9 +4,9 @@ export const publicResumeData: ResumeData = {
   header: {
     name: "Tony Lee",
     badges: [
-      "Staff Software Engineer",
       "Platform Infrastructure",
       "ML Inference Systems",
+      "GPU Kernel Optimization",
     ],
     contacts: {
       email: "tungsheng@gmail.com",
@@ -24,6 +24,9 @@ export const publicResumeData: ResumeData = {
       "Admission Control",
       "KV Cache / Context Length",
       "Quantization Evaluation",
+      "CUDA / Triton Benchmarking",
+      "Kernel Fusion",
+      "GPU Profiling",
       "GPU Capacity Planning",
       "GPU Scheduling (NVIDIA Device Plugin)",
       "Inference Load Testing (k6)",
@@ -46,24 +49,27 @@ export const publicResumeData: ResumeData = {
     Backend: ["Node.js", "GraphQL", "REST"],
   },
   projects: {
-    title: "Selected Project",
+    title: "Selected Projects",
     items: [
       {
         title: "GPU Inference Decision Lab (AWS EKS + Karpenter + vLLM)",
         highlights: [
           "Built an AWS EKS/vLLM decision lab that turns serving measurements into supported, rejected, pending, or blocked architecture calls across autoscaling, admission control, long-context capacity, scheduling, and quantization.",
-          "Proved zero-idle GPU serving from 0 nodes to a public /v1 completion, then cleaned back to $0/hr serving-GPU idle cost.",
-          "Measured burst and spike-to-zero admission behavior: bounded queues kept 100% delivery at about 2s p95 while direct clients dropped 237-787 iterations.",
-          "Mapped the 8192/300 long-context boundary with server timing: 1.15 req/s repeated 14.02s p95 queue delay, 1.20 delivered 100% but reached 62.66-63.40s p95 latency, and admission-capped 1.25 cut p95 to 27.98s with 59 explicit unserved iterations.",
-          "Rejected FP8 KV cache on g4dn/vLLM after variants cut delivery to 47.58-69.12% and generated throughput to 114-166 tokens/sec versus a 249.58 tokens/sec baseline.",
-          "Designed a Blackwell FP4 path for BF16, plain NVFP4, and SmoothQuant across accuracy, memory, latency, throughput, serving cost, and build cost; the first p6-b200 attempt was blocked by EC2 capacity.",
+          "Measured burst and 8192/300 long-context behavior: bounded queues preserved 100% delivery near 2s p95 for bursts, 1.20 req/s long-context traffic repeated 62.66-63.40s p95 latency, and FP8 KV was rejected after delivery fell to 47.58-69.12%.",
+        ],
+      },
+      {
+        title: "CUDA Kernel Lab (PyTorch + Triton + A10G benchmarks)",
+        highlights: [
+          "Built a CUDA/Triton optimization lab for LLM-shaped primitives and measured 38 A10G benchmark rows across memory primitives, reductions, softmax, normalization, SwiGLU, and vector-add variants, with all correctness checks passing.",
+          "Produced the strongest current kernel wins through fusion: Triton RMSNorm fp16 reached 5.539x over torch baseline and SwiGLU fp32 reached 3.112x, while memory primitives and row-softmax remain profiler follow-ups.",
         ],
       },
     ],
   },
   experience: [
     {
-      title: "Staff Software Engineer",
+      title: "Platform Infrastructure Engineer",
       company: "DTEX Systems",
       startDate: "Sep 2024",
       endDate: "Present",

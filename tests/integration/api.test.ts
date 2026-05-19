@@ -29,23 +29,39 @@ describe("API Integration", () => {
 
     const html = await res.text();
     expect(html).toContain("<div id=\"root\"></div>");
-    expect(html).toContain("Tony Lee | Platform Infrastructure Engineer");
+    expect(html).toContain("Tony Lee | ML Inference Systems Performance Optimization");
   });
 
-  itIfIntegration("GET /project/cloud-inference-platform serves the project shell", async () => {
-    const res = await fetch(`${BASE_URL}/project/cloud-inference-platform`);
+  itIfIntegration("GET /projects serves the projects shell", async () => {
+    const res = await fetch(`${BASE_URL}/projects`);
     expect(res.status).toBe(200);
 
     const html = await res.text();
-    expect(html).toContain("GPU Inference Decision Lab | Tony Lee");
+    expect(html).toContain("Projects | Tony Lee");
   });
 
-  itIfIntegration("GET /project/cloud-inference-platform/validation serves the project shell", async () => {
-    const res = await fetch(`${BASE_URL}/project/cloud-inference-platform/validation`);
+  itIfIntegration("GET /projects/gpu-inference-lab serves the projects shell", async () => {
+    const res = await fetch(`${BASE_URL}/projects/gpu-inference-lab`);
     expect(res.status).toBe(200);
 
     const html = await res.text();
-    expect(html).toContain("GPU Inference Decision Lab | Tony Lee");
+    expect(html).toContain("Projects | Tony Lee");
+  });
+
+  itIfIntegration("GET /projects/gpu-inference-lab/validation serves the projects shell", async () => {
+    const res = await fetch(`${BASE_URL}/projects/gpu-inference-lab/validation`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Projects | Tony Lee");
+  });
+
+  itIfIntegration("GET /projects/cuda-kernel-lab serves the projects shell", async () => {
+    const res = await fetch(`${BASE_URL}/projects/cuda-kernel-lab`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Projects | Tony Lee");
   });
 
   itIfIntegration("GET /experiments serves the experiments shell", async () => {

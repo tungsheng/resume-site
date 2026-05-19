@@ -36,6 +36,10 @@ server = Bun.serve({
   routes: {
     // Page routes - using Bun's HTML imports for React bundling
     "/": homePage,
+    "/projects": projectPage,
+    "/projects/gpu-inference-lab": projectPage,
+    "/projects/gpu-inference-lab/validation": projectPage,
+    "/projects/cuda-kernel-lab": projectPage,
     "/project/cloud-inference-platform": projectPage,
     "/project/cloud-inference-platform/validation": projectPage,
     "/experiments": experimentsPage,
@@ -84,6 +88,9 @@ console.log("[resume-site] Resume server started", {
   baseUrl: `http://localhost:${PORT}`,
   home: `http://localhost:${PORT}/`,
   project: `http://localhost:${PORT}/project/cloud-inference-platform`,
+  projects: `http://localhost:${PORT}/projects`,
+  gpuInferenceLab: `http://localhost:${PORT}/projects/gpu-inference-lab`,
+  cudaKernelLab: `http://localhost:${PORT}/projects/cuda-kernel-lab`,
   experiments: `http://localhost:${PORT}/experiments`,
   resume: `http://localhost:${PORT}/resume`,
 });

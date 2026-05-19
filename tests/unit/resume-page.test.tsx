@@ -16,7 +16,7 @@ const sampleResume: ResumeData = {
   },
   experience: [
     {
-      title: "Staff Software Engineer",
+      title: "Platform Infrastructure Engineer",
       company: "Example Co",
       startDate: "2022",
       endDate: "Present",
@@ -53,7 +53,7 @@ describe("ResumePageContent", () => {
     expect(html).toContain("TL");
     expect(html).toContain("ML inference infrastructure");
     expect(html).toContain("Professional Summary");
-    expect(html).toContain("View project");
+    expect(html).toContain("View projects");
     expect(html).toContain("View experiments");
     expect(html).toContain(">Email<");
     expect(html).toContain(">LinkedIn<");

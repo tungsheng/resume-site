@@ -8,10 +8,12 @@ import {
   Chip,
   Grid,
   Stack,
+  Tab,
+  Tabs,
   Typography,
 } from "@mui/material";
 import { alpha, type SxProps, type Theme } from "@mui/material/styles";
-import { EXPERIMENTS_PATH, PROJECT_PATH } from "../site/content";
+import { EXPERIMENTS_PATH, PROJECTS_PATH } from "../site/content";
 import {
   experimentCatalogContent,
   experimentDetailPath,
@@ -22,6 +24,7 @@ import {
   type ExperimentReadinessTone,
   type ExperimentResultEvidenceTable,
 } from "../site/experiment-catalog-content";
+import { getProjectById, projectPortfolioContent, type ProjectId } from "../site/projects-content";
 import {
   ActionLinkRow,
   PageHero,
@@ -221,6 +224,25 @@ const browseRowColumns = {
 const browseSurfaceSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   overflow: "hidden",
 });
+
+const projectTabsSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => ({
+  px: { xs: 0.75, sm: 1 },
+  py: 0.5,
+  "& .MuiTabs-indicator": {
+    backgroundColor: theme.palette.secondary.main,
+  },
+  "& .MuiTab-root": {
+    minHeight: 42,
+    maxWidth: "none",
+    color: theme.palette.text.secondary,
+    fontWeight: 600,
+    letterSpacing: 0,
+    textTransform: "none",
+  },
+  "& .Mui-selected": {
+    color: theme.palette.text.primary,
+  },
+}));
 
 const browseHeaderSx: SxProps<Theme> = (theme) => ({
   display: { xs: "none", md: "grid" },
@@ -602,17 +624,18 @@ function CatalogFactStrip() {
   );
   const countPrimaryTone = (tone: ExperimentReadinessTone) =>
     primaryReadiness.filter((item) => item.tone === tone).length;
-  const rejectedCallCount = experimentCatalogContent.experiments.filter(
-    (experiment) => experiment.readiness.secondary?.tone === "rejected",
-  ).length;
+  const projectCount = new Set(
+    experimentCatalogContent.experiments.map((experiment) => experiment.projectId),
+  ).size;
   const facts = [
     `${experimentCatalogContent.experiments.length} experiments`,
+    `${projectCount} projects`,
     "Run-ready",
     `${countPrimaryTone("supported")} supported`,
-    `${countPrimaryTone("selected")} selected reports`,
+    `${countPrimaryTone("selected")} selected`,
+    `${countPrimaryTone("rejected")} rejected`,
     `${countPrimaryTone("pending")} pending`,
     `${countPrimaryTone("blocked")} blocked`,
-    `${rejectedCallCount} rejected call`,
   ];
 
   return (
@@ -771,18 +794,61 @@ function RelatedProjectEvidenceBand() {
   );
 }
 
-function ExperimentCatalogListSection() {
+function ProjectExperimentTabs({
+  selectedProjectId,
+  onSelectProject,
+}: {
+  selectedProjectId: ProjectId;
+  onSelectProject: (projectId: ProjectId) => void;
+}) {
+  return (
+    <Box sx={projectTabsSx}>
+      <Tabs
+        value={selectedProjectId}
+        onChange={(_, value: ProjectId) => onSelectProject(value)}
+        variant="scrollable"
+        scrollButtons="auto"
+        aria-label="Experiment project tabs"
+      >
+        {projectPortfolioContent.projects.map((project) => (
+          <Tab
+            key={project.id}
+            value={project.id}
+            label={`${project.title} (${project.experimentCount})`}
+          />
+        ))}
+      </Tabs>
+    </Box>
+  );
+}
+
+function ExperimentCatalogListSection({
+  selectedProjectId,
+  onSelectProject,
+}: {
+  selectedProjectId: ProjectId;
+  onSelectProject: (projectId: ProjectId) => void;
+}) {
+  const selectedProject = getProjectById(selectedProjectId);
+  const selectedExperiments = experimentCatalogContent.experiments.filter(
+    (experiment) => experiment.projectId === selectedProjectId,
+  );
+
   return (
     <PageSection>
       <Box id="experiment-catalog-list" sx={{ scrollMarginTop: { xs: 88, md: 112 } }}>
         <SectionHeader
           eyebrow="Catalog"
-          title="Browse experiments"
-          copy="Scan by purpose and metric focus, then open a detail page for the question, run shape, and commands."
+          title={`${selectedProject.title} experiments`}
+          copy="Switch projects with the tabs, then open a detail page for the question, run shape, and commands."
         />
       </Box>
 
       <Stack spacing={2.25}>
+        <ProjectExperimentTabs
+          selectedProjectId={selectedProjectId}
+          onSelectProject={onSelectProject}
+        />
         <Box sx={browseSurfaceSx}>
           <Box sx={browseHeaderSx} aria-hidden="true">
             <span>Experiment</span>
@@ -791,7 +857,7 @@ function ExperimentCatalogListSection() {
             <span>Status</span>
             <span>Details</span>
           </Box>
-          {experimentCatalogContent.experiments.map((experiment) => (
+          {selectedExperiments.map((experiment) => (
             <ExperimentBrowseRow key={experiment.slug} experiment={experiment} />
           ))}
         </Box>
@@ -804,6 +870,8 @@ function ExperimentCatalogListSection() {
 
 function ExperimentCatalogRoute() {
   useDocumentTitle(PAGE_TITLE);
+  const [selectedProjectId, setSelectedProjectId] =
+    React.useState<ProjectId>("gpu-inference-lab");
 
   return (
     <PublicSiteLayout activeNav="experiments">
@@ -826,8 +894,8 @@ function ExperimentCatalogRoute() {
               <Button href="#experiment-catalog-list" variant="contained">
                 Browse experiments
               </Button>
-              <Button href={PROJECT_PATH} variant="outlined">
-                View project
+              <Button href={PROJECTS_PATH} variant="outlined">
+                View projects
               </Button>
             </ActionLinkRow>
           </Box>
@@ -839,7 +907,10 @@ function ExperimentCatalogRoute() {
       </PageHero>
 
       <ExperimentCatalogConceptSection />
-      <ExperimentCatalogListSection />
+      <ExperimentCatalogListSection
+        selectedProjectId={selectedProjectId}
+        onSelectProject={setSelectedProjectId}
+      />
     </PublicSiteLayout>
   );
 }
@@ -892,21 +963,29 @@ function ExperimentPendingNextRuns({ experiment }: { experiment: ExperimentCatal
 
 function ExperimentPendingResult({ experiment }: { experiment: ExperimentCatalogItem }) {
   const isBlocked = experiment.readiness.primary.tone === "blocked";
+  const blockedTitle =
+    experiment.projectId === "gpu-inference-lab"
+      ? "Blackwell capacity blocked"
+      : `${experiment.readiness.primary.detail} blocked`;
+  const blockedCopy =
+    experiment.projectId === "gpu-inference-lab"
+      ? "Blackwell capacity blocked the live run. Store generated Markdown, JSON, and client logs in docs/reports/ until a comparable result is selected."
+      : `${experiment.readiness.primary.detail} blocked this proof. Store compact profiler notes with the project until comparable counters are selected.`;
 
   return (
     <Box sx={pendingResultSx}>
       <Typography variant="h6">
-        {isBlocked ? "Blackwell capacity blocked" : "Live result pending"}
+        {isBlocked ? blockedTitle : "Live result pending"}
       </Typography>
       <Typography variant="body2" color="text.secondary">
         {isBlocked
-          ? `Blackwell capacity blocked the live run. Store generated Markdown, JSON, and client logs in docs/reports/ until a comparable result is selected.`
+          ? blockedCopy
           : `${experiment.resultsPath} is still a template. Store generated Markdown, JSON, and client logs in docs/reports/ until a representative run is selected.`}
       </Typography>
       <ExperimentPendingNextRuns experiment={experiment} />
       <ActionLinkRow>
         <Button
-          href={experimentSourceLink(experiment.resultsPath)}
+          href={experimentSourceLink(experiment.projectId, experiment.resultsPath)}
           target="_blank"
           rel="noreferrer"
           size="small"
@@ -915,7 +994,7 @@ function ExperimentPendingResult({ experiment }: { experiment: ExperimentCatalog
           Results template
         </Button>
         <Button
-          href={experimentSourceLink("docs/reports/README.md")}
+          href={experimentSourceLink(experiment.projectId, experimentReportRulesPath(experiment))}
           target="_blank"
           rel="noreferrer"
           size="small"
@@ -1065,7 +1144,7 @@ function ExperimentSourceReports({ experiment }: { experiment: ExperimentCatalog
         {reports.map((report) => (
           <Button
             key={report.path}
-            href={experimentSourceLink(report.path)}
+            href={experimentSourceLink(experiment.projectId, report.path)}
             target="_blank"
             rel="noreferrer"
             size="small"
@@ -1075,7 +1154,7 @@ function ExperimentSourceReports({ experiment }: { experiment: ExperimentCatalog
           </Button>
         ))}
         <Button
-          href={experimentSourceLink(experiment.resultsPath)}
+          href={experimentSourceLink(experiment.projectId, experiment.resultsPath)}
           target="_blank"
           rel="noreferrer"
           size="small"
@@ -1084,7 +1163,7 @@ function ExperimentSourceReports({ experiment }: { experiment: ExperimentCatalog
           {resultsLinkLabel}
         </Button>
         <Button
-          href={experimentSourceLink("docs/reports/README.md")}
+          href={experimentSourceLink(experiment.projectId, experimentReportRulesPath(experiment))}
           target="_blank"
           rel="noreferrer"
           size="small"
@@ -1200,8 +1279,56 @@ function formatTokenRange(values: number[]): string {
   return `${min.toLocaleString("en-US")}-${max.toLocaleString("en-US")}`;
 }
 
+function experimentReportRulesPath(experiment: ExperimentCatalogItem): string {
+  return experiment.projectId === "cuda-kernel-lab"
+    ? "docs/optimization-strategies.md"
+    : "docs/reports/README.md";
+}
+
+function formatRunShapeCopy(experiment: ExperimentCatalogItem): string {
+  if (experiment.runShapeSummary) {
+    return experiment.runShapeSummary;
+  }
+
+  const promptTokenValues = experiment.cases
+    .map((item) => item.promptTokens)
+    .filter((value): value is number => typeof value === "number");
+  const outputTokenValues = experiment.cases
+    .map((item) => item.outputTokens)
+    .filter((value): value is number => typeof value === "number");
+
+  if (promptTokenValues.length === experiment.cases.length && outputTokenValues.length === experiment.cases.length) {
+    return `${formatCount(experiment.cases.length, "case")} across ${formatTokenRange(promptTokenValues)} prompt tokens and ${formatTokenRange(outputTokenValues)} output tokens, paired with ${formatCount(experiment.servingProfiles.length, "run profile")}.`;
+  }
+
+  return `${formatCount(experiment.cases.length, "case")} paired with ${formatCount(experiment.servingProfiles.length, "run profile")}.`;
+}
+
+function getCaseMeasureLabels(item: ExperimentCatalogItem["cases"][number]): string[] {
+  const labels: string[] = [];
+
+  if (item.primaryMeasure) {
+    labels.push(item.primaryMeasure);
+  } else if (typeof item.promptTokens === "number") {
+    labels.push(`${item.promptTokens.toLocaleString("en-US")} prompt tokens`);
+  }
+
+  if (item.secondaryMeasure) {
+    labels.push(item.secondaryMeasure);
+  } else if (typeof item.outputTokens === "number") {
+    labels.push(`${item.outputTokens.toLocaleString("en-US")} output tokens`);
+  }
+
+  return labels;
+}
+
 function ExperimentDetailSummaryStrip({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const project = getProjectById(experiment.projectId);
   const facts = [
+    {
+      label: "Project",
+      value: project.title,
+    },
     {
       label: "Category",
       value: experiment.category,
@@ -1286,12 +1413,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
       : experiment.resultEvidence
         ? "Results summary"
         : "Results template";
-  const promptTokenRange = formatTokenRange(
-    experiment.cases.map((item) => item.promptTokens),
-  );
-  const outputTokenRange = formatTokenRange(
-    experiment.cases.map((item) => item.outputTokens),
-  );
+  const runShapeCopy = formatRunShapeCopy(experiment);
 
   return (
     <PublicSiteLayout activeNav="experiments">
@@ -1310,7 +1432,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
                 Experiment catalog
               </Button>
               <Button
-                href={experimentSourceLink(experiment.sourcePath)}
+                href={experimentSourceLink(experiment.projectId, experiment.sourcePath)}
                 target="_blank"
                 rel="noreferrer"
                 endIcon={<OpenInNewRoundedIcon />}
@@ -1339,7 +1461,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
         <SectionHeader
           eyebrow="Run shape"
           title="Run shape"
-          copy={`${formatCount(experiment.cases.length, "case")} across ${promptTokenRange} prompt tokens and ${outputTokenRange} output tokens, paired with ${formatCount(experiment.servingProfiles.length, "serving profile")}.`}
+          copy={runShapeCopy}
         />
 
         <Box sx={runMatrixSx}>
@@ -1356,15 +1478,16 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
                   {item.description}
                 </Typography>
                 <Box sx={experimentMetaRowSx}>
-                  <Chip label={`${item.promptTokens} prompt tokens`} size="small" variant="outlined" />
-                  <Chip label={`${item.outputTokens} output tokens`} size="small" variant="outlined" />
+                  {getCaseMeasureLabels(item).map((label) => (
+                    <Chip key={`${item.id}-${label}`} label={label} size="small" variant="outlined" />
+                  ))}
                 </Box>
               </Box>
             ))}
           </RunShapeColumn>
 
           <RunShapeColumn
-            title="Serving profiles"
+            title="Run profiles"
             count={formatCount(experiment.servingProfiles.length, "profile")}
           >
             {experiment.servingProfiles.map((profile) => (
@@ -1428,7 +1551,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
 
         <ActionLinkRow>
           <Button
-            href={experimentSourceLink(experiment.sourcePath)}
+            href={experimentSourceLink(experiment.projectId, experiment.sourcePath)}
             target="_blank"
             rel="noreferrer"
             size="small"
@@ -1437,7 +1560,7 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
             Source
           </Button>
           <Button
-            href={experimentSourceLink(experiment.resultsPath)}
+            href={experimentSourceLink(experiment.projectId, experiment.resultsPath)}
             target="_blank"
             rel="noreferrer"
             size="small"
@@ -1467,8 +1590,8 @@ function UnknownExperimentRoute({ slug }: { slug: string }) {
           <Button href={EXPERIMENTS_PATH} variant="contained" startIcon={<ArrowBackRoundedIcon />}>
             Experiment catalog
           </Button>
-          <Button href={PROJECT_PATH} variant="outlined">
-            View project
+          <Button href={PROJECTS_PATH} variant="outlined">
+            View projects
           </Button>
         </ActionLinkRow>
       </PageHero>

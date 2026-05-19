@@ -71,9 +71,14 @@ Deploys also smoke-test `POST /api/public-pdf` after the container is ready so C
 The current container serves these public routes:
 
 - `/`
-- `/project/cloud-inference-platform`
+- `/projects`
+- `/projects/gpu-inference-lab`
+- `/projects/gpu-inference-lab/validation`
+- `/projects/cuda-kernel-lab`
 - `/experiments`
 - `/resume`
+
+The older `/project/cloud-inference-platform` paths remain served as compatibility aliases.
 
 It also serves the PDF export endpoint at `/api/public-pdf`.
 

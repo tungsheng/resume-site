@@ -11,24 +11,29 @@ describe("ExperimentsPage", () => {
     const html = renderToStaticMarkup(<ExperimentsPage />);
 
     expect(html).toContain("Experiment Catalog");
-    expect(html).toContain("Serving experiments that turn workload shape into a measured architecture call.");
+    expect(html).toContain("Project-linked experiments that turn GPU serving and kernel questions into measured calls.");
     expect(html).toContain("Catalog ready");
-    expect(html).toContain("Rows show what each experiment currently proves");
-    expect(html).toContain("7 experiments");
+    expect(html).toContain("Rows show which project each experiment supports");
+    expect(html).toContain("14 experiments");
+    expect(html).toContain("2 projects");
     expect(html).toContain("Run-ready");
-    expect(html).toContain("3 supported");
-    expect(html).toContain("3 selected reports");
-    expect(html).toContain("0 pending");
-    expect(html).toContain("1 blocked");
-    expect(html).toContain("1 rejected call");
+    expect(html).toContain("5 supported");
+    expect(html).toContain("5 selected");
+    expect(html).toContain("1 rejected");
+    expect(html).toContain("1 pending");
+    expect(html).toContain("2 blocked");
     expect(html).toContain("href=\"#experiment-catalog-list\"");
     expect(html).not.toContain("definition catalog");
     expect(html).not.toContain(">View resume<");
     expect(html).toContain("How experiments work");
     expect(html).toContain("Browse experiments");
+    expect(html).toContain("GPU Inference Decision Lab (7)");
+    expect(html).toContain("CUDA Kernel Lab (7)");
+    expect(html).toContain("role=\"tablist\"");
+    expect(html).not.toContain("<span>Project</span>");
     expect(html).toContain("Question");
     expect(html).toContain("Cases");
-    expect(html).toContain("Serving profile");
+    expect(html).toContain("Run profile");
     expect(html).toContain("Metrics");
     expect(html).toContain("Result");
     expect(html).toContain("Memory pressure");
@@ -47,6 +52,13 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Autoscaling and Queueing Behavior");
     expect(html).toContain("Cost per Useful Work");
     expect(html).toContain("FP4 Quantization Optimization");
+    expect(html).not.toContain("Memory Primitive Bandwidth");
+    expect(html).not.toContain("Reduction Strategy Comparison");
+    expect(html).not.toContain("Normalization Fusion");
+    expect(html).not.toContain("SwiGLU Elementwise Fusion");
+    expect(html).not.toContain("Row Softmax Fusion");
+    expect(html).not.toContain("Matmul Tiling Progression");
+    expect(html).not.toContain("Profiler Validation");
     expect(html).toContain("href=\"/experiments/kv-cache\"");
     expect(html).toContain("href=\"/experiments/prefill-decode\"");
     expect(html).toContain("href=\"/experiments/batching\"");
@@ -54,10 +66,12 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("href=\"/experiments/autoscaling\"");
     expect(html).toContain("href=\"/experiments/cost\"");
     expect(html).toContain("href=\"/experiments/fp4\"");
-    expect(html).toContain("Related project evidence");
+    expect(html).not.toContain("href=\"/experiments/kernel-memory-primitives\"");
+    expect(html).not.toContain("href=\"/experiments/kernel-normalization-fusion\"");
+    expect(html).toContain("GPU inference evidence");
     expect(html).toContain("Architecture decisions live in the project record");
-    expect(html).toContain("not standalone catalog entries");
-    expect(html).toContain("href=\"/project/cloud-inference-platform/validation\"");
+    expect(html).toContain("stay attached to the GPU Inference Lab decision record");
+    expect(html).toContain("href=\"/projects/gpu-inference-lab/validation\"");
     expect(html).not.toContain("href=\"/experiments/platform-validation\"");
     expect(html).toContain("Full delivery can hide queueing.");
     expect(html).toContain("Concurrency");
@@ -71,12 +85,14 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Admission behavior");
     expect(html).toContain("Blackwell capacity");
     expect(html).toContain("BF16 vs NVFP4 vs SmoothQuant.");
+    expect(html).not.toContain("PyTorch still wins simple memory traffic.");
+    expect(html).not.toContain("RMSNorm fusion is the strongest current win.");
+    expect(html).not.toContain("Current Triton softmax trails torch.");
     expect(html).not.toContain("Evaluate evidence from the platform");
     expect(html).not.toContain("Choose an evaluate decision");
     expect(html).not.toContain("experiment-decision-workspace");
-    expect(html).not.toContain("role=\"tablist\"");
     expect(html).not.toContain("Artifact contract");
-    expect(html).toContain("href=\"/project/cloud-inference-platform\"");
+    expect(html).toContain("href=\"/projects\"");
   });
 
   test("renders blocked experiment detail pages with the shared template", () => {
@@ -175,6 +191,27 @@ describe("ExperimentsPage", () => {
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/experiments/kv-cache/\"",
     );
+  });
+
+  test("renders CUDA kernel experiment detail content", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/kernel-normalization-fusion" />,
+    );
+
+    expect(html).toContain("Normalization Fusion");
+    expect(html).toContain("CUDA Kernel Lab");
+    expect(html).toContain("How much does a fused Triton RMSNorm or LayerNorm kernel move latency");
+    expect(html).toContain("2 normalization cases at 4096x4096");
+    expect(html).toContain("rmsnorm-4096x4096-float16");
+    expect(html).toContain("4096x4096");
+    expect(html).toContain("triton-fused-rmsnorm");
+    expect(html).toContain("RMSNorm fp16");
+    expect(html).toContain("5.539x");
+    expect(html).toContain("RMSNorm fp32");
+    expect(html).toContain("LayerNorm fp32");
+    expect(html).toContain("benchmark-norms");
+    expect(html).toContain("href=\"https://github.com/tungsheng/inference-kernel-lab/blob/main/src/cuda_kernel_lab/kernels/triton/norms.py\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/inference-kernel-lab/blob/main/experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md\"");
   });
 
   test("renders measured batching detail content", () => {

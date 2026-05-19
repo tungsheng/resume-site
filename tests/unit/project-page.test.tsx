@@ -4,8 +4,24 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { ProjectPage } from "../../src/features/project/page";
 
 describe("ProjectPage", () => {
-  test("renders the flagship project walkthrough", () => {
+  test("renders the project index", () => {
     const html = renderToStaticMarkup(<ProjectPage />);
+
+    expect(html).toContain("Projects");
+    expect(html).toContain("Evidence-backed GPU systems work");
+    expect(html).toContain("GPU Inference Decision Lab");
+    expect(html).toContain("CUDA Kernel Lab");
+    expect(html).toContain("Serving infrastructure");
+    expect(html).toContain("Kernel optimization");
+    expect(html).toContain("href=\"/projects/gpu-inference-lab\"");
+    expect(html).toContain("href=\"/projects/cuda-kernel-lab\"");
+    expect(html).toContain("href=\"/experiments\"");
+  });
+
+  test("renders the flagship project walkthrough", () => {
+    const html = renderToStaticMarkup(
+      <ProjectPage initialPath="/projects/gpu-inference-lab" />,
+    );
 
     expect(html).toContain("GPU Inference Decision Lab");
     expect(html).toContain(
@@ -135,7 +151,7 @@ describe("ProjectPage", () => {
     );
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
     expect(html).toContain("Architecture decisions");
-    expect(html).toContain("href=\"/project/cloud-inference-platform/validation\"");
+    expect(html).toContain("href=\"/projects/gpu-inference-lab/validation\"");
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/platform/inference/ingress.yaml\""
     );
@@ -157,7 +173,7 @@ describe("ProjectPage", () => {
 
   test("renders the platform decision record on the validation route", () => {
     const html = renderToStaticMarkup(
-      <ProjectPage initialPath="/project/cloud-inference-platform/validation" />,
+      <ProjectPage initialPath="/projects/gpu-inference-lab/validation" />,
     );
 
     expect(html).toContain("Architecture Decisions");
@@ -218,7 +234,29 @@ describe("ProjectPage", () => {
     expect(html).toContain("Evidence type: Curated decisions");
     expect(html).toContain("Project overview");
     expect(html).toContain("Experiment catalog");
-    expect(html).toContain("href=\"/project/cloud-inference-platform\"");
+    expect(html).toContain("href=\"/projects/gpu-inference-lab\"");
     expect(html).toContain("href=\"/experiments\"");
+  });
+
+  test("renders the CUDA Kernel Lab project route", () => {
+    const html = renderToStaticMarkup(
+      <ProjectPage initialPath="/projects/cuda-kernel-lab" />,
+    );
+
+    expect(html).toContain("CUDA Kernel Lab");
+    expect(html).toContain("A CUDA/Triton optimization lab");
+    expect(html).toContain("NVIDIA A10G");
+    expect(html).toContain("38 rows");
+    expect(html).toContain("5.539x");
+    expect(html).toContain("Benchmark path");
+    expect(html).toContain("benchmark-memory");
+    expect(html).toContain("A10G evidence");
+    expect(html).toContain("Fused RMSNorm");
+    expect(html).toContain("Fused SwiGLU");
+    expect(html).toContain("Softmax");
+    expect(html).not.toContain("Optimization ladder");
+    expect(html).toContain("href=\"/projects\"");
+    expect(html).toContain("href=\"/experiments\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/inference-kernel-lab\"");
   });
 });

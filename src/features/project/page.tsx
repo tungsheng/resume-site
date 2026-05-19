@@ -22,13 +22,22 @@ import {
   type EvidenceMatrixRow,
 } from "../site/evidence-visuals";
 import {
+  CUDA_KERNEL_PROJECT_PATH,
   EXPERIMENTS_PATH,
-  PROJECT_PATH,
-  PROJECT_VALIDATION_PATH,
+  GPU_INFERENCE_PROJECT_PATH,
+  GPU_INFERENCE_PROJECT_VALIDATION_PATH,
+  LEGACY_GPU_INFERENCE_PROJECT_PATH,
+  LEGACY_GPU_INFERENCE_PROJECT_VALIDATION_PATH,
+  PROJECTS_PATH,
   RESUME_PATH,
-  siteProfile,
 } from "../site/content";
 import { implementation, projectContent } from "../site/project-content";
+import {
+  cudaKernelProjectContent,
+  getProjectById,
+  projectPortfolioContent,
+  type PortfolioProject,
+} from "../site/projects-content";
 import {
   ActionLinkRow,
   PageHero,
@@ -46,6 +55,9 @@ import {
 import { useDocumentTitle } from "../site/use-document-title";
 
 const PAGE_TITLE = "GPU Inference Decision Lab | Tony Lee";
+const PROJECTS_PAGE_TITLE = "Projects | Tony Lee";
+const CUDA_PAGE_TITLE = "CUDA Kernel Lab | Tony Lee";
+const GPU_INFERENCE_PROJECT = getProjectById("gpu-inference-lab");
 
 type WorkflowNode = (typeof projectContent.workflowFoundation.nodes)[number];
 type WorkflowTrack = (typeof projectContent.workflowPaths)[number];
@@ -67,6 +79,80 @@ const overviewFactSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   gap: 0.55,
   alignContent: "start",
   p: { xs: 1.5, sm: 1.65, md: 1.75 },
+});
+
+const projectIndexGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    lg: "repeat(2, minmax(0, 1fr))",
+  },
+  gap: { xs: 1.25, md: 1.5 },
+};
+
+const projectIndexCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
+  display: "grid",
+  gap: { xs: 1.1, md: 1.25 },
+  alignContent: "start",
+  height: "100%",
+  p: { xs: 1.4, sm: 1.6, md: 1.75 },
+});
+
+const projectMetaRowSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.75,
+  alignItems: "center",
+};
+
+const projectEvidenceListSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.65,
+  m: 0,
+  p: 0,
+  listStyle: "none",
+};
+
+const projectEvidenceItemSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: "0.55rem minmax(0, 1fr)",
+  gap: 0.65,
+  alignItems: "baseline",
+  color: theme.palette.text.secondary,
+  fontSize: "0.92rem",
+  lineHeight: 1.5,
+  "&::before": {
+    content: '""',
+    width: "0.45rem",
+    height: "0.45rem",
+    borderRadius: "50%",
+    backgroundColor: alpha(theme.palette.secondary.main, 0.9),
+    transform: "translateY(-0.08rem)",
+  },
+});
+
+const projectIndexSummarySx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
+  display: "grid",
+  gap: 0.65,
+  p: { xs: 1.25, sm: 1.35 },
+});
+
+const cudaWorkflowGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    lg: "repeat(3, minmax(0, 1fr))",
+  },
+  gap: { xs: 1.1, md: 1.25 },
+};
+
+const cudaWorkflowCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
+  display: "grid",
+  gridTemplateRows: "auto auto 1fr",
+  gap: 1,
+  alignContent: "start",
+  height: "100%",
+  p: { xs: 1.25, sm: 1.4 },
 });
 
 const workflowSurfaceSx: SxProps<Theme> = {
@@ -598,11 +684,39 @@ const validationVisualGridSx: SxProps<Theme> = {
 };
 
 function resolveCurrentPathname(initialPath?: string): string {
-  return initialPath ?? (typeof window === "undefined" ? PROJECT_PATH : window.location.pathname);
+  return initialPath ?? (typeof window === "undefined" ? PROJECTS_PATH : window.location.pathname);
 }
 
-function isProjectValidationPath(pathname: string): boolean {
-  return (pathname.split(/[?#]/, 1)[0] ?? "").replace(/\/+$/, "") === PROJECT_VALIDATION_PATH;
+function normalizeRoutePath(pathname: string): string {
+  const normalizedPath = (pathname.split(/[?#]/, 1)[0] ?? "").replace(/\/+$/, "");
+
+  return normalizedPath || "/";
+}
+
+function isGpuInferenceProjectPath(pathname: string): boolean {
+  const normalizedPath = normalizeRoutePath(pathname);
+
+  return (
+    normalizedPath === GPU_INFERENCE_PROJECT_PATH ||
+    normalizedPath === LEGACY_GPU_INFERENCE_PROJECT_PATH
+  );
+}
+
+function isGpuInferenceValidationPath(pathname: string): boolean {
+  const normalizedPath = normalizeRoutePath(pathname);
+
+  return (
+    normalizedPath === GPU_INFERENCE_PROJECT_VALIDATION_PATH ||
+    normalizedPath === LEGACY_GPU_INFERENCE_PROJECT_VALIDATION_PATH
+  );
+}
+
+function isCudaKernelProjectPath(pathname: string): boolean {
+  return normalizeRoutePath(pathname) === CUDA_KERNEL_PROJECT_PATH;
+}
+
+function isProjectsIndexPath(pathname: string): boolean {
+  return normalizeRoutePath(pathname) === PROJECTS_PATH;
 }
 
 function WorkflowNodePill({ node }: { node: WorkflowNode }) {
@@ -673,6 +787,103 @@ function WorkflowPathRow({ title, summary, nodes }: WorkflowTrack) {
       </Box>
       <WorkflowFlow nodes={nodes} ariaLabel={`${title} workflow`} />
     </Box>
+  );
+}
+
+function ProjectPortfolioCard({ project }: { project: PortfolioProject }) {
+  return (
+    <Box component="section" sx={projectIndexCardSx}>
+      <Box sx={projectMetaRowSx}>
+        <Chip label={project.layer} variant="outlined" sx={mutedChipSx} />
+        <Chip label={project.status} color={project.statusTone === "supported" ? "success" : "info"} variant="outlined" />
+        <Chip label={`${project.experimentCount} experiments`} variant="outlined" />
+      </Box>
+
+      <Box sx={{ display: "grid", gap: 0.7, minWidth: 0 }}>
+        <Typography component="h2" variant="h4">
+          {project.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {project.summary}
+        </Typography>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {project.result}
+        </Typography>
+      </Box>
+
+      <Box component="ul" sx={projectEvidenceListSx}>
+        {project.evidence.map((item) => (
+          <Box key={item} component="li" sx={projectEvidenceItemSx}>
+            {item}
+          </Box>
+        ))}
+      </Box>
+
+      <ActionLinkRow>
+        <Button href={project.path} variant="contained">
+          View project
+        </Button>
+        <Button href={project.primaryAction.href} variant="outlined">
+          {project.primaryAction.label}
+        </Button>
+        <Button
+          href={project.repositoryUrl}
+          target="_blank"
+          rel="noreferrer"
+          size="small"
+          endIcon={<OpenInNewRoundedIcon />}
+        >
+          GitHub
+        </Button>
+      </ActionLinkRow>
+    </Box>
+  );
+}
+
+function ProjectsIndexRoute() {
+  useDocumentTitle(PROJECTS_PAGE_TITLE);
+
+  return (
+    <PublicSiteLayout activeNav="project">
+      <PageHero contentWidth="60rem">
+        <Typography component="h1" variant="h3">
+          {projectPortfolioContent.title}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "58rem" }}>
+          {projectPortfolioContent.lede}
+        </Typography>
+        <Box sx={projectIndexSummarySx}>
+          <Typography variant="body2" color="text.secondary">
+            {projectPortfolioContent.summary}
+          </Typography>
+        </Box>
+        <ActionLinkRow>
+          <Button href={GPU_INFERENCE_PROJECT_PATH} variant="contained">
+            GPU Inference Lab
+          </Button>
+          <Button href={CUDA_KERNEL_PROJECT_PATH} variant="outlined">
+            CUDA Kernel Lab
+          </Button>
+          <Button href={EXPERIMENTS_PATH} variant="outlined">
+            Experiment catalog
+          </Button>
+        </ActionLinkRow>
+      </PageHero>
+
+      <PageSection>
+        <SectionHeader
+          eyebrow="Selected work"
+          title="Project evidence"
+          copy="Each project owns a different layer of the GPU inference stack, with experiments attached to the project that produced the evidence."
+        />
+
+        <Box sx={projectIndexGridSx}>
+          {projectPortfolioContent.projects.map((project) => (
+            <ProjectPortfolioCard key={project.id} project={project} />
+          ))}
+        </Box>
+      </PageSection>
+    </PublicSiteLayout>
   );
 }
 
@@ -986,7 +1197,7 @@ function ProjectEvidenceSection() {
         />
 
         <ActionLinkRow>
-          <Button href={PROJECT_VALIDATION_PATH} variant="contained">
+          <Button href={GPU_INFERENCE_PROJECT_VALIDATION_PATH} variant="contained">
             Architecture decisions
           </Button>
           <Button href={EXPERIMENTS_PATH} variant="outlined">
@@ -1033,7 +1244,7 @@ function ProjectValidationRoute() {
         </Box>
 
         <ActionLinkRow>
-          <Button href={PROJECT_PATH} variant="contained">
+          <Button href={GPU_INFERENCE_PROJECT_PATH} variant="contained">
             Project overview
           </Button>
           <Button href={EXPERIMENTS_PATH} variant="outlined">
@@ -1099,6 +1310,149 @@ function ProjectValidationRoute() {
   );
 }
 
+function CudaKernelWorkflowSection() {
+  return (
+    <PageSection>
+      <SectionHeader
+        eyebrow="Workflow"
+        title="Benchmark path"
+        copy="The project keeps local checks, CUDA benchmark records, generated reports, and profiler attempts as separate evidence layers."
+      />
+
+      <Box sx={cudaWorkflowGridSx}>
+        {cudaKernelProjectContent.workflows.map((workflow) => (
+          <Box key={workflow.title} component="section" sx={cudaWorkflowCardSx}>
+            <Box sx={{ display: "grid", gap: 0.45, minWidth: 0 }}>
+              <Typography variant="overline" sx={{ color: "secondary.dark" }}>
+                {workflow.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {workflow.body}
+              </Typography>
+            </Box>
+            <CommandCodeBlock
+              command={workflow.command}
+              ariaLabel={`${workflow.title} command`}
+              sx={quickStartCommandSx}
+            />
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {workflow.output}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    </PageSection>
+  );
+}
+
+function CudaKernelResultsSection() {
+  return (
+    <PageSection>
+      <SectionHeader
+        eyebrow="A10G evidence"
+        title="Benchmark readout"
+        copy="The latest rerun shows where custom kernels are already useful and where the next proof needs profiler counters."
+      />
+
+      <Paper variant="outlined" sx={evidenceSurfaceSx}>
+        <DecisionReadoutStrip
+          ariaLabel="CUDA benchmark readout"
+          items={cudaKernelProjectContent.results.map((item) => ({
+            label: item.title,
+            statusLabel: item.statusLabel,
+            value: item.call,
+            detail: item.proof,
+            tone: item.tone,
+          })) as DecisionReadoutItem[]}
+        />
+
+        <ActionLinkRow>
+          <Button href={EXPERIMENTS_PATH} variant="contained">
+            Kernel experiments
+          </Button>
+          <Button
+            href={`${getProjectById("cuda-kernel-lab").repositoryUrl}/blob/main/experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md`}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            A10G report
+          </Button>
+          <Button
+            href={`${getProjectById("cuda-kernel-lab").repositoryUrl}/blob/main/docs/milestones.md`}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            Milestones
+          </Button>
+        </ActionLinkRow>
+      </Paper>
+    </PageSection>
+  );
+}
+
+function CudaKernelProjectRoute() {
+  useDocumentTitle(CUDA_PAGE_TITLE);
+  const project = getProjectById("cuda-kernel-lab");
+
+  return (
+    <PublicSiteLayout activeNav="project">
+      <PageHero>
+        <Typography component="h1" variant="h3">
+          {cudaKernelProjectContent.title}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
+          {cudaKernelProjectContent.lede}
+        </Typography>
+
+        <ActionLinkRow>
+          <Button href={EXPERIMENTS_PATH} variant="contained">
+            View experiments
+          </Button>
+          <Button href={PROJECTS_PATH} variant="outlined">
+            All projects
+          </Button>
+          <Button
+            href={project.repositoryUrl}
+            target="_blank"
+            rel="noreferrer"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            GitHub
+          </Button>
+        </ActionLinkRow>
+      </PageHero>
+
+      <PageSection>
+        <SectionHeader
+          title="At a glance"
+          copy={cudaKernelProjectContent.overviewSummary}
+        />
+
+        <Box sx={overviewFactGridSx}>
+          {cudaKernelProjectContent.overviewFacts.map((item) => (
+            <Box key={item.label} component="section" sx={overviewFactSx}>
+              <Typography variant="overline" sx={{ color: "secondary.dark" }}>
+                {item.label}
+              </Typography>
+              <Typography variant="h6">{item.value}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {item.body}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </PageSection>
+
+      <CudaKernelWorkflowSection />
+      <CudaKernelResultsSection />
+    </PublicSiteLayout>
+  );
+}
+
 function ProjectOverviewRoute() {
   useDocumentTitle(PAGE_TITLE);
 
@@ -1120,7 +1474,7 @@ function ProjectOverviewRoute() {
             View resume
           </Button>
           <Button
-            href={siteProfile.githubUrl}
+            href={GPU_INFERENCE_PROJECT.repositoryUrl}
             target="_blank"
             rel="noreferrer"
             endIcon={<OpenInNewRoundedIcon />}
@@ -1216,9 +1570,21 @@ function ProjectOverviewRoute() {
 export function ProjectPage({ initialPath }: { initialPath?: string } = {}) {
   const pathname = resolveCurrentPathname(initialPath);
 
-  if (isProjectValidationPath(pathname)) {
+  if (isGpuInferenceValidationPath(pathname)) {
     return <ProjectValidationRoute />;
   }
 
-  return <ProjectOverviewRoute />;
+  if (isGpuInferenceProjectPath(pathname)) {
+    return <ProjectOverviewRoute />;
+  }
+
+  if (isCudaKernelProjectPath(pathname)) {
+    return <CudaKernelProjectRoute />;
+  }
+
+  if (isProjectsIndexPath(pathname)) {
+    return <ProjectsIndexRoute />;
+  }
+
+  return <ProjectsIndexRoute />;
 }

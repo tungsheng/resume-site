@@ -19,7 +19,7 @@ import { alpha } from "@mui/material/styles";
 import { buildResumeViewModel } from "./view-model";
 import type { ResumeData } from "../../types";
 import { publicResumeData } from "./data";
-import { EXPERIMENTS_PATH, PROJECT_PATH } from "../site/content";
+import { EXPERIMENTS_PATH, PROJECTS_PATH } from "../site/content";
 import {
   ActionLinkRow,
   PageHero,
@@ -514,8 +514,8 @@ export function ResumePageContent({
             {downloading ? "Preparing PDF..." : "Download PDF"}
           </Button>
 
-          <Button href={PROJECT_PATH} variant="outlined">
-            View project
+          <Button href={PROJECTS_PATH} variant="outlined">
+            View projects
           </Button>
           <Button href={EXPERIMENTS_PATH} variant="outlined">
             View experiments

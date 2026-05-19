@@ -6,29 +6,31 @@ import type { ResumeData } from "../../src/types";
 describe("Resume Service", () => {
   test("publicResumeData contains the checked-in public resume", () => {
     expect(publicResumeData.header.name).toBe("Tony Lee");
+    expect(publicResumeData.header.badges).toContain("GPU Kernel Optimization");
+    expect(publicResumeData.header.badges).not.toContain("GPU Kernel Experiments");
     expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("vLLM");
     expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Inference Load Testing (k6)");
     expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Admission Control");
     expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Quantization Evaluation");
+    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("CUDA / Triton Benchmarking");
+    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Kernel Fusion");
     expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("AWS (VPC, IAM, EC2, ALB)");
     expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("DCGM Exporter");
     expect(publicResumeData.skills["Languages"]).toBeArray();
-    expect(publicResumeData.projects?.title).toBe("Selected Project");
+    expect(publicResumeData.projects?.title).toBe("Selected Projects");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
       "Built an AWS EKS/vLLM decision lab that turns serving measurements into supported, rejected, pending, or blocked architecture calls across autoscaling, admission control, long-context capacity, scheduling, and quantization.",
     );
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Measured burst and spike-to-zero admission behavior: bounded queues kept 100% delivery at about 2s p95 while direct clients dropped 237-787 iterations.",
+      "Measured burst and 8192/300 long-context behavior: bounded queues preserved 100% delivery near 2s p95 for bursts, 1.20 req/s long-context traffic repeated 62.66-63.40s p95 latency, and FP8 KV was rejected after delivery fell to 47.58-69.12%.",
     );
-    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Mapped the 8192/300 long-context boundary with server timing: 1.15 req/s repeated 14.02s p95 queue delay, 1.20 delivered 100% but reached 62.66-63.40s p95 latency, and admission-capped 1.25 cut p95 to 27.98s with 59 explicit unserved iterations.",
+    expect(publicResumeData.projects?.items[1]?.title).toContain("CUDA Kernel Lab");
+    expect(publicResumeData.projects?.items[1]?.highlights).toContain(
+      "Built a CUDA/Triton optimization lab for LLM-shaped primitives and measured 38 A10G benchmark rows across memory primitives, reductions, softmax, normalization, SwiGLU, and vector-add variants, with all correctness checks passing.",
     );
-    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Rejected FP8 KV cache on g4dn/vLLM after variants cut delivery to 47.58-69.12% and generated throughput to 114-166 tokens/sec versus a 249.58 tokens/sec baseline.",
-    );
-    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Designed a Blackwell FP4 path for BF16, plain NVFP4, and SmoothQuant across accuracy, memory, latency, throughput, serving cost, and build cost; the first p6-b200 attempt was blocked by EC2 capacity.",
+    expect(publicResumeData.projects?.items[1]?.highlights).toContain(
+      "Produced the strongest current kernel wins through fusion: Triton RMSNorm fp16 reached 5.539x over torch baseline and SwiGLU fp32 reached 3.112x, while memory primitives and row-softmax remain profiler follow-ups.",
     );
   });
 
