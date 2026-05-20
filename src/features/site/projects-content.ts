@@ -58,7 +58,7 @@ export const projectPortfolioContent = {
       id: "cuda-kernel-lab",
       title: "CUDA Kernel Lab",
       path: CUDA_KERNEL_PROJECT_PATH,
-      repositoryUrl: "https://github.com/tungsheng/inference-kernel-lab",
+      repositoryUrl: "https://github.com/tungsheng/cuda-kernel-lab",
       layer: "Kernel optimization",
       status: "A10G benchmark evidence",
       statusTone: "measured",
@@ -84,7 +84,7 @@ export const cudaKernelProjectContent = {
   title: "CUDA Kernel Lab",
   lede:
     "A CUDA/Triton optimization lab that turns LLM-shaped primitives into benchmarked kernel strategy evidence.",
-  repositoryUrl: "https://github.com/tungsheng/inference-kernel-lab",
+  repositoryUrl: "https://github.com/tungsheng/cuda-kernel-lab",
   overviewSummary:
     "The lab moves from memory traffic and reductions into fusion, tiling, Tensor Cores, and profiler-backed strategy comparisons.",
   overviewFacts: [

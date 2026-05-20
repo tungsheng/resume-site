@@ -257,6 +257,6 @@ describe("ProjectPage", () => {
     expect(html).not.toContain("Optimization ladder");
     expect(html).toContain("href=\"/projects\"");
     expect(html).toContain("href=\"/experiments\"");
-    expect(html).toContain("href=\"https://github.com/tungsheng/inference-kernel-lab\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab\"");
   });
 });

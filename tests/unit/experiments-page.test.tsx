@@ -210,8 +210,8 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("RMSNorm fp32");
     expect(html).toContain("LayerNorm fp32");
     expect(html).toContain("benchmark-norms");
-    expect(html).toContain("href=\"https://github.com/tungsheng/inference-kernel-lab/blob/main/src/cuda_kernel_lab/kernels/triton/norms.py\"");
-    expect(html).toContain("href=\"https://github.com/tungsheng/inference-kernel-lab/blob/main/experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/src/cuda_kernel_lab/kernels/triton/norms.py\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md\"");
   });
 
   test("renders measured batching detail content", () => {

@@ -2,7 +2,7 @@ import { GPU_INFERENCE_PROJECT_VALIDATION_PATH } from "./content";
 import type { ProjectId } from "./projects-content";
 
 const GPU_INFERENCE_REPO_BASE = "https://github.com/tungsheng/gpu-inference-lab/blob/main";
-const CUDA_KERNEL_REPO_BASE = "https://github.com/tungsheng/inference-kernel-lab/blob/main";
+const CUDA_KERNEL_REPO_BASE = "https://github.com/tungsheng/cuda-kernel-lab/blob/main";
 
 type ExperimentMetricGroup = {
   label: string;
