@@ -254,6 +254,8 @@ describe("ProjectPage", () => {
     expect(html).toContain("Fused RMSNorm");
     expect(html).toContain("Fused SwiGLU");
     expect(html).toContain("Softmax");
+    expect(html).not.toContain("Milestones");
+    expect(html).not.toContain("docs/milestones.md");
     expect(html).not.toContain("Optimization ladder");
     expect(html).toContain("href=\"/projects\"");
     expect(html).toContain("href=\"/experiments\"");

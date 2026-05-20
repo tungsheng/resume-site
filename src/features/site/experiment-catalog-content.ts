@@ -2124,7 +2124,7 @@ export const experimentCatalogContent = {
       runner: "CUDA benchmark matrix",
       endpoint: "benchmark-matmul",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/matmul.py",
-      resultsPath: "docs/milestones.md",
+      resultsPath: "docs/optimization-strategies.md",
       runShapeSummary:
         "Matmul cases are organized around M/N/K tile sweeps and Tensor Core profiler validation.",
       cases: [

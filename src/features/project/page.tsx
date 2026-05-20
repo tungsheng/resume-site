@@ -1379,15 +1379,6 @@ function CudaKernelResultsSection() {
           >
             A10G report
           </Button>
-          <Button
-            href={`${getProjectById("cuda-kernel-lab").repositoryUrl}/blob/main/docs/milestones.md`}
-            target="_blank"
-            rel="noreferrer"
-            size="small"
-            endIcon={<OpenInNewRoundedIcon />}
-          >
-            Milestones
-          </Button>
         </ActionLinkRow>
       </Paper>
     </PageSection>

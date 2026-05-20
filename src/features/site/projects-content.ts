@@ -169,17 +169,6 @@ export const cudaKernelProjectContent = {
       tone: "error",
     },
   ],
-  milestones: [
-    "Benchmark discipline, device info, and result metadata",
-    "Memory bandwidth primitives",
-    "Reduction strategy variants",
-    "Softmax fusion",
-    "Normalization fusion",
-    "SwiGLU elementwise fusion",
-    "Initial tiled matmul progression",
-    "Tensor Core matmul",
-    "Attention microkernel optimization",
-  ],
 };
 
 export function getProjectById(id: ProjectId): PortfolioProject {
