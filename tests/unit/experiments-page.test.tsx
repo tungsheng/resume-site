@@ -11,9 +11,9 @@ describe("ExperimentsPage", () => {
     const html = renderToStaticMarkup(<ExperimentsPage />);
 
     expect(html).toContain("Experiment Catalog");
-    expect(html).toContain("Project-linked experiments that turn GPU serving and kernel questions into measured calls.");
+    expect(html).toContain("Project-linked experiments that turn GPU serving and kernel questions into evidence-backed decisions.");
     expect(html).toContain("Catalog ready");
-    expect(html).toContain("Rows show which project each experiment supports");
+    expect(html).toContain("Rows show the supporting project");
     expect(html).toContain("14 experiments");
     expect(html).toContain("2 projects");
     expect(html).toContain("Run-ready");
@@ -70,7 +70,7 @@ describe("ExperimentsPage", () => {
     expect(html).not.toContain("href=\"/experiments/kernel-normalization-fusion\"");
     expect(html).toContain("GPU inference evidence");
     expect(html).toContain("Architecture decisions live in the project record");
-    expect(html).toContain("stay attached to the GPU Inference Lab decision record");
+    expect(html).toContain("remain in the GPU Inference Lab decision record");
     expect(html).toContain("href=\"/projects/gpu-inference-lab/validation\"");
     expect(html).not.toContain("href=\"/experiments/platform-validation\"");
     expect(html).toContain("Full delivery can hide queueing.");
@@ -87,7 +87,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("BF16 vs NVFP4 vs SmoothQuant.");
     expect(html).not.toContain("PyTorch still wins simple memory traffic.");
     expect(html).not.toContain("RMSNorm fusion is the strongest current win.");
-    expect(html).not.toContain("Current Triton softmax trails torch.");
+    expect(html).not.toContain("Current Triton softmax trails PyTorch.");
     expect(html).not.toContain("Evaluate evidence from the platform");
     expect(html).not.toContain("Choose an evaluate decision");
     expect(html).not.toContain("experiment-decision-workspace");

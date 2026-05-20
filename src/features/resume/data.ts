@@ -4,16 +4,16 @@ export const publicResumeData: ResumeData = {
   header: {
     name: "Tony Lee",
     badges: [
-      "Platform Infrastructure",
-      "ML Inference Systems",
-      "GPU Kernel Optimization",
+      "ML Inference Performance",
+      "GPU Serving Infrastructure",
+      "CUDA/Triton Optimization",
     ],
     contacts: {
       email: "tungsheng@gmail.com",
       linkedin: "tonyslee8",
     },
     summary:
-      "Platform infrastructure engineer focused on ML inference architecture, GPU-backed serving, Kubernetes, autoscaling, admission control, and distributed systems reliability.",
+      "ML inference performance engineer focused on GPU-backed serving, Kubernetes, autoscaling, admission control, CUDA/Triton benchmarking, and distributed systems reliability.",
   },
   skills: {
     "ML Infrastructure / Inference": [
@@ -62,7 +62,7 @@ export const publicResumeData: ResumeData = {
         title: "CUDA Kernel Lab (PyTorch + Triton + A10G benchmarks)",
         highlights: [
           "Built a CUDA/Triton optimization lab for LLM-shaped primitives and measured 38 A10G benchmark rows across memory primitives, reductions, softmax, normalization, SwiGLU, and vector-add variants, with all correctness checks passing.",
-          "Produced the strongest current kernel wins through fusion: Triton RMSNorm fp16 reached 5.539x over torch baseline and SwiGLU fp32 reached 3.112x, while memory primitives and row-softmax remain profiler follow-ups.",
+          "Produced the strongest current kernel wins through fusion: Triton RMSNorm fp16 reached 5.539x over the PyTorch baseline and SwiGLU fp32 reached 3.112x, while memory primitives and row-softmax remain profiler follow-ups.",
         ],
       },
     ],

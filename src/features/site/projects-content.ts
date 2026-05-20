@@ -30,7 +30,7 @@ export const projectPortfolioContent = {
   lede:
     "Evidence-backed GPU systems work across serving infrastructure and kernel optimization.",
   summary:
-    "The portfolio separates system-level inference decisions from kernel-level CUDA experiments, then lets each experiment point back to the project it supports.",
+    "The portfolio separates serving decisions from CUDA kernel optimization, with each experiment tied to the project it supports.",
   projects: [
     {
       id: "gpu-inference-lab",
@@ -68,8 +68,8 @@ export const projectPortfolioContent = {
         "The latest A10G matrix shows Triton wins where fusion removes intermediate traffic, while PyTorch still leads simple memory primitives.",
       evidence: [
         "38 benchmark rows loaded, all correctness checks passed",
-        "RMSNorm fp16 reached 5.539x speedup over torch baseline",
-        "SwiGLU fp32 reached 3.112x speedup over torch baseline",
+        "RMSNorm fp16 reached 5.539x speedup over the PyTorch baseline",
+        "SwiGLU fp32 reached 3.112x speedup over the PyTorch baseline",
       ],
       experimentCount: 7,
       primaryAction: {
@@ -83,7 +83,7 @@ export const projectPortfolioContent = {
 export const cudaKernelProjectContent = {
   title: "CUDA Kernel Lab",
   lede:
-    "A CUDA/Triton optimization lab that turns LLM-shaped primitives into benchmarked kernel strategy evidence.",
+    "A CUDA/Triton optimization lab that turns LLM-shaped primitives into benchmarked kernel-optimization evidence.",
   repositoryUrl: "https://github.com/tungsheng/cuda-kernel-lab",
   overviewSummary:
     "The lab moves from memory traffic and reductions into fusion, tiling, Tensor Cores, and profiler-backed strategy comparisons.",
@@ -101,20 +101,20 @@ export const cudaKernelProjectContent = {
     {
       label: "Correctness",
       value: "38 / 38 pass",
-      body: "Every recorded torch and Triton row passed output validation.",
+      body: "Every recorded PyTorch and Triton row passed output validation.",
     },
     {
       label: "Largest win",
       value: "5.539x",
-      body: "Triton fused RMSNorm fp16 versus the torch baseline.",
+      body: "Triton fused RMSNorm fp16 versus the PyTorch baseline.",
     },
     {
       label: "Fusion win",
       value: "3.112x",
-      body: "Triton fused SwiGLU fp32 versus the torch baseline.",
+      body: "Triton fused SwiGLU fp32 versus the PyTorch baseline.",
     },
     {
-      label: "Open proof",
+      label: "Next proof",
       value: "Profiler notes",
       body: "Nsight summaries are the next gate for explaining the memory primitive gap.",
     },
@@ -123,7 +123,7 @@ export const cudaKernelProjectContent = {
     {
       title: "Benchmark locally",
       command: "uv run benchmark-memory --backend all --op all --numel 16777216 --dtype float32",
-      body: "Exercise the memory primitive path and emit comparable torch/Triton rows.",
+      body: "Exercise the memory primitive path and emit comparable PyTorch/Triton rows.",
       output: "Latency, bandwidth, TFLOP/s, and correctness metadata",
     },
     {
@@ -136,36 +136,36 @@ export const cudaKernelProjectContent = {
       title: "Live GPU evidence",
       command: "./scripts/live-benchmark --run-id <run-id> --with-profiling",
       body: "Launch a disposable GPU host, run benchmarks, copy artifacts back, and tear down.",
-      output: "Benchmark report plus profiler capture attempts",
+      output: "Benchmark report plus profiler artifacts",
     },
   ],
   results: [
     {
       title: "Fused RMSNorm",
       statusLabel: "Supported",
-      call: "Fusion removes enough framework/intermediate overhead to dominate the torch baseline.",
-      proof: "fp16 0.171 ms Triton vs 0.9472 ms torch; 5.539x speedup.",
+      call: "Fusion removes enough framework and intermediate-tensor overhead to beat the PyTorch baseline.",
+      proof: "fp16 0.171 ms Triton vs 0.9472 ms PyTorch; 5.539x speedup.",
       tone: "success",
     },
     {
       title: "Fused SwiGLU",
       statusLabel: "Supported",
-      call: "Elementwise fusion is a strong next teaching track before deeper matmul work.",
-      proof: "fp32 0.4567 ms Triton vs 1.421 ms torch; 3.112x speedup.",
+      call: "Elementwise fusion is a strong path before deeper matmul work.",
+      proof: "fp32 0.4567 ms Triton vs 1.421 ms PyTorch; 3.112x speedup.",
       tone: "success",
     },
     {
       title: "Memory primitives",
       statusLabel: "Caveated",
       call: "Do not broaden launch sweeps before profiler counters explain the PyTorch lead.",
-      proof: "torch stayed around 445-467 GB/s; Triton vector_add fp32 reached 439.8-444.8 GB/s.",
+      proof: "PyTorch stayed around 445-467 GB/s; Triton vector_add fp32 reached 439.8-444.8 GB/s.",
       tone: "warning",
     },
     {
       title: "Softmax",
       statusLabel: "Rejected",
       call: "Do not claim the current row-softmax kernel as a win.",
-      proof: "torch fp16 p50 was 0.05018 ms; Triton fp16 p50 was 0.06554 ms.",
+      proof: "PyTorch fp16 p50 was 0.05018 ms; Triton fp16 p50 was 0.06554 ms.",
       tone: "error",
     },
   ],

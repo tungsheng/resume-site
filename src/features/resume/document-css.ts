@@ -59,12 +59,13 @@ body {
 
 .resume-document .header-subtitle {
   margin: 0;
-  font-size: 10pt;
-  letter-spacing: 0.14px;
+  font-size: 9pt;
+  letter-spacing: 0;
   color: var(--resume-muted);
   font-weight: 500;
-  line-height: 1.24;
+  line-height: 1.2;
   font-family: var(--ui-font);
+  white-space: nowrap;
 }
 
 .resume-document .name {

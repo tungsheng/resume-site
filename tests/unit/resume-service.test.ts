@@ -6,7 +6,10 @@ import type { ResumeData } from "../../src/types";
 describe("Resume Service", () => {
   test("publicResumeData contains the checked-in public resume", () => {
     expect(publicResumeData.header.name).toBe("Tony Lee");
-    expect(publicResumeData.header.badges).toContain("GPU Kernel Optimization");
+    expect(publicResumeData.header.badges).toContain("ML Inference Performance");
+    expect(publicResumeData.header.badges).toContain("GPU Serving Infrastructure");
+    expect(publicResumeData.header.badges).toContain("CUDA/Triton Optimization");
+    expect(publicResumeData.header.badges).not.toContain("GPU Kernel Optimization");
     expect(publicResumeData.header.badges).not.toContain("GPU Kernel Experiments");
     expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("vLLM");
     expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Inference Load Testing (k6)");
@@ -30,7 +33,7 @@ describe("Resume Service", () => {
       "Built a CUDA/Triton optimization lab for LLM-shaped primitives and measured 38 A10G benchmark rows across memory primitives, reductions, softmax, normalization, SwiGLU, and vector-add variants, with all correctness checks passing.",
     );
     expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Produced the strongest current kernel wins through fusion: Triton RMSNorm fp16 reached 5.539x over torch baseline and SwiGLU fp32 reached 3.112x, while memory primitives and row-softmax remain profiler follow-ups.",
+      "Produced the strongest current kernel wins through fusion: Triton RMSNorm fp16 reached 5.539x over the PyTorch baseline and SwiGLU fp32 reached 3.112x, while memory primitives and row-softmax remain profiler follow-ups.",
     );
   });
 
@@ -145,6 +148,8 @@ describe("Resume Service", () => {
     expect(html).toContain("class=\"resume-document\"");
     expect(html).toContain("<div class=\"experience-rail\"></div>");
     expect(dotCount).toBe(mockData.experience.length);
+    expect(html).toContain(".resume-document .header-subtitle {");
+    expect(html).toContain("white-space: nowrap;");
     expect(html).toContain(".resume-document .experience-item {");
     expect(html).toContain(".resume-document .experience-dot {");
   });
