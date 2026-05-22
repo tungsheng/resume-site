@@ -47,6 +47,7 @@ import { useDocumentTitle } from "../site/use-document-title";
 const PAGE_TITLE = "Experiments | Tony Lee";
 
 const EXPERIMENT_DETAIL_PREFIX = `${EXPERIMENTS_PATH}/`;
+const DEFAULT_EXPERIMENT_PROJECT_ID: ProjectId = "gpu-inference-lab";
 
 const catalogStatusNoteSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => ({
   position: "relative",
@@ -593,7 +594,36 @@ export function getExperimentSlugFromPath(pathname: string): string | null {
     return null;
   }
 
-  return decodeURIComponent(slug);
+  const decodedSlug = decodeURIComponent(slug);
+  return isExperimentProjectId(decodedSlug) ? null : decodedSlug;
+}
+
+function isExperimentProjectId(value: string): value is ProjectId {
+  return projectPortfolioContent.projects.some((project) => project.id === value);
+}
+
+export function experimentProjectCatalogPath(projectId: ProjectId): string {
+  return `${EXPERIMENTS_PATH}/${projectId}`;
+}
+
+export function getExperimentProjectIdFromPath(pathname: string): ProjectId | null {
+  const normalizedPath = (pathname.split(/[?#]/, 1)[0] ?? "").replace(/\/+$/, "");
+
+  if (normalizedPath === EXPERIMENTS_PATH) {
+    return DEFAULT_EXPERIMENT_PROJECT_ID;
+  }
+
+  if (!normalizedPath.startsWith(EXPERIMENT_DETAIL_PREFIX)) {
+    return null;
+  }
+
+  const segment = normalizedPath.slice(EXPERIMENT_DETAIL_PREFIX.length);
+  if (!segment || segment.includes("/")) {
+    return null;
+  }
+
+  const decodedSegment = decodeURIComponent(segment);
+  return isExperimentProjectId(decodedSegment) ? decodedSegment : null;
 }
 
 function resolveCurrentPathname(initialPath?: string): string {
@@ -796,16 +826,13 @@ function RelatedProjectEvidenceBand() {
 
 function ProjectExperimentTabs({
   selectedProjectId,
-  onSelectProject,
 }: {
   selectedProjectId: ProjectId;
-  onSelectProject: (projectId: ProjectId) => void;
 }) {
   return (
     <Box sx={projectTabsSx}>
       <Tabs
         value={selectedProjectId}
-        onChange={(_, value: ProjectId) => onSelectProject(value)}
         variant="scrollable"
         scrollButtons="auto"
         aria-label="Experiment project tabs"
@@ -813,6 +840,8 @@ function ProjectExperimentTabs({
         {projectPortfolioContent.projects.map((project) => (
           <Tab
             key={project.id}
+            component="a"
+            href={experimentProjectCatalogPath(project.id)}
             value={project.id}
             label={`${project.title} (${project.experimentCount})`}
           />
@@ -824,10 +853,8 @@ function ProjectExperimentTabs({
 
 function ExperimentCatalogListSection({
   selectedProjectId,
-  onSelectProject,
 }: {
   selectedProjectId: ProjectId;
-  onSelectProject: (projectId: ProjectId) => void;
 }) {
   const selectedProject = getProjectById(selectedProjectId);
   const selectedExperiments = experimentCatalogContent.experiments.filter(
@@ -847,7 +874,6 @@ function ExperimentCatalogListSection({
       <Stack spacing={2.25}>
         <ProjectExperimentTabs
           selectedProjectId={selectedProjectId}
-          onSelectProject={onSelectProject}
         />
         <Box sx={browseSurfaceSx}>
           <Box sx={browseHeaderSx} aria-hidden="true">
@@ -868,10 +894,8 @@ function ExperimentCatalogListSection({
   );
 }
 
-function ExperimentCatalogRoute() {
+function ExperimentCatalogRoute({ selectedProjectId }: { selectedProjectId: ProjectId }) {
   useDocumentTitle(PAGE_TITLE);
-  const [selectedProjectId, setSelectedProjectId] =
-    React.useState<ProjectId>("gpu-inference-lab");
 
   return (
     <PublicSiteLayout activeNav="experiments">
@@ -891,7 +915,10 @@ function ExperimentCatalogRoute() {
             <CatalogFactStrip />
 
             <ActionLinkRow>
-              <Button href="#experiment-catalog-list" variant="contained">
+              <Button
+                href={`${experimentProjectCatalogPath(selectedProjectId)}#experiment-catalog-list`}
+                variant="contained"
+              >
                 Browse experiments
               </Button>
               <Button href={PROJECTS_PATH} variant="outlined">
@@ -909,7 +936,6 @@ function ExperimentCatalogRoute() {
       <ExperimentCatalogConceptSection />
       <ExperimentCatalogListSection
         selectedProjectId={selectedProjectId}
-        onSelectProject={setSelectedProjectId}
       />
     </PublicSiteLayout>
   );
@@ -1601,7 +1627,12 @@ function UnknownExperimentRoute({ slug }: { slug: string }) {
 
 export function ExperimentsPage({ initialPath }: { initialPath?: string } = {}) {
   const pathname = resolveCurrentPathname(initialPath);
+  const projectId = getExperimentProjectIdFromPath(pathname);
   const slug = getExperimentSlugFromPath(pathname);
+
+  if (projectId) {
+    return <ExperimentCatalogRoute selectedProjectId={projectId} />;
+  }
 
   if (slug) {
     const experiment = getExperimentBySlug(slug);
@@ -1613,5 +1644,5 @@ export function ExperimentsPage({ initialPath }: { initialPath?: string } = {}) 
     return <ExperimentDetailRoute experiment={experiment} />;
   }
 
-  return <ExperimentCatalogRoute />;
+  return <ExperimentCatalogRoute selectedProjectId={DEFAULT_EXPERIMENT_PROJECT_ID} />;
 }

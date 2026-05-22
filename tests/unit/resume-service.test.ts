@@ -30,10 +30,10 @@ describe("Resume Service", () => {
     );
     expect(publicResumeData.projects?.items[1]?.title).toContain("CUDA Kernel Lab");
     expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Built a CUDA/Triton optimization lab for LLM-shaped primitives and measured 38 A10G benchmark rows across memory primitives, reductions, softmax, normalization, SwiGLU, and vector-add variants, with all correctness checks passing.",
+      "Built a CUDA/Triton optimization lab for LLM-shaped primitives and decode-step replay, measuring 115 operator rows plus a 27-row resident-KV graph run on A10G with correctness checks passing.",
     );
     expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Produced the strongest current kernel wins through fusion: Triton RMSNorm fp16 reached 5.539x over the PyTorch baseline and SwiGLU fp32 reached 3.112x, while memory primitives and row-softmax remain profiler follow-ups.",
+      "Validated supported wins and boundaries: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
     );
   });
 

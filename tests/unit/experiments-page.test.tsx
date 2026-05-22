@@ -3,6 +3,8 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   ExperimentsPage,
+  experimentProjectCatalogPath,
+  getExperimentProjectIdFromPath,
   getExperimentSlugFromPath,
 } from "../../src/features/experiments/page";
 
@@ -14,22 +16,24 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Project-linked experiments that turn GPU serving and kernel questions into evidence-backed decisions.");
     expect(html).toContain("Catalog ready");
     expect(html).toContain("Rows show the supporting project");
-    expect(html).toContain("14 experiments");
+    expect(html).toContain("15 experiments");
     expect(html).toContain("2 projects");
     expect(html).toContain("Run-ready");
     expect(html).toContain("5 supported");
-    expect(html).toContain("5 selected");
+    expect(html).toContain("8 selected");
     expect(html).toContain("1 rejected");
-    expect(html).toContain("1 pending");
-    expect(html).toContain("2 blocked");
-    expect(html).toContain("href=\"#experiment-catalog-list\"");
+    expect(html).not.toContain("1 pending");
+    expect(html).toContain("1 blocked");
+    expect(html).toContain("href=\"/experiments/gpu-inference-lab#experiment-catalog-list\"");
     expect(html).not.toContain("definition catalog");
     expect(html).not.toContain(">View resume<");
     expect(html).toContain("How experiments work");
     expect(html).toContain("Browse experiments");
     expect(html).toContain("GPU Inference Decision Lab (7)");
-    expect(html).toContain("CUDA Kernel Lab (7)");
+    expect(html).toContain("CUDA Kernel Lab (8)");
     expect(html).toContain("role=\"tablist\"");
+    expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
+    expect(html).toContain("href=\"/experiments/cuda-kernel-lab\"");
     expect(html).not.toContain("<span>Project</span>");
     expect(html).toContain("Question");
     expect(html).toContain("Cases");
@@ -57,7 +61,8 @@ describe("ExperimentsPage", () => {
     expect(html).not.toContain("Normalization Fusion");
     expect(html).not.toContain("SwiGLU Elementwise Fusion");
     expect(html).not.toContain("Row Softmax Fusion");
-    expect(html).not.toContain("Matmul Tiling Progression");
+    expect(html).not.toContain("Matmul Tile Sweep");
+    expect(html).not.toContain("Decode Attention Baseline");
     expect(html).not.toContain("Profiler Validation");
     expect(html).toContain("href=\"/experiments/kv-cache\"");
     expect(html).toContain("href=\"/experiments/prefill-decode\"");
@@ -93,6 +98,26 @@ describe("ExperimentsPage", () => {
     expect(html).not.toContain("experiment-decision-workspace");
     expect(html).not.toContain("Artifact contract");
     expect(html).toContain("href=\"/projects\"");
+  });
+
+  test("renders CUDA catalog tab from its route", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/cuda-kernel-lab" />,
+    );
+
+    expect(html).toContain("CUDA Kernel Lab experiments");
+    expect(html).toContain("GPU Inference Decision Lab (7)");
+    expect(html).toContain("CUDA Kernel Lab (8)");
+    expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
+    expect(html).toContain("href=\"/experiments/cuda-kernel-lab\"");
+    expect(html).toContain("Memory Primitive Bandwidth");
+    expect(html).toContain("Normalization Fusion");
+    expect(html).toContain("Decode Step Graph Replay");
+    expect(html).toContain("Profiler Validation");
+    expect(html).toContain("href=\"/experiments/kernel-memory-primitives\"");
+    expect(html).toContain("href=\"/experiments/kernel-decode-step-graph-replay\"");
+    expect(html).not.toContain("KV Cache vs Concurrency");
+    expect(html).not.toContain("FP4 Quantization Optimization");
   });
 
   test("renders blocked experiment detail pages with the shared template", () => {
@@ -201,17 +226,38 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("Normalization Fusion");
     expect(html).toContain("CUDA Kernel Lab");
     expect(html).toContain("How much does a fused Triton RMSNorm or LayerNorm kernel move latency");
-    expect(html).toContain("2 normalization cases at 4096x4096");
+    expect(html).toContain("RMSNorm fp16 shape sweep from 512x1024 through 4096x8192");
     expect(html).toContain("rmsnorm-4096x4096-float16");
     expect(html).toContain("4096x4096");
     expect(html).toContain("triton-fused-rmsnorm");
     expect(html).toContain("RMSNorm fp16");
-    expect(html).toContain("5.539x");
-    expect(html).toContain("RMSNorm fp32");
+    expect(html).toContain("5.901x");
+    expect(html).toContain("RMSNorm profile");
+    expect(html).toContain("90.91% DRAM");
     expect(html).toContain("LayerNorm fp32");
     expect(html).toContain("benchmark-norms");
     expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/src/cuda_kernel_lab/kernels/triton/norms.py\"");
-    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/experiments/reports/aws-ec2/2026-05-21-strategy-next.md\"");
+  });
+
+  test("renders CUDA decode graph replay detail content", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/kernel-decode-step-graph-replay" />,
+    );
+
+    expect(html).toContain("Decode Step Graph Replay");
+    expect(html).toContain("CUDA Kernel Lab");
+    expect(html).toContain("resident-KV same-stream piecewise CUDA Graph replay");
+    expect(html).toContain("decode-step-dynamic-dense-buckets");
+    expect(html).toContain("dynamic-piecewise-graph-same-stream");
+    expect(html).toContain("0.1375 ms");
+    expect(html).toContain("0.155-0.158 ms");
+    expect(html).toContain("0.228-0.232 ms");
+    expect(html).toContain("0.2273 ms");
+    expect(html).toContain("benchmark-decode-step");
+    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/src/cuda_kernel_lab/benchmarks/decode_step.py\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/experiments/reports/aws-ec2/2026-05-22-round12-kv-active-views.md\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/docs/benchmark-workflow.md\"");
   });
 
   test("renders measured batching detail content", () => {
@@ -371,10 +417,17 @@ describe("ExperimentsPage", () => {
   test("resolves experiment slugs from catalog paths", () => {
     expect(getExperimentSlugFromPath("/experiments")).toBeNull();
     expect(getExperimentSlugFromPath("/experiments/")).toBeNull();
+    expect(getExperimentSlugFromPath("/experiments/gpu-inference-lab")).toBeNull();
+    expect(getExperimentSlugFromPath("/experiments/cuda-kernel-lab")).toBeNull();
     expect(getExperimentSlugFromPath("/experiments/kv-cache")).toBe("kv-cache");
     expect(getExperimentSlugFromPath("/experiments/cost?tab=run")).toBe("cost");
     expect(getExperimentSlugFromPath("/experiments/platform-validation/")).toBe("platform-validation");
     expect(getExperimentSlugFromPath("/project/cloud-inference-platform")).toBeNull();
     expect(getExperimentSlugFromPath("/experiments/kv-cache/extra")).toBeNull();
+    expect(getExperimentProjectIdFromPath("/experiments")).toBe("gpu-inference-lab");
+    expect(getExperimentProjectIdFromPath("/experiments/gpu-inference-lab")).toBe("gpu-inference-lab");
+    expect(getExperimentProjectIdFromPath("/experiments/cuda-kernel-lab")).toBe("cuda-kernel-lab");
+    expect(getExperimentProjectIdFromPath("/experiments/kv-cache")).toBeNull();
+    expect(experimentProjectCatalogPath("cuda-kernel-lab")).toBe("/experiments/cuda-kernel-lab");
   });
 });

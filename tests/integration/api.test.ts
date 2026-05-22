@@ -72,6 +72,14 @@ describe("API Integration", () => {
     expect(html).toContain("Experiments | Tony Lee");
   });
 
+  itIfIntegration("GET /experiments/cuda-kernel-lab serves the experiments shell", async () => {
+    const res = await fetch(`${BASE_URL}/experiments/cuda-kernel-lab`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Experiments | Tony Lee");
+  });
+
   itIfIntegration("GET /experiments/:slug serves the experiments shell", async () => {
     const res = await fetch(`${BASE_URL}/experiments/kv-cache`);
     expect(res.status).toBe(200);

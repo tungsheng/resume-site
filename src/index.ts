@@ -43,6 +43,8 @@ server = Bun.serve({
     "/project/cloud-inference-platform": projectPage,
     "/project/cloud-inference-platform/validation": projectPage,
     "/experiments": experimentsPage,
+    "/experiments/gpu-inference-lab": experimentsPage,
+    "/experiments/cuda-kernel-lab": experimentsPage,
     "/experiments/:slug": experimentsPage,
     "/resume": resumePage,
 
@@ -92,5 +94,7 @@ console.log("[resume-site] Resume server started", {
   gpuInferenceLab: `http://localhost:${PORT}/projects/gpu-inference-lab`,
   cudaKernelLab: `http://localhost:${PORT}/projects/cuda-kernel-lab`,
   experiments: `http://localhost:${PORT}/experiments`,
+  gpuInferenceExperiments: `http://localhost:${PORT}/experiments/gpu-inference-lab`,
+  cudaKernelExperiments: `http://localhost:${PORT}/experiments/cuda-kernel-lab`,
   resume: `http://localhost:${PORT}/resume`,
 });

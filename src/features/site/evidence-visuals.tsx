@@ -74,11 +74,26 @@ const readoutGridSx: SxProps<Theme> = {
 
 const readoutItemSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
-  gap: 0.7,
-  alignContent: "start",
-  minHeight: "10.25rem",
+  gridTemplateRows: "auto minmax(0, 1fr) auto",
+  gap: 0.85,
+  alignContent: "stretch",
+  minHeight: { xs: "15.5rem", md: "16rem", xl: "17.25rem" },
   p: { xs: 1.25, sm: 1.35 },
 });
+
+const readoutBodySx: SxProps<Theme> = {
+  display: "grid",
+  alignContent: "start",
+  gap: 0.55,
+  minWidth: 0,
+};
+
+const readoutBadgeSx: SxProps<Theme> = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-start",
+  minWidth: 0,
+};
 
 const compactBarsSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
@@ -167,30 +182,22 @@ export function DecisionReadoutStrip({
     <Box sx={readoutGridSx} aria-label={ariaLabel}>
       {items.map((item) => (
         <Box key={`${item.label}-${item.value}`} component="section" sx={readoutItemSx}>
-          <Box sx={{ display: "grid", gap: 0.55, minWidth: 0 }}>
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 0.75,
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Typography variant="overline" sx={{ color: "secondary.dark" }}>
-                {item.label}
-              </Typography>
-              <ToneChip tone={item.tone ?? "neutral"} label={item.statusLabel} />
-            </Box>
+          <Typography variant="overline" sx={{ color: "secondary.dark" }}>
+            {item.label}
+          </Typography>
+          <Box sx={readoutBodySx}>
             <Typography variant="body2" sx={{ fontWeight: 700 }}>
               {item.value}
             </Typography>
+            {item.detail ? (
+              <Typography variant="body2" color="text.secondary">
+                {item.detail}
+              </Typography>
+            ) : null}
           </Box>
-          {item.detail ? (
-            <Typography variant="body2" color="text.secondary">
-              {item.detail}
-            </Typography>
-          ) : null}
+          <Box sx={readoutBadgeSx}>
+            <ToneChip tone={item.tone ?? "neutral"} label={item.statusLabel} />
+          </Box>
         </Box>
       ))}
     </Box>

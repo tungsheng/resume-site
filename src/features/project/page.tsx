@@ -22,6 +22,7 @@ import {
   type EvidenceMatrixRow,
 } from "../site/evidence-visuals";
 import {
+  CUDA_KERNEL_EXPERIMENTS_PATH,
   CUDA_KERNEL_PROJECT_PATH,
   EXPERIMENTS_PATH,
   GPU_INFERENCE_PROJECT_PATH,
@@ -91,12 +92,25 @@ const projectIndexGridSx: SxProps<Theme> = {
 };
 
 const projectIndexCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
-  display: "grid",
+  display: "flex",
+  flexDirection: "column",
   gap: { xs: 1.1, md: 1.25 },
-  alignContent: "start",
   height: "100%",
   p: { xs: 1.4, sm: 1.6, md: 1.75 },
 });
+
+const projectIndexBodySx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.7,
+  minWidth: 0,
+  minHeight: { lg: "10.25rem" },
+  alignContent: "start",
+};
+
+const projectIndexActionsSx: SxProps<Theme> = {
+  mt: "auto",
+  pt: { xs: 0.25, md: 0.5 },
+};
 
 const projectMetaRowSx: SxProps<Theme> = {
   display: "flex",
@@ -141,18 +155,32 @@ const cudaWorkflowGridSx: SxProps<Theme> = {
   display: "grid",
   gridTemplateColumns: {
     xs: "minmax(0, 1fr)",
-    lg: "repeat(3, minmax(0, 1fr))",
+    md: "repeat(2, minmax(0, 1fr))",
+    xl: "repeat(4, minmax(0, 1fr))",
   },
   gap: { xs: 1.1, md: 1.25 },
 };
 
 const cudaWorkflowCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
-  gridTemplateRows: "auto auto 1fr",
-  gap: 1,
+  gap: 0.9,
   alignContent: "start",
   height: "100%",
   p: { xs: 1.25, sm: 1.4 },
+});
+
+const cudaWorkflowStepSx: SxProps<Theme> = (theme) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "2rem",
+  height: "2rem",
+  borderRadius: "50%",
+  backgroundColor: alpha(theme.palette.secondary.main, 0.12),
+  color: theme.palette.secondary.dark,
+  fontSize: "0.76rem",
+  fontWeight: 800,
+  lineHeight: 1,
 });
 
 const workflowSurfaceSx: SxProps<Theme> = {
@@ -799,7 +827,7 @@ function ProjectPortfolioCard({ project }: { project: PortfolioProject }) {
         <Chip label={`${project.experimentCount} experiments`} variant="outlined" />
       </Box>
 
-      <Box sx={{ display: "grid", gap: 0.7, minWidth: 0 }}>
+      <Box sx={projectIndexBodySx}>
         <Typography component="h2" variant="h4">
           {project.title}
         </Typography>
@@ -819,23 +847,25 @@ function ProjectPortfolioCard({ project }: { project: PortfolioProject }) {
         ))}
       </Box>
 
-      <ActionLinkRow>
-        <Button href={project.path} variant="contained">
-          View project
-        </Button>
-        <Button href={project.primaryAction.href} variant="outlined">
-          {project.primaryAction.label}
-        </Button>
-        <Button
-          href={project.repositoryUrl}
-          target="_blank"
-          rel="noreferrer"
-          size="small"
-          endIcon={<OpenInNewRoundedIcon />}
-        >
-          GitHub
-        </Button>
-      </ActionLinkRow>
+      <Box sx={projectIndexActionsSx}>
+        <ActionLinkRow>
+          <Button href={project.path} variant="contained">
+            View project
+          </Button>
+          <Button href={project.primaryAction.href} variant="outlined">
+            {project.primaryAction.label}
+          </Button>
+          <Button
+            href={project.repositoryUrl}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            GitHub
+          </Button>
+        </ActionLinkRow>
+      </Box>
     </Box>
   );
 }
@@ -1315,13 +1345,14 @@ function CudaKernelWorkflowSection() {
     <PageSection>
       <SectionHeader
         eyebrow="Workflow"
-        title="Benchmark path"
-        copy="The project keeps local checks, CUDA benchmark records, generated reports, and profiler attempts as separate evidence layers."
+        title="Optimization loop"
+        copy="Every kernel claim moves through the same loop: profile first, isolate the bottleneck, change only that path, then re-profile before calling it a win."
       />
 
       <Box sx={cudaWorkflowGridSx}>
-        {cudaKernelProjectContent.workflows.map((workflow) => (
+        {cudaKernelProjectContent.optimizationLoop.map((workflow) => (
           <Box key={workflow.title} component="section" sx={cudaWorkflowCardSx}>
+            <Box sx={cudaWorkflowStepSx}>{workflow.step}</Box>
             <Box sx={{ display: "grid", gap: 0.45, minWidth: 0 }}>
               <Typography variant="overline" sx={{ color: "secondary.dark" }}>
                 {workflow.title}
@@ -1330,13 +1361,8 @@ function CudaKernelWorkflowSection() {
                 {workflow.body}
               </Typography>
             </Box>
-            <CommandCodeBlock
-              command={workflow.command}
-              ariaLabel={`${workflow.title} command`}
-              sx={quickStartCommandSx}
-            />
             <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {workflow.output}
+              {workflow.evidence}
             </Typography>
           </Box>
         ))}
@@ -1351,7 +1377,7 @@ function CudaKernelResultsSection() {
       <SectionHeader
         eyebrow="A10G evidence"
         title="Benchmark readout"
-        copy="The latest rerun shows where custom kernels are already useful and where the next proof needs profiler counters."
+        copy="The selected runs show where custom kernels are useful, where profiler counters explain the result, and where decode replay is measured but still bounded as a synthetic resident-KV upper bound."
       />
 
       <Paper variant="outlined" sx={evidenceSurfaceSx}>
@@ -1367,17 +1393,35 @@ function CudaKernelResultsSection() {
         />
 
         <ActionLinkRow>
-          <Button href={EXPERIMENTS_PATH} variant="contained">
+          <Button href={CUDA_KERNEL_EXPERIMENTS_PATH} variant="contained">
             Kernel experiments
           </Button>
           <Button
-            href={`${getProjectById("cuda-kernel-lab").repositoryUrl}/blob/main/experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md`}
+            href={`${getProjectById("cuda-kernel-lab").repositoryUrl}/blob/main/experiments/reports/aws-ec2/2026-05-21-strategy-next.md`}
             target="_blank"
             rel="noreferrer"
             size="small"
             endIcon={<OpenInNewRoundedIcon />}
           >
-            A10G report
+            Strategy report
+          </Button>
+          <Button
+            href={`${getProjectById("cuda-kernel-lab").repositoryUrl}/blob/main/experiments/reports/aws-ec2/2026-05-22-round12-kv-active-views.md`}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            Decode replay report
+          </Button>
+          <Button
+            href={`${getProjectById("cuda-kernel-lab").repositoryUrl}/tree/main/profiling/reports/2026-05-21-strategy-next`}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            Profiler reports
           </Button>
         </ActionLinkRow>
       </Paper>
@@ -1400,7 +1444,7 @@ function CudaKernelProjectRoute() {
         </Typography>
 
         <ActionLinkRow>
-          <Button href={EXPERIMENTS_PATH} variant="contained">
+          <Button href={CUDA_KERNEL_EXPERIMENTS_PATH} variant="contained">
             View experiments
           </Button>
           <Button href={PROJECTS_PATH} variant="outlined">

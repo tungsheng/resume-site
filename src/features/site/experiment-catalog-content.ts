@@ -1595,7 +1595,7 @@ export const experimentCatalogContent = {
       runner: "CUDA benchmark matrix",
       endpoint: "benchmark-memory",
       sourcePath: "src/cuda_kernel_lab/benchmarks/memory_bandwidth.py",
-      resultsPath: "experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md",
+      resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
       runShapeSummary:
         "3 memory cases across 16,777,216-element tensors, compared across PyTorch and Triton profiles.",
       cases: [
@@ -1654,16 +1654,16 @@ export const experimentCatalogContent = {
         "uv run benchmark-memory --backend all --op all --numel 16777216 --dtype float32",
       ],
       liveCommands: [
-        "./scripts/live-benchmark --run-id <run-id>",
+        "./scripts/benchmark --run-id <run-id> --with-profiling",
       ],
       resultEvidence: {
         title: "PyTorch still owns simple memory primitives",
         statusLabel: "Selected report",
-        reportDate: "2026-05-19",
+        reportDate: "2026-05-21",
         summary:
-          "The A10G rerun kept PyTorch ahead on copy, scale, and vector_add, while Triton stayed close enough to justify focused profiler work.",
+          "The A10G strategy run kept PyTorch ahead on copy, scale, and vector_add, while the Triton vector_add profile showed high DRAM throughput rather than an obvious block-size fix.",
         boundary:
-          "This is not evidence against custom kernels broadly; it only bounds simple memory traffic before fusion or reuse changes the operation.",
+          "This is not evidence against custom kernels broadly; it bounds simple memory traffic and redirects optimization toward fusion or reuse before wider launch sweeps.",
         stats: [
           {
             label: "Rows",
@@ -1676,9 +1676,9 @@ export const experimentCatalogContent = {
             context: "float32 p50 0.4311 ms",
           },
           {
-            label: "Best Triton vector_add",
-            value: "444.8 GB/s",
-            context: "float32 block_size=512 p50 0.4526 ms",
+            label: "Triton profile",
+            value: "91.58% DRAM",
+            context: "float32 vector_add with 81.80% occupancy",
           },
         ],
         tables: [
@@ -1695,15 +1695,15 @@ export const experimentCatalogContent = {
               {
                 target: "copy fp32",
                 outcome: "PyTorch",
-                p95Latency: "0.2898 ms",
-                peakWaiting: "463.2",
+                p95Latency: "0.2888 ms",
+                peakWaiting: "464.8",
                 gpuMax: "baseline leads",
               },
               {
                 target: "scale fp32",
                 outcome: "PyTorch",
-                p95Latency: "0.2949 ms",
-                peakWaiting: "455.1",
+                p95Latency: "0.2929 ms",
+                peakWaiting: "458.3",
                 gpuMax: "baseline leads",
               },
               {
@@ -1711,7 +1711,7 @@ export const experimentCatalogContent = {
                 outcome: "PyTorch",
                 p95Latency: "0.4311 ms",
                 peakWaiting: "467.0",
-                gpuMax: "profile next",
+                gpuMax: "fusion next",
               },
             ],
           },
@@ -1723,7 +1723,7 @@ export const experimentCatalogContent = {
       slug: "kernel-reduction-strategy",
       title: "Reduction Strategy Comparison",
       category: "Kernel reductions",
-      status: experimentStatus("Measured on A10G", "Strategy comparison ready"),
+      status: experimentStatus("Measured on A10G", "Profiler comparison ready"),
       readiness: {
         primary: {
           label: "Selected report",
@@ -1742,7 +1742,7 @@ export const experimentCatalogContent = {
       runner: "CUDA benchmark matrix",
       endpoint: "benchmark-memory --op reduction_sum",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/memory.py",
-      resultsPath: "experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md",
+      resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
       runShapeSummary:
         "1 reduction case across a 16,777,216-element float32 tensor, compared across PyTorch, iterative Triton, and two-pass Triton profiles.",
       cases: [
@@ -1777,7 +1777,7 @@ export const experimentCatalogContent = {
           metrics: ["effective GB/s", "estimated reads and writes", "partial tensor traffic"],
         },
         {
-          label: "Profiler follow-up",
+          label: "Profiler evidence",
           metrics: ["occupancy", "memory throughput", "register pressure"],
         },
       ],
@@ -1785,31 +1785,31 @@ export const experimentCatalogContent = {
         "uv run benchmark-memory --backend all --device cuda --op reduction_sum --dtype float32",
       ],
       liveCommands: [
-        "./scripts/live-benchmark --run-id <run-id> --with-profiling",
+        "./scripts/benchmark --run-id <run-id> --with-profiling",
       ],
       resultEvidence: {
-        title: "Reduction variants need profiler explanation",
+        title: "Reduction variants stream well but still trail PyTorch",
         statusLabel: "Selected report",
-        reportDate: "2026-05-19",
+        reportDate: "2026-05-21",
         summary:
-          "Both Triton reduction variants passed correctness but trailed the PyTorch baseline on the A10G rerun.",
+          "Both Triton reduction variants passed correctness and profiled with high DRAM throughput and occupancy, but still trailed the PyTorch baseline end to end.",
         boundary:
-          "The current result chooses the next question, not a final implementation strategy: profile the faster Triton path before adding variants.",
+          "The profiler points away from a simple memory-coalescing fix; the next change should target launch/finalization overhead or a different reduction structure.",
         stats: [
           {
             label: "PyTorch",
-            value: "0.1495 ms",
-            context: "float32 p50, 449.8 GB/s",
+            value: "0.1485 ms",
+            context: "float32 p50, 452.9 GB/s",
           },
           {
             label: "Iterative Triton",
             value: "0.1761 ms",
-            context: "381.8 GB/s",
+            context: "381.8 GB/s, 93.59% profiled DRAM throughput",
           },
           {
             label: "Two-pass Triton",
-            value: "0.1802 ms",
-            context: "373.1 GB/s",
+            value: "0.1792 ms",
+            context: "375.2 GB/s, 98.89% profiled occupancy",
           },
         ],
       },
@@ -1829,19 +1829,31 @@ export const experimentCatalogContent = {
       },
       question:
         "How much does a fused Triton RMSNorm or LayerNorm kernel move latency versus the PyTorch baseline?",
-      cardSummary: "RMSNorm fusion is the strongest current win.",
-      metricFocus: ["Speedup", "GB/s", "TFLOP/s"],
+      cardSummary: "RMSNorm fusion stays strong across the shape sweep.",
+      metricFocus: ["Speedup", "DRAM throughput", "Occupancy"],
       summary:
-        "Compares PyTorch and Triton fused normalization kernels at 4096x4096 for float16 and float32.",
+        "Compares PyTorch and Triton fused normalization kernels, then checks whether the RMSNorm fp16 win holds across hidden-size shapes.",
       whyItMatters:
-        "Normalization is a realistic LLM primitive where fusion can remove expensive intermediate work and show a clear kernel-level payoff.",
+        "Normalization is a realistic LLM primitive where fusion can remove expensive intermediate work; the shape sweep makes the win harder to dismiss as one lucky point.",
       runner: "CUDA benchmark matrix",
       endpoint: "benchmark-norms",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/norms.py",
-      resultsPath: "experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md",
+      resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
       runShapeSummary:
-        "2 normalization cases at 4096x4096, compared across PyTorch and fused Triton profiles.",
+        "RMSNorm fp16 shape sweep from 512x1024 through 4096x8192, plus 4096x4096 LayerNorm and RMSNorm comparisons.",
       cases: [
+        {
+          id: "rmsnorm-512x1024-float16",
+          description: "small RMSNorm shape sweep point",
+          primaryMeasure: "512x1024",
+          secondaryMeasure: "float16",
+        },
+        {
+          id: "rmsnorm-2048x4096-float16",
+          description: "mid-size RMSNorm shape sweep point",
+          primaryMeasure: "2048x4096",
+          secondaryMeasure: "float16",
+        },
         {
           id: "rmsnorm-4096x4096-float16",
           description: "RMSNorm forward pass over LLM-shaped rows",
@@ -1887,31 +1899,66 @@ export const experimentCatalogContent = {
         "uv run benchmark-norms --backend all --device cuda --rows 4096 --cols 4096 --dtype float16",
       ],
       liveCommands: [
-        "./scripts/live-benchmark --run-id <run-id>",
+        "./scripts/benchmark --run-id <run-id> --include-rmsnorm-shape-sweep --with-profiling",
       ],
       resultEvidence: {
-        title: "Fusion creates the largest measured kernel win",
+        title: "RMSNorm shape sweep keeps fusion as the largest win",
         statusLabel: "Supported",
-        reportDate: "2026-05-19",
+        reportDate: "2026-05-21",
         summary:
-          "Triton fused RMSNorm produced the largest speedup in the A10G rerun, with LayerNorm also beating PyTorch.",
+          "Triton fused RMSNorm produced the largest speedups in the A10G strategy run and stayed ahead across the measured fp16 shape sweep.",
         boundary:
-          "The result supports normalization fusion on the current A10G shape; profiler counters are still needed before claiming why every bottleneck moved.",
+          "The two smallest shape-sweep rows were noisy enough to rerun before precise claims, but the larger rows and profiler counters support the fusion direction.",
         stats: [
           {
-            label: "RMSNorm fp16",
-            value: "5.539x",
-            context: "0.171 ms Triton vs 0.9472 ms PyTorch",
+            label: "RMSNorm fp16 max",
+            value: "5.901x",
+            context: "4096x8192, 0.3103 ms Triton vs 1.831 ms PyTorch",
           },
           {
-            label: "RMSNorm fp32",
-            value: "3.261x",
-            context: "0.3103 ms Triton vs 1.012 ms PyTorch",
+            label: "RMSNorm profile",
+            value: "90.91% DRAM",
+            context: "4096x4096 fp16 with 93.12% occupancy",
           },
           {
             label: "LayerNorm fp32",
-            value: "1.386x",
-            context: "0.3133 ms Triton vs 0.4342 ms PyTorch",
+            value: "1.379x",
+            context: "0.3133 ms Triton vs 0.4321 ms PyTorch",
+          },
+        ],
+        tables: [
+          {
+            title: "RMSNorm fp16 shape sweep",
+            columns: {
+              target: "Shape",
+              outcome: "Winner",
+              p95Latency: "Triton p50",
+              peakWaiting: "Speedup",
+              gpuMax: "Call",
+            },
+            rows: [
+              {
+                target: "512x1024",
+                outcome: "Triton",
+                p95Latency: "0.05018 ms",
+                peakWaiting: "2.367x",
+                gpuMax: "rerun noise",
+              },
+              {
+                target: "2048x4096",
+                outcome: "Triton",
+                p95Latency: "0.1024 ms",
+                peakWaiting: "4.76x",
+                gpuMax: "supported",
+              },
+              {
+                target: "4096x8192",
+                outcome: "Triton",
+                p95Latency: "0.3103 ms",
+                peakWaiting: "5.901x",
+                gpuMax: "supported",
+              },
+            ],
           },
         ],
       },
@@ -1940,7 +1987,7 @@ export const experimentCatalogContent = {
       runner: "CUDA benchmark matrix",
       endpoint: "benchmark-swiglu",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/swiglu.py",
-      resultsPath: "experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md",
+      resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
       runShapeSummary:
         "1 fused activation case at 4096x4096, compared across PyTorch and Triton profiles for float16 and float32.",
       cases: [
@@ -1979,26 +2026,26 @@ export const experimentCatalogContent = {
         "uv run benchmark-swiglu --backend all --device cuda --rows 4096 --cols 4096 --dtype float32",
       ],
       liveCommands: [
-        "./scripts/live-benchmark --run-id <run-id>",
+        "./scripts/benchmark --run-id <run-id> --with-profiling",
       ],
       resultEvidence: {
         title: "Fused activation removes expensive intermediate work",
         statusLabel: "Supported",
-        reportDate: "2026-05-19",
+        reportDate: "2026-05-21",
         summary:
-          "Fused Triton SwiGLU beat PyTorch in both float16 and float32 on the A10G rerun.",
+          "Fused Triton SwiGLU beat PyTorch in both float16 and float32 on the A10G strategy run.",
         boundary:
-          "The result is a strong fusion proof for this shape, but profiler counters should still validate traffic assumptions.",
+          "The result is a strong fusion proof for this shape; keep it behind the same re-profile gate before expanding to adjacent activation shapes.",
         stats: [
           {
             label: "SwiGLU fp16",
-            value: "2.925x",
-            context: "0.2447 ms Triton vs 0.7158 ms PyTorch",
+            value: "2.937x",
+            context: "0.2437 ms Triton vs 0.7158 ms PyTorch",
           },
           {
             label: "SwiGLU fp32",
-            value: "3.112x",
-            context: "0.4567 ms Triton vs 1.421 ms PyTorch",
+            value: "3.119x",
+            context: "0.4547 ms Triton vs 1.418 ms PyTorch",
           },
           {
             label: "Correctness",
@@ -2032,7 +2079,7 @@ export const experimentCatalogContent = {
       runner: "CUDA benchmark matrix",
       endpoint: "benchmark-softmax",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/softmax.py",
-      resultsPath: "experiments/reports/aws-ec2/2026-05-19-a10g-rerun.md",
+      resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
       runShapeSummary:
         "1 row-softmax case at 4096x1024, compared across PyTorch and Triton profiles for float16 and float32.",
       cases: [
@@ -2071,14 +2118,14 @@ export const experimentCatalogContent = {
         "uv run benchmark-softmax --backend all --device cuda --rows 4096 --cols 1024 --dtype float16",
       ],
       liveCommands: [
-        "./scripts/live-benchmark --run-id <run-id> --with-profiling",
+        "./scripts/benchmark --run-id <run-id> --with-profiling",
       ],
       resultEvidence: {
         title: "Current softmax kernel should not be presented as a win",
         statusLabel: "Rejected",
-        reportDate: "2026-05-19",
+        reportDate: "2026-05-21",
         summary:
-          "PyTorch beat the current Triton fused row-softmax kernel in both float16 and float32 on the A10G rerun.",
+          "PyTorch beat the current Triton fused row-softmax kernel in both float16 and float32 on the A10G strategy run.",
         boundary:
           "This rejects the current implementation as a portfolio win; it does not reject future softmax optimization after row-shape and profiler work.",
         stats: [
@@ -2094,7 +2141,7 @@ export const experimentCatalogContent = {
           },
           {
             label: "Triton fp32",
-            value: "0.835x",
+            value: "0.8247x",
             context: "speedup vs PyTorch, below parity",
           },
         ],
@@ -2103,30 +2150,30 @@ export const experimentCatalogContent = {
     {
       projectId: "cuda-kernel-lab",
       slug: "kernel-matmul-tiling",
-      title: "Matmul Tiling Progression",
+      title: "Matmul Tile Sweep",
       category: "Kernel tiling",
-      status: experimentStatus("Initial implementation", "Tensor Core track pending"),
+      status: experimentStatus("Measured on A10G", "PyTorch/cuBLAS still leads"),
       readiness: {
         primary: {
-          label: "Pending",
-          detail: "Tensor Core proof",
-          tone: "pending",
+          label: "Selected report",
+          detail: "Tile sweep",
+          tone: "selected",
         },
       },
       question:
-        "How should the lab progress from a tiled Triton matmul baseline toward Tensor Core utilization?",
-      cardSummary: "Initial tiled matmul sets up the next track.",
-      metricFocus: ["TFLOP/s", "Tile shape", "Tensor Core use"],
+        "Which Triton tile and launch configuration gets closest to the PyTorch/cuBLAS matmul baseline?",
+      cardSummary: "Best Triton tile is measured but still below cuBLAS.",
+      metricFocus: ["TFLOP/s", "Tensor Core use", "Occupancy"],
       summary:
-        "Defines the transition from memory-dominated primitives into reuse, tile shape, and Tensor Core validation.",
+        "Compares focused float16 tile shapes, warp counts, pipeline stages, and Tensor Core profiler counters for 1024x1024x1024 matmul.",
       whyItMatters:
-        "Matmul is the bridge from teaching memory traffic and fusion to the compute path that dominates transformer inference.",
+        "Matmul is the bridge from memory traffic and fusion into the compute path that dominates transformer inference; the current evidence is useful because it shows where Triton is not yet enough.",
       runner: "CUDA benchmark matrix",
       endpoint: "benchmark-matmul",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/matmul.py",
-      resultsPath: "docs/optimization-strategies.md",
+      resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
       runShapeSummary:
-        "Matmul cases are organized around M/N/K tile sweeps and Tensor Core profiler validation.",
+        "1024x1024x1024 float16 matmul tile sweep with block M/N/K, num_warps, num_stages, and input_precision variants.",
       cases: [
         {
           id: "matmul-1024x1024x1024",
@@ -2141,12 +2188,12 @@ export const experimentCatalogContent = {
           description: "PyTorch matmul baseline",
         },
         {
-          id: "triton-tiled",
-          description: "initial Triton tiled tl.dot implementation",
+          id: "triton-best-tile",
+          description: "best measured Triton tile: 128x64x32, 8 warps, 3 stages, tf32 input precision",
         },
         {
-          id: "tensor-core-planned",
-          description: "planned Tensor Core validation track",
+          id: "triton-profiled-tile",
+          description: "profiled Triton tile: 64x64x32, 4 warps, 3 stages",
         },
       ],
       metricGroups: [
@@ -2167,48 +2214,263 @@ export const experimentCatalogContent = {
         "uv run benchmark-matmul --backend all --device cuda --m 1024 --n 1024 --k 1024 --dtype float16",
       ],
       liveCommands: [
-        "./scripts/live-benchmark --run-id <run-id> --with-profiling",
+        "./scripts/benchmark --run-id <run-id> --include-matmul-sweep --with-profiling",
       ],
       pendingNextRuns: [
         {
-          label: "Stable matmul baseline",
-          command: "uv run benchmark-matmul --backend all --device cuda --m 1024 --n 1024 --k 1024 --dtype float16",
-          reason: "Capture the first comparable PyTorch and Triton matmul row before sweeping tile shapes.",
+          label: "Retune from profiler counters",
+          command: "uv run benchmark-matmul --backend triton --device cuda --m 1024 --n 1024 --k 1024 --dtype float16 --block-m 128 --block-n 64 --block-k 32 --num-warps 8 --num-stages 3 --input-precision tf32",
+          reason: "Use the measured occupancy, register, shared-memory, and Tensor Core counters to choose the next bounded tile change.",
         },
         {
-          label: "Tensor Core profiler pass",
-          command: "./scripts/live-benchmark --run-id <run-id> --with-profiling",
-          reason: "Confirm whether the optimized path is actually using Tensor Core instructions.",
+          label: "Re-profile best tile",
+          command: "./scripts/benchmark --run-id <run-id> --include-matmul-sweep --with-profiling",
+          reason: "Profile the current best measured tile, not only the earlier 64x64x32 comparison point.",
         },
       ],
+      resultEvidence: {
+        title: "Triton tiling is active but not yet a cuBLAS win",
+        statusLabel: "Selected report",
+        reportDate: "2026-05-21",
+        summary:
+          "The strategy run found a best Triton tile at 25.74 TFLOP/s, while PyTorch/cuBLAS stayed around 30-31 TFLOP/s on the same A10G shape.",
+        boundary:
+          "This is progress evidence for the tiling track, not a claim that the custom matmul should replace the library baseline.",
+        stats: [
+          {
+            label: "Best Triton tile",
+            value: "25.74 TFLOP/s",
+            context: "128x64x32, 8 warps, 3 stages, tf32 input precision",
+          },
+          {
+            label: "PyTorch/cuBLAS",
+            value: "30-31 TFLOP/s",
+            context: "same 1024x1024x1024 float16 shape",
+          },
+          {
+            label: "Profiled tile",
+            value: "45.19% Tensor Core",
+            context: "22.49% occupancy, 80 registers/thread, 16 KiB dynamic shared memory",
+          },
+        ],
+      },
+    },
+    {
+      projectId: "cuda-kernel-lab",
+      slug: "kernel-decode-step-graph-replay",
+      title: "Decode Step Graph Replay",
+      category: "Decode scheduling",
+      status: experimentStatus("Measured on A10G", "Resident-KV replay measured"),
+      readiness: {
+        primary: {
+          label: "Selected report",
+          detail: "Round 12 decode",
+          tone: "selected",
+        },
+      },
+      question:
+        "How far can resident-KV same-stream piecewise CUDA Graph replay reduce dynamic decode-step latency before a custom attention kernel?",
+      cardSummary: "Resident-KV graph replay is now measured and caveated.",
+      metricFocus: ["p50 latency", "p95 tail", "Padding", "Correctness"],
+      summary:
+        "Tracks a synthetic decode step where fused pre/post regions replay as CUDA Graphs around SDPA attention with head-major resident KV views.",
+      whyItMatters:
+        "Decode replay connects kernel optimization to serving mechanics: the question shifts from one custom kernel to launch overhead, dynamic buckets, resident cache layout, and tail latency.",
+      runner: "CUDA benchmark matrix",
+      endpoint: "benchmark-decode-step",
+      sourcePath: "src/cuda_kernel_lab/benchmarks/decode_step.py",
+      resultsPath: "experiments/reports/aws-ec2/2026-05-22-round12-kv-active-views.md",
+      runShapeSummary:
+        "Fixed-shape and dynamic decode-step replay at max_batch_size=8, seq_len=2048, heads=16, head_dim=64, hidden_dim=1024, intermediate_dim=4096.",
+      cases: [
+        {
+          id: "decode-step-fixed-same-stream",
+          description: "fixed-shape same-stream piecewise CUDA Graph replay",
+          primaryMeasure: "0.1375 ms p50",
+          secondaryMeasure: "batch=1, seq_len=2048, float16",
+        },
+        {
+          id: "decode-step-dynamic-dense-buckets",
+          description: "dynamic same-stream graph replay with dense active-batch buckets",
+          primaryMeasure: "0.155-0.158 ms p50",
+          secondaryMeasure: "0.228-0.232 ms p95, zero padding",
+        },
+        {
+          id: "decode-attention-baseline-context",
+          description: "earlier PyTorch contiguous-KV attention baseline kept as context",
+          primaryMeasure: "0.2273 ms p50",
+          secondaryMeasure: "seq_len=2048, heads=16, head_dim=128",
+        },
+      ],
+      servingProfiles: [
+        {
+          id: "naive-eager",
+          description: "decomposed PyTorch decode step with eager launches",
+        },
+        {
+          id: "fused-graph",
+          description: "fused pre/post work replayed inside CUDA Graph capture",
+        },
+        {
+          id: "dynamic-piecewise-graph-same-stream",
+          description: "same-stream dynamic piecewise graph replay around SDPA attention",
+        },
+        {
+          id: "torch-contiguous-kv-baseline",
+          description: "PyTorch contiguous-KV attention baseline retained as the custom-kernel target",
+        },
+      ],
+      metricGroups: [
+        {
+          label: "Latency",
+          metrics: ["p50 latency", "p95 latency", "p99 latency", "p95/p50 noise"],
+        },
+        {
+          label: "Scheduling",
+          metrics: ["graph hit rate", "bucket policy", "padding waste", "scheduler p95"],
+        },
+        {
+          label: "Replay path",
+          metrics: ["resident KV views", "same-stream replay", "eager post-add", "correctness"],
+        },
+      ],
+      localCommands: [
+        "uv run benchmark-decode-step --dynamic-trace --mode all --device cuda --dtype float16 --attention-backend sdpa-head-major --dynamic-copy-mode resident --piecewise-post-mode eager --orchestration-timing off",
+      ],
+      liveCommands: [
+        "./scripts/benchmark --run-id <run-id> --only-decode-step --include-decode-bucket-sweep --include-decode-tail-sweep --decode-attention-backend sdpa-head-major --decode-dynamic-copy-mode resident --decode-piecewise-post-mode eager --decode-orchestration-timing off --decode-tail-buckets '1,2,3,4,5,6,7,8'",
+      ],
+      pendingNextRuns: [
+        {
+          label: "Turn timing probes back on",
+          command: "./scripts/benchmark --run-id <run-id> --only-decode-step --include-decode-bucket-sweep --decode-attention-backend sdpa-head-major --decode-dynamic-copy-mode resident --decode-piecewise-post-mode eager",
+          reason: "Use per-region host timings to explain the remaining p95 tail before treating p50 as the whole story.",
+        },
+        {
+          label: "Custom attention target",
+          command: "uv run benchmark-attention --backend triton --device cuda --seq-len 2048 --num-heads 16 --head-dim 128 --dtype float16",
+          reason: "Keep the 0.2273 ms contiguous-KV PyTorch baseline as the first custom attention target before paged-cache indirection.",
+        },
+      ],
+      resultEvidence: {
+        title: "Resident-KV graph replay defines the current decode upper bound",
+        statusLabel: "Selected report",
+        reportDate: "2026-05-22",
+        summary:
+          "Round 12 benchmarks resident head-major KV views, same-stream piecewise CUDA Graph replay, eager post-add, dense active-batch buckets, and hot-loop timing with orchestration probes off.",
+        boundary:
+          "Read this as a synthetic resident-KV upper bound, not an end-to-end serving result or a custom attention-kernel win. The p95 tail still deserves timing-probe and profiler follow-up.",
+        stats: [
+          {
+            label: "Fixed-shape replay",
+            value: "0.1375 ms",
+            context: "same-stream piecewise graph p50 at batch=1, seq_len=2048",
+          },
+          {
+            label: "Dynamic replay",
+            value: "0.155-0.158 ms",
+            context: "dense-bucket same-stream p50 across three tail seeds",
+          },
+          {
+            label: "Tail",
+            value: "0.228-0.232 ms",
+            context: "p95 with zero padding and 27/27 correctness checks passing",
+          },
+          {
+            label: "Attention baseline",
+            value: "0.2273 ms",
+            context: "earlier PyTorch contiguous-KV p50 target for a future custom kernel",
+          },
+        ],
+        tables: [
+          {
+            title: "Decode replay progression",
+            columns: {
+              target: "Path",
+              outcome: "Call",
+              p95Latency: "p50",
+              peakWaiting: "p95",
+              gpuMax: "Boundary",
+            },
+            rows: [
+              {
+                target: "naive eager",
+                outcome: "baseline",
+                p95Latency: "0.3395 ms",
+                peakWaiting: "0.3668 ms",
+                gpuMax: "decomposed PyTorch",
+              },
+              {
+                target: "fused graph",
+                outcome: "supported",
+                p95Latency: "0.1482 ms",
+                peakWaiting: "0.1589 ms",
+                gpuMax: "fixed shape",
+              },
+              {
+                target: "same-stream piecewise graph",
+                outcome: "measured",
+                p95Latency: "0.1375 ms",
+                peakWaiting: "0.1681 ms",
+                gpuMax: "fixed shape",
+              },
+              {
+                target: "dynamic dense buckets",
+                outcome: "caveated",
+                p95Latency: "0.155-0.158 ms",
+                peakWaiting: "0.228-0.232 ms",
+                gpuMax: "resident-KV upper bound",
+              },
+            ],
+          },
+        ],
+        sourceReports: [
+          {
+            label: "Round 12 report",
+            path: "experiments/reports/aws-ec2/2026-05-22-round12-kv-active-views.md",
+          },
+          {
+            label: "Benchmark workflow",
+            path: "docs/benchmark-workflow.md",
+          },
+          {
+            label: "Strategy guide",
+            path: "docs/optimization-strategies.md",
+          },
+          {
+            label: "Attention baseline",
+            path: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
+          },
+        ],
+      },
     },
     {
       projectId: "cuda-kernel-lab",
       slug: "kernel-profiler-validation",
       title: "Profiler Validation",
       category: "Profiler evidence",
-      status: experimentStatus("Profiler captures attempted", "Compact summaries blocked"),
+      status: experimentStatus("Profiler summaries captured", "Profiler-backed interpretation ready"),
       readiness: {
         primary: {
-          label: "Blocked",
-          detail: "Nsight summaries",
-          tone: "blocked",
+          label: "Selected report",
+          detail: "Nsight counters",
+          tone: "selected",
         },
       },
       question:
-        "Do Nsight Compute counters confirm the benchmark interpretation for memory primitives and fused kernels?",
-      cardSummary: "Profiler summaries are the next evidence gate.",
-      metricFocus: ["Occupancy", "Memory throughput", "Registers"],
+        "Do Nsight Compute counters confirm or challenge the benchmark interpretation for memory, fusion, reduction, and matmul kernels?",
+      cardSummary: "Profiler counters now explain the strongest win and active gaps.",
+      metricFocus: ["DRAM throughput", "Occupancy", "Tensor Core use"],
       summary:
-        "Tracks the profiler-backed proof needed to explain why memory primitives trail while fused kernels win.",
+        "Tracks compact profiler summaries that explain why memory primitives trail, why RMSNorm is credible, and why matmul still needs tuning.",
       whyItMatters:
         "Benchmark numbers show what moved; profiler counters are what make the optimization explanation credible.",
       runner: "Nsight Compute summary workflow",
       endpoint: "nsight-summary",
       sourcePath: "src/cuda_kernel_lab/nsight_summary.py",
-      resultsPath: "profiling/reports/2026-05-19-a10g-profile/",
+      resultsPath: "profiling/reports/2026-05-21-strategy-next/",
       runShapeSummary:
-        "Focused profiler targets cover vector_add, reduction_sum, RMSNorm, and future matmul captures.",
+        "Focused profiler targets cover vector_add, reduction_sum, RMSNorm, and tiled matmul captures.",
       cases: [
         {
           id: "vector-add-float32-profile",
@@ -2217,9 +2479,21 @@ export const experimentCatalogContent = {
           secondaryMeasure: "float32",
         },
         {
+          id: "reduction-sum-float32-profile",
+          description: "reduction strategy profiler target",
+          primaryMeasure: "reduction_sum",
+          secondaryMeasure: "float32",
+        },
+        {
           id: "rmsnorm-float16-profile",
           description: "largest fusion win profiler target",
           primaryMeasure: "RMSNorm",
+          secondaryMeasure: "float16",
+        },
+        {
+          id: "matmul-float16-profile",
+          description: "Tensor Core tiling profiler target",
+          primaryMeasure: "matmul",
           secondaryMeasure: "float16",
         },
       ],
@@ -2251,20 +2525,46 @@ export const experimentCatalogContent = {
         "uv run nsight-summary --input profiling/nsight_compute/<capture>.csv --output profiling/reports/<capture>.md",
       ],
       liveCommands: [
-        "./scripts/live-benchmark --run-id <run-id> --with-profiling",
+        "./scripts/benchmark --run-id <run-id> --with-profiling",
       ],
       pendingNextRuns: [
         {
-          label: "Repair profiler capture",
-          command: "./scripts/live-benchmark --run-id <run-id> --with-profiling",
-          reason: "The current profile notes are placeholders because the profile command failed before compact counters were generated.",
+          label: "Profile noisy RMSNorm rows",
+          command: "./scripts/benchmark --run-id <run-id> --include-rmsnorm-shape-sweep --with-profiling",
+          reason: "The smallest RMSNorm shape-sweep rows passed correctness but had enough noise to deserve a focused re-profile before precise claims.",
         },
         {
-          label: "Publish compact summaries",
-          command: "uv run nsight-summary --input profiling/nsight_compute/<capture>.csv --output profiling/reports/<capture>.md",
-          reason: "Commit markdown summaries that explain the benchmark result without storing large binary profiler artifacts.",
+          label: "Profile best matmul tile",
+          command: "./scripts/benchmark --run-id <run-id> --include-matmul-sweep --with-profiling",
+          reason: "The committed profile explains one tile; the current best measured tile should get the same counter treatment before the next change.",
         },
       ],
+      resultEvidence: {
+        title: "Profiler counters turn benchmark results into optimization calls",
+        statusLabel: "Selected report",
+        reportDate: "2026-05-21",
+        summary:
+          "Compact Nsight summaries now cover memory, reduction, RMSNorm, and matmul targets from the strategy run.",
+        boundary:
+          "These counters explain the current claims; they do not make every faster p50 stable, and noisy rows still need reruns.",
+        stats: [
+          {
+            label: "RMSNorm fp16",
+            value: "90.91% DRAM",
+            context: "93.12% occupancy, 40 registers/thread",
+          },
+          {
+            label: "Vector add fp32",
+            value: "91.58% DRAM",
+            context: "81.80% occupancy, 26 registers/thread",
+          },
+          {
+            label: "Matmul tile",
+            value: "45.19% Tensor Core",
+            context: "22.49% occupancy, 80 registers/thread",
+          },
+        ],
+      },
     },
   ] satisfies ExperimentCatalogItem[],
 };

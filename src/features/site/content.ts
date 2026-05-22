@@ -7,6 +7,8 @@ export const LEGACY_GPU_INFERENCE_PROJECT_VALIDATION_PATH = `${LEGACY_GPU_INFERE
 export const PROJECT_PATH = GPU_INFERENCE_PROJECT_PATH;
 export const PROJECT_VALIDATION_PATH = GPU_INFERENCE_PROJECT_VALIDATION_PATH;
 export const EXPERIMENTS_PATH = "/experiments";
+export const GPU_INFERENCE_EXPERIMENTS_PATH = `${EXPERIMENTS_PATH}/gpu-inference-lab`;
+export const CUDA_KERNEL_EXPERIMENTS_PATH = `${EXPERIMENTS_PATH}/cuda-kernel-lab`;
 export const RESUME_PATH = "/resume";
 
 export const siteProfile = {
