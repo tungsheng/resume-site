@@ -147,8 +147,31 @@ const projectEvidenceItemSx: SxProps<Theme> = (theme) => ({
 const projectIndexSummarySx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
   display: "grid",
   gap: 0.65,
+  alignSelf: { md: "end" },
   p: { xs: 1.25, sm: 1.35 },
 });
+
+const projectIndexListSx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 2, md: 2.25 },
+};
+
+const projectIndexHeaderSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "minmax(0, 1fr) minmax(18rem, 0.62fr)",
+  },
+  gap: { xs: 1.15, md: 2 },
+  alignItems: "end",
+  width: "100%",
+};
+
+const projectIndexHeadingSx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 0.85, md: 1 },
+  maxWidth: "48rem",
+};
 
 const cudaWorkflowGridSx: SxProps<Theme> = {
   display: "grid",
@@ -728,42 +751,29 @@ function ProjectsIndexRoute() {
       activeNav="project"
       breadcrumbs={[HOME_BREADCRUMB, { label: "Projects" }]}
     >
-      <PageHero contentWidth="60rem">
-        <Typography component="h1" variant="h3">
-          {projectPortfolioContent.title}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "58rem" }}>
-          {projectPortfolioContent.lede}
-        </Typography>
-        <Box sx={projectIndexSummarySx}>
-          <Typography variant="body2" color="text.secondary">
-            {projectPortfolioContent.summary}
-          </Typography>
-        </Box>
-        <ActionLinkRow>
-          <Button href={GPU_INFERENCE_PROJECT_PATH} variant="contained">
-            GPU Inference Lab
-          </Button>
-          <Button href={CUDA_KERNEL_PROJECT_PATH} variant="outlined">
-            CUDA Kernel Lab
-          </Button>
-          <Button href={EXPERIMENTS_PATH} variant="outlined">
-            Experiment catalog
-          </Button>
-        </ActionLinkRow>
-      </PageHero>
-
       <PageSection>
-        <SectionHeader
-          eyebrow="Selected work"
-          title="Project evidence"
-          copy="Each project owns a different layer of the GPU inference stack, with experiments attached to the project that produced the evidence."
-        />
+        <Box sx={projectIndexListSx}>
+          <Box sx={projectIndexHeaderSx}>
+            <Box sx={projectIndexHeadingSx}>
+              <Typography component="h1" variant="h3">
+                {projectPortfolioContent.title}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {projectPortfolioContent.lede}
+              </Typography>
+            </Box>
+            <Box sx={projectIndexSummarySx}>
+              <Typography variant="body2" color="text.secondary">
+                {projectPortfolioContent.summary}
+              </Typography>
+            </Box>
+          </Box>
 
-        <Box sx={projectIndexGridSx}>
-          {projectPortfolioContent.projects.map((project) => (
-            <ProjectPortfolioCard key={project.id} project={project} />
-          ))}
+          <Box sx={projectIndexGridSx}>
+            {projectPortfolioContent.projects.map((project) => (
+              <ProjectPortfolioCard key={project.id} project={project} />
+            ))}
+          </Box>
         </Box>
       </PageSection>
     </PublicSiteLayout>

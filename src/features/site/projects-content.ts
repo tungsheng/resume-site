@@ -31,7 +31,7 @@ export const projectPortfolioContent = {
   lede:
     "Evidence-backed GPU systems work across serving infrastructure and kernel optimization.",
   summary:
-    "The portfolio separates serving decisions from CUDA kernel optimization, with each experiment tied to the project it supports.",
+    "Serving infrastructure decisions and CUDA kernel optimization are separated by project, with experiments attached to the evidence they support.",
   projects: [
     {
       id: "gpu-inference-lab",
