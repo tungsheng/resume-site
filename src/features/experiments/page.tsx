@@ -24,6 +24,11 @@ import {
   type ExperimentReadinessTone,
   type ExperimentResultEvidenceTable,
 } from "../site/experiment-catalog-content";
+import {
+  decisionProjectPath,
+  getDecisionRecordsByExperimentSlug,
+  type DecisionRecord,
+} from "../site/decision-content";
 import { getProjectById, projectPortfolioContent, type ProjectId } from "../site/projects-content";
 import {
   ActionLinkRow,
@@ -217,6 +222,22 @@ const conceptArrowSx: SxProps<Theme> = (theme) => ({
   fontSize: "1rem",
   flexShrink: 0,
   display: { xs: "none", sm: "inline-flex" },
+});
+
+const relatedDecisionGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "repeat(2, minmax(0, 1fr))",
+  },
+  gap: { xs: 1, md: 1.15 },
+};
+
+const relatedDecisionCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
+  display: "grid",
+  gap: 0.75,
+  alignContent: "start",
+  p: { xs: 1.2, sm: 1.35 },
 });
 
 const browseRowColumns = {
@@ -807,7 +828,7 @@ function RelatedProjectEvidenceBand() {
           {item.status}
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          Architecture decisions live in the project record
+          Decisions live in the project decision record
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {item.question}
@@ -1411,6 +1432,57 @@ function ExperimentDetailSummaryStrip({ experiment }: { experiment: ExperimentCa
   );
 }
 
+function RelatedDecisionCard({ decision }: { decision: DecisionRecord }) {
+  return (
+    <Box component="section" sx={relatedDecisionCardSx}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, alignItems: "center" }}>
+        <Chip label={decision.status} size="small" variant="outlined" sx={accentChipSx} />
+        <Typography variant="overline" sx={{ color: "secondary.dark" }}>
+          {decision.domain}
+        </Typography>
+      </Box>
+      <Typography variant="h6">{decision.title}</Typography>
+      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+        {decision.call}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {decision.evidence}
+      </Typography>
+      <Button
+        href={decisionProjectPath(decision.projectId)}
+        size="small"
+        endIcon={<ArrowForwardRoundedIcon />}
+        sx={{ justifySelf: "start" }}
+      >
+        View decision record
+      </Button>
+    </Box>
+  );
+}
+
+function RelatedDecisionsSection({ experiment }: { experiment: ExperimentCatalogItem }) {
+  const relatedDecisions = getDecisionRecordsByExperimentSlug(experiment.slug);
+
+  if (relatedDecisions.length === 0) {
+    return null;
+  }
+
+  return (
+    <PageSection>
+      <SectionHeader
+        eyebrow="Decision links"
+        title="Supports decisions"
+        copy="Decision records own the project conclusions; this experiment supplies evidence for the calls below."
+      />
+      <Box sx={relatedDecisionGridSx}>
+        {relatedDecisions.map((decision) => (
+          <RelatedDecisionCard key={decision.id} decision={decision} />
+        ))}
+      </Box>
+    </PageSection>
+  );
+}
+
 function RunShapeColumn({
   title,
   count,
@@ -1497,6 +1569,8 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
       </PageSection>
 
       <ExperimentResultSection experiment={experiment} />
+
+      <RelatedDecisionsSection experiment={experiment} />
 
       <PageSection>
         <SectionHeader

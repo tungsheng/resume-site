@@ -75,9 +75,9 @@ describe("ExperimentsPage", () => {
     expect(html).not.toContain("href=\"/experiments/kernel-memory-primitives\"");
     expect(html).not.toContain("href=\"/experiments/kernel-normalization-fusion\"");
     expect(html).toContain("GPU inference evidence");
-    expect(html).toContain("Architecture decisions live in the project record");
+    expect(html).toContain("Decisions live in the project decision record");
     expect(html).toContain("remain in the GPU Inference Lab decision record");
-    expect(html).toContain("href=\"/projects/gpu-inference-lab/validation\"");
+    expect(html).toContain("href=\"/decisions/gpu-inference-lab\"");
     expect(html).not.toContain("href=\"/experiments/platform-validation\"");
     expect(html).toContain("Full delivery can hide queueing.");
     expect(html).toContain("Concurrency");
@@ -213,6 +213,10 @@ describe("ExperimentsPage", () => {
     expect(html).not.toContain("seqs-24 @ 1.15");
     expect(html).not.toContain("40.57s");
     expect(html).toContain("Results summary");
+    expect(html).toContain("Supports decisions");
+    expect(html).toContain("Long-context boundary");
+    expect(html).toContain("Long-context scheduler caps");
+    expect(html).toContain("href=\"/decisions/gpu-inference-lab\"");
     expect(html).not.toContain("Live result pending");
     expect(html.indexOf("Result evidence")).toBeLessThan(html.indexOf("How to run"));
     expect(html).toContain(

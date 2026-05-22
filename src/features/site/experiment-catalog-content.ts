@@ -1,4 +1,4 @@
-import { GPU_INFERENCE_PROJECT_VALIDATION_PATH } from "./content";
+import { GPU_INFERENCE_DECISIONS_PATH } from "./content";
 import type { ProjectId } from "./projects-content";
 
 const GPU_INFERENCE_REPO_BASE = "https://github.com/tungsheng/gpu-inference-lab/blob/main";
@@ -144,7 +144,7 @@ export const experimentCatalogContent = {
     status: "GPU inference evidence",
     question:
       "Admission, cold start, active-pressure HPA, FP8 KV cache, and Blackwell FP4 readiness remain in the GPU Inference Lab decision record.",
-    href: GPU_INFERENCE_PROJECT_VALIDATION_PATH,
+    href: GPU_INFERENCE_DECISIONS_PATH,
   },
   conceptLead:
     "Each experiment starts with one serving question and ends with a result, rejection, or bounded gap.",

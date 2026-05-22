@@ -31,7 +31,7 @@ describe("ProjectPage", () => {
     );
     expect(html).toContain("GitHub");
     expect(html).toContain("View experiments");
-    expect(html).toContain("View resume");
+    expect(html).toContain("View decisions");
     expect(html).toContain("At a glance");
     expect(html).toContain(
       "One public request path, one observable scale path, and an evidence gate that separates supported decisions from open work."
@@ -153,7 +153,7 @@ describe("ProjectPage", () => {
     );
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
     expect(html).toContain("Architecture decisions");
-    expect(html).toContain("href=\"/projects/gpu-inference-lab/validation\"");
+    expect(html).toContain("href=\"/decisions/gpu-inference-lab\"");
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/platform/inference/ingress.yaml\""
     );
@@ -171,74 +171,6 @@ describe("ProjectPage", () => {
     );
     expect(html).toContain("href=\"/experiments\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
-  });
-
-  test("renders the platform decision record on the validation route", () => {
-    const html = renderToStaticMarkup(
-      <ProjectPage initialPath="/projects/gpu-inference-lab/validation" />,
-    );
-
-    expect(html).toContain("Architecture Decisions");
-    expect(html).toContain("aria-label=\"Breadcrumb\"");
-    expect(html).toContain("What the EKS/vLLM evidence supports");
-    expect(html).toContain("Decision table");
-    expect(html).toContain("Architecture decision table");
-    expect(html).toContain("Best evidence");
-    expect(html).toContain("Supported");
-    expect(html).toContain("Bounded admission");
-    expect(html).toContain("Long-context boundary");
-    expect(html).toContain("Long-context scheduler caps");
-    expect(html).toContain("Small-request scheduler");
-    expect(html).toContain("Rejected");
-    expect(html).toContain("FP8 KV on g4dn");
-    expect(html).toContain("Partial");
-    expect(html).toContain("Active-pressure target");
-    expect(html).toContain("Useful-work cost");
-    expect(html).toContain("Blocked");
-    expect(html).toContain("Blackwell FP4");
-    expect(html).toContain("Scan-first record");
-    expect(html).toContain("Bound burst traffic");
-    expect(html).toContain("100% vs 76.98-88.14%");
-    expect(html).toContain("dropped 237-787 iterations");
-    expect(html).toContain("Optimize readiness");
-    expect(html).toContain("425-439s");
-    expect(html).toContain("image, container, and model readiness drove the wait");
-    expect(html).toContain("Gate 8192/300");
-    expect(html).toContain("1.20 req/s, 36.8s queue");
-    expect(html).toContain("The latest repeats still deliver 100%");
-    expect(html).toContain("Queue attribution");
-    expect(html).toContain("Bound queue before decode tuning");
-    expect(html).toContain("36.93s -&gt; 0.285s");
-    expect(html).toContain("Scheduler cap tuning");
-    expect(html).toContain("Reject as first fix");
-    expect(html).toContain("55.58-76.24s p95");
-    expect(html).toContain("Reject FP8 KV here");
-    expect(html).toContain("47.58-69.12%");
-    expect(html).toContain("Decision evidence visuals");
-    expect(html).toContain("Local MUI visuals recreate the key proof points");
-    expect(html).toContain("Long-context knee");
-    expect(html).toContain("p95 queue");
-    expect(html).toContain("p95 TTFT");
-    expect(html).toContain("Long-context fix attempt");
-    expect(html).toContain("Cost per useful work");
-    expect(html).toContain("Peak waiting");
-    expect(html).toContain("57 waiting");
-    expect(html).toContain("seqs-16 @ 1.20");
-    expect(html).toContain("76.24s");
-    expect(html).toContain("batched-16384 @ 1.20");
-    expect(html).toContain("55.58s");
-    expect(html).toContain("admission-032 @ 1.25");
-    expect(html).toContain("27.98s");
-    expect(html).toContain("$0.019752");
-    expect(html).toContain("burst optimized");
-    expect(html).toContain("10.91s");
-    expect(html).toContain("Updated: May 18, 2026 UTC");
-    expect(html).toContain("Workflow: ./scripts/evaluate + ./scripts/experiment");
-    expect(html).toContain("Evidence type: Curated decisions");
-    expect(html).toContain("Project overview");
-    expect(html).toContain("Experiment catalog");
-    expect(html).toContain("href=\"/projects/gpu-inference-lab\"");
-    expect(html).toContain("href=\"/experiments\"");
   });
 
   test("renders the CUDA Kernel Lab project route", () => {
@@ -272,6 +204,7 @@ describe("ProjectPage", () => {
     expect(html).not.toContain("Optimization ladder");
     expect(html).toContain("href=\"/projects\"");
     expect(html).toContain("href=\"/experiments/cuda-kernel-lab\"");
+    expect(html).toContain("href=\"/decisions/cuda-kernel-lab\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab\"");
   });
 });

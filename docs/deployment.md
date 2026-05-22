@@ -73,12 +73,16 @@ The current container serves these public routes:
 - `/`
 - `/projects`
 - `/projects/gpu-inference-lab`
-- `/projects/gpu-inference-lab/validation`
 - `/projects/cuda-kernel-lab`
 - `/experiments`
+- `/experiments/gpu-inference-lab`
+- `/experiments/cuda-kernel-lab`
+- `/decisions`
+- `/decisions/gpu-inference-lab`
+- `/decisions/cuda-kernel-lab`
 - `/resume`
 
-The older `/project/cloud-inference-platform` paths remain served as compatibility aliases.
+The older `/project/cloud-inference-platform` paths and `/projects/gpu-inference-lab/validation` remain served as compatibility aliases.
 
 It also serves the PDF export endpoint at `/api/public-pdf`.
 

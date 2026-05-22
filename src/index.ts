@@ -9,6 +9,7 @@ import homePage from "../public/index.html";
 import resumePage from "../public/resume.html";
 import projectPage from "../public/project.html";
 import experimentsPage from "../public/experiments.html";
+import decisionsPage from "../public/decisions.html";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -38,14 +39,17 @@ server = Bun.serve({
     "/": homePage,
     "/projects": projectPage,
     "/projects/gpu-inference-lab": projectPage,
-    "/projects/gpu-inference-lab/validation": projectPage,
+    "/projects/gpu-inference-lab/validation": decisionsPage,
     "/projects/cuda-kernel-lab": projectPage,
     "/project/cloud-inference-platform": projectPage,
-    "/project/cloud-inference-platform/validation": projectPage,
+    "/project/cloud-inference-platform/validation": decisionsPage,
     "/experiments": experimentsPage,
     "/experiments/gpu-inference-lab": experimentsPage,
     "/experiments/cuda-kernel-lab": experimentsPage,
     "/experiments/:slug": experimentsPage,
+    "/decisions": decisionsPage,
+    "/decisions/gpu-inference-lab": decisionsPage,
+    "/decisions/cuda-kernel-lab": decisionsPage,
     "/resume": resumePage,
 
     // PDF export routes
@@ -96,5 +100,8 @@ console.log("[resume-site] Resume server started", {
   experiments: `http://localhost:${PORT}/experiments`,
   gpuInferenceExperiments: `http://localhost:${PORT}/experiments/gpu-inference-lab`,
   cudaKernelExperiments: `http://localhost:${PORT}/experiments/cuda-kernel-lab`,
+  decisions: `http://localhost:${PORT}/decisions`,
+  gpuInferenceDecisions: `http://localhost:${PORT}/decisions/gpu-inference-lab`,
+  cudaKernelDecisions: `http://localhost:${PORT}/decisions/cuda-kernel-lab`,
   resume: `http://localhost:${PORT}/resume`,
 });

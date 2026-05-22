@@ -17,11 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha, type SxProps, type Theme } from "@mui/material/styles";
-import { EXPERIMENTS_PATH, PROJECTS_PATH, RESUME_PATH, siteProfile } from "./content";
+import { DECISIONS_PATH, EXPERIMENTS_PATH, PROJECTS_PATH, RESUME_PATH, siteProfile } from "./content";
 import { composeSx } from "./styles";
 import { monoStack } from "../../theme";
 
-export type PublicNavKey = "home" | "project" | "experiments" | "resume";
+export type PublicNavKey = "home" | "project" | "experiments" | "decisions" | "resume";
 
 export type SiteBreadcrumbItem = {
   label: string;
@@ -32,6 +32,7 @@ const NAV_ITEMS: Array<{ key: PublicNavKey; label: string; href: string }> = [
   { key: "home", label: "Home", href: "/" },
   { key: "project", label: "Projects", href: PROJECTS_PATH },
   { key: "experiments", label: "Experiments", href: EXPERIMENTS_PATH },
+  { key: "decisions", label: "Decisions", href: DECISIONS_PATH },
   { key: "resume", label: "Resume", href: RESUME_PATH },
 ];
 

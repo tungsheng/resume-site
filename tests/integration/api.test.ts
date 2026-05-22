@@ -48,12 +48,12 @@ describe("API Integration", () => {
     expect(html).toContain("Projects | Tony Lee");
   });
 
-  itIfIntegration("GET /projects/gpu-inference-lab/validation serves the projects shell", async () => {
+  itIfIntegration("GET /projects/gpu-inference-lab/validation serves the decisions shell", async () => {
     const res = await fetch(`${BASE_URL}/projects/gpu-inference-lab/validation`);
     expect(res.status).toBe(200);
 
     const html = await res.text();
-    expect(html).toContain("Projects | Tony Lee");
+    expect(html).toContain("Decisions | Tony Lee");
   });
 
   itIfIntegration("GET /projects/cuda-kernel-lab serves the projects shell", async () => {
@@ -86,6 +86,30 @@ describe("API Integration", () => {
 
     const html = await res.text();
     expect(html).toContain("Experiments | Tony Lee");
+  });
+
+  itIfIntegration("GET /decisions serves the decisions shell", async () => {
+    const res = await fetch(`${BASE_URL}/decisions`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Decisions | Tony Lee");
+  });
+
+  itIfIntegration("GET /decisions/gpu-inference-lab serves the decisions shell", async () => {
+    const res = await fetch(`${BASE_URL}/decisions/gpu-inference-lab`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Decisions | Tony Lee");
+  });
+
+  itIfIntegration("GET /decisions/cuda-kernel-lab serves the decisions shell", async () => {
+    const res = await fetch(`${BASE_URL}/decisions/cuda-kernel-lab`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Decisions | Tony Lee");
   });
 
   itIfIntegration("GET /resume serves the resume shell", async () => {

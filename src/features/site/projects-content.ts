@@ -1,7 +1,8 @@
 import {
+  CUDA_KERNEL_DECISIONS_PATH,
   CUDA_KERNEL_PROJECT_PATH,
+  GPU_INFERENCE_DECISIONS_PATH,
   GPU_INFERENCE_PROJECT_PATH,
-  GPU_INFERENCE_PROJECT_VALIDATION_PATH,
 } from "./content";
 import { projectContent } from "./project-content";
 
@@ -51,7 +52,7 @@ export const projectPortfolioContent = {
       experimentCount: 7,
       primaryAction: {
         label: "Architecture decisions",
-        href: GPU_INFERENCE_PROJECT_VALIDATION_PATH,
+        href: GPU_INFERENCE_DECISIONS_PATH,
       },
     },
     {
@@ -73,8 +74,8 @@ export const projectPortfolioContent = {
       ],
       experimentCount: 8,
       primaryAction: {
-        label: "Benchmark readout",
-        href: CUDA_KERNEL_PROJECT_PATH,
+        label: "Kernel decisions",
+        href: CUDA_KERNEL_DECISIONS_PATH,
       },
     },
   ] satisfies PortfolioProject[],
