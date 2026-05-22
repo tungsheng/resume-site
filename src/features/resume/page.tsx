@@ -19,7 +19,7 @@ import { alpha } from "@mui/material/styles";
 import { buildResumeViewModel } from "./view-model";
 import type { ResumeData } from "../../types";
 import { publicResumeData } from "./data";
-import { EXPERIMENTS_PATH, PROJECTS_PATH } from "../site/content";
+import { EXPERIMENTS_PATH, PROJECTS_PATH, RESUME_PATH } from "../site/content";
 import {
   ActionLinkRow,
   PageHero,
@@ -463,7 +463,13 @@ export function ResumePageContent({
   const linkedinHref = getLinkedinHref(data.header.contacts.linkedin);
 
   return (
-    <PublicSiteLayout activeNav="resume">
+    <PublicSiteLayout
+      activeNav="resume"
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Resume", href: RESUME_PATH },
+      ]}
+    >
       <PageHero>
         <Typography component="h1" variant="h3">
           {data.header.name}

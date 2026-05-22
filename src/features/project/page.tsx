@@ -59,6 +59,16 @@ const PAGE_TITLE = "GPU Inference Decision Lab | Tony Lee";
 const PROJECTS_PAGE_TITLE = "Projects | Tony Lee";
 const CUDA_PAGE_TITLE = "CUDA Kernel Lab | Tony Lee";
 const GPU_INFERENCE_PROJECT = getProjectById("gpu-inference-lab");
+const HOME_BREADCRUMB = { label: "Home", href: "/" };
+const PROJECTS_BREADCRUMB = { label: "Projects", href: PROJECTS_PATH };
+const GPU_INFERENCE_BREADCRUMB = {
+  label: GPU_INFERENCE_PROJECT.title,
+  href: GPU_INFERENCE_PROJECT_PATH,
+};
+const CUDA_KERNEL_BREADCRUMB = {
+  label: getProjectById("cuda-kernel-lab").title,
+  href: CUDA_KERNEL_PROJECT_PATH,
+};
 
 type WorkflowNode = (typeof projectContent.workflowFoundation.nodes)[number];
 type WorkflowTrack = (typeof projectContent.workflowPaths)[number];
@@ -874,7 +884,10 @@ function ProjectsIndexRoute() {
   useDocumentTitle(PROJECTS_PAGE_TITLE);
 
   return (
-    <PublicSiteLayout activeNav="project">
+    <PublicSiteLayout
+      activeNav="project"
+      breadcrumbs={[HOME_BREADCRUMB, { label: "Projects" }]}
+    >
       <PageHero contentWidth="60rem">
         <Typography component="h1" variant="h3">
           {projectPortfolioContent.title}
@@ -1255,7 +1268,15 @@ function ProjectValidationRoute() {
   useDocumentTitle(`${projectContent.validation.title} | Tony Lee`);
 
   return (
-    <PublicSiteLayout activeNav="project">
+    <PublicSiteLayout
+      activeNav="project"
+      breadcrumbs={[
+        HOME_BREADCRUMB,
+        PROJECTS_BREADCRUMB,
+        GPU_INFERENCE_BREADCRUMB,
+        { label: projectContent.validation.title },
+      ]}
+    >
       <PageHero>
         <Typography component="h1" variant="h3">
           {projectContent.validation.title}
@@ -1434,7 +1455,14 @@ function CudaKernelProjectRoute() {
   const project = getProjectById("cuda-kernel-lab");
 
   return (
-    <PublicSiteLayout activeNav="project">
+    <PublicSiteLayout
+      activeNav="project"
+      breadcrumbs={[
+        HOME_BREADCRUMB,
+        PROJECTS_BREADCRUMB,
+        { label: CUDA_KERNEL_BREADCRUMB.label },
+      ]}
+    >
       <PageHero>
         <Typography component="h1" variant="h3">
           {cudaKernelProjectContent.title}
@@ -1492,7 +1520,14 @@ function ProjectOverviewRoute() {
   useDocumentTitle(PAGE_TITLE);
 
   return (
-    <PublicSiteLayout activeNav="project">
+    <PublicSiteLayout
+      activeNav="project"
+      breadcrumbs={[
+        HOME_BREADCRUMB,
+        PROJECTS_BREADCRUMB,
+        { label: GPU_INFERENCE_PROJECT.title },
+      ]}
+    >
       <PageHero>
         <Typography component="h1" variant="h3">
           {projectContent.title}

@@ -14,6 +14,7 @@ describe("ExperimentsPage", () => {
 
     expect(html).toContain("Experiment Catalog");
     expect(html).toContain("Project-linked experiments that turn GPU serving and kernel questions into evidence-backed decisions.");
+    expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("Catalog ready");
     expect(html).toContain("Rows show the supporting project");
     expect(html).toContain("15 experiments");
@@ -106,6 +107,7 @@ describe("ExperimentsPage", () => {
     );
 
     expect(html).toContain("CUDA Kernel Lab experiments");
+    expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("GPU Inference Decision Lab (7)");
     expect(html).toContain("CUDA Kernel Lab (8)");
     expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
@@ -246,6 +248,7 @@ describe("ExperimentsPage", () => {
     );
 
     expect(html).toContain("Decode Step Graph Replay");
+    expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("CUDA Kernel Lab");
     expect(html).toContain("resident-KV same-stream piecewise CUDA Graph replay");
     expect(html).toContain("decode-step-dynamic-dense-buckets");

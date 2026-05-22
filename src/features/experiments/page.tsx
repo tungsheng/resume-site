@@ -48,6 +48,8 @@ const PAGE_TITLE = "Experiments | Tony Lee";
 
 const EXPERIMENT_DETAIL_PREFIX = `${EXPERIMENTS_PATH}/`;
 const DEFAULT_EXPERIMENT_PROJECT_ID: ProjectId = "gpu-inference-lab";
+const HOME_BREADCRUMB = { label: "Home", href: "/" };
+const EXPERIMENTS_BREADCRUMB = { label: "Experiments", href: EXPERIMENTS_PATH };
 
 const catalogStatusNoteSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => ({
   position: "relative",
@@ -896,9 +898,13 @@ function ExperimentCatalogListSection({
 
 function ExperimentCatalogRoute({ selectedProjectId }: { selectedProjectId: ProjectId }) {
   useDocumentTitle(PAGE_TITLE);
+  const selectedProject = getProjectById(selectedProjectId);
 
   return (
-    <PublicSiteLayout activeNav="experiments">
+    <PublicSiteLayout
+      activeNav="experiments"
+      breadcrumbs={[HOME_BREADCRUMB, EXPERIMENTS_BREADCRUMB, { label: selectedProject.title }]}
+    >
       <PageHero
         contentWidth="100%"
         variant="compact"
@@ -1440,9 +1446,18 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
         ? "Results summary"
         : "Results template";
   const runShapeCopy = formatRunShapeCopy(experiment);
+  const project = getProjectById(experiment.projectId);
 
   return (
-    <PublicSiteLayout activeNav="experiments">
+    <PublicSiteLayout
+      activeNav="experiments"
+      breadcrumbs={[
+        HOME_BREADCRUMB,
+        EXPERIMENTS_BREADCRUMB,
+        { label: project.title, href: experimentProjectCatalogPath(project.id) },
+        { label: experiment.title },
+      ]}
+    >
       <PageHero contentWidth="100%">
         <Box sx={heroSplitSx}>
           <Box sx={heroPrimarySx}>
@@ -1604,7 +1619,10 @@ function UnknownExperimentRoute({ slug }: { slug: string }) {
   useDocumentTitle("Experiment Not Found | Tony Lee");
 
   return (
-    <PublicSiteLayout activeNav="experiments">
+    <PublicSiteLayout
+      activeNav="experiments"
+      breadcrumbs={[HOME_BREADCRUMB, EXPERIMENTS_BREADCRUMB, { label: "Not found" }]}
+    >
       <PageHero>
         <Typography component="h1" variant="h3">
           Experiment not found

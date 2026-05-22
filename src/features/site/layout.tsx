@@ -4,6 +4,7 @@ import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import {
   AppBar,
   Box,
+  Breadcrumbs,
   Button,
   Collapse,
   Container,
@@ -21,6 +22,11 @@ import { composeSx } from "./styles";
 import { monoStack } from "../../theme";
 
 export type PublicNavKey = "home" | "project" | "experiments" | "resume";
+
+export type SiteBreadcrumbItem = {
+  label: string;
+  href?: string;
+};
 
 const NAV_ITEMS: Array<{ key: PublicNavKey; label: string; href: string }> = [
   { key: "home", label: "Home", href: "/" },
@@ -231,11 +237,70 @@ export function PublicSiteFooter() {
   );
 }
 
+function SiteBreadcrumbs({ items }: { items: SiteBreadcrumbItem[] }) {
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <Breadcrumbs
+      aria-label="Breadcrumb"
+      sx={{
+        mb: { xs: 1.5, md: 2 },
+        color: "text.secondary",
+        fontSize: "0.86rem",
+        "& .MuiBreadcrumbs-ol": {
+          flexWrap: "wrap",
+          rowGap: 0.35,
+        },
+        "& .MuiBreadcrumbs-separator": {
+          mx: 0.75,
+        },
+      }}
+    >
+      {items.map((item, index) => {
+        const isCurrent = index === items.length - 1 || !item.href;
+
+        return isCurrent ? (
+          <Typography
+            key={`${item.label}-${index}`}
+            color="text.primary"
+            aria-current="page"
+            sx={{
+              fontSize: "inherit",
+              fontWeight: 650,
+              lineHeight: 1.4,
+            }}
+          >
+            {item.label}
+          </Typography>
+        ) : (
+          <Link
+            key={`${item.label}-${index}`}
+            href={item.href}
+            underline="hover"
+            color="text.secondary"
+            sx={{
+              fontSize: "inherit",
+              fontWeight: 600,
+              lineHeight: 1.4,
+            }}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </Breadcrumbs>
+  );
+}
+
 export function PublicSiteLayout({
   activeNav,
+  breadcrumbs = [],
   children,
 }: {
   activeNav: PublicNavKey;
+  breadcrumbs?: SiteBreadcrumbItem[];
   children: React.ReactNode;
 }) {
   return (
@@ -250,6 +315,7 @@ export function PublicSiteLayout({
       <PublicSiteHeader activeNav={activeNav} />
 
       <Container maxWidth="lg" sx={{ flexGrow: 1, py: { xs: 3, md: 4 } }}>
+        <SiteBreadcrumbs items={breadcrumbs} />
         {children}
       </Container>
 

@@ -9,6 +9,7 @@ describe("ProjectPage", () => {
 
     expect(html).toContain("Projects");
     expect(html).toContain("Evidence-backed GPU systems work");
+    expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("GPU Inference Decision Lab");
     expect(html).toContain("CUDA Kernel Lab");
     expect(html).toContain("Serving infrastructure");
@@ -24,6 +25,7 @@ describe("ProjectPage", () => {
     );
 
     expect(html).toContain("GPU Inference Decision Lab");
+    expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain(
       "An EKS/vLLM lab that turns serving measurements into architecture decisions for admission, autoscaling, context limits, scheduling, and quantization."
     );
@@ -177,6 +179,7 @@ describe("ProjectPage", () => {
     );
 
     expect(html).toContain("Architecture Decisions");
+    expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("What the EKS/vLLM evidence supports");
     expect(html).toContain("Decision table");
     expect(html).toContain("Architecture decision table");
@@ -244,6 +247,7 @@ describe("ProjectPage", () => {
     );
 
     expect(html).toContain("CUDA Kernel Lab");
+    expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("A CUDA/Triton optimization lab");
     expect(html).toContain("NVIDIA A10G");
     expect(html).toContain("115 + 27 rows");

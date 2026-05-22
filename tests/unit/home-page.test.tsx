@@ -10,6 +10,7 @@ describe("HomePage", () => {
     expect(html).toContain(">Tony Lee<");
     expect(html).toContain("aria-label=\"Tony Lee home\"");
     expect(html).toContain("aria-current=\"page\">Home<");
+    expect(html).not.toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("ML Inference Performance Engineering");
     expect(html).toContain(
       "I optimize GPU serving paths from Kubernetes scheduling to CUDA kernels with reproducible latency, throughput, and cost measurements."
