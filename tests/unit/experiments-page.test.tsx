@@ -31,7 +31,7 @@ describe("ExperimentsPage", () => {
       <ExperimentsPage initialPath="/experiments/gpu-inference-lab" />,
     );
 
-    expect(html).toContain("Experiment Catalog");
+    expect(html).toContain("GPU Inference Lab Experiments");
     expect(html).toContain("Project-linked experiments that turn GPU serving and kernel questions into evidence-backed decisions.");
     expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("Catalog ready");
@@ -123,7 +123,7 @@ describe("ExperimentsPage", () => {
       <ExperimentsPage initialPath="/experiments/cuda-kernel-lab" />,
     );
 
-    expect(html).toContain("Experiment Catalog");
+    expect(html).toContain("CUDA Kernel Lab Experiments");
     expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).not.toContain("GPU Inference Decision Lab (7)");
     expect(html).not.toContain("CUDA Kernel Lab (8)");

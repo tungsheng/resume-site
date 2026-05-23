@@ -37,7 +37,8 @@ import {
 } from "../site/projects-content";
 import {
   ActionLinkRow,
-  PageHero,
+  DetailPageHeader,
+  IndexPageHeader,
   PageSection,
   PublicSiteLayout,
   SectionHeader,
@@ -154,23 +155,6 @@ const projectIndexSummarySx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
 const projectIndexListSx: SxProps<Theme> = {
   display: "grid",
   gap: { xs: 2, md: 2.25 },
-};
-
-const projectIndexHeaderSx: SxProps<Theme> = {
-  display: "grid",
-  gridTemplateColumns: {
-    xs: "minmax(0, 1fr)",
-    md: "minmax(0, 1fr) minmax(18rem, 0.62fr)",
-  },
-  gap: { xs: 1.15, md: 2 },
-  alignItems: "end",
-  width: "100%",
-};
-
-const projectIndexHeadingSx: SxProps<Theme> = {
-  display: "grid",
-  gap: { xs: 0.85, md: 1 },
-  maxWidth: "48rem",
 };
 
 const cudaWorkflowGridSx: SxProps<Theme> = {
@@ -593,6 +577,19 @@ const evidenceSurfaceSx: SxProps<Theme> = {
   gap: { xs: 1.4, md: 1.75 },
 };
 
+const projectDetailSupportSx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
+  display: "grid",
+  gap: { xs: 0.85, md: 1 },
+  p: { xs: 1.25, sm: 1.35 },
+});
+
+const projectDetailSupportMetaSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.65,
+  alignItems: "center",
+};
+
 function resolveCurrentPathname(initialPath?: string): string {
   return initialPath ?? (typeof window === "undefined" ? PROJECTS_PATH : window.location.pathname);
 }
@@ -753,21 +750,17 @@ function ProjectsIndexRoute() {
     >
       <PageSection>
         <Box sx={projectIndexListSx}>
-          <Box sx={projectIndexHeaderSx}>
-            <Box sx={projectIndexHeadingSx}>
-              <Typography component="h1" variant="h3">
-                {projectPortfolioContent.title}
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                {projectPortfolioContent.lede}
-              </Typography>
-            </Box>
-            <Box sx={projectIndexSummarySx}>
+          <IndexPageHeader
+            title={projectPortfolioContent.title}
+            copy={projectPortfolioContent.lede}
+            support={
+              <Box sx={projectIndexSummarySx}>
               <Typography variant="body2" color="text.secondary">
                 {projectPortfolioContent.summary}
               </Typography>
-            </Box>
-          </Box>
+              </Box>
+            }
+          />
 
           <Box sx={projectIndexGridSx}>
             {projectPortfolioContent.projects.map((project) => (
@@ -777,6 +770,21 @@ function ProjectsIndexRoute() {
         </Box>
       </PageSection>
     </PublicSiteLayout>
+  );
+}
+
+function ProjectDetailSupport({ project }: { project: PortfolioProject }) {
+  return (
+    <Box sx={projectDetailSupportSx}>
+      <Box sx={projectDetailSupportMetaSx}>
+        <Chip label={project.layer} size="small" variant="outlined" sx={mutedChipSx} />
+        <Chip label={project.status} size="small" variant="outlined" />
+        <Chip label={`${project.experimentCount} experiments`} size="small" variant="outlined" />
+      </Box>
+      <Typography variant="body2" color="text.secondary">
+        {project.result}
+      </Typography>
+    </Box>
   );
 }
 
@@ -1100,15 +1108,12 @@ function CudaKernelProjectRoute() {
         { label: CUDA_KERNEL_BREADCRUMB.label },
       ]}
     >
-      <PageHero>
-        <Typography component="h1" variant="h3">
-          {cudaKernelProjectContent.title}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
-          {cudaKernelProjectContent.lede}
-        </Typography>
-
-        <ActionLinkRow>
+      <DetailPageHeader
+        title={cudaKernelProjectContent.title}
+        copy={cudaKernelProjectContent.lede}
+        support={<ProjectDetailSupport project={project} />}
+        actions={
+          <>
           <Button href={CUDA_KERNEL_EXPERIMENTS_PATH} variant="contained">
             View experiments
           </Button>
@@ -1123,8 +1128,9 @@ function CudaKernelProjectRoute() {
           >
             GitHub
           </Button>
-        </ActionLinkRow>
-      </PageHero>
+          </>
+        }
+      />
 
       <PageSection>
         <SectionHeader
@@ -1165,15 +1171,12 @@ function ProjectOverviewRoute() {
         { label: GPU_INFERENCE_PROJECT.title },
       ]}
     >
-      <PageHero>
-        <Typography component="h1" variant="h3">
-          {projectContent.title}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
-          {projectContent.lede}
-        </Typography>
-
-        <ActionLinkRow>
+      <DetailPageHeader
+        title={projectContent.title}
+        copy={projectContent.lede}
+        support={<ProjectDetailSupport project={GPU_INFERENCE_PROJECT} />}
+        actions={
+          <>
           <Button href={EXPERIMENTS_PATH} variant="contained">
             View experiments
           </Button>
@@ -1188,8 +1191,9 @@ function ProjectOverviewRoute() {
           >
             GitHub
           </Button>
-        </ActionLinkRow>
-      </PageHero>
+          </>
+        }
+      />
 
       <PageSection>
         <SectionHeader

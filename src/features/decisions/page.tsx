@@ -32,6 +32,8 @@ import {
 } from "../site/evidence-visuals";
 import {
   ActionLinkRow,
+  DetailPageHeader,
+  IndexPageHeader,
   PageHero,
   PageSection,
   PublicSiteLayout,
@@ -49,29 +51,6 @@ const DECISIONS_BREADCRUMB = { label: "Decisions", href: DECISIONS_PATH };
 const decisionPageListSx: SxProps<Theme> = {
   display: "grid",
   gap: { xs: 1.8, md: 2 },
-};
-
-const decisionPageHeaderSx: SxProps<Theme> = {
-  display: "grid",
-  gridTemplateColumns: {
-    xs: "minmax(0, 1fr)",
-    lg: "minmax(0, 1fr) minmax(21rem, 0.52fr)",
-  },
-  gap: { xs: 1.15, md: 2 },
-  alignItems: "start",
-  width: "100%",
-};
-
-const decisionPageHeadingSx: SxProps<Theme> = {
-  display: "grid",
-  gap: { xs: 0.9, md: 1.05 },
-  maxWidth: "58rem",
-};
-
-const decisionPageSupportSx: SxProps<Theme> = {
-  display: "grid",
-  gap: { xs: 1, md: 1.15 },
-  alignSelf: "start",
 };
 
 const decisionMatrixHeaderSx: SxProps<Theme> = {
@@ -505,21 +484,17 @@ function DecisionsIndexRoute() {
     >
       <PageSection>
         <Box sx={decisionPageListSx}>
-          <Box sx={decisionPageHeaderSx}>
-            <Box sx={decisionPageHeadingSx}>
-              <Typography component="h1" variant="h3">
-                Decisions
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Project-level calls that separate serving architecture from kernel optimization evidence.
-              </Typography>
-            </Box>
-            <Box sx={decisionIndexSummarySx}>
+          <IndexPageHeader
+            title="Decisions"
+            copy="Project-level calls that separate serving architecture from kernel optimization evidence."
+            support={
+              <Box sx={decisionIndexSummarySx}>
               <Typography variant="body2" color="text.secondary">
                 Choose a project decision page for the status dashboard, grouped decision matrix, related experiments, and next evidence needed.
               </Typography>
-            </Box>
-          </Box>
+              </Box>
+            }
+          />
 
           <Box sx={decisionIndexGridSx}>
             {projectPortfolioContent.projects.map((project) => (
@@ -548,38 +523,32 @@ function DecisionProjectRoute({ projectId }: { projectId: ProjectId }) {
         { label: project.title },
       ]}
     >
+      <DetailPageHeader
+        title={summary.title}
+        copy={summary.lead}
+        support={<DecisionStatusDashboard decisions={decisions} />}
+        actions={
+          <>
+            <Button href={summary.experimentsPath} variant="contained">
+              View experiments
+            </Button>
+            <Button href={project.path} variant="outlined">
+              Project overview
+            </Button>
+            <Button
+              href={project.repositoryUrl}
+              target="_blank"
+              rel="noreferrer"
+              endIcon={<OpenInNewRoundedIcon />}
+            >
+              GitHub
+            </Button>
+          </>
+        }
+      />
+
       <PageSection>
         <Box sx={decisionPageListSx}>
-          <Box sx={decisionPageHeaderSx}>
-            <Box sx={decisionPageHeadingSx}>
-              <Typography component="h1" variant="h3">
-                {summary.title}
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                {summary.lead}
-              </Typography>
-              <ActionLinkRow>
-                <Button href={summary.experimentsPath} variant="contained">
-                  View experiments
-                </Button>
-                <Button href={project.path} variant="outlined">
-                  Project overview
-                </Button>
-                <Button
-                  href={project.repositoryUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  endIcon={<OpenInNewRoundedIcon />}
-                >
-                  GitHub
-                </Button>
-              </ActionLinkRow>
-            </Box>
-            <Box sx={decisionPageSupportSx}>
-              <DecisionStatusDashboard decisions={decisions} />
-            </Box>
-          </Box>
-
           <Box sx={decisionMatrixHeaderSx}>
             <Typography variant="overline" sx={{ color: "secondary.dark" }}>
               Decision matrix

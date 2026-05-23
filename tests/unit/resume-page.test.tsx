@@ -56,10 +56,11 @@ describe("ResumePageContent", () => {
     expect(html).toContain("Professional Summary");
     expect(html).toContain("View projects");
     expect(html).toContain("View experiments");
-    expect(html).toContain(">Email<");
-    expect(html).toContain(">LinkedIn<");
-    expect(html).toContain("resume-mobile-contact");
-    expect(html).toContain("resume-sidebar-contact");
+    expect(html).toContain(">Contact<");
+    expect(html).toContain("tony@example.com");
+    expect(html).toContain("linkedin.com/in/tonyslee8");
+    expect(html).toContain("resume-compact-contact");
+    expect(html).not.toContain("resume-sidebar-contact");
     expect(html).toContain("title=\"Download resume PDF\"");
     expect(html).toContain("Download PDF");
     expect(html).toContain("Led platform modernization.");

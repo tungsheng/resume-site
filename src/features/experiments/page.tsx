@@ -30,6 +30,8 @@ import {
 import { getProjectById, projectPortfolioContent, type ProjectId } from "../site/projects-content";
 import {
   ActionLinkRow,
+  DetailPageHeader,
+  IndexPageHeader,
   PageHero,
   PageSection,
   PublicSiteLayout,
@@ -81,30 +83,6 @@ const catalogStatusHeaderSx: SxProps<Theme> = {
   justifyContent: "space-between",
 };
 
-const heroSplitSx: SxProps<Theme> = {
-  display: "grid",
-  gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "minmax(0, 0.95fr) minmax(23rem, 0.75fr)" },
-  gap: { xs: 1.75, md: 2.5 },
-  alignItems: "start",
-  width: "100%",
-};
-
-const heroPrimarySx: SxProps<Theme> = {
-  display: "grid",
-  gap: 2,
-  alignContent: "start",
-  minWidth: 0,
-  maxWidth: "58rem",
-};
-
-const heroSupportSx: SxProps<Theme> = {
-  display: "grid",
-  gap: 1.25,
-  alignContent: "start",
-  minWidth: 0,
-  width: "100%",
-};
-
 const catalogFactStripSx: SxProps<Theme> = {
   display: "flex",
   flexWrap: "wrap",
@@ -147,23 +125,6 @@ const relatedDecisionCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
 const catalogListSx: SxProps<Theme> = {
   display: "grid",
   gap: { xs: 2, md: 2.25 },
-};
-
-const catalogListHeaderSx: SxProps<Theme> = {
-  display: "grid",
-  gridTemplateColumns: {
-    xs: "minmax(0, 1fr)",
-    lg: "minmax(0, 1fr) minmax(20rem, 0.5fr)",
-  },
-  gap: { xs: 1.15, md: 2 },
-  alignItems: "end",
-  width: "100%",
-};
-
-const catalogListHeadingSx: SxProps<Theme> = {
-  display: "grid",
-  gap: { xs: 0.9, md: 1.05 },
-  maxWidth: "56rem",
 };
 
 const catalogListControlsSx: SxProps<Theme> = {
@@ -861,22 +822,19 @@ function ExperimentsIndexRoute() {
     >
       <PageSection>
         <Box sx={catalogListSx}>
-          <Box sx={catalogListHeaderSx}>
-            <Box sx={catalogListHeadingSx}>
-              <Typography component="h1" variant="h3">
-                Experiments
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Project-linked catalogs that turn GPU serving and kernel questions into evidence-backed decisions.
-              </Typography>
-              <CatalogFactStrip />
-            </Box>
-            <Box sx={experimentIndexSummarySx}>
+          <IndexPageHeader
+            title="Experiments"
+            copy="Project-linked catalogs that turn GPU serving and kernel questions into evidence-backed decisions."
+            support={
+              <Box sx={experimentIndexSummarySx}>
               <Typography variant="body2" color="text.secondary">
                 Choose a project to browse its experiment table. Detail routes stay available for individual run shape, evidence, and commands.
               </Typography>
-            </Box>
-          </Box>
+              </Box>
+            }
+          >
+            <CatalogFactStrip />
+          </IndexPageHeader>
 
           <Box sx={experimentIndexGridSx}>
             {projectPortfolioContent.projects.map((project) => (
@@ -897,48 +855,49 @@ function ExperimentCatalogListSection({
   const selectedExperiments = experimentCatalogContent.experiments.filter(
     (experiment) => experiment.projectId === selectedProjectId,
   );
+  const selectedProject = getProjectById(selectedProjectId);
+  const catalogTitle =
+    selectedProjectId === "gpu-inference-lab"
+      ? "GPU Inference Lab Experiments"
+      : `${selectedProject.title} Experiments`;
 
   return (
-    <PageSection>
-      <Box sx={catalogListSx}>
-        <Box id="experiment-catalog-list" sx={catalogListHeaderSx}>
-          <Box sx={catalogListHeadingSx}>
-            <Typography component="h1" variant="h3">
-              {experimentCatalogContent.title}
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {experimentCatalogContent.subtitle}
-            </Typography>
-            <CatalogFactStrip />
-          </Box>
+    <>
+      <DetailPageHeader
+        title={catalogTitle}
+        copy={experimentCatalogContent.subtitle}
+        support={<CatalogStatusNote selectedProjectId={selectedProjectId} />}
+      >
+        <CatalogFactStrip />
+      </DetailPageHeader>
 
-          <CatalogStatusNote selectedProjectId={selectedProjectId} />
-        </Box>
-
-        <Box sx={catalogListControlsSx}>
-          <Box sx={browseSurfaceSx}>
-            <Box sx={browseHeaderSx} aria-hidden="true">
-              <span>Experiment</span>
-              <span>Purpose</span>
-              <span>Focus</span>
-              <span>Status</span>
-              <span>Details</span>
+      <PageSection>
+        <Box sx={catalogListSx}>
+          <Box id="experiment-catalog-list" sx={catalogListControlsSx}>
+            <Box sx={browseSurfaceSx}>
+              <Box sx={browseHeaderSx} aria-hidden="true">
+                <span>Experiment</span>
+                <span>Purpose</span>
+                <span>Focus</span>
+                <span>Status</span>
+                <span>Details</span>
+              </Box>
+              {selectedExperiments.map((experiment) => (
+                <ExperimentBrowseRow key={experiment.slug} experiment={experiment} />
+              ))}
             </Box>
-            {selectedExperiments.map((experiment) => (
-              <ExperimentBrowseRow key={experiment.slug} experiment={experiment} />
-            ))}
-          </Box>
 
-          {selectedProjectId === "gpu-inference-lab" ? <RelatedProjectEvidenceBand /> : null}
+            {selectedProjectId === "gpu-inference-lab" ? <RelatedProjectEvidenceBand /> : null}
+          </Box>
         </Box>
-      </Box>
-    </PageSection>
+      </PageSection>
+    </>
   );
 }
 
 function ExperimentCatalogRoute({ selectedProjectId }: { selectedProjectId: ProjectId }) {
-  useDocumentTitle(PAGE_TITLE);
   const selectedProject = getProjectById(selectedProjectId);
+  useDocumentTitle(`${selectedProject.title} Experiments | Tony Lee`);
 
   return (
     <PublicSiteLayout
@@ -1514,17 +1473,12 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
         { label: experiment.title },
       ]}
     >
-      <PageHero contentWidth="100%">
-        <Box sx={heroSplitSx}>
-          <Box sx={heroPrimarySx}>
-            <Typography component="h1" variant="h3">
-              {experiment.title}
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "58rem" }}>
-              {experiment.question}
-            </Typography>
-
-            <ActionLinkRow>
+      <DetailPageHeader
+        title={experiment.title}
+        copy={experiment.question}
+        support={<ExperimentDetailSummaryStrip experiment={experiment} />}
+        actions={
+          <>
               <Button href={EXPERIMENTS_PATH} variant="contained" startIcon={<ArrowBackRoundedIcon />}>
                 Experiment catalog
               </Button>
@@ -1536,14 +1490,9 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
               >
                 Source
               </Button>
-            </ActionLinkRow>
-          </Box>
-
-          <Box sx={heroSupportSx}>
-            <ExperimentDetailSummaryStrip experiment={experiment} />
-          </Box>
-        </Box>
-      </PageHero>
+          </>
+        }
+      />
 
       <PageSection>
         <SectionHeader title="Why it matters" copy={experiment.summary} />

@@ -325,6 +325,104 @@ export function PublicSiteLayout({
   );
 }
 
+export function IndexPageHeader({
+  title,
+  copy,
+  children,
+  support,
+}: {
+  title: string;
+  copy: string;
+  children?: React.ReactNode;
+  support?: React.ReactNode;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "minmax(0, 1fr)",
+          lg: "minmax(0, 1fr) minmax(20rem, 0.52fr)",
+        },
+        gap: { xs: 1.15, md: 2 },
+        alignItems: "start",
+        width: "100%",
+      }}
+    >
+      <Stack spacing={{ xs: 1.1, md: 1.25 }} sx={{ maxWidth: "58rem", minWidth: 0 }}>
+        <Typography component="h1" variant="h3">
+          {title}
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          {copy}
+        </Typography>
+        {children}
+      </Stack>
+      {support ? (
+        <Box sx={{ minWidth: 0 }}>
+          {support}
+        </Box>
+      ) : null}
+    </Box>
+  );
+}
+
+export function DetailPageHeader({
+  title,
+  copy,
+  actions,
+  support,
+  children,
+  sx,
+}: {
+  title: string;
+  copy?: React.ReactNode;
+  actions?: React.ReactNode;
+  support?: React.ReactNode;
+  children?: React.ReactNode;
+  sx?: SxProps<Theme>;
+}) {
+  return (
+    <Box
+      component="section"
+      sx={composeSx(
+        {
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            lg: "minmax(0, 1fr) minmax(21rem, 0.52fr)",
+          },
+          gap: { xs: 1.5, md: 2.25 },
+          alignItems: "start",
+          width: "100%",
+          mb: { xs: 3, md: 3.75 },
+        },
+        sx,
+      )}
+    >
+      <Stack spacing={{ xs: 1.45, md: 1.6 }} sx={{ maxWidth: "58rem", minWidth: 0 }}>
+        <Typography component="h1" variant="h3">
+          {title}
+        </Typography>
+        {typeof copy === "string" ? (
+          <Typography variant="body1" color="text.secondary">
+            {copy}
+          </Typography>
+        ) : copy ? (
+          copy
+        ) : null}
+        {children}
+        {actions ? <ActionLinkRow>{actions}</ActionLinkRow> : null}
+      </Stack>
+      {support ? (
+        <Box sx={{ minWidth: 0, width: "100%" }}>
+          {support}
+        </Box>
+      ) : null}
+    </Box>
+  );
+}
+
 export function PageHero({
   children,
   align = "left",

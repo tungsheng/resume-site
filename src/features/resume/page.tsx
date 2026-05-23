@@ -21,10 +21,10 @@ import type { ResumeData } from "../../types";
 import { publicResumeData } from "./data";
 import { EXPERIMENTS_PATH, PROJECTS_PATH, RESUME_PATH } from "../site/content";
 import {
-  ActionLinkRow,
-  PageHero,
+  DetailPageHeader,
   PublicSiteLayout,
 } from "../site/layout";
+import { composeSx, softPanelBaseSx } from "../site/styles";
 import { useDocumentTitle } from "../site/use-document-title";
 
 interface Toast {
@@ -41,6 +41,12 @@ const resumeCardContentSx = {
     pb: { xs: 1.75, sm: 2, md: 2.25 },
   },
 } as const;
+
+const resumeHeaderSupportSx = composeSx(softPanelBaseSx, {
+  display: "grid",
+  gap: 1,
+  p: { xs: 1.25, sm: 1.35 },
+});
 
 function getLinkedinHref(linkedin: string | undefined): string | null {
   if (!linkedin) return null;
@@ -188,120 +194,89 @@ function ResumeContactLinks({
   email,
   linkedin,
   linkedinHref,
-  compact = false,
 }: {
   email?: string;
   linkedin?: string;
   linkedinHref: string | null;
-  compact?: boolean;
 }) {
   if (!email && !linkedinHref) return null;
 
-  if (compact) {
-    return (
-      <Stack
-        component="address"
-        className="resume-mobile-contact"
-        direction="row"
-        spacing={1.25}
-        useFlexGap
-        sx={{
-          flexWrap: "wrap",
-          fontStyle: "normal",
-          maxWidth: "100%",
-        }}
-      >
-        {email ? (
-          <Link
-            href={`mailto:${email}`}
-            sx={(theme) => ({
-              color: "text.secondary",
-              fontSize: "0.95rem",
-              fontWeight: 500,
-              lineHeight: 1.5,
-              minHeight: 28,
-              overflowWrap: "anywhere",
-              textDecorationColor: alpha(theme.palette.text.secondary, 0.42),
-              textUnderlineOffset: 3,
-            })}
-          >
-            {email}
-          </Link>
-        ) : null}
-        {linkedinHref ? (
-          <Link
-            href={linkedinHref}
-            target="_blank"
-            rel="noreferrer"
-            sx={(theme) => ({
-              color: "text.secondary",
-              fontSize: "0.95rem",
-              fontWeight: 500,
-              lineHeight: 1.5,
-              minHeight: 28,
-              overflowWrap: "anywhere",
-              textDecorationColor: alpha(theme.palette.text.secondary, 0.42),
-              textUnderlineOffset: 3,
-            })}
-          >
-            {`linkedin.com/in/${linkedin}`}
-          </Link>
-        ) : null}
-      </Stack>
-    );
-  }
-
   return (
-    <Stack className="resume-sidebar-contact" spacing={1.5}>
+    <Stack
+      component="address"
+      className="resume-compact-contact"
+      direction="row"
+      spacing={1.25}
+      useFlexGap
+      sx={{
+        flexWrap: "wrap",
+        fontStyle: "normal",
+        maxWidth: "100%",
+      }}
+    >
       {email ? (
-        <div>
-          <Typography variant="overline" sx={{ color: "secondary.dark" }}>
-            Email
-          </Typography>
-          <Typography variant="body2">
-            <Link
-              href={`mailto:${email}`}
-              sx={{
-                alignItems: "center",
-                display: "inline-flex",
-                minHeight: 40,
-                overflowWrap: "anywhere",
-              }}
-            >
-              {email}
-            </Link>
-          </Typography>
-        </div>
+        <Link
+          href={`mailto:${email}`}
+          sx={(theme) => ({
+            color: "text.secondary",
+            fontSize: "0.95rem",
+            fontWeight: 500,
+            lineHeight: 1.5,
+            minHeight: 28,
+            overflowWrap: "anywhere",
+            textDecorationColor: alpha(theme.palette.text.secondary, 0.42),
+            textUnderlineOffset: 3,
+          })}
+        >
+          {email}
+        </Link>
       ) : null}
       {linkedinHref ? (
-        <div>
-          <Typography variant="overline" sx={{ color: "secondary.dark" }}>
-            LinkedIn
-          </Typography>
-          <Typography variant="body2">
-            <Link
-              href={linkedinHref}
-              target="_blank"
-              rel="noreferrer"
-              sx={{
-                alignItems: "center",
-                display: "inline-flex",
-                minHeight: 40,
-                overflowWrap: "anywhere",
-              }}
-            >
-              {`linkedin.com/in/${linkedin}`}
-            </Link>
-          </Typography>
-        </div>
+        <Link
+          href={linkedinHref}
+          target="_blank"
+          rel="noreferrer"
+          sx={(theme) => ({
+            color: "text.secondary",
+            fontSize: "0.95rem",
+            fontWeight: 500,
+            lineHeight: 1.5,
+            minHeight: 28,
+            overflowWrap: "anywhere",
+            textDecorationColor: alpha(theme.palette.text.secondary, 0.42),
+            textUnderlineOffset: 3,
+          })}
+        >
+          {`linkedin.com/in/${linkedin}`}
+        </Link>
       ) : null}
     </Stack>
   );
 }
 
+function ResumeHeaderSupport({
+  email,
+  linkedin,
+  linkedinHref,
+}: {
+  email?: string;
+  linkedin?: string;
+  linkedinHref: string | null;
+}) {
+  if (!email && !linkedinHref) return null;
+
+  return (
+    <Box sx={resumeHeaderSupportSx}>
+      <Typography variant="overline" sx={{ color: "secondary.dark" }}>
+        Contact
+      </Typography>
+      <ResumeContactLinks email={email} linkedin={linkedin} linkedinHref={linkedinHref} />
+    </Box>
+  );
+}
+
 function ResumeWebView({ data }: { data: ResumeData }) {
   const view = buildResumeViewModel(data);
-  const linkedinHref = getLinkedinHref(view.header.contacts.linkedin);
 
   return (
     <Box
@@ -380,21 +355,6 @@ function ResumeWebView({ data }: { data: ResumeData }) {
       </Stack>
 
       <Stack spacing={{ xs: 2, md: 2.25 }}>
-        {(view.header.contacts.email || linkedinHref) ? (
-          <Card variant="outlined" sx={{ display: { xs: "none", md: "block" } }}>
-            <CardContent sx={resumeCardContentSx}>
-              <Typography variant="h6" sx={{ mb: 1.5 }}>
-                Contact
-              </Typography>
-              <ResumeContactLinks
-                email={view.header.contacts.email}
-                linkedin={view.header.contacts.linkedin}
-                linkedinHref={linkedinHref}
-              />
-            </CardContent>
-          </Card>
-        ) : null}
-
         {view.skills.length > 0 ? (
           <ResumeSection title="Skills">
             <Card variant="outlined">
@@ -470,12 +430,10 @@ export function ResumePageContent({
         { label: "Resume", href: RESUME_PATH },
       ]}
     >
-      <PageHero>
-        <Typography component="h1" variant="h3">
-          {data.header.name}
-        </Typography>
-
-        {data.header.badges.length > 0 ? (
+      <DetailPageHeader
+        title={data.header.name}
+        copy={
+          data.header.badges.length > 0 ? (
           <Typography
             variant="body1"
             sx={{
@@ -487,20 +445,17 @@ export function ResumePageContent({
           >
             {data.header.badges.join(" • ")}
           </Typography>
-        ) : null}
-
-        {(data.header.contacts.email || linkedinHref) ? (
-          <Box sx={{ display: { xs: "block", md: "none" } }}>
-            <ResumeContactLinks
-              compact
-              email={data.header.contacts.email}
-              linkedin={data.header.contacts.linkedin}
-              linkedinHref={linkedinHref}
-            />
-          </Box>
-        ) : null}
-
-        <ActionLinkRow>
+          ) : undefined
+        }
+        support={
+          <ResumeHeaderSupport
+            email={data.header.contacts.email}
+            linkedin={data.header.contacts.linkedin}
+            linkedinHref={linkedinHref}
+          />
+        }
+        actions={
+          <>
           <Button
             type="button"
             variant="contained"
@@ -526,8 +481,9 @@ export function ResumePageContent({
           <Button href={EXPERIMENTS_PATH} variant="outlined">
             View experiments
           </Button>
-        </ActionLinkRow>
-      </PageHero>
+          </>
+        }
+      />
 
       <ResumeWebView data={data} />
 
