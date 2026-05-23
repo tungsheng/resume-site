@@ -9,14 +9,33 @@ import {
 } from "../../src/features/experiments/page";
 
 describe("ExperimentsPage", () => {
-  test("renders the experiment catalog with dynamic detail links", () => {
+  test("renders the experiment index with project cards", () => {
     const html = renderToStaticMarkup(<ExperimentsPage />);
+
+    expect(html).toContain(">Experiments<");
+    expect(html).toContain("Project-linked catalogs that turn GPU serving and kernel questions into evidence-backed decisions.");
+    expect(html).toContain("Choose a project to browse its experiment table.");
+    expect(html).toContain("GPU Inference Decision Lab");
+    expect(html).toContain("CUDA Kernel Lab");
+    expect(html).toContain("7 experiments");
+    expect(html).toContain("8 experiments");
+    expect(html).toContain("href=\"/decisions/gpu-inference-lab\"");
+    expect(html).toContain("href=\"/decisions/cuda-kernel-lab\"");
+    expect(html).not.toContain("role=\"tablist\"");
+    expect(html).not.toContain("KV Cache vs Concurrency");
+    expect(html).not.toContain("Memory Primitive Bandwidth");
+  });
+
+  test("renders the GPU experiment catalog with dynamic detail links", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/gpu-inference-lab" />,
+    );
 
     expect(html).toContain("Experiment Catalog");
     expect(html).toContain("Project-linked experiments that turn GPU serving and kernel questions into evidence-backed decisions.");
     expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("Catalog ready");
-    expect(html).toContain("Rows show the supporting project");
+    expect(html).toContain("Rows show the current proof, focus area");
     expect(html).toContain("15 experiments");
     expect(html).toContain("2 projects");
     expect(html).toContain("Run-ready");
@@ -25,26 +44,24 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("1 rejected");
     expect(html).not.toContain("1 pending");
     expect(html).toContain("1 blocked");
-    expect(html).toContain("href=\"/experiments/gpu-inference-lab#experiment-catalog-list\"");
     expect(html).not.toContain("definition catalog");
     expect(html).not.toContain(">View resume<");
-    expect(html).toContain("How experiments work");
-    expect(html).toContain("Browse experiments");
-    expect(html).toContain("GPU Inference Decision Lab (7)");
-    expect(html).toContain("CUDA Kernel Lab (8)");
-    expect(html).toContain("role=\"tablist\"");
-    expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
-    expect(html).toContain("href=\"/experiments/cuda-kernel-lab\"");
+    expect(html).not.toContain("How experiments work");
+    expect(html).not.toContain("Browse experiments");
+    expect(html).toContain("href=\"/decisions/gpu-inference-lab\"");
+    expect(html).not.toContain("role=\"tablist\"");
+    expect(html).not.toContain("GPU Inference Decision Lab (7)");
+    expect(html).not.toContain("CUDA Kernel Lab (8)");
     expect(html).not.toContain("<span>Project</span>");
-    expect(html).toContain("Question");
-    expect(html).toContain("Cases");
-    expect(html).toContain("Run profile");
-    expect(html).toContain("Metrics");
-    expect(html).toContain("Result");
+    expect(html).not.toContain("Rows show the supporting project");
+    expect(html).toContain("Experiment");
+    expect(html).toContain("Purpose");
+    expect(html).toContain("Focus");
+    expect(html).toContain("Status");
+    expect(html).toContain("Details");
     expect(html).toContain("Memory pressure");
     expect(html).toContain("Streaming latency");
     expect(html).toContain("Scheduler behavior");
-    expect(html).toContain("Purpose");
     expect(html).toContain("Run ready");
     expect(html).toContain("Supported");
     expect(html).toContain("Selected report");
@@ -101,17 +118,17 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("href=\"/projects\"");
   });
 
-  test("renders CUDA catalog tab from its route", () => {
+  test("renders CUDA catalog from its route", () => {
     const html = renderToStaticMarkup(
       <ExperimentsPage initialPath="/experiments/cuda-kernel-lab" />,
     );
 
-    expect(html).toContain("CUDA Kernel Lab experiments");
+    expect(html).toContain("Experiment Catalog");
     expect(html).toContain("aria-label=\"Breadcrumb\"");
-    expect(html).toContain("GPU Inference Decision Lab (7)");
-    expect(html).toContain("CUDA Kernel Lab (8)");
-    expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
-    expect(html).toContain("href=\"/experiments/cuda-kernel-lab\"");
+    expect(html).not.toContain("GPU Inference Decision Lab (7)");
+    expect(html).not.toContain("CUDA Kernel Lab (8)");
+    expect(html).not.toContain("role=\"tablist\"");
+    expect(html).toContain("href=\"/decisions/cuda-kernel-lab\"");
     expect(html).toContain("Memory Primitive Bandwidth");
     expect(html).toContain("Normalization Fusion");
     expect(html).toContain("Decode Step Graph Replay");
@@ -431,7 +448,7 @@ describe("ExperimentsPage", () => {
     expect(getExperimentSlugFromPath("/experiments/platform-validation/")).toBe("platform-validation");
     expect(getExperimentSlugFromPath("/project/cloud-inference-platform")).toBeNull();
     expect(getExperimentSlugFromPath("/experiments/kv-cache/extra")).toBeNull();
-    expect(getExperimentProjectIdFromPath("/experiments")).toBe("gpu-inference-lab");
+    expect(getExperimentProjectIdFromPath("/experiments")).toBeNull();
     expect(getExperimentProjectIdFromPath("/experiments/gpu-inference-lab")).toBe("gpu-inference-lab");
     expect(getExperimentProjectIdFromPath("/experiments/cuda-kernel-lab")).toBe("cuda-kernel-lab");
     expect(getExperimentProjectIdFromPath("/experiments/kv-cache")).toBeNull();

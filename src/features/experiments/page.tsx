@@ -8,8 +8,6 @@ import {
   Chip,
   Grid,
   Stack,
-  Tab,
-  Tabs,
   Typography,
 } from "@mui/material";
 import { alpha, type SxProps, type Theme } from "@mui/material/styles";
@@ -107,32 +105,6 @@ const heroSupportSx: SxProps<Theme> = {
   width: "100%",
 };
 
-const catalogHeroTopSx: SxProps<Theme> = {
-  display: "grid",
-  gridTemplateColumns: {
-    xs: "minmax(0, 1fr)",
-    md: "minmax(0, 1fr) minmax(20rem, 0.52fr)",
-  },
-  gap: { xs: 1.5, md: 2.25 },
-  alignItems: "start",
-  width: "100%",
-};
-
-const catalogHeroPrimarySx: SxProps<Theme> = {
-  display: "grid",
-  gap: { xs: 1.05, md: 1.25 },
-  alignContent: "start",
-  minWidth: 0,
-  maxWidth: "61rem",
-};
-
-const catalogHeroSupportSx: SxProps<Theme> = {
-  display: "grid",
-  alignContent: "start",
-  minWidth: 0,
-  width: "100%",
-};
-
 const catalogFactStripSx: SxProps<Theme> = {
   display: "flex",
   flexWrap: "wrap",
@@ -156,74 +128,6 @@ const catalogFactChipSx: SxProps<Theme> = composeSx(mutedChipSx, {
   },
 });
 
-const conceptSurfaceSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => ({
-  "--experiment-concept-rail-x": "1.45rem",
-  "--experiment-concept-step-indent": "3.05rem",
-  "--experiment-concept-marker-size": "0.6rem",
-  position: "relative",
-  display: { xs: "grid", sm: "flex" },
-  gridTemplateColumns: { xs: "minmax(0, 1fr)" },
-  flexWrap: "wrap",
-  gap: { xs: 0.85, sm: 0.75, md: 1 },
-  alignItems: { xs: "stretch", sm: "center" },
-  p: { xs: 1.15, sm: 1.3, md: 1.5 },
-  pl: { xs: "var(--experiment-concept-step-indent)", sm: 1.3, md: 1.5 },
-  "&::before": {
-    content: '""',
-    display: { xs: "block", sm: "none" },
-    position: "absolute",
-    left: "var(--experiment-concept-rail-x)",
-    top: "1.75rem",
-    bottom: "1.75rem",
-    width: "1px",
-    backgroundColor: alpha(theme.palette.secondary.light, 0.16),
-  },
-}));
-
-const conceptStepItemSx: SxProps<Theme> = (theme) => ({
-  position: { xs: "relative", sm: "static" },
-  display: "inline-flex",
-  alignItems: "center",
-  minWidth: 0,
-  justifySelf: { xs: "start", sm: "auto" },
-  "&::before": {
-    content: '""',
-    display: { xs: "block", sm: "none" },
-    position: "absolute",
-    left:
-      "calc(var(--experiment-concept-rail-x) - var(--experiment-concept-step-indent) - (var(--experiment-concept-marker-size) / 2))",
-    top: "50%",
-    zIndex: 1,
-    width: "var(--experiment-concept-marker-size)",
-    height: "var(--experiment-concept-marker-size)",
-    borderRadius: "50%",
-    backgroundColor: theme.palette.background.paper,
-    border: `2px solid ${alpha(theme.palette.secondary.light, 0.46)}`,
-    transform: "translateY(-50%)",
-  },
-});
-
-const conceptStepSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
-  display: "inline-flex",
-  alignItems: "center",
-  minHeight: "2.35rem",
-  width: "fit-content",
-  maxWidth: "100%",
-  px: { xs: 1.1, sm: 1.25 },
-  py: 0.75,
-  borderRadius: 999,
-  fontSize: "0.86rem",
-  fontWeight: 600,
-  lineHeight: 1.2,
-});
-
-const conceptArrowSx: SxProps<Theme> = (theme) => ({
-  color: alpha(theme.palette.secondary.dark, 0.42),
-  fontSize: "1rem",
-  flexShrink: 0,
-  display: { xs: "none", sm: "inline-flex" },
-});
-
 const relatedDecisionGridSx: SxProps<Theme> = {
   display: "grid",
   gridTemplateColumns: {
@@ -240,6 +144,96 @@ const relatedDecisionCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   p: { xs: 1.2, sm: 1.35 },
 });
 
+const catalogListSx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 2, md: 2.25 },
+};
+
+const catalogListHeaderSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    lg: "minmax(0, 1fr) minmax(20rem, 0.5fr)",
+  },
+  gap: { xs: 1.15, md: 2 },
+  alignItems: "end",
+  width: "100%",
+};
+
+const catalogListHeadingSx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 0.9, md: 1.05 },
+  maxWidth: "56rem",
+};
+
+const catalogListControlsSx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 1, md: 1.15 },
+};
+
+const experimentIndexGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    lg: "repeat(2, minmax(0, 1fr))",
+  },
+  gap: { xs: 1.25, md: 1.5 },
+};
+
+const experimentIndexCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
+  display: "flex",
+  flexDirection: "column",
+  gap: { xs: 1.1, md: 1.25 },
+  height: "100%",
+  p: { xs: 1.4, sm: 1.6, md: 1.75 },
+});
+
+const experimentIndexBodySx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.7,
+  minWidth: 0,
+  minHeight: { lg: "10.25rem" },
+  alignContent: "start",
+};
+
+const experimentIndexActionsSx: SxProps<Theme> = {
+  mt: "auto",
+  pt: { xs: 0.25, md: 0.5 },
+};
+
+const experimentIndexSummarySx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
+  display: "grid",
+  gap: 0.65,
+  alignSelf: { md: "end" },
+  p: { xs: 1.25, sm: 1.35 },
+});
+
+const experimentEvidenceListSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.65,
+  m: 0,
+  p: 0,
+  listStyle: "none",
+};
+
+const experimentEvidenceItemSx: SxProps<Theme> = (theme) => ({
+  display: "grid",
+  gridTemplateColumns: "0.55rem minmax(0, 1fr)",
+  gap: 0.65,
+  alignItems: "baseline",
+  color: theme.palette.text.secondary,
+  fontSize: "0.92rem",
+  lineHeight: 1.5,
+  "&::before": {
+    content: '""',
+    width: "0.45rem",
+    height: "0.45rem",
+    borderRadius: "50%",
+    backgroundColor: alpha(theme.palette.secondary.main, 0.9),
+    transform: "translateY(-0.08rem)",
+  },
+});
+
 const browseRowColumns = {
   xs: "minmax(0, 1fr)",
   md: "minmax(14rem, 1fr) minmax(11rem, 0.75fr) minmax(12rem, 1fr) minmax(11rem, 0.85fr) 8rem",
@@ -248,25 +242,6 @@ const browseRowColumns = {
 const browseSurfaceSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   overflow: "hidden",
 });
-
-const projectTabsSx: SxProps<Theme> = composeSx(softPanelBaseSx, (theme) => ({
-  px: { xs: 0.75, sm: 1 },
-  py: 0.5,
-  "& .MuiTabs-indicator": {
-    backgroundColor: theme.palette.secondary.main,
-  },
-  "& .MuiTab-root": {
-    minHeight: 42,
-    maxWidth: "none",
-    color: theme.palette.text.secondary,
-    fontWeight: 600,
-    letterSpacing: 0,
-    textTransform: "none",
-  },
-  "& .Mui-selected": {
-    color: theme.palette.text.primary,
-  },
-}));
 
 const browseHeaderSx: SxProps<Theme> = (theme) => ({
   display: { xs: "none", md: "grid" },
@@ -632,10 +607,6 @@ export function experimentProjectCatalogPath(projectId: ProjectId): string {
 export function getExperimentProjectIdFromPath(pathname: string): ProjectId | null {
   const normalizedPath = (pathname.split(/[?#]/, 1)[0] ?? "").replace(/\/+$/, "");
 
-  if (normalizedPath === EXPERIMENTS_PATH) {
-    return DEFAULT_EXPERIMENT_PROJECT_ID;
-  }
-
   if (!normalizedPath.startsWith(EXPERIMENT_DETAIL_PREFIX)) {
     return null;
   }
@@ -653,14 +624,22 @@ function resolveCurrentPathname(initialPath?: string): string {
   return initialPath ?? (typeof window === "undefined" ? EXPERIMENTS_PATH : window.location.pathname);
 }
 
-function CatalogStatusNote() {
-  const item = experimentCatalogContent.platformValidation;
+function isExperimentsIndexPath(pathname: string): boolean {
+  const normalizedPath = (pathname.split(/[?#]/, 1)[0] ?? "").replace(/\/+$/, "");
 
+  return normalizedPath === EXPERIMENTS_PATH;
+}
+
+function CatalogStatusNote({ selectedProjectId }: { selectedProjectId: ProjectId }) {
   return (
     <Box role="note" sx={catalogStatusNoteSx}>
       <Box sx={catalogStatusHeaderSx}>
         <Chip label="Catalog ready" variant="outlined" sx={accentChipSx} />
-        <Button href={item.href} size="small" endIcon={<ArrowForwardRoundedIcon />}>
+        <Button
+          href={decisionProjectPath(selectedProjectId)}
+          size="small"
+          endIcon={<ArrowForwardRoundedIcon />}
+        >
           View project decisions
         </Button>
       </Box>
@@ -697,33 +676,6 @@ function CatalogFactStrip() {
         <Chip key={fact} label={fact} size="small" variant="outlined" sx={catalogFactChipSx} />
       ))}
     </Box>
-  );
-}
-
-function ExperimentCatalogConceptSection() {
-  return (
-    <PageSection>
-      <SectionHeader
-        eyebrow="Experiment model"
-        title="How experiments work"
-        copy={experimentCatalogContent.conceptLead}
-      />
-
-      <Box component="section" sx={conceptSurfaceSx}>
-        {experimentCatalogContent.conceptSteps.map((step, index) => (
-          <React.Fragment key={step.label}>
-            <Box component="span" className="experiment-concept-step" sx={conceptStepItemSx}>
-              <Box component="span" sx={conceptStepSx} title={step.body}>
-                {step.label}
-              </Box>
-            </Box>
-            {index < experimentCatalogContent.conceptSteps.length - 1 ? (
-              <ArrowForwardRoundedIcon aria-hidden="true" sx={conceptArrowSx} />
-            ) : null}
-          </React.Fragment>
-        ))}
-      </Box>
-    </PageSection>
   );
 }
 
@@ -847,30 +799,93 @@ function RelatedProjectEvidenceBand() {
   );
 }
 
-function ProjectExperimentTabs({
-  selectedProjectId,
-}: {
-  selectedProjectId: ProjectId;
-}) {
+function ExperimentProjectCard({ projectId }: { projectId: ProjectId }) {
+  const project = getProjectById(projectId);
+  const projectExperiments = experimentCatalogContent.experiments.filter(
+    (experiment) => experiment.projectId === projectId,
+  );
+  const categories = new Set(projectExperiments.map((experiment) => experiment.category));
+
   return (
-    <Box sx={projectTabsSx}>
-      <Tabs
-        value={selectedProjectId}
-        variant="scrollable"
-        scrollButtons="auto"
-        aria-label="Experiment project tabs"
-      >
-        {projectPortfolioContent.projects.map((project) => (
-          <Tab
-            key={project.id}
-            component="a"
-            href={experimentProjectCatalogPath(project.id)}
-            value={project.id}
-            label={`${project.title} (${project.experimentCount})`}
-          />
+    <Box component="section" sx={experimentIndexCardSx}>
+      <Box sx={experimentMetaRowSx}>
+        <Chip label={project.layer} variant="outlined" sx={mutedChipSx} />
+        <Chip label={`${projectExperiments.length} experiments`} variant="outlined" />
+        <Chip label={`${categories.size} focus areas`} variant="outlined" />
+      </Box>
+
+      <Box sx={experimentIndexBodySx}>
+        <Typography component="h2" variant="h4">
+          {project.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {project.summary}
+        </Typography>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {project.result}
+        </Typography>
+      </Box>
+
+      <Box component="ul" sx={experimentEvidenceListSx}>
+        {project.evidence.map((item) => (
+          <Box key={item} component="li" sx={experimentEvidenceItemSx}>
+            {item}
+          </Box>
         ))}
-      </Tabs>
+      </Box>
+
+      <Box sx={experimentIndexActionsSx}>
+        <ActionLinkRow>
+          <Button href={experimentProjectCatalogPath(project.id)} variant="contained">
+            View experiments
+          </Button>
+          <Button href={decisionProjectPath(project.id)} variant="outlined">
+            Project decisions
+          </Button>
+          <Button href={project.path} size="small">
+            Project overview
+          </Button>
+        </ActionLinkRow>
+      </Box>
     </Box>
+  );
+}
+
+function ExperimentsIndexRoute() {
+  useDocumentTitle(PAGE_TITLE);
+
+  return (
+    <PublicSiteLayout
+      activeNav="experiments"
+      breadcrumbs={[HOME_BREADCRUMB, { label: "Experiments" }]}
+    >
+      <PageSection>
+        <Box sx={catalogListSx}>
+          <Box sx={catalogListHeaderSx}>
+            <Box sx={catalogListHeadingSx}>
+              <Typography component="h1" variant="h3">
+                Experiments
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Project-linked catalogs that turn GPU serving and kernel questions into evidence-backed decisions.
+              </Typography>
+              <CatalogFactStrip />
+            </Box>
+            <Box sx={experimentIndexSummarySx}>
+              <Typography variant="body2" color="text.secondary">
+                Choose a project to browse its experiment table. Detail routes stay available for individual run shape, evidence, and commands.
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={experimentIndexGridSx}>
+            {projectPortfolioContent.projects.map((project) => (
+              <ExperimentProjectCard key={project.id} projectId={project.id} />
+            ))}
+          </Box>
+        </Box>
+      </PageSection>
+    </PublicSiteLayout>
   );
 }
 
@@ -879,40 +894,44 @@ function ExperimentCatalogListSection({
 }: {
   selectedProjectId: ProjectId;
 }) {
-  const selectedProject = getProjectById(selectedProjectId);
   const selectedExperiments = experimentCatalogContent.experiments.filter(
     (experiment) => experiment.projectId === selectedProjectId,
   );
 
   return (
     <PageSection>
-      <Box id="experiment-catalog-list" sx={{ scrollMarginTop: { xs: 88, md: 112 } }}>
-        <SectionHeader
-          eyebrow="Catalog"
-          title={`${selectedProject.title} experiments`}
-          copy="Switch projects with the tabs, then open a detail page for the question, run shape, and commands."
-        />
-      </Box>
-
-      <Stack spacing={2.25}>
-        <ProjectExperimentTabs
-          selectedProjectId={selectedProjectId}
-        />
-        <Box sx={browseSurfaceSx}>
-          <Box sx={browseHeaderSx} aria-hidden="true">
-            <span>Experiment</span>
-            <span>Purpose</span>
-            <span>Focus</span>
-            <span>Status</span>
-            <span>Details</span>
+      <Box sx={catalogListSx}>
+        <Box id="experiment-catalog-list" sx={catalogListHeaderSx}>
+          <Box sx={catalogListHeadingSx}>
+            <Typography component="h1" variant="h3">
+              {experimentCatalogContent.title}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {experimentCatalogContent.subtitle}
+            </Typography>
+            <CatalogFactStrip />
           </Box>
-          {selectedExperiments.map((experiment) => (
-            <ExperimentBrowseRow key={experiment.slug} experiment={experiment} />
-          ))}
+
+          <CatalogStatusNote selectedProjectId={selectedProjectId} />
         </Box>
 
-        <RelatedProjectEvidenceBand />
-      </Stack>
+        <Box sx={catalogListControlsSx}>
+          <Box sx={browseSurfaceSx}>
+            <Box sx={browseHeaderSx} aria-hidden="true">
+              <span>Experiment</span>
+              <span>Purpose</span>
+              <span>Focus</span>
+              <span>Status</span>
+              <span>Details</span>
+            </Box>
+            {selectedExperiments.map((experiment) => (
+              <ExperimentBrowseRow key={experiment.slug} experiment={experiment} />
+            ))}
+          </Box>
+
+          {selectedProjectId === "gpu-inference-lab" ? <RelatedProjectEvidenceBand /> : null}
+        </Box>
+      </Box>
     </PageSection>
   );
 }
@@ -926,41 +945,6 @@ function ExperimentCatalogRoute({ selectedProjectId }: { selectedProjectId: Proj
       activeNav="experiments"
       breadcrumbs={[HOME_BREADCRUMB, EXPERIMENTS_BREADCRUMB, { label: selectedProject.title }]}
     >
-      <PageHero
-        contentWidth="100%"
-        variant="compact"
-        contentSx={{ gap: { xs: 1.75, md: 2 } }}
-      >
-        <Box sx={catalogHeroTopSx}>
-          <Box sx={catalogHeroPrimarySx}>
-            <Typography component="h1" variant="h3">
-              {experimentCatalogContent.title}
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "56rem" }}>
-              {experimentCatalogContent.subtitle}
-            </Typography>
-            <CatalogFactStrip />
-
-            <ActionLinkRow>
-              <Button
-                href={`${experimentProjectCatalogPath(selectedProjectId)}#experiment-catalog-list`}
-                variant="contained"
-              >
-                Browse experiments
-              </Button>
-              <Button href={PROJECTS_PATH} variant="outlined">
-                View projects
-              </Button>
-            </ActionLinkRow>
-          </Box>
-
-          <Box sx={catalogHeroSupportSx}>
-            <CatalogStatusNote />
-          </Box>
-        </Box>
-      </PageHero>
-
-      <ExperimentCatalogConceptSection />
       <ExperimentCatalogListSection
         selectedProjectId={selectedProjectId}
       />
@@ -1719,6 +1703,11 @@ function UnknownExperimentRoute({ slug }: { slug: string }) {
 
 export function ExperimentsPage({ initialPath }: { initialPath?: string } = {}) {
   const pathname = resolveCurrentPathname(initialPath);
+
+  if (isExperimentsIndexPath(pathname)) {
+    return <ExperimentsIndexRoute />;
+  }
+
   const projectId = getExperimentProjectIdFromPath(pathname);
   const slug = getExperimentSlugFromPath(pathname);
 

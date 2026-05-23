@@ -38,13 +38,98 @@ import {
   SectionHeader,
 } from "../site/layout";
 import { projectContent } from "../site/project-content";
-import { getProjectById, type ProjectId } from "../site/projects-content";
-import { composeSx, softPanelBaseSx, warningPanelBaseSx } from "../site/styles";
+import { getProjectById, projectPortfolioContent, type ProjectId } from "../site/projects-content";
+import { accentPanelBaseSx, composeSx, softPanelBaseSx, warningPanelBaseSx } from "../site/styles";
 import { useDocumentTitle } from "../site/use-document-title";
 
 const DEFAULT_DECISION_PROJECT_ID: ProjectId = "gpu-inference-lab";
 const HOME_BREADCRUMB = { label: "Home", href: "/" };
 const DECISIONS_BREADCRUMB = { label: "Decisions", href: DECISIONS_PATH };
+
+const decisionPageListSx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 1.8, md: 2 },
+};
+
+const decisionPageHeaderSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    lg: "minmax(0, 1fr) minmax(21rem, 0.52fr)",
+  },
+  gap: { xs: 1.15, md: 2 },
+  alignItems: "start",
+  width: "100%",
+};
+
+const decisionPageHeadingSx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 0.9, md: 1.05 },
+  maxWidth: "58rem",
+};
+
+const decisionPageSupportSx: SxProps<Theme> = {
+  display: "grid",
+  gap: { xs: 1, md: 1.15 },
+  alignSelf: "start",
+};
+
+const decisionMatrixHeaderSx: SxProps<Theme> = {
+  display: "grid",
+  gap: 1,
+  maxWidth: "52rem",
+};
+
+const decisionIndexGridSx: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    lg: "repeat(2, minmax(0, 1fr))",
+  },
+  gap: { xs: 1.25, md: 1.5 },
+};
+
+const decisionIndexCardSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
+  display: "flex",
+  flexDirection: "column",
+  gap: { xs: 1.1, md: 1.25 },
+  height: "100%",
+  p: { xs: 1.4, sm: 1.6, md: 1.75 },
+});
+
+const decisionIndexBodySx: SxProps<Theme> = {
+  display: "grid",
+  gap: 0.7,
+  minWidth: 0,
+  minHeight: { lg: "10.25rem" },
+  alignContent: "start",
+};
+
+const decisionIndexActionsSx: SxProps<Theme> = {
+  mt: "auto",
+  pt: { xs: 0.25, md: 0.5 },
+};
+
+const decisionIndexSummarySx: SxProps<Theme> = composeSx(accentPanelBaseSx, {
+  display: "grid",
+  gap: 0.65,
+  alignSelf: { md: "end" },
+  p: { xs: 1.25, sm: 1.35 },
+});
+
+const decisionIndexStatusSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.65,
+  alignItems: "center",
+};
+
+const decisionMetaRowSx: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.75,
+  alignItems: "center",
+};
 
 const statusDashboardSx: SxProps<Theme> = {
   display: "grid",
@@ -155,7 +240,6 @@ export function getDecisionProjectIdFromPath(pathname: string): ProjectId | null
   const normalizedPath = (pathname.split(/[?#]/, 1)[0] ?? "").replace(/\/+$/, "");
 
   if (
-    normalizedPath === DECISIONS_PATH ||
     normalizedPath === GPU_INFERENCE_PROJECT_VALIDATION_PATH ||
     normalizedPath === LEGACY_GPU_INFERENCE_PROJECT_VALIDATION_PATH
   ) {
@@ -173,6 +257,12 @@ export function getDecisionProjectIdFromPath(pathname: string): ProjectId | null
 
   const decodedSegment = decodeURIComponent(segment);
   return isDecisionProjectId(decodedSegment) ? decodedSegment : null;
+}
+
+function isDecisionsIndexPath(pathname: string): boolean {
+  const normalizedPath = (pathname.split(/[?#]/, 1)[0] ?? "").replace(/\/+$/, "");
+
+  return normalizedPath === DECISIONS_PATH;
 }
 
 function getStatusCounts(decisions: DecisionRecord[]): Array<{ status: DecisionStatus; count: number }> {
@@ -350,6 +440,98 @@ function UnknownDecisionProjectRoute() {
   );
 }
 
+function DecisionIndexCard({ projectId }: { projectId: ProjectId }) {
+  const summary = getDecisionProjectSummary(projectId);
+  const project = getProjectById(projectId);
+  const decisions = getDecisionRecordsByProject(projectId);
+  const domains = getDecisionDomains(projectId);
+
+  return (
+    <Box component="section" sx={decisionIndexCardSx}>
+      <Box sx={decisionMetaRowSx}>
+        <Chip label={project.layer} variant="outlined" />
+        <Chip label={summary.sectionTitle} variant="outlined" />
+        <Chip label={`${decisions.length} decisions`} variant="outlined" />
+      </Box>
+
+      <Box sx={decisionIndexBodySx}>
+        <Typography component="h2" variant="h4">
+          {project.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {summary.lead}
+        </Typography>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          Domains: {domains.join(", ")}.
+        </Typography>
+      </Box>
+
+      <Box sx={decisionIndexStatusSx} aria-label={`${project.title} decision status counts`}>
+        {getStatusCounts(decisions).map((item) => (
+          <Chip
+            key={`${projectId}-${item.status}`}
+            label={`${item.count} ${item.status.toLowerCase()}`}
+            size="small"
+            variant="outlined"
+            sx={decisionStatusChipSx(item.status)}
+          />
+        ))}
+      </Box>
+
+      <Box sx={decisionIndexActionsSx}>
+        <ActionLinkRow>
+          <Button href={summary.path} variant="contained">
+            View decisions
+          </Button>
+          <Button href={summary.experimentsPath} variant="outlined">
+            Experiments
+          </Button>
+          <Button href={project.path} size="small">
+            Project overview
+          </Button>
+        </ActionLinkRow>
+      </Box>
+    </Box>
+  );
+}
+
+function DecisionsIndexRoute() {
+  useDocumentTitle("Decisions | Tony Lee");
+
+  return (
+    <PublicSiteLayout
+      activeNav="decisions"
+      breadcrumbs={[HOME_BREADCRUMB, { label: "Decisions" }]}
+    >
+      <PageSection>
+        <Box sx={decisionPageListSx}>
+          <Box sx={decisionPageHeaderSx}>
+            <Box sx={decisionPageHeadingSx}>
+              <Typography component="h1" variant="h3">
+                Decisions
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Project-level calls that separate serving architecture from kernel optimization evidence.
+              </Typography>
+            </Box>
+            <Box sx={decisionIndexSummarySx}>
+              <Typography variant="body2" color="text.secondary">
+                Choose a project decision page for the status dashboard, grouped decision matrix, related experiments, and next evidence needed.
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={decisionIndexGridSx}>
+            {projectPortfolioContent.projects.map((project) => (
+              <DecisionIndexCard key={project.id} projectId={project.id} />
+            ))}
+          </Box>
+        </Box>
+      </PageSection>
+    </PublicSiteLayout>
+  );
+}
+
 function DecisionProjectRoute({ projectId }: { projectId: ProjectId }) {
   const summary = getDecisionProjectSummary(projectId);
   const project = getProjectById(projectId);
@@ -366,47 +548,52 @@ function DecisionProjectRoute({ projectId }: { projectId: ProjectId }) {
         { label: project.title },
       ]}
     >
-      <PageHero
-        variant="compact"
-        contentWidth="64rem"
-        sx={{ mb: { xs: 2.5, md: 3 } }}
-      >
-        <Box sx={{ display: "grid", gap: { xs: 1.35, md: 1.55 }, minWidth: 0 }}>
-          <Box sx={{ display: "grid", gap: 1, maxWidth: "62rem" }}>
-            <Typography component="h1" variant="h3">
-              {summary.title}
+      <PageSection>
+        <Box sx={decisionPageListSx}>
+          <Box sx={decisionPageHeaderSx}>
+            <Box sx={decisionPageHeadingSx}>
+              <Typography component="h1" variant="h3">
+                {summary.title}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {summary.lead}
+              </Typography>
+              <ActionLinkRow>
+                <Button href={summary.experimentsPath} variant="contained">
+                  View experiments
+                </Button>
+                <Button href={project.path} variant="outlined">
+                  Project overview
+                </Button>
+                <Button
+                  href={project.repositoryUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  endIcon={<OpenInNewRoundedIcon />}
+                >
+                  GitHub
+                </Button>
+              </ActionLinkRow>
+            </Box>
+            <Box sx={decisionPageSupportSx}>
+              <DecisionStatusDashboard decisions={decisions} />
+            </Box>
+          </Box>
+
+          <Box sx={decisionMatrixHeaderSx}>
+            <Typography variant="overline" sx={{ color: "secondary.dark" }}>
+              Decision matrix
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "58rem" }}>
-              {summary.lead}
+            <Typography component="h2" variant="h4">
+              {summary.sectionTitle}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Each decision is grouped by domain and links back to the experiments that produced the evidence.
             </Typography>
           </Box>
-          <DecisionStatusDashboard decisions={decisions} />
-          <ActionLinkRow>
-            <Button href={summary.experimentsPath} variant="contained">
-              View experiments
-            </Button>
-            <Button href={project.path} variant="outlined">
-              Project overview
-            </Button>
-            <Button
-              href={project.repositoryUrl}
-              target="_blank"
-              rel="noreferrer"
-              endIcon={<OpenInNewRoundedIcon />}
-            >
-              GitHub
-            </Button>
-          </ActionLinkRow>
-        </Box>
-      </PageHero>
 
-      <PageSection>
-        <SectionHeader
-          eyebrow="Decision matrix"
-          title={summary.sectionTitle}
-          copy="Each decision is grouped by domain and links back to the experiments that produced the evidence."
-        />
-        <DecisionGroups projectId={projectId} decisions={decisions} />
+          <DecisionGroups projectId={projectId} decisions={decisions} />
+        </Box>
       </PageSection>
 
       {projectId === "gpu-inference-lab" ? <GpuEvidenceVisualsSection /> : null}
@@ -415,7 +602,13 @@ function DecisionProjectRoute({ projectId }: { projectId: ProjectId }) {
 }
 
 export function DecisionsPage({ initialPath }: { initialPath?: string } = {}) {
-  const projectId = getDecisionProjectIdFromPath(resolveCurrentPathname(initialPath));
+  const pathname = resolveCurrentPathname(initialPath);
+
+  if (isDecisionsIndexPath(pathname)) {
+    return <DecisionsIndexRoute />;
+  }
+
+  const projectId = getDecisionProjectIdFromPath(pathname);
 
   if (!projectId) {
     return <UnknownDecisionProjectRoute />;

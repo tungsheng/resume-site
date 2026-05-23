@@ -7,8 +7,28 @@ import {
 } from "../../src/features/decisions/page";
 
 describe("DecisionsPage", () => {
-  test("renders the default GPU inference decision record", () => {
+  test("renders the decision index with project cards", () => {
     const html = renderToStaticMarkup(<DecisionsPage />);
+
+    expect(html).toContain(">Decisions<");
+    expect(html).toContain("Project-level calls that separate serving architecture from kernel optimization evidence.");
+    expect(html).toContain("Choose a project decision page for the status dashboard");
+    expect(html).toContain("GPU Inference Decision Lab");
+    expect(html).toContain("CUDA Kernel Lab");
+    expect(html).toContain("9 decisions");
+    expect(html).toContain("8 decisions");
+    expect(html).toContain("href=\"/decisions/gpu-inference-lab\"");
+    expect(html).toContain("href=\"/decisions/cuda-kernel-lab\"");
+    expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
+    expect(html).toContain("href=\"/experiments/cuda-kernel-lab\"");
+    expect(html).not.toContain("Decision status dashboard");
+    expect(html).not.toContain("Bounded admission");
+  });
+
+  test("renders the GPU inference decision record", () => {
+    const html = renderToStaticMarkup(
+      <DecisionsPage initialPath="/decisions/gpu-inference-lab" />,
+    );
 
     expect(html).toContain("GPU Inference Decisions");
     expect(html).toContain("Architecture Decisions");
@@ -62,7 +82,7 @@ describe("DecisionsPage", () => {
   });
 
   test("resolves decision project routes", () => {
-    expect(getDecisionProjectIdFromPath("/decisions")).toBe("gpu-inference-lab");
+    expect(getDecisionProjectIdFromPath("/decisions")).toBeNull();
     expect(getDecisionProjectIdFromPath("/decisions/gpu-inference-lab")).toBe(
       "gpu-inference-lab",
     );

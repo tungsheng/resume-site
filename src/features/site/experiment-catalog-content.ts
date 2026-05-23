@@ -139,7 +139,7 @@ export const experimentCatalogContent = {
   subtitle:
     "Project-linked experiments that turn GPU serving and kernel questions into evidence-backed decisions.",
   statusNote:
-    "Rows show the supporting project, current proof, and decisions that still need stronger evidence.",
+    "Rows show the current proof, focus area, and decisions that still need stronger evidence.",
   platformValidation: {
     status: "GPU inference evidence",
     question:
