@@ -56,7 +56,10 @@ describe("ResumePageContent", () => {
     expect(html).toContain("Professional Summary");
     expect(html).toContain("View projects");
     expect(html).toContain("View experiments");
-    expect(html).toContain(">Contact<");
+    expect(html).toContain("aria-label=\"Contact\"");
+    expect(html).toContain("MailOutlineRoundedIcon");
+    expect(html).toContain("BadgeOutlinedIcon");
+    expect(html).not.toContain(">Contact<");
     expect(html).toContain("tony@example.com");
     expect(html).toContain("linkedin.com/in/tonyslee8");
     expect(html).toContain("resume-compact-contact");

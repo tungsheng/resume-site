@@ -18,7 +18,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("GPU Inference Decision Lab");
     expect(html).toContain("CUDA Kernel Lab");
     expect(html).toContain("7 experiments");
-    expect(html).toContain("8 experiments");
+    expect(html).toContain("9 experiments");
     expect(html).toContain("href=\"/decisions/gpu-inference-lab\"");
     expect(html).toContain("href=\"/decisions/cuda-kernel-lab\"");
     expect(html).not.toContain("role=\"tablist\"");
@@ -36,11 +36,11 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("Catalog ready");
     expect(html).toContain("Rows show the current proof, focus area");
-    expect(html).toContain("15 experiments");
+    expect(html).toContain("16 experiments");
     expect(html).toContain("2 projects");
     expect(html).toContain("Run-ready");
     expect(html).toContain("5 supported");
-    expect(html).toContain("8 selected");
+    expect(html).toContain("9 selected");
     expect(html).toContain("1 rejected");
     expect(html).not.toContain("1 pending");
     expect(html).toContain("1 blocked");
@@ -131,9 +131,11 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("href=\"/decisions/cuda-kernel-lab\"");
     expect(html).toContain("Memory Primitive Bandwidth");
     expect(html).toContain("Normalization Fusion");
+    expect(html).toContain("H200 Matmul Autotune");
     expect(html).toContain("Decode Step Graph Replay");
     expect(html).toContain("Profiler Validation");
     expect(html).toContain("href=\"/experiments/kernel-memory-primitives\"");
+    expect(html).toContain("href=\"/experiments/kernel-h200-matmul-autotune\"");
     expect(html).toContain("href=\"/experiments/kernel-decode-step-graph-replay\"");
     expect(html).not.toContain("KV Cache vs Concurrency");
     expect(html).not.toContain("FP4 Quantization Optimization");
@@ -155,14 +157,14 @@ describe("ExperimentsPage", () => {
       expect(html).toContain("Example live command");
       expect(html).toContain("Blackwell capacity blocked");
       expect(html).toContain("Result status");
-      expect(html).toContain("Category");
-      expect(html).toContain("Profiles");
-      expect(html).toContain("Endpoint");
+      expect(html).toContain("Focus");
+      expect(html).toContain("Run shape");
+      expect(html).toContain("Evidence");
       expect(html).toContain("Source");
       expect(html).toContain("Results template");
       expect(html).toContain("Report rules");
       expect(html).toContain("Next runs to curate");
-      expect(html).toContain("href=\"/experiments\"");
+      expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
       expect(html).toContain("command-token--program");
       expect(html).toContain("command-token--flag");
     }
@@ -259,6 +261,7 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("90.91% DRAM");
     expect(html).toContain("LayerNorm fp32");
     expect(html).toContain("benchmark-norms");
+    expect(html).toContain("href=\"/experiments/cuda-kernel-lab\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/src/cuda_kernel_lab/kernels/triton/norms.py\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/experiments/reports/aws-ec2/2026-05-21-strategy-next.md\"");
   });
@@ -282,6 +285,35 @@ describe("ExperimentsPage", () => {
     expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/src/cuda_kernel_lab/benchmarks/decode_step.py\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/experiments/reports/aws-ec2/2026-05-22-round12-kv-active-views.md\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/docs/benchmark-workflow.md\"");
+  });
+
+  test("renders H200 matmul autotune detail content", () => {
+    const html = renderToStaticMarkup(
+      <ExperimentsPage initialPath="/experiments/kernel-h200-matmul-autotune" />,
+    );
+
+    expect(html).toContain("H200 Matmul Autotune");
+    expect(html).toContain("CUDA Kernel Lab");
+    expect(html).toContain("Which Triton tiled-dot and persistent-wave schedules get closest");
+    expect(html).toContain("512x11008x4096");
+    expect(html).toContain("H200 matmul is the Tensor Core track");
+    expect(html).toContain("H200 matmul is bounded but not a replacement win");
+    expect(html).toContain("Latest reports: 2026-05-26");
+    expect(html).toContain("Clean focused bf16");
+    expect(html).toContain("89.31%");
+    expect(html).toContain("Latest focused bf16");
+    expect(html).toContain("89.41%");
+    expect(html).toContain("Persistent wave 2");
+    expect(html).toContain("179.1 TFLOP/s");
+    expect(html).toContain("H200 focused matmul gap");
+    expect(html).toContain("Persistent-wave check");
+    expect(html).toContain("profile-counter access");
+    expect(html).toContain("Supports decisions");
+    expect(html).toContain("H200 matmul autotune");
+    expect(html).toContain("href=\"/decisions/cuda-kernel-lab\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/src/cuda_kernel_lab/kernels/triton/matmul.py\"");
+    expect(html).toContain("href=\"https://github.com/tungsheng/cuda-kernel-lab/blob/main/experiments/reports/runpod/20260526-h200-persistent-waves-073234.md\"");
+    expect(html).not.toContain("Live result pending");
   });
 
   test("renders measured batching detail content", () => {

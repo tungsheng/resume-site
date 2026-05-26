@@ -59,10 +59,11 @@ export const publicResumeData: ResumeData = {
         ],
       },
       {
-        title: "CUDA Kernel Lab (PyTorch + Triton + A10G benchmarks)",
+        title: "CUDA Kernel Lab (PyTorch + Triton + A10G/H200 benchmarks)",
         highlights: [
-          "Built a CUDA/Triton optimization lab for LLM-shaped primitives and decode-step replay, measuring 115 operator rows plus a 27-row resident-KV graph run on A10G with correctness checks passing.",
+          "Built a CUDA/Triton optimization lab for LLM-shaped primitives, decode-step replay, and H200 Tensor Core matmul tuning, measuring A10G operator rows plus H200 autotune evidence with correctness checks passing.",
           "Validated supported wins and boundaries: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
+          "Extended the matmul track to H200 with autotuned Triton tiled-dot and persistent-wave schedules; best standard Triton rows reached about 88-90% of PyTorch/cuBLAS while persistent waves remained a measured non-win.",
         ],
       },
     ],

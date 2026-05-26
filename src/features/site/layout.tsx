@@ -392,15 +392,15 @@ export function DetailPageHeader({
             xs: "minmax(0, 1fr)",
             lg: "minmax(0, 1fr) minmax(21rem, 0.52fr)",
           },
-          gap: { xs: 1.5, md: 2.25 },
+          gap: { xs: 1.35, md: 2 },
           alignItems: "start",
           width: "100%",
-          mb: { xs: 3, md: 3.75 },
+          mb: { xs: 2.75, md: 3 },
         },
         sx,
       )}
     >
-      <Stack spacing={{ xs: 1.45, md: 1.6 }} sx={{ maxWidth: "58rem", minWidth: 0 }}>
+      <Stack spacing={{ xs: 1.3, md: 1.45 }} sx={{ maxWidth: "58rem", minWidth: 0 }}>
         <Typography component="h1" variant="h3">
           {title}
         </Typography>

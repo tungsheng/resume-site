@@ -54,7 +54,7 @@ export const decisionProjectSummaries: DecisionProjectSummary[] = [
     title: "CUDA Kernel Lab Decisions",
     sectionTitle: "Kernel Optimization Decisions",
     lead:
-      "Kernel optimization calls derived from CUDA/Triton benchmark and profiler evidence, with caveats kept beside the experiment that produced them.",
+      "Kernel optimization calls derived from CUDA/Triton benchmark and profiler evidence across A10G and H200, with caveats kept beside the experiment that produced them.",
   },
 ];
 
@@ -214,6 +214,17 @@ export const decisionRecords: DecisionRecord[] = [
     evidence: "Best Triton tile reached 25.74 TFLOP/s; PyTorch/cuBLAS stayed around 30-31 TFLOP/s.",
     experimentSlugs: ["kernel-matmul-tiling", "kernel-profiler-validation"],
     nextEvidence: "Profile the current best tile before the next tuning pass.",
+  },
+  {
+    id: "h200-matmul-autotune",
+    projectId: "cuda-kernel-lab",
+    domain: "Matmul/Tensor Core gaps",
+    title: "H200 matmul autotune",
+    status: "Caveated",
+    call: "Keep H200 matmul as an active gap-closing track; standard tiled-dot is currently best, while persistent-wave scheduling is measured but not yet useful.",
+    evidence: "Clean focused H200 timing reached 470.7 TFLOP/s bfloat16 and 462.0 TFLOP/s float16, about 88-90% of PyTorch/cuBLAS; the latest persistent-wave sweep kept standard Triton ahead at 471.4 TFLOP/s bfloat16.",
+    experimentSlugs: ["kernel-h200-matmul-autotune"],
+    nextEvidence: "Run Tensor Core counter profiles on an H200 host with NVIDIA performance-counter access; current RunPod profile reports hit permission failures.",
   },
   {
     id: "decode-graph-replay",

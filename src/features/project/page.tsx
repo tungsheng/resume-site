@@ -24,6 +24,7 @@ import {
   CUDA_KERNEL_PROJECT_PATH,
   GPU_INFERENCE_DECISIONS_PATH,
   EXPERIMENTS_PATH,
+  GPU_INFERENCE_EXPERIMENTS_PATH,
   GPU_INFERENCE_PROJECT_PATH,
   LEGACY_GPU_INFERENCE_PROJECT_PATH,
   PROJECTS_PATH,
@@ -1041,9 +1042,9 @@ function CudaKernelResultsSection() {
   return (
     <PageSection>
       <SectionHeader
-        eyebrow="A10G evidence"
+        eyebrow="A10G/H200 evidence"
         title="Benchmark readout"
-        copy="The selected runs show where custom kernels are useful, where profiler counters explain the result, and where decode replay is measured but still bounded as a synthetic resident-KV upper bound."
+        copy="The selected runs show where custom kernels are useful, where profiler counters explain the result, and where newer H200 matmul tuning remains measured but caveated."
       />
 
       <Paper variant="outlined" sx={evidenceSurfaceSx}>
@@ -1081,6 +1082,15 @@ function CudaKernelResultsSection() {
             Decode replay report
           </Button>
           <Button
+            href={`${getProjectById("cuda-kernel-lab").repositoryUrl}/blob/main/experiments/reports/runpod/20260526-h200-persistent-waves-073234.md`}
+            target="_blank"
+            rel="noreferrer"
+            size="small"
+            endIcon={<OpenInNewRoundedIcon />}
+          >
+            H200 report
+          </Button>
+          <Button
             href={`${getProjectById("cuda-kernel-lab").repositoryUrl}/tree/main/profiling/reports/2026-05-21-strategy-next`}
             target="_blank"
             rel="noreferrer"
@@ -1114,20 +1124,20 @@ function CudaKernelProjectRoute() {
         support={<ProjectDetailSupport project={project} />}
         actions={
           <>
-          <Button href={CUDA_KERNEL_EXPERIMENTS_PATH} variant="contained">
-            View experiments
-          </Button>
-          <Button href={CUDA_KERNEL_DECISIONS_PATH} variant="outlined">
-            View decisions
-          </Button>
-          <Button
-            href={project.repositoryUrl}
-            target="_blank"
-            rel="noreferrer"
-            endIcon={<OpenInNewRoundedIcon />}
-          >
-            GitHub
-          </Button>
+            <Button href={CUDA_KERNEL_EXPERIMENTS_PATH} variant="contained">
+              View experiments
+            </Button>
+            <Button href={CUDA_KERNEL_DECISIONS_PATH} variant="outlined">
+              View decisions
+            </Button>
+            <Button
+              href={project.repositoryUrl}
+              target="_blank"
+              rel="noreferrer"
+              endIcon={<OpenInNewRoundedIcon />}
+            >
+              GitHub
+            </Button>
           </>
         }
       />
@@ -1177,20 +1187,20 @@ function ProjectOverviewRoute() {
         support={<ProjectDetailSupport project={GPU_INFERENCE_PROJECT} />}
         actions={
           <>
-          <Button href={EXPERIMENTS_PATH} variant="contained">
-            View experiments
-          </Button>
-          <Button href={GPU_INFERENCE_DECISIONS_PATH} variant="outlined">
-            View decisions
-          </Button>
-          <Button
-            href={GPU_INFERENCE_PROJECT.repositoryUrl}
-            target="_blank"
-            rel="noreferrer"
-            endIcon={<OpenInNewRoundedIcon />}
-          >
-            GitHub
-          </Button>
+            <Button href={GPU_INFERENCE_EXPERIMENTS_PATH} variant="contained">
+              View experiments
+            </Button>
+            <Button href={GPU_INFERENCE_DECISIONS_PATH} variant="outlined">
+              View decisions
+            </Button>
+            <Button
+              href={GPU_INFERENCE_PROJECT.repositoryUrl}
+              target="_blank"
+              rel="noreferrer"
+              endIcon={<OpenInNewRoundedIcon />}
+            >
+              GitHub
+            </Button>
           </>
         }
       />

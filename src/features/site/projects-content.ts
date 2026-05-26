@@ -61,18 +61,18 @@ export const projectPortfolioContent = {
       path: CUDA_KERNEL_PROJECT_PATH,
       repositoryUrl: "https://github.com/tungsheng/cuda-kernel-lab",
       layer: "Kernel optimization",
-      status: "A10G benchmark evidence",
+      status: "A10G/H200 benchmark evidence",
       statusTone: "measured",
       summary:
-        "A CUDA/Triton optimization lab organized around profile-driven kernel work for LLM-shaped primitives.",
+        "A CUDA/Triton optimization lab organized around profile-driven kernel work for LLM-shaped primitives across A10G and H200.",
       result:
-        "The latest A10G evidence keeps RMSNorm fusion as the strongest kernel win and adds a resident-KV decode-step CUDA Graph replay track.",
+        "RMSNorm fusion remains the strongest supported win, while H200 matmul autotune now bounds the Tensor Core gap against PyTorch/cuBLAS.",
       evidence: [
         "115 operator rows plus 27 decode replay rows on A10G",
+        "H200 matmul rows keep best standard Triton around 88-90% of PyTorch/cuBLAS",
         "RMSNorm fp16 reached 5.901x over the PyTorch baseline",
-        "Decode replay held around 0.156 ms p50 with zero padding",
       ],
-      experimentCount: 8,
+      experimentCount: 9,
       primaryAction: {
         label: "Kernel decisions",
         href: CUDA_KERNEL_DECISIONS_PATH,
@@ -87,27 +87,32 @@ export const cudaKernelProjectContent = {
     "A CUDA/Triton optimization lab organized around a measured loop: profile first, identify the bottleneck, optimize that bottleneck, then re-profile before claiming a win.",
   repositoryUrl: "https://github.com/tungsheng/cuda-kernel-lab",
   overviewSummary:
-    "The lab moves from memory traffic and reductions into fusion, tiling, Tensor Cores, and decode-step graph replay with profiler-backed strategy comparisons.",
+    "The lab moves from memory traffic and reductions into fusion, tiling, Tensor Cores, H200 matmul autotune, and decode-step graph replay with profiler-backed strategy comparisons.",
   overviewFacts: [
     {
       label: "Device",
-      value: "NVIDIA A10G",
-      body: "Latest evidence run used a disposable AWS g5.xlarge CUDA host.",
+      value: "A10G + H200",
+      body: "A10G AWS operator evidence now sits beside RunPod H200 matmul/Tensor Core tuning.",
     },
     {
       label: "Benchmark matrix",
-      value: "115 + 27 rows",
-      body: "115 operator rows plus a 27-row decode-step replay run on A10G.",
+      value: "A10G + H200",
+      body: "115 operator rows plus 27 decode replay rows on A10G, with H200 autotune and persistent-wave matmul reports added.",
     },
     {
       label: "Correctness",
-      value: "142 / 142 pass",
-      body: "The selected operator matrix and Round 12 decode replay report both passed validation.",
+      value: "Selected rows pass",
+      body: "The selected A10G operator/decode rows and latest H200 matmul rows passed correctness checks.",
     },
     {
       label: "Largest win",
       value: "5.901x",
       body: "Triton fused RMSNorm fp16 on the 4096x8192 shape versus the PyTorch baseline.",
+    },
+    {
+      label: "H200 matmul",
+      value: "88-90%",
+      body: "Best standard Triton tiled-dot rows trail PyTorch/cuBLAS but close most of the gap on LLM-shaped GEMMs.",
     },
     {
       label: "Profiler proof",
@@ -143,7 +148,7 @@ export const cudaKernelProjectContent = {
       step: "04",
       title: "Re-profile",
       body: "Compare the next run against the same control and promote only supported, caveated, rejected, or pending claims.",
-      evidence: "RMSNorm supported; softmax rejected; matmul below cuBLAS; decode replay remains a synthetic upper bound",
+      evidence: "RMSNorm supported; softmax rejected; H200 matmul remains below PyTorch/cuBLAS; decode replay remains a synthetic upper bound",
     },
   ],
   results: [
@@ -166,6 +171,13 @@ export const cudaKernelProjectContent = {
       statusLabel: "Caveated",
       call: "Treat Triton tiling as an active optimization track, not a portfolio win over cuBLAS yet.",
       proof: "Best Triton tile reached 25.74 TFLOP/s; PyTorch/cuBLAS stayed around 30-31 TFLOP/s.",
+      tone: "warning",
+    },
+    {
+      title: "H200 matmul autotune",
+      statusLabel: "Measured, caveated",
+      call: "Standard tiled-dot is the current H200 winner; persistent-wave scheduling is measured but not yet useful.",
+      proof: "Focused H200 rows put best standard Triton at 470.7-471.4 TFLOP/s bf16, about 89% of PyTorch/cuBLAS; persistent waves stayed far behind standard.",
       tone: "warning",
     },
     {

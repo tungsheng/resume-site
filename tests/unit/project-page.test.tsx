@@ -154,6 +154,7 @@ describe("ProjectPage", () => {
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
     expect(html).toContain("Architecture decisions");
     expect(html).toContain("href=\"/decisions/gpu-inference-lab\"");
+    expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/platform/inference/ingress.yaml\""
     );
@@ -169,7 +170,7 @@ describe("ProjectPage", () => {
     expect(html).toContain(
       "href=\"https://github.com/tungsheng/gpu-inference-lab/blob/main/docs/platform-reference.md\""
     );
-    expect(html).toContain("href=\"/experiments\"");
+    expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
     expect(html).toContain("href=\"https://github.com/tungsheng/gpu-inference-lab\"");
   });
 
@@ -181,8 +182,8 @@ describe("ProjectPage", () => {
     expect(html).toContain("CUDA Kernel Lab");
     expect(html).toContain("aria-label=\"Breadcrumb\"");
     expect(html).toContain("A CUDA/Triton optimization lab");
-    expect(html).toContain("NVIDIA A10G");
-    expect(html).toContain("115 + 27 rows");
+    expect(html).toContain("A10G + H200");
+    expect(html).toContain("H200 matmul");
     expect(html).toContain("5.901x");
     expect(html).toContain("~0.156 ms");
     expect(html).toContain("Optimization loop");
@@ -190,14 +191,16 @@ describe("ProjectPage", () => {
     expect(html).toContain("Identify bottleneck");
     expect(html).toContain("Optimize that bottleneck");
     expect(html).toContain("Re-profile");
-    expect(html).toContain("A10G evidence");
+    expect(html).toContain("A10G/H200 evidence");
     expect(html).toContain("Fused RMSNorm");
     expect(html).toContain("Fused SwiGLU");
     expect(html).toContain("Matmul tile sweep");
+    expect(html).toContain("H200 matmul autotune");
     expect(html).toContain("Decode graph replay");
     expect(html).toContain("Profiler-backed proof");
     expect(html).toContain("Strategy report");
     expect(html).toContain("Decode replay report");
+    expect(html).toContain("H200 report");
     expect(html).toContain("Profiler reports");
     expect(html).not.toContain("Milestones");
     expect(html).not.toContain("docs/milestones.md");

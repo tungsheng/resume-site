@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
 import {
   Alert,
   Box,
@@ -24,7 +26,7 @@ import {
   DetailPageHeader,
   PublicSiteLayout,
 } from "../site/layout";
-import { composeSx, softPanelBaseSx } from "../site/styles";
+import { accentPanelBaseSx, composeSx } from "../site/styles";
 import { useDocumentTitle } from "../site/use-document-title";
 
 interface Toast {
@@ -42,11 +44,36 @@ const resumeCardContentSx = {
   },
 } as const;
 
-const resumeHeaderSupportSx = composeSx(softPanelBaseSx, {
+const resumeHeaderContactSx = composeSx(accentPanelBaseSx, {
   display: "grid",
-  gap: 1,
+  gap: 0.75,
+  alignContent: "center",
+  justifySelf: { xs: "start", md: "stretch" },
+  minWidth: 0,
+  width: { xs: "min(100%, 28rem)", md: "100%" },
   p: { xs: 1.25, sm: 1.35 },
 });
+
+const resumeHeaderContactLinkSx = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 0.55,
+  minHeight: 28,
+  maxWidth: "100%",
+  overflowWrap: "anywhere",
+  color: "text.secondary",
+  fontSize: "0.95rem",
+  fontWeight: 500,
+  lineHeight: 1.5,
+  textUnderlineOffset: 3,
+  whiteSpace: { sm: "nowrap" },
+} as const;
+
+const resumeHeaderContactIconSx = {
+  color: "secondary.dark",
+  fontSize: "1.08rem",
+  flexShrink: 0,
+} as const;
 
 function getLinkedinHref(linkedin: string | undefined): string | null {
   if (!linkedin) return null;
@@ -183,7 +210,7 @@ function ResumeSection({
   children: React.ReactNode;
 }) {
   return (
-    <Stack component="section" spacing={2}>
+    <Stack component="section" spacing={{ xs: 1.35, md: 1.5 }}>
       <Typography variant="h6">{title}</Typography>
       {children}
     </Stack>
@@ -205,11 +232,14 @@ function ResumeContactLinks({
     <Stack
       component="address"
       className="resume-compact-contact"
-      direction="row"
-      spacing={1.25}
+      direction={{ xs: "row", lg: "column" }}
       useFlexGap
+      aria-label="Contact"
       sx={{
         flexWrap: "wrap",
+        columnGap: { xs: 1, sm: 1.35 },
+        rowGap: { xs: 0.75, lg: 0.45 },
+        alignItems: { xs: "center", lg: "flex-start" },
         fontStyle: "normal",
         maxWidth: "100%",
       }}
@@ -218,16 +248,11 @@ function ResumeContactLinks({
         <Link
           href={`mailto:${email}`}
           sx={(theme) => ({
-            color: "text.secondary",
-            fontSize: "0.95rem",
-            fontWeight: 500,
-            lineHeight: 1.5,
-            minHeight: 28,
-            overflowWrap: "anywhere",
+            ...resumeHeaderContactLinkSx,
             textDecorationColor: alpha(theme.palette.text.secondary, 0.42),
-            textUnderlineOffset: 3,
           })}
         >
+          <MailOutlineRoundedIcon aria-hidden="true" sx={resumeHeaderContactIconSx} />
           {email}
         </Link>
       ) : null}
@@ -237,16 +262,11 @@ function ResumeContactLinks({
           target="_blank"
           rel="noreferrer"
           sx={(theme) => ({
-            color: "text.secondary",
-            fontSize: "0.95rem",
-            fontWeight: 500,
-            lineHeight: 1.5,
-            minHeight: 28,
-            overflowWrap: "anywhere",
+            ...resumeHeaderContactLinkSx,
             textDecorationColor: alpha(theme.palette.text.secondary, 0.42),
-            textUnderlineOffset: 3,
           })}
         >
+          <BadgeOutlinedIcon aria-hidden="true" sx={resumeHeaderContactIconSx} />
           {`linkedin.com/in/${linkedin}`}
         </Link>
       ) : null}
@@ -254,7 +274,7 @@ function ResumeContactLinks({
   );
 }
 
-function ResumeHeaderSupport({
+function ResumeHeaderContact({
   email,
   linkedin,
   linkedinHref,
@@ -266,10 +286,7 @@ function ResumeHeaderSupport({
   if (!email && !linkedinHref) return null;
 
   return (
-    <Box sx={resumeHeaderSupportSx}>
-      <Typography variant="overline" sx={{ color: "secondary.dark" }}>
-        Contact
-      </Typography>
+    <Box sx={resumeHeaderContactSx}>
       <ResumeContactLinks email={email} linkedin={linkedin} linkedinHref={linkedinHref} />
     </Box>
   );
@@ -293,16 +310,15 @@ function ResumeWebView({ data }: { data: ResumeData }) {
     >
       <Stack spacing={{ xs: 2, md: 2.25 }}>
         {view.summary ? (
-          <Card variant="outlined">
-            <CardContent sx={resumeCardContentSx}>
-              <Typography variant="h6" sx={{ mb: 1.5 }}>
-                Professional Summary
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                {view.summary}
-              </Typography>
-            </CardContent>
-          </Card>
+          <ResumeSection title="Professional Summary">
+            <Card variant="outlined">
+              <CardContent sx={resumeCardContentSx}>
+                <Typography variant="body1" color="text.secondary">
+                  {view.summary}
+                </Typography>
+              </CardContent>
+            </Card>
+          </ResumeSection>
         ) : null}
 
         {view.projects.length > 0 ? (
@@ -434,54 +450,61 @@ export function ResumePageContent({
         title={data.header.name}
         copy={
           data.header.badges.length > 0 ? (
-          <Typography
-            variant="body1"
-            sx={{
-              color: "secondary.dark",
-              fontWeight: 600,
-              letterSpacing: 0,
-              overflowWrap: "anywhere",
-            }}
-          >
-            {data.header.badges.join(" • ")}
-          </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "secondary.dark",
+                fontWeight: 600,
+                letterSpacing: 0,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {data.header.badges.join(" • ")}
+            </Typography>
           ) : undefined
         }
+        sx={{
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            md: "minmax(0, 1fr) minmax(17.5rem, 0.42fr)",
+          },
+          alignItems: { md: "center" },
+        }}
+        actions={
+          <>
+            <Button
+              type="button"
+              variant="contained"
+              onClick={onDownload}
+              disabled={downloading}
+              aria-label={downloading ? "Generating PDF" : "Download resume as PDF"}
+              aria-busy={downloading}
+              title="Download resume PDF"
+              startIcon={
+                downloading ? (
+                  <CircularProgress color="inherit" size={18} />
+                ) : (
+                  <DownloadRoundedIcon />
+                )
+              }
+            >
+              {downloading ? "Preparing PDF..." : "Download PDF"}
+            </Button>
+
+            <Button href={PROJECTS_PATH} variant="outlined">
+              View projects
+            </Button>
+            <Button href={EXPERIMENTS_PATH} variant="outlined">
+              View experiments
+            </Button>
+          </>
+        }
         support={
-          <ResumeHeaderSupport
+          <ResumeHeaderContact
             email={data.header.contacts.email}
             linkedin={data.header.contacts.linkedin}
             linkedinHref={linkedinHref}
           />
-        }
-        actions={
-          <>
-          <Button
-            type="button"
-            variant="contained"
-            onClick={onDownload}
-            disabled={downloading}
-            aria-label={downloading ? "Generating PDF" : "Download resume as PDF"}
-            aria-busy={downloading}
-            title="Download resume PDF"
-            startIcon={
-              downloading ? (
-                <CircularProgress color="inherit" size={18} />
-              ) : (
-                <DownloadRoundedIcon />
-              )
-            }
-          >
-            {downloading ? "Preparing PDF..." : "Download PDF"}
-          </Button>
-
-          <Button href={PROJECTS_PATH} variant="outlined">
-            View projects
-          </Button>
-          <Button href={EXPERIMENTS_PATH} variant="outlined">
-            View experiments
-          </Button>
-          </>
         }
       />
 

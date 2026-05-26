@@ -16,7 +16,7 @@ describe("DecisionsPage", () => {
     expect(html).toContain("GPU Inference Decision Lab");
     expect(html).toContain("CUDA Kernel Lab");
     expect(html).toContain("9 decisions");
-    expect(html).toContain("8 decisions");
+    expect(html).toContain("5 caveated");
     expect(html).toContain("href=\"/decisions/gpu-inference-lab\"");
     expect(html).toContain("href=\"/decisions/cuda-kernel-lab\"");
     expect(html).toContain("href=\"/experiments/gpu-inference-lab\"");
@@ -62,9 +62,11 @@ describe("DecisionsPage", () => {
     expect(html).toContain("Decode replay caveats");
     expect(html).toContain("Fused RMSNorm");
     expect(html).toContain("Row softmax");
+    expect(html).toContain("H200 matmul autotune");
     expect(html).toContain("Decode graph replay");
     expect(html).toContain("Profiler-backed proof");
     expect(html).toContain("href=\"/experiments/kernel-normalization-fusion\"");
+    expect(html).toContain("href=\"/experiments/kernel-h200-matmul-autotune\"");
     expect(html).toContain("href=\"/experiments/kernel-decode-step-graph-replay\"");
     expect(html).toContain("href=\"/projects/cuda-kernel-lab\"");
     expect(html).toContain("href=\"/experiments/cuda-kernel-lab\"");

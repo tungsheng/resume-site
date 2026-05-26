@@ -2257,6 +2257,206 @@ export const experimentCatalogContent = {
     },
     {
       projectId: "cuda-kernel-lab",
+      slug: "kernel-h200-matmul-autotune",
+      title: "H200 Matmul Autotune",
+      category: "Tensor Core matmul",
+      status: experimentStatus("Measured on H200", "Standard Triton trails PyTorch/cuBLAS"),
+      readiness: {
+        primary: {
+          label: "Selected report",
+          detail: "H200 matmul gap",
+          tone: "selected",
+        },
+      },
+      question:
+        "Which Triton tiled-dot and persistent-wave schedules get closest to the PyTorch/cuBLAS H200 matmul baseline for LLM-shaped GEMMs?",
+      cardSummary: "Standard tiled-dot closes most of the H200 gap, but persistent waves are not a win yet.",
+      metricFocus: ["TFLOP/s", "Triton/Torch %", "Persistent waves"],
+      summary:
+        "Compares H200 PyTorch/cuBLAS against repeated Triton tiled-dot candidates, then tests whether persistent resident-program waves improve the focused 512x11008x4096 shape.",
+      whyItMatters:
+        "H200 matmul is the Tensor Core track that determines whether custom Triton GEMMs can become more than a tuning exercise. The current evidence is valuable because it shows a bounded gap and prevents overclaiming the new persistent scheduler.",
+      runner: "H200 matmul autotune suite",
+      endpoint: "benchmark --suite h200-matmul-autotune",
+      sourcePath: "src/cuda_kernel_lab/kernels/triton/matmul.py",
+      resultsPath: "experiments/reports/runpod/20260526-h200-persistent-waves-073234.md",
+      runShapeSummary:
+        "H200 512x11008x4096 focused sweep plus broader 512x4096x11008, 512x11008x4096, and 4096x4096x4096 winner profiling shapes across float16 and bfloat16.",
+      cases: [
+        {
+          id: "h200-llm-down-512x11008x4096",
+          description: "focused LLM down-projection GEMM used for standard and persistent-wave comparison",
+          primaryMeasure: "512x11008x4096",
+          secondaryMeasure: "float16 and bfloat16",
+        },
+        {
+          id: "h200-llm-up-512x4096x11008",
+          description: "asymmetric LLM up-projection GEMM from the clean winner profile sweep",
+          primaryMeasure: "512x4096x11008",
+          secondaryMeasure: "float16 and bfloat16",
+        },
+        {
+          id: "h200-square-4096x4096x4096",
+          description: "square Tensor Core GEMM from the clean winner profile sweep",
+          primaryMeasure: "4096x4096x4096",
+          secondaryMeasure: "float16 and bfloat16",
+        },
+      ],
+      servingProfiles: [
+        {
+          id: "torch-baseline",
+          description: "PyTorch/cuBLAS reference baseline on H200",
+        },
+        {
+          id: "triton-standard-tiled-dot",
+          description: "best measured standard Triton tiled-dot schedule",
+        },
+        {
+          id: "triton-persistent-waves-1-4",
+          description: "persistent tiled-dot schedule with one through four resident-program waves per SM",
+        },
+      ],
+      metricGroups: [
+        {
+          label: "Compute",
+          metrics: ["TFLOP/s", "p50 latency", "Triton/Torch %"],
+        },
+        {
+          label: "Schedule",
+          metrics: ["standard tiled-dot", "persistent waves", "group_m"],
+        },
+        {
+          label: "Next proof",
+          metrics: ["Tensor Core counters", "profile-counter access", "winner stability"],
+        },
+      ],
+      localCommands: [
+        "uv run benchmark-autotune --input-dir experiments/results/runpod/20260526-h200-persistent-waves-073234 --dry-run",
+      ],
+      liveCommands: [
+        "./scripts/benchmark --run-id <run-id> --suite h200-matmul-autotune --matmul-autotune-schedules standard,persistent --matmul-autotune-persistent-waves 1,2,3,4 --with-profiling",
+      ],
+      pendingNextRuns: [
+        {
+          label: "Counter-enabled H200 profile",
+          command: "./scripts/up --profile-counters",
+          reason: "Current RunPod profiler reports hit NVIDIA performance-counter permission errors, so the next proof needs a host with counter access before Tensor Core utilization can explain the gap.",
+        },
+        {
+          label: "Winner-only profile rerun",
+          command: "./scripts/benchmark --run-id <run-id> --suite h200-matmul-autotune --with-profiling",
+          reason: "Profile the selected H200 autotune winners after counter access is available instead of widening the schedule search first.",
+        },
+      ],
+      resultEvidence: {
+        title: "H200 matmul is bounded but not a replacement win",
+        statusLabel: "Measured, caveated",
+        reportDate: "2026-05-26",
+        summary:
+          "Clean H200 timing runs show best standard Triton tiled-dot rows around 88-90% of PyTorch/cuBLAS, while the latest persistent-wave sweep improves over one-wave variants but stays far behind the standard schedule.",
+        boundary:
+          "Use this as active gap-closing evidence, not a custom matmul win. The latest persistent-wave report is exploratory, and the canonical next step is a counter-enabled H200 profile for the selected winners.",
+        boundaryPoints: [
+          "The clean 2026-05-25 timing-only run reached 470.7 TFLOP/s bfloat16 and 462.0 TFLOP/s float16 for standard Triton on 512x11008x4096.",
+          "The latest persistent-wave sweep reached 471.4 TFLOP/s bfloat16 for standard Triton on the same focused shape, with all 60 correctness checks passing.",
+          "The best persistent wave-2 rows reached about 179 TFLOP/s, improving over one-wave persistent rows but remaining far below the standard tiled-dot schedule.",
+        ],
+        stats: [
+          {
+            label: "Clean focused bf16",
+            value: "89.31%",
+            context: "470.7 Triton TFLOP/s vs 527.1 torch on 512x11008x4096",
+          },
+          {
+            label: "Latest focused bf16",
+            value: "89.41%",
+            context: "471.4 Triton TFLOP/s vs 527.3 torch in the persistent-wave sweep",
+          },
+          {
+            label: "Persistent wave 2",
+            value: "179.1 TFLOP/s",
+            context: "best bf16 persistent row, still roughly one third of torch",
+          },
+        ],
+        tables: [
+          {
+            title: "H200 focused matmul gap",
+            columns: {
+              target: "Dtype",
+              outcome: "Current call",
+              p95Latency: "Triton",
+              peakWaiting: "Torch",
+              gpuMax: "Triton/Torch",
+            },
+            rows: [
+              {
+                target: "bfloat16",
+                outcome: "standard tiled-dot leads Triton",
+                p95Latency: "470.7 TFLOP/s",
+                peakWaiting: "527.1 TFLOP/s",
+                gpuMax: "89.31%",
+              },
+              {
+                target: "float16",
+                outcome: "standard tiled-dot leads Triton",
+                p95Latency: "462.0 TFLOP/s",
+                peakWaiting: "520.4 TFLOP/s",
+                gpuMax: "88.78%",
+              },
+            ],
+          },
+          {
+            title: "Persistent-wave check",
+            columns: {
+              target: "Schedule",
+              outcome: "Call",
+              p95Latency: "Best Triton",
+              peakWaiting: "Torch",
+              gpuMax: "Boundary",
+            },
+            rows: [
+              {
+                target: "standard bf16",
+                outcome: "current best",
+                p95Latency: "471.4 TFLOP/s",
+                peakWaiting: "527.3 TFLOP/s",
+                gpuMax: "89.41%",
+              },
+              {
+                target: "persistent wave 2 bf16",
+                outcome: "measured non-win",
+                p95Latency: "179.1 TFLOP/s",
+                peakWaiting: "527.3 TFLOP/s",
+                gpuMax: "below standard",
+              },
+              {
+                target: "persistent waves 3-4 bf16",
+                outcome: "measured non-win",
+                p95Latency: "171.7-173.3 TFLOP/s",
+                peakWaiting: "527.3 TFLOP/s",
+                gpuMax: "below wave 2",
+              },
+            ],
+          },
+        ],
+        sourceReports: [
+          {
+            label: "Clean timing-only H200 report",
+            path: "experiments/reports/runpod/20260525-h200-timing-only-235601.md",
+          },
+          {
+            label: "H200 winner profile report",
+            path: "experiments/reports/runpod/20260525-h200-winner-profile-055211.md",
+          },
+          {
+            label: "Persistent wave sweep",
+            path: "experiments/reports/runpod/20260526-h200-persistent-waves-073234.md",
+          },
+        ],
+      },
+    },
+    {
+      projectId: "cuda-kernel-lab",
       slug: "kernel-decode-step-graph-replay",
       title: "Decode Step Graph Replay",
       category: "Decode scheduling",

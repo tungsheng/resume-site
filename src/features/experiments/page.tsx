@@ -286,7 +286,7 @@ const detailSummaryStripSx: SxProps<Theme> = {
     xs: "minmax(0, 1fr)",
     sm: "repeat(2, minmax(0, 1fr))",
   },
-  gap: 0.75,
+  gap: 0.65,
   alignItems: "stretch",
   gridAutoRows: "1fr",
   width: "100%",
@@ -296,10 +296,10 @@ const detailSummaryItemSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
   display: "grid",
   alignContent: "center",
   gap: 0.2,
-  minHeight: "4rem",
+  minHeight: "3.6rem",
   height: "100%",
-  px: { xs: 1.25, md: 1.4 },
-  py: { xs: 1, md: 1.1 },
+  px: { xs: 1.1, md: 1.2 },
+  py: { xs: 0.8, md: 0.9 },
 });
 
 const metricGroupSx: SxProps<Theme> = composeSx(softPanelBaseSx, {
@@ -1326,37 +1326,24 @@ function ExperimentDetailSummaryStrip({ experiment }: { experiment: ExperimentCa
       value: project.title,
     },
     {
-      label: "Category",
+      label: "Focus",
       value: experiment.category,
     },
     {
-      label: "Cases",
-      value: formatCount(experiment.cases.length, "case"),
+      label: "Run shape",
+      value: `${formatCount(experiment.cases.length, "case")} / ${formatCount(experiment.servingProfiles.length, "profile")}`,
     },
     {
-      label: "Profiles",
-      value: formatCount(experiment.servingProfiles.length, "profile"),
+      label: "Evidence",
+      value: [
+        `${experiment.readiness.primary.label}: ${experiment.readiness.primary.detail}`,
+        experiment.readiness.secondary
+          ? `${experiment.readiness.secondary.label}: ${experiment.readiness.secondary.detail}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" / "),
     },
-    {
-      label: "Runner",
-      value: experiment.runner,
-    },
-    {
-      label: "Endpoint",
-      value: experiment.endpoint,
-    },
-    {
-      label: "Readiness",
-      value: `${experiment.readiness.primary.label}: ${experiment.readiness.primary.detail}`,
-    },
-    ...(experiment.readiness.secondary
-      ? [
-          {
-            label: experiment.readiness.secondary.label,
-            value: experiment.readiness.secondary.detail,
-          },
-        ]
-      : []),
   ];
 
   return (
@@ -1479,7 +1466,11 @@ function ExperimentDetailRoute({ experiment }: { experiment: ExperimentCatalogIt
         support={<ExperimentDetailSummaryStrip experiment={experiment} />}
         actions={
           <>
-              <Button href={EXPERIMENTS_PATH} variant="contained" startIcon={<ArrowBackRoundedIcon />}>
+              <Button
+                href={experimentProjectCatalogPath(project.id)}
+                variant="contained"
+                startIcon={<ArrowBackRoundedIcon />}
+              >
                 Experiment catalog
               </Button>
               <Button
