@@ -4,8 +4,8 @@ export const publicResumeData: ResumeData = {
   header: {
     name: "Tony Lee",
     badges: [
-      "ML Inference Performance",
-      "GPU Serving Infrastructure",
+      "ML Inference Performance Engineering",
+      "GPU Serving Systems",
       "CUDA/Triton Optimization",
     ],
     contacts: {
@@ -13,7 +13,7 @@ export const publicResumeData: ResumeData = {
       linkedin: "tonyslee8",
     },
     summary:
-      "ML inference performance engineer focused on GPU-backed serving, Kubernetes, autoscaling, admission control, CUDA/Triton benchmarking, and distributed systems reliability.",
+      "ML inference performance engineer optimizing GPU-backed LLM serving from CUDA/Triton kernels to vLLM runtime behavior and Kubernetes capacity controls, with recent work on KV-cache limits, latency/cost tradeoffs, autoscaling/admission control, H200 Tensor Core matmul tuning, RMSNorm bandwidth profiling, and decode-step replay.",
   },
   skills: {
     "ML Infrastructure / Inference": [
@@ -54,16 +54,16 @@ export const publicResumeData: ResumeData = {
       {
         title: "GPU Inference Decision Lab (AWS EKS + Karpenter + vLLM)",
         highlights: [
-          "Built an AWS EKS/vLLM decision lab that turns serving measurements into supported, rejected, pending, or blocked architecture calls across autoscaling, admission control, long-context capacity, scheduling, and quantization.",
+          "Built an AWS EKS/vLLM inference performance lab that connects KV-cache/context-length behavior, autoscaling, admission control, scheduling, quantization, and useful-work cost to supported/rejected architecture decisions.",
           "Measured burst and 8192/300 long-context behavior: bounded queues preserved 100% delivery near 2s p95 for bursts, 1.20 req/s long-context traffic repeated 62.66-63.40s p95 latency, and FP8 KV was rejected after delivery fell to 47.58-69.12%.",
         ],
       },
       {
         title: "CUDA Kernel Lab (PyTorch + Triton + A10G/H200 benchmarks)",
         highlights: [
-          "Built a CUDA/Triton optimization lab for LLM-shaped primitives, decode-step replay, and H200 Tensor Core matmul tuning, measuring A10G operator rows plus H200 autotune evidence with correctness checks passing.",
+          "Built a CUDA/Triton benchmark lab for LLM-shaped primitives, measuring PyTorch/cuBLAS baselines, RMSNorm memory bandwidth, decode-step replay, and H200 Tensor Core matmul tuning with correctness checks.",
           "Validated supported wins and boundaries: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
-          "Extended the matmul track to H200 with autotuned Triton tiled-dot and persistent-wave schedules; best standard Triton rows reached about 88-90% of PyTorch/cuBLAS while persistent waves remained a measured non-win.",
+          "Extended the H200 matmul track with autotuned Triton tiled-dot and persistent-wave schedules; best standard rows reached about 88-90% of PyTorch/cuBLAS while persistent waves remained a measured non-win.",
         ],
       },
     ],
@@ -76,7 +76,6 @@ export const publicResumeData: ResumeData = {
       endDate: "Present",
       highlights: [
         "Designed distributed platform services across UI, API, data, and infrastructure boundaries, with emphasis on reliability, deployment safety, and cross-service coordination.",
-        "Evaluated platform behavior under load across latency, throughput, failure modes, and recovery paths.",
         "Improved release stability by containerizing UI services, decoupling shared dependencies, and isolating high-risk deployment surfaces.",
         "Led a launch-critical OpenSearch Dashboards migration, resolving deployment and environment issues with AWS/OpenSearch engineers.",
         "Built local development and validation automation that cut dev/test iteration latency by 20% and improved onboarding.",

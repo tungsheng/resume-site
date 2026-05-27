@@ -6,8 +6,8 @@ import type { ResumeData } from "../../src/types";
 describe("Resume Service", () => {
   test("publicResumeData contains the checked-in public resume", () => {
     expect(publicResumeData.header.name).toBe("Tony Lee");
-    expect(publicResumeData.header.badges).toContain("ML Inference Performance");
-    expect(publicResumeData.header.badges).toContain("GPU Serving Infrastructure");
+    expect(publicResumeData.header.badges).toContain("ML Inference Performance Engineering");
+    expect(publicResumeData.header.badges).toContain("GPU Serving Systems");
     expect(publicResumeData.header.badges).toContain("CUDA/Triton Optimization");
     expect(publicResumeData.header.badges).not.toContain("GPU Kernel Optimization");
     expect(publicResumeData.header.badges).not.toContain("GPU Kernel Experiments");
@@ -23,20 +23,20 @@ describe("Resume Service", () => {
     expect(publicResumeData.projects?.title).toBe("Selected Projects");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Built an AWS EKS/vLLM decision lab that turns serving measurements into supported, rejected, pending, or blocked architecture calls across autoscaling, admission control, long-context capacity, scheduling, and quantization.",
+      "Built an AWS EKS/vLLM inference performance lab that connects KV-cache/context-length behavior, autoscaling, admission control, scheduling, quantization, and useful-work cost to supported/rejected architecture decisions.",
     );
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
       "Measured burst and 8192/300 long-context behavior: bounded queues preserved 100% delivery near 2s p95 for bursts, 1.20 req/s long-context traffic repeated 62.66-63.40s p95 latency, and FP8 KV was rejected after delivery fell to 47.58-69.12%.",
     );
     expect(publicResumeData.projects?.items[1]?.title).toContain("CUDA Kernel Lab");
     expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Built a CUDA/Triton optimization lab for LLM-shaped primitives, decode-step replay, and H200 Tensor Core matmul tuning, measuring A10G operator rows plus H200 autotune evidence with correctness checks passing.",
+      "Built a CUDA/Triton benchmark lab for LLM-shaped primitives, measuring PyTorch/cuBLAS baselines, RMSNorm memory bandwidth, decode-step replay, and H200 Tensor Core matmul tuning with correctness checks.",
     );
     expect(publicResumeData.projects?.items[1]?.highlights).toContain(
       "Validated supported wins and boundaries: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
     );
     expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Extended the matmul track to H200 with autotuned Triton tiled-dot and persistent-wave schedules; best standard Triton rows reached about 88-90% of PyTorch/cuBLAS while persistent waves remained a measured non-win.",
+      "Extended the H200 matmul track with autotuned Triton tiled-dot and persistent-wave schedules; best standard rows reached about 88-90% of PyTorch/cuBLAS while persistent waves remained a measured non-win.",
     );
   });
 

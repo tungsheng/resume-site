@@ -23,11 +23,11 @@ body {
   --resume-ink: #16231f;
   --resume-muted: #465750;
   --ui-font: '${RESUME_PDF_FONT_FAMILY}', Arial, sans-serif;
-  --page-x: 0.4in;
-  --column-gap: 0.22in;
+  --page-x: 0.38in;
+  --column-gap: 0.2in;
   --sidebar-width: 2.05in;
-  --section-gap: 0.24in;
-  --experience-gap: 0.16in;
+  --section-gap: 0.2in;
+  --experience-gap: 0.13in;
 
   width: 8.5in;
   min-height: 11in;
@@ -40,7 +40,7 @@ body {
 }
 
 .resume-document .header {
-  padding: 0.24in var(--page-x) 0.12in;
+  padding: 0.22in var(--page-x) 0.1in;
 }
 
 .resume-document .header-content {
@@ -54,12 +54,12 @@ body {
   flex: 1;
   min-width: 0;
   display: grid;
-  row-gap: 6px;
+  row-gap: 5px;
 }
 
 .resume-document .header-subtitle {
   margin: 0;
-  font-size: 9pt;
+  font-size: 8.75pt;
   letter-spacing: 0;
   color: var(--resume-muted);
   font-weight: 500;
@@ -124,7 +124,7 @@ body {
 }
 
 .resume-document .header-divider {
-  margin-top: 12px;
+  margin-top: 10px;
   border-top: 1px solid var(--resume-accent);
 }
 
@@ -132,7 +132,7 @@ body {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   align-items: start;
-  padding: 0.16in var(--page-x) 0.12in;
+  padding: 0.13in var(--page-x) 0.1in;
   column-gap: var(--column-gap);
 }
 
@@ -150,7 +150,7 @@ body {
 }
 
 .resume-document .section-title {
-  margin: 0 0 9px;
+  margin: 0 0 7px;
   font-size: 9.7pt;
   font-weight: 700;
   text-transform: uppercase;
@@ -160,7 +160,7 @@ body {
 }
 
 .resume-document .education-item {
-  margin-bottom: 9px;
+  margin-bottom: 8px;
 }
 
 .resume-document .education-degree,
@@ -194,7 +194,7 @@ body {
 }
 
 .resume-document .skill-category {
-  margin-bottom: 7px;
+  margin-bottom: 6px;
 }
 
 .resume-document .skill-category-title {
@@ -208,8 +208,8 @@ body {
 
 .resume-document .summary {
   margin: 0;
-  font-size: 8.95pt;
-  line-height: 1.36;
+  font-size: 8.75pt;
+  line-height: 1.32;
   text-align: left;
   color: var(--resume-ink);
 }
@@ -227,9 +227,9 @@ body {
   list-style: none;
   padding: 0;
   display: grid;
-  row-gap: 3px;
-  font-size: 8.8pt;
-  line-height: 1.38;
+  row-gap: 2px;
+  font-size: 8.75pt;
+  line-height: 1.35;
   color: var(--resume-ink);
 }
 
