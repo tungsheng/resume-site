@@ -184,19 +184,24 @@ If the GHCR package is public, these two secrets are not required.
 Set these as repository or environment variables when available:
 
 - `PRODUCTION_URL`
+- `PRODUCTION_URL_REQUIRED`
 - `REMOTE_DEBUG_LOGS`
 
 Example:
 
 ```text
 PRODUCTION_URL=https://tonylee.bio
+PRODUCTION_URL_REQUIRED=false
 REMOTE_DEBUG_LOGS=false
 ```
 
 The deploy workflow uses:
 
 - `PRODUCTION_URL` for an optional public smoke test after the VPS deploy succeeds
+- `PRODUCTION_URL_REQUIRED=true` only when the public smoke test should block an otherwise successful VPS deploy
 - `REMOTE_DEBUG_LOGS=true` only when you intentionally want full remote container logs copied into GitHub Actions output on failures
+
+The public smoke test uses short connection and total request timeouts so external DNS, TLS, firewall, or reverse-proxy reachability issues do not hold a deploy job open for several minutes. By default, a public URL failure is reported as a warning because the deploy step already checks the app directly on the VPS and smoke-tests PDF export internally.
 
 ## First Deploy
 

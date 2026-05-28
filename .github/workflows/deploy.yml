@@ -19,6 +19,7 @@ env:
   DEPLOY_PATH: /srv/resume-site
   VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
   PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+  PRODUCTION_URL_REQUIRED: ${{ vars.PRODUCTION_URL_REQUIRED || 'false' }}
   REMOTE_DEBUG_LOGS: ${{ vars.REMOTE_DEBUG_LOGS || 'false' }}
   DEPLOY_SSH_OPTS: -o BatchMode=yes -o StrictHostKeyChecking=accept-new
 
@@ -159,11 +160,28 @@ jobs:
       - name: Smoke test public URL
         if: ${{ env.PRODUCTION_URL != '' }}
         run: |
+          set +e
           curl --fail --silent --show-error --location --head \
+            --connect-timeout 10 \
+            --max-time 20 \
             --retry 5 \
             --retry-all-errors \
-            --retry-delay 2 \
+            --retry-connrefused \
+            --retry-delay 5 \
+            --retry-max-time 120 \
             "${PRODUCTION_URL}"
+          curl_status=$?
+          if [ "${curl_status}" -eq 0 ]; then
+            exit 0
+          fi
+
+          message="Public URL smoke test failed for ${PRODUCTION_URL} with curl exit code ${curl_status}."
+          if [ "${PRODUCTION_URL_REQUIRED}" = "true" ]; then
+            echo "${message}" >&2
+            exit "${curl_status}"
+          fi
+
+          echo "::warning::${message} The VPS deploy and internal smoke tests succeeded; set PRODUCTION_URL_REQUIRED=true to make this check block deploys."
 
       - name: Collect remote diagnostics on failure
         if: failure()
