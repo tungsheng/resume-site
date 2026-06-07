@@ -70,7 +70,7 @@ export const publicResumeData: ResumeData = {
   },
   experience: [
     {
-      title: "Platform Infrastructure Engineer",
+      title: "Staff Software Engineer",
       company: "DTEX Systems",
       startDate: "Sep 2024",
       endDate: "Present",
