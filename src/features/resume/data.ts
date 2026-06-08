@@ -54,7 +54,7 @@ export const publicResumeData: ResumeData = {
       {
         title: "GPU Inference Decision Lab (AWS EKS + Karpenter + vLLM)",
         highlights: [
-          "Built an AWS EKS/vLLM inference performance lab that connects KV-cache/context-length behavior, autoscaling, admission control, scheduling, quantization, and useful-work cost to supported/rejected architecture decisions.",
+          "Built an AWS EKS/vLLM inference performance lab that turns KV-cache/context-length behavior, autoscaling, admission control, scheduler/quantization probes, useful-work cost, and failure-mitigation drills into supported, rejected, or pending architecture evidence.",
           "Measured burst and 8192/300 long-context behavior: bounded queues preserved 100% delivery near 2s p95 for bursts, 1.20 req/s long-context traffic repeated 62.66-63.40s p95 latency, and FP8 KV was rejected after delivery fell to 47.58-69.12%.",
         ],
       },
@@ -63,7 +63,7 @@ export const publicResumeData: ResumeData = {
         highlights: [
           "Built a CUDA/Triton benchmark lab for LLM-shaped primitives, measuring PyTorch/cuBLAS baselines, RMSNorm memory bandwidth, decode-step replay, and H200 Tensor Core matmul tuning with correctness checks.",
           "Validated supported wins and boundaries: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
-          "Extended the H200 matmul track with autotuned Triton tiled-dot and persistent-wave schedules; best standard rows reached about 88-90% of PyTorch/cuBLAS while persistent waves remained a measured non-win.",
+          "Extended the H200 matmul track with standard and persistent-wave Triton schedules; best standard row reached 471.4 TFLOP/s bf16 (89.41% of PyTorch/cuBLAS) while persistent waves remained a measured non-win.",
         ],
       },
     ],
