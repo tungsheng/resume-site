@@ -59,11 +59,11 @@ export const publicResumeData: ResumeData = {
         ],
       },
       {
-        title: "CUDA Kernel Lab (PyTorch + Triton + A10G/H200 benchmarks)",
+        title: "CUDA/Triton GPU Kernel Lab (PyTorch baselines + A10G/H200)",
         highlights: [
-          "Built a CUDA/Triton benchmark lab for LLM-shaped primitives, measuring PyTorch/cuBLAS baselines, RMSNorm memory bandwidth, decode-step replay, and H200 Tensor Core matmul tuning with correctness checks.",
-          "Validated supported wins and boundaries: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
-          "Extended the H200 matmul track with standard and persistent-wave Triton schedules; best standard row reached 471.4 TFLOP/s bf16 (89.41% of PyTorch/cuBLAS) while persistent waves remained a measured non-win.",
+          "Built a reproducible CUDA/Triton benchmarking lab for LLM-shaped GPU primitives, comparing custom Triton kernels against PyTorch/cuBLAS baselines with correctness checks, latency percentiles, bandwidth, TFLOP/s, roofline analysis, and Nsight evidence.",
+          "Separated supported wins from caveats: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
+          "Extended the H200 matmul track with standard and persistent-wave Triton schedules; the focused 512x11008x4096 bf16 standard row reached 471.4 TFLOP/s (89.41% of PyTorch/cuBLAS), while persistent waves remained below the standard schedule.",
         ],
       },
     ],

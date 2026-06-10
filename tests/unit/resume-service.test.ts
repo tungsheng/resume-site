@@ -28,15 +28,15 @@ describe("Resume Service", () => {
     expect(publicResumeData.projects?.items[0]?.highlights).toContain(
       "Measured burst and 8192/300 long-context behavior: bounded queues preserved 100% delivery near 2s p95 for bursts, 1.20 req/s long-context traffic repeated 62.66-63.40s p95 latency, and FP8 KV was rejected after delivery fell to 47.58-69.12%.",
     );
-    expect(publicResumeData.projects?.items[1]?.title).toContain("CUDA Kernel Lab");
+    expect(publicResumeData.projects?.items[1]?.title).toBe("CUDA/Triton GPU Kernel Lab (PyTorch baselines + A10G/H200)");
     expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Built a CUDA/Triton benchmark lab for LLM-shaped primitives, measuring PyTorch/cuBLAS baselines, RMSNorm memory bandwidth, decode-step replay, and H200 Tensor Core matmul tuning with correctness checks.",
+      "Built a reproducible CUDA/Triton benchmarking lab for LLM-shaped GPU primitives, comparing custom Triton kernels against PyTorch/cuBLAS baselines with correctness checks, latency percentiles, bandwidth, TFLOP/s, roofline analysis, and Nsight evidence.",
     );
     expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Validated supported wins and boundaries: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
+      "Separated supported wins from caveats: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
     );
     expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Extended the H200 matmul track with standard and persistent-wave Triton schedules; best standard row reached 471.4 TFLOP/s bf16 (89.41% of PyTorch/cuBLAS) while persistent waves remained a measured non-win.",
+      "Extended the H200 matmul track with standard and persistent-wave Triton schedules; the focused 512x11008x4096 bf16 standard row reached 471.4 TFLOP/s (89.41% of PyTorch/cuBLAS), while persistent waves remained below the standard schedule.",
     );
   });
 
