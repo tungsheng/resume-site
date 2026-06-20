@@ -112,6 +112,22 @@ describe("API Integration", () => {
     expect(html).toContain("Decisions | Tony Lee");
   });
 
+  itIfIntegration("GET /blog serves the blog shell", async () => {
+    const res = await fetch(`${BASE_URL}/blog`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Blog | Tony Lee");
+  });
+
+  itIfIntegration("GET /blog/:slug serves the blog shell", async () => {
+    const res = await fetch(`${BASE_URL}/blog/decode-process-deep-dive`);
+    expect(res.status).toBe(200);
+
+    const html = await res.text();
+    expect(html).toContain("Blog | Tony Lee");
+  });
+
   itIfIntegration("GET /resume serves the resume shell", async () => {
     const res = await fetch(`${BASE_URL}/resume`);
     expect(res.status).toBe(200);
