@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Design tokens ported 1:1 from src/theme.ts (ADR-0003 decision 5: faithful
+ * Design tokens ported 1:1 from the original MUI theme (ADR-0003 decision 5: faithful
  * port, design frozen). Exposing them through Tailwind's @theme makes them
  * available as utilities (text-ink, bg-paper, font-display, …) so the page
  * ports in later #12 slices match the current look.

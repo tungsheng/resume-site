@@ -1,15 +1,11 @@
 {
   "name": "resume-site",
-  "module": "src/index.ts",
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun run src/index.ts",
-    "dev": "bun --watch src/index.ts",
     "astro": "astro",
-    "astro:dev": "astro dev",
-    "astro:build": "astro build",
-    "astro:preview": "astro preview",
+    "dev": "astro dev",
+    "preview": "astro preview",
     "build": "astro build && bun run build:pdf",
     "build:pdf": "bun run scripts/build-resume-pdf.ts",
     "test": "bun run test:unit",
@@ -26,10 +22,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^9.0.0",
-    "@mui/material": "^9.0.0",
     "@tailwindcss/vite": "^4.3.1",
     "astro": "^6.4.8",
     "puppeteer-core": "^24.35.0",
