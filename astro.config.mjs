@@ -7,10 +7,10 @@ import tailwindcss from "@tailwindcss/vite";
 // collide with the existing Bun/React app in ./src. Once every page is ported
 // and the Bun app is removed, srcDir flips back to the default ./src.
 //
-// TODO(#12): set `site` to the real production domain once known — it is needed
-// for canonical URLs, the sitemap (#8/#9) and absolute RSS image URLs.
+// `site` is the production origin — used for canonical URLs, the sitemap (#8/#9)
+// and absolute RSS image URLs. No trailing slash (Astro convention).
 export default defineConfig({
-  site: "https://example.com",
+  site: "https://tonylee.bio",
   srcDir: "./astro",
   // Dedicated public dir during the migration: the default ./public still holds
   // the old Bun app's static HTML shells, which would otherwise shadow Astro's
