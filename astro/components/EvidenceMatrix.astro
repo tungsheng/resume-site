@@ -1,0 +1,82 @@
+---
+// Plain-.astro port of TwoMetricEvidenceMatrix (src/features/site/evidence-visuals.tsx):
+// a titled card with a takeaway and rows of two labeled horizontal bars. Zero JS.
+interface Cell {
+  value: number;
+  label: string;
+  tone?: string;
+}
+interface Column {
+  key: string;
+  label: string;
+  max: number;
+  tone?: string;
+}
+interface Row {
+  label: string;
+  context?: string;
+  values: Record<string, Cell>;
+}
+interface Props {
+  title: string;
+  takeaway: string;
+  sourceLabel?: string;
+  columns: Column[];
+  rows: Row[];
+}
+const { title, takeaway, sourceLabel, columns, rows } = Astro.props;
+
+const TONE: Record<string, string> = {
+  success: "#00AB66",
+  info: "#276f89",
+  warning: "#a95718",
+  error: "#d32f2f",
+  neutral: "rgba(22,35,31,0.58)",
+};
+const toneColor = (tone = "neutral") => TONE[tone] ?? TONE.neutral;
+const barWidth = (value: number, max: number) =>
+  max <= 0 || value <= 0 ? "0%" : `${Math.min(100, Math.max(4, (value / max) * 100))}%`;
+---
+
+<section class="grid gap-3 overflow-hidden rounded-lg border border-surface-border bg-paper p-5">
+  <div class="grid gap-1">
+    <h3 class="text-[1.05rem] font-semibold">{title}</h3>
+    <p class="text-sm leading-relaxed text-muted">{takeaway}</p>
+  </div>
+
+  <div class="grid gap-1">
+    {
+      rows.map((row) => (
+        <div class="grid items-center gap-2 border-t border-ink/[0.08] pt-2 first:border-t-0 md:grid-cols-[minmax(10rem,0.7fr)_repeat(2,minmax(8rem,1fr))] md:gap-4">
+          <div class="grid min-w-0 gap-0.5">
+            <p class="text-sm font-bold">{row.label}</p>
+            {row.context && <p class="text-xs text-muted">{row.context}</p>}
+          </div>
+          {
+            columns.map((column) => {
+              const cell = row.values[column.key];
+              if (!cell) return null;
+              return (
+                <div class="grid min-w-0 gap-1">
+                  <div class="flex items-baseline justify-between gap-2">
+                    <span class="text-xs font-semibold text-muted">{column.label}</span>
+                    <span class="text-xs font-bold" style="overflow-wrap:anywhere">{cell.label}</span>
+                  </div>
+                  <div class="relative h-[0.7rem] w-full overflow-hidden rounded-full bg-ink/[0.07]">
+                    <div
+                      class="h-full rounded-[inherit]"
+                      style={`width:${barWidth(cell.value, column.max)};background-color:${toneColor(cell.tone ?? column.tone)}`}
+                    >
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          }
+        </div>
+      ))
+    }
+  </div>
+
+  {sourceLabel && <p class="text-xs text-muted">{sourceLabel}</p>}
+</section>

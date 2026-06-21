@@ -22,6 +22,7 @@ export default defineConfig({
   // detail route, added with that slice.
   redirects: {
     "/project/cloud-inference-platform": "/projects/gpu-inference-lab",
+    "/project/cloud-inference-platform/validation": "/decisions/gpu-inference-lab",
   },
   vite: {
     plugins: [tailwindcss()],
