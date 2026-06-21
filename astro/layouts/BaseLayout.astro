@@ -3,13 +3,19 @@ import "../styles/global.css";
 
 type NavKey = "home" | "projects" | "experiments" | "decisions" | "blog" | "resume";
 
+interface Crumb {
+  label: string;
+  href?: string;
+}
+
 interface Props {
   title: string;
   description?: string;
   activeNav?: NavKey;
+  breadcrumbs?: Crumb[];
 }
 
-const { title, description, activeNav } = Astro.props;
+const { title, description, activeNav, breadcrumbs = [] } = Astro.props;
 
 // Canonical paths mirror src/features/site/content.ts.
 const navItems: { key: NavKey; label: string; href: string }[] = [
@@ -112,6 +118,31 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </header>
 
     <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:py-10">
+      {
+        breadcrumbs.length > 0 && (
+          <nav aria-label="Breadcrumb" class="mb-4 text-[0.86rem] md:mb-5">
+            <ol class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-muted">
+              {breadcrumbs.map((crumb, i) => {
+                const isCurrent = i === breadcrumbs.length - 1 || !crumb.href;
+                return (
+                  <li class="flex items-center gap-x-1.5">
+                    {i > 0 && <span aria-hidden="true">/</span>}
+                    {isCurrent ? (
+                      <span aria-current="page" class="font-bold text-ink">
+                        {crumb.label}
+                      </span>
+                    ) : (
+                      <a href={crumb.href} class="font-semibold hover:underline">
+                        {crumb.label}
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
+        )
+      }
       <slot />
     </main>
 
