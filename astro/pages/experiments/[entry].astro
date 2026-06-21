@@ -1,0 +1,39 @@
+---
+import ExperimentCatalog from "../../components/ExperimentCatalog.astro";
+import ExperimentDetail from "../../components/ExperimentDetail.astro";
+import { experimentCatalogContent } from "../../../src/features/site/experiment-catalog-content";
+import {
+  projectPortfolioContent,
+  type ProjectId,
+} from "../../../src/features/site/projects-content";
+
+// Single dynamic route for /experiments/<x>, mirroring the original
+// ExperimentsPage runtime routing: <x> is either a project id (catalog) or an
+// experiment slug (detail). Astro forbids two sibling dynamic params at one
+// path level, so both cases live here and getStaticPaths emits every page.
+export function getStaticPaths() {
+  const projectPaths = projectPortfolioContent.projects.map((p) => ({
+    params: { entry: p.id },
+  }));
+  // Experiment slugs never collide with project ids in the data, but guard anyway.
+  const projectIds = new Set(projectPortfolioContent.projects.map((p) => p.id));
+  const slugPaths = experimentCatalogContent.experiments
+    .filter((e) => !projectIds.has(e.slug as ProjectId))
+    .map((e) => ({ params: { entry: e.slug } }));
+  return [...projectPaths, ...slugPaths];
+}
+
+const entry = Astro.params.entry as string;
+const isProject = projectPortfolioContent.projects.some((p) => p.id === entry);
+const experiment = isProject
+  ? null
+  : experimentCatalogContent.experiments.find((e) => e.slug === entry);
+---
+
+{
+  isProject ? (
+    <ExperimentCatalog projectId={entry as ProjectId} />
+  ) : (
+    <ExperimentDetail experiment={experiment!} />
+  )
+}

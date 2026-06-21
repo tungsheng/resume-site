@@ -1,27 +1,23 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import { EXPERIMENTS_PATH } from "../../../src/features/site/content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { EXPERIMENTS_PATH } from "../../src/features/site/content";
 import {
   experimentCatalogContent,
   experimentDetailPath,
-} from "../../../src/features/site/experiment-catalog-content";
-import { decisionProjectPath } from "../../../src/features/site/decision-content";
+} from "../../src/features/site/experiment-catalog-content";
+import { decisionProjectPath } from "../../src/features/site/decision-content";
 import {
   getProjectById,
-  projectPortfolioContent,
   type ProjectId,
-} from "../../../src/features/site/projects-content";
+} from "../../src/features/site/projects-content";
 
-// Faithful port of ExperimentCatalogRoute (/experiments/<projectId>) from
-// src/features/experiments/page.tsx. Both project catalogs share one template,
-// so a single dynamic route with getStaticPaths covers them. Design frozen
-// (ADR-0003 §5); typed data reused unchanged (ADR-0003 §9). Per-experiment
-// /experiments/<slug> detail pages are a later sub-slice.
-export function getStaticPaths() {
-  return projectPortfolioContent.projects.map((p) => ({ params: { project: p.id } }));
+// Catalog view (/experiments/<projectId>) — faithful port of
+// ExperimentCatalogRoute. Rendered by experiments/[entry].astro when the path
+// segment is a project id.
+interface Props {
+  projectId: ProjectId;
 }
-
-const projectId = Astro.params.project as ProjectId;
+const { projectId } = Astro.props;
 const project = getProjectById(projectId);
 const { experiments } = experimentCatalogContent;
 const selected = experiments.filter((e) => e.projectId === projectId);
@@ -30,7 +26,6 @@ const catalogTitle =
     ? "GPU Inference Lab Experiments"
     : `${project.title} Experiments`;
 
-// CatalogFactStrip is global (all experiments), matching the React source.
 const countTone = (tone: string) =>
   experiments.filter((e) => e.readiness.primary.tone === tone).length;
 const projectCount = new Set(experiments.map((e) => e.projectId)).size;
@@ -74,7 +69,6 @@ const textBtn = "inline-flex min-h-9 items-center px-2 text-sm font-medium text-
     { label: project.title },
   ]}
 >
-  <!-- Detail header -->
   <section class="mb-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
     <div class="flex max-w-[58rem] flex-col gap-4">
       <h1 class="font-display text-[2.42rem] font-semibold leading-tight text-balance">
@@ -96,7 +90,6 @@ const textBtn = "inline-flex min-h-9 items-center px-2 text-sm font-medium text-
     </div>
   </section>
 
-  <!-- Browse table -->
   <section class="grid gap-4">
     <div class="overflow-hidden rounded-lg border border-surface-border bg-paper">
       <div class={`hidden gap-5 border-b border-ink/10 bg-ink/[0.035] px-6 py-2.5 text-[0.72rem] font-semibold uppercase tracking-wide text-muted md:grid ${rowCols}`} aria-hidden="true">
