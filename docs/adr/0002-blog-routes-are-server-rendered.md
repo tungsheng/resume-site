@@ -1,5 +1,7 @@
 # Blog routes are server-rendered; the rest of the site is client-rendered
 
+Status: superseded by [ADR-0003](0003-migrate-to-astro-static-site.md) — the site is moving to Astro with zero-JS static output, so the blog (and every page) is prerendered at build time rather than server-rendered per request. The reasoning below is retained for context; the "revisit later" noted under the zero-JS option is what ADR-0003 acts on.
+
 The site is otherwise 100% client-rendered: Bun serves a static HTML shell per section and a React bundle hydrates an empty `#root`. That is fine for a portfolio but fails a blog — crawlers and link-unfurlers hit `/blog/<slug>` and see no title, description, or content. So the blog index and detail routes become function handlers (like the existing PDF route) that server-render React to HTML with Emotion critical-CSS extraction, ship that in the initial response, then hydrate. SEO, social-card unfurling, and a full-content RSS feed are the payoff.
 
 ## Considered Options
