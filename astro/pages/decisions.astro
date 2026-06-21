@@ -1,0 +1,130 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  getDecisionDomains,
+  getDecisionProjectSummary,
+  getDecisionRecordsByProject,
+} from "../../src/features/site/decision-content";
+import {
+  getProjectById,
+  projectPortfolioContent,
+} from "../../src/features/site/projects-content";
+
+// Faithful port of the /decisions index route (DecisionsIndexRoute in
+// src/features/decisions/page.tsx). Design frozen (ADR-0003 §5); typed data
+// modules reused unchanged (ADR-0003 §9). The per-project decision routes
+// (/decisions/<projectId>) are a separate slice.
+const PAGE_TITLE = "Decisions | Tony Lee";
+const LEDE =
+  "Project-level calls that separate serving architecture from kernel optimization evidence.";
+const SUPPORT =
+  "Choose a project decision page for the status dashboard, grouped decision matrix, related experiments, and next evidence needed.";
+
+// Mirrors getStatusCounts() in the React page: fixed order, drop zero counts.
+const STATUS_ORDER = ["Supported", "Measured", "Caveated", "Partial", "Rejected", "Blocked"];
+const STATUS_COLOR = {
+  Supported: "#00AB66", // success.main
+  Measured: "#006B40", // success.dark
+  Caveated: "#743914", // warning.dark
+  Partial: "#276f89", // info.main
+  Rejected: "#d32f2f", // error.main (MUI default)
+  Blocked: "#743914", // warning.dark
+};
+const statusCounts = (decisions) =>
+  STATUS_ORDER.map((status) => ({
+    status,
+    count: decisions.filter((d) => d.status === status).length,
+  })).filter((item) => item.count > 0);
+const statusChipStyle = (status) => {
+  const c = STATUS_COLOR[status];
+  return `color:${c};border-color:color-mix(in srgb, ${c} 35%, transparent);background-color:color-mix(in srgb, ${c} 5.5%, transparent)`;
+};
+
+const cards = projectPortfolioContent.projects.map((p) => {
+  const project = getProjectById(p.id);
+  const summary = getDecisionProjectSummary(p.id);
+  const decisions = getDecisionRecordsByProject(p.id);
+  const domains = getDecisionDomains(p.id);
+  return { project, summary, decisions, domains };
+});
+
+const chipBase =
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
+const chipDefault = chipBase + " border-go-green/30 bg-go-green/[0.075] text-ink";
+const statusChip = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold";
+
+const primaryBtn =
+  "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
+const outlinedBtn =
+  "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
+const textBtn =
+  "inline-flex min-h-10 items-center px-2 text-sm font-medium text-ink hover:underline";
+---
+
+<BaseLayout
+  title={PAGE_TITLE}
+  description={LEDE}
+  activeNav="decisions"
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Decisions" }]}
+>
+  <section class="grid gap-8 md:gap-9">
+    <!-- Index header -->
+    <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.52fr)]">
+      <div class="flex max-w-[58rem] flex-col gap-3">
+        <h1 class="font-display text-[2.42rem] font-semibold leading-tight text-balance">
+          Decisions
+        </h1>
+        <p class="text-base leading-relaxed text-muted">{LEDE}</p>
+      </div>
+      <div class="rounded-lg border border-go-green/20 bg-go-green/8 p-5">
+        <p class="text-sm leading-relaxed text-muted">{SUPPORT}</p>
+      </div>
+    </div>
+
+    <!-- Per-project decision cards -->
+    <div class="grid gap-5 lg:grid-cols-2">
+      {
+        cards.map(({ project, summary, decisions, domains }) => (
+          <section class="flex h-full flex-col gap-4 rounded-lg border border-surface-border bg-paper p-6">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class={chipDefault}>{project.layer}</span>
+              <span class={chipDefault}>{summary.sectionTitle}</span>
+              <span class={chipDefault}>{decisions.length} decisions</span>
+            </div>
+
+            <div class="grid gap-2">
+              <h2 class="font-display text-[1.85rem] font-semibold leading-snug">
+                {project.title}
+              </h2>
+              <p class="text-sm leading-relaxed text-muted">{summary.lead}</p>
+              <p class="text-sm font-semibold">Domains: {domains.join(", ")}.</p>
+            </div>
+
+            <div
+              class="flex flex-wrap items-center gap-2"
+              aria-label={`${project.title} decision status counts`}
+            >
+              {statusCounts(decisions).map((item) => (
+                <span class={statusChip} style={statusChipStyle(item.status)}>
+                  {item.count} {item.status.toLowerCase()}
+                </span>
+              ))}
+            </div>
+
+            <div class="mt-auto flex flex-wrap items-center gap-3 pt-1">
+              <a href={summary.path} class={primaryBtn}>
+                View decisions
+              </a>
+              <a href={summary.experimentsPath} class={outlinedBtn}>
+                Experiments
+              </a>
+              <a href={project.path} class={textBtn}>
+                Project overview
+              </a>
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
