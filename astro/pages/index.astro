@@ -1,0 +1,42 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Placeholder home for the Astro foundation slice (#12). The faithful port of
+// the real home content — and the build-time "Latest writing" section (#10) —
+// land in later slices. This page exists to prove the Astro static build,
+// the shared layout, and the ported design tokens all work end to end.
+---
+
+<BaseLayout
+  title="Tony Lee — ML Inference Performance Engineering"
+  description="Portfolio and writing on ML inference performance engineering: inference serving, scheduler behavior, and GPU kernel paths."
+  activeNav="home"
+>
+  <section class="max-w-3xl">
+    <p class="font-mono text-xs font-semibold tracking-widest text-go-green-dark uppercase">
+      ML Inference Performance Engineering
+    </p>
+    <h1 class="mt-3 font-display text-5xl leading-none font-semibold text-balance">
+      Tony Lee
+    </h1>
+    <p class="mt-4 text-lg leading-relaxed text-muted">
+      Engineering writing and a portfolio orbiting inference serving, scheduler
+      behavior, and GPU kernel paths.
+    </p>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a
+        href="/blog"
+        class="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper transition-opacity hover:opacity-90"
+      >
+        Read the Blog
+      </a>
+      <a
+        href="/resume"
+        class="rounded-md border border-surface-border px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink/5"
+      >
+        View Resume
+      </a>
+    </div>
+  </section>
+</BaseLayout>

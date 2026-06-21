@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens ported 1:1 from src/theme.ts (ADR-0003 decision 5: faithful
+ * port, design frozen). Exposing them through Tailwind's @theme makes them
+ * available as utilities (text-ink, bg-paper, font-display, …) so the page
+ * ports in later #12 slices match the current look.
+ */
+@theme {
+  --color-ink: #16231f;
+  --color-muted: #465750;
+  --color-go-green: #00ab66;
+  --color-go-green-dark: #006b40;
+  --color-accent-soft: #dff6ee;
+  --color-warning-warm: #a95718;
+  --color-warning-soft: #f5e0cb;
+  --color-support-cool: #276f89;
+  --color-paper: #ffffff;
+  --color-surface-border: #d8ded8;
+  --color-canvas: #f7f8f5;
+
+  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--color-warning-warm) 20%, transparent);
+}

@@ -1,0 +1,128 @@
+---
+import "../styles/global.css";
+
+type NavKey = "home" | "projects" | "experiments" | "decisions" | "blog" | "resume";
+
+interface Props {
+  title: string;
+  description?: string;
+  activeNav?: NavKey;
+}
+
+const { title, description, activeNav } = Astro.props;
+
+// Canonical paths mirror src/features/site/content.ts.
+const navItems: { key: NavKey; label: string; href: string }[] = [
+  { key: "home", label: "Home", href: "/" },
+  { key: "projects", label: "Projects", href: "/projects" },
+  { key: "experiments", label: "Experiments", href: "/experiments" },
+  { key: "decisions", label: "Decisions", href: "/decisions" },
+  { key: "blog", label: "Blog", href: "/blog" },
+  { key: "resume", label: "Resume", href: "/resume" },
+];
+
+function navLinkClass(key: NavKey): string {
+  const base = "rounded-md px-3 py-1.5 text-sm font-medium transition-colors";
+  return key === activeNav
+    ? base + " bg-go-green/10 text-ink font-semibold"
+    : base + " text-muted hover:bg-ink/5 hover:text-ink";
+}
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+  </head>
+  <body class="flex min-h-screen flex-col font-sans text-ink">
+    <header class="sticky top-0 z-10 border-b border-surface-border bg-paper">
+      <div class="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-2 md:py-3">
+        <a
+          href="/"
+          aria-label="Tony Lee home"
+          class="mr-auto inline-flex h-10 w-10 items-center justify-center font-mono text-lg font-bold"
+        >
+          TL
+        </a>
+
+        <!-- Desktop nav -->
+        <nav aria-label="Primary" class="hidden sm:block">
+          <ul class="flex flex-wrap justify-end gap-1">
+            {
+              navItems.map((item) => (
+                <li>
+                  <a
+                    href={item.href}
+                    class={navLinkClass(item.key)}
+                    aria-current={item.key === activeNav ? "page" : undefined}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+
+        <!-- Mobile nav: CSS-only <details>/<summary>, zero JavaScript (ADR-0003 §7) -->
+        <details class="relative sm:hidden">
+          <summary
+            class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-md hover:bg-ink/5 [&::-webkit-details-marker]:hidden"
+            aria-label="Toggle navigation menu"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </summary>
+          <nav
+            aria-label="Primary"
+            class="absolute right-0 mt-2 grid w-48 grid-cols-1 gap-1 rounded-md border border-surface-border bg-paper p-2 shadow-sm"
+          >
+            {
+              navItems.map((item) => (
+                <a
+                  href={item.href}
+                  class={navLinkClass(item.key) + " text-center"}
+                  aria-current={item.key === activeNav ? "page" : undefined}
+                >
+                  {item.label}
+                </a>
+              ))
+            }
+          </nav>
+        </details>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:py-10">
+      <slot />
+    </main>
+
+    <footer class="border-t border-surface-border">
+      <div
+        class="mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-1 px-4 py-6 text-center sm:flex-row sm:gap-2"
+      >
+        <span class="text-sm font-semibold text-ink">Tony Lee</span>
+        <span class="hidden text-surface-border sm:inline" aria-hidden="true">|</span>
+        <span class="text-sm text-muted">ML Inference Performance Engineering</span>
+      </div>
+    </footer>
+  </body>
+</html>

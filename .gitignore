@@ -7,6 +7,9 @@ dist
 .build
 *.tgz
 
+# Astro generated types/cache (not the ./astro source dir)
+.astro/
+
 # Database
 data/
 *.db
