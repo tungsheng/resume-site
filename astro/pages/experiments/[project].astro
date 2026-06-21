@@ -1,0 +1,179 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { EXPERIMENTS_PATH } from "../../../src/features/site/content";
+import {
+  experimentCatalogContent,
+  experimentDetailPath,
+} from "../../../src/features/site/experiment-catalog-content";
+import { decisionProjectPath } from "../../../src/features/site/decision-content";
+import {
+  getProjectById,
+  projectPortfolioContent,
+  type ProjectId,
+} from "../../../src/features/site/projects-content";
+
+// Faithful port of ExperimentCatalogRoute (/experiments/<projectId>) from
+// src/features/experiments/page.tsx. Both project catalogs share one template,
+// so a single dynamic route with getStaticPaths covers them. Design frozen
+// (ADR-0003 §5); typed data reused unchanged (ADR-0003 §9). Per-experiment
+// /experiments/<slug> detail pages are a later sub-slice.
+export function getStaticPaths() {
+  return projectPortfolioContent.projects.map((p) => ({ params: { project: p.id } }));
+}
+
+const projectId = Astro.params.project as ProjectId;
+const project = getProjectById(projectId);
+const { experiments } = experimentCatalogContent;
+const selected = experiments.filter((e) => e.projectId === projectId);
+const catalogTitle =
+  projectId === "gpu-inference-lab"
+    ? "GPU Inference Lab Experiments"
+    : `${project.title} Experiments`;
+
+// CatalogFactStrip is global (all experiments), matching the React source.
+const countTone = (tone: string) =>
+  experiments.filter((e) => e.readiness.primary.tone === tone).length;
+const projectCount = new Set(experiments.map((e) => e.projectId)).size;
+const facts = [
+  `${experiments.length} experiments`,
+  `${projectCount} projects`,
+  "Run-ready",
+  `${countTone("supported")} supported`,
+  `${countTone("selected")} selected`,
+  `${countTone("rejected")} rejected`,
+  `${countTone("pending")} pending`,
+  `${countTone("blocked")} blocked`,
+];
+
+const READINESS_COLOR: Record<string, string> = {
+  supported: "#00AB66",
+  selected: "#276f89",
+  rejected: "#d32f2f",
+  pending: "#a95718",
+  blocked: "#a95718",
+};
+const readinessColor = (tone: string) => READINESS_COLOR[tone] ?? "#00AB66";
+
+const eyebrow = "text-[0.74rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark";
+const chipBase = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
+const chipMuted = chipBase + " border-go-green/25 bg-go-green/[0.065] text-ink/70";
+const chipAccent = chipBase + " border-go-green/35 bg-go-green/15 text-go-green-dark";
+const fieldLabel = "mb-0.5 text-[0.68rem] font-semibold uppercase tracking-wide text-muted md:hidden";
+const rowCols = "md:grid-cols-[minmax(14rem,1fr)_minmax(11rem,0.75fr)_minmax(12rem,1fr)_minmax(11rem,0.85fr)_8rem]";
+const detailBtn = "inline-flex min-h-9 items-center gap-1 text-sm font-medium text-ink hover:underline";
+const textBtn = "inline-flex min-h-9 items-center px-2 text-sm font-medium text-ink hover:underline";
+---
+
+<BaseLayout
+  title={`${project.title} Experiments | Tony Lee`}
+  description={experimentCatalogContent.subtitle}
+  activeNav="experiments"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Experiments", href: EXPERIMENTS_PATH },
+    { label: project.title },
+  ]}
+>
+  <!-- Detail header -->
+  <section class="mb-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
+    <div class="flex max-w-[58rem] flex-col gap-4">
+      <h1 class="font-display text-[2.42rem] font-semibold leading-tight text-balance">
+        {catalogTitle}
+      </h1>
+      <p class="text-base leading-relaxed text-muted">{experimentCatalogContent.subtitle}</p>
+      <div class="flex flex-wrap items-center gap-2" aria-label="Experiment catalog status facts">
+        {facts.map((fact) => <span class={chipMuted}>{fact}</span>)}
+      </div>
+    </div>
+
+    <div class="relative grid content-center gap-2 overflow-hidden rounded-lg border border-surface-border bg-paper py-4 pr-4 pl-6" role="note">
+      <span class="absolute inset-y-0 left-0 w-[0.28rem] bg-go-green" aria-hidden="true"></span>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <span class={chipAccent}>Catalog ready</span>
+        <a href={decisionProjectPath(projectId)} class={textBtn}>View project decisions &rarr;</a>
+      </div>
+      <p class="text-sm leading-relaxed text-muted">{experimentCatalogContent.statusNote}</p>
+    </div>
+  </section>
+
+  <!-- Browse table -->
+  <section class="grid gap-4">
+    <div class="overflow-hidden rounded-lg border border-surface-border bg-paper">
+      <div class={`hidden gap-5 border-b border-ink/10 bg-ink/[0.035] px-6 py-2.5 text-[0.72rem] font-semibold uppercase tracking-wide text-muted md:grid ${rowCols}`} aria-hidden="true">
+        <span>Experiment</span>
+        <span>Purpose</span>
+        <span>Focus</span>
+        <span>Status</span>
+        <span>Details</span>
+      </div>
+
+      {
+        selected.map((exp) => {
+          const signals = [exp.readiness.primary, ...(exp.readiness.secondary ? [exp.readiness.secondary] : [])];
+          return (
+            <section class={`grid gap-3 border-t border-ink/10 px-6 py-5 first:border-t-0 md:items-center md:gap-5 ${rowCols}`}>
+              <div class="min-w-0">
+                <span class={fieldLabel}>Experiment</span>
+                <p class="text-[0.74rem] font-semibold text-muted">{exp.category}</p>
+                <p class="text-sm font-semibold">{exp.title}</p>
+              </div>
+
+              <div class="min-w-0">
+                <span class={fieldLabel}>Purpose</span>
+                <p class="text-sm leading-relaxed text-muted">{exp.cardSummary}</p>
+              </div>
+
+              <div class="min-w-0">
+                <span class={fieldLabel}>Focus</span>
+                <div class="flex flex-wrap gap-1.5">
+                  {exp.metricFocus.map((m) => <span class={chipAccent}>{m}</span>)}
+                </div>
+              </div>
+
+              <div class="min-w-0">
+                <span class={fieldLabel}>Status</span>
+                <div class="grid max-w-[13rem] gap-1.5" aria-label={`${exp.title} status`}>
+                  <span class="flex items-baseline gap-1.5" style="color:#00AB66">
+                    <span class="mt-[0.15rem] h-[0.45rem] w-[0.45rem] shrink-0 rounded-full bg-current" aria-hidden="true"></span>
+                    <span class="text-[0.78rem] font-semibold leading-snug">Run ready</span>
+                  </span>
+                  {signals.map((sig) => (
+                    <span class="flex items-baseline gap-1.5" style={`color:${readinessColor(sig.tone)}`}>
+                      <span class="mt-[0.15rem] h-[0.45rem] w-[0.45rem] shrink-0 rounded-full bg-current" aria-hidden="true"></span>
+                      <span class="text-[0.78rem] font-semibold leading-snug">
+                        {sig.label}
+                        <span class="font-semibold text-muted"> &middot; {sig.detail}</span>
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div class="min-w-0 md:justify-self-end">
+                <span class={fieldLabel}>Details</span>
+                <a href={experimentDetailPath(exp.slug)} class={detailBtn}>View details &rarr;</a>
+              </div>
+            </section>
+          );
+        })
+      }
+    </div>
+
+    {
+      projectId === "gpu-inference-lab" && (
+        <section class="grid items-center gap-3 rounded-lg border border-surface-border bg-paper p-5 md:grid-cols-[minmax(0,1fr)_auto]">
+          <div class="grid min-w-0 gap-1">
+            <p class={eyebrow}>{experimentCatalogContent.platformValidation.status}</p>
+            <p class="text-sm font-semibold">Decisions live in the project decision record</p>
+            <p class="text-sm leading-relaxed text-muted">
+              {experimentCatalogContent.platformValidation.question}
+            </p>
+          </div>
+          <a href={experimentCatalogContent.platformValidation.href} class={textBtn}>
+            View project decisions &rarr;
+          </a>
+        </section>
+      )
+    }
+  </section>
+</BaseLayout>
