@@ -17,6 +17,12 @@ export default defineConfig({
   // generated pages. Flips back to ./public once the Bun app is removed (#12).
   publicDir: "./public-astro",
   output: "static",
+  // Legacy paths from the pre-Astro site (the Notes prototype never shipped, but
+  // these portfolio paths did). The /validation redirect targets the decisions
+  // detail route, added with that slice.
+  redirects: {
+    "/project/cloud-inference-platform": "/projects/gpu-inference-lab",
+  },
   vite: {
     plugins: [tailwindcss()],
   },

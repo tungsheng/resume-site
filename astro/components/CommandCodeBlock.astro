@@ -1,0 +1,110 @@
+---
+// Plain-.astro port of src/features/site/command-code-block.tsx: a GitHub-dark
+// shell block with lightly tokenized syntax coloring. No JS (the React version
+// had no copy button either — just colored tokens). Tokenizer ported verbatim.
+interface Props {
+  command: string;
+  ariaLabel?: string;
+}
+const { command, ariaLabel = "Command" } = Astro.props;
+
+type Kind =
+  | "program"
+  | "flag"
+  | "value"
+  | "separator"
+  | "variable"
+  | "assignment"
+  | "comment"
+  | "plain";
+
+function tokenize(command: string): { kind: Kind; text: string }[] {
+  const parts =
+    command.match(/\s+|&&|\|\||[|;<>]=?|#[^\n]*|"[^"]*"|'[^']*'|[^\s|;&<>]+/g) ?? [command];
+  let expectingValue = false;
+  let expectingProgram = true;
+
+  return parts.map((part) => {
+    if (/^\s+$/.test(part)) return { kind: "plain" as Kind, text: part };
+    if (part.startsWith("#")) {
+      expectingProgram = false;
+      expectingValue = false;
+      return { kind: "comment" as Kind, text: part };
+    }
+    if (/^(?:&&|\|\||[|;<>]=?)$/.test(part)) {
+      expectingProgram = true;
+      expectingValue = false;
+      return { kind: "separator" as Kind, text: part };
+    }
+    if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(part)) {
+      expectingProgram = true;
+      expectingValue = false;
+      return { kind: "assignment" as Kind, text: part };
+    }
+    if (part.startsWith("$")) {
+      expectingProgram = false;
+      expectingValue = false;
+      return { kind: "variable" as Kind, text: part };
+    }
+    if (/^(['"]).*\1$/.test(part)) {
+      expectingProgram = false;
+      expectingValue = false;
+      return { kind: "value" as Kind, text: part };
+    }
+    if (part.startsWith("./") || part.startsWith("/") || expectingProgram) {
+      expectingProgram = false;
+      expectingValue = false;
+      return { kind: "program" as Kind, text: part };
+    }
+    if (part.startsWith("-")) {
+      expectingProgram = false;
+      expectingValue = true;
+      return { kind: "flag" as Kind, text: part };
+    }
+    if (expectingValue) {
+      expectingProgram = false;
+      expectingValue = false;
+      return { kind: "value" as Kind, text: part };
+    }
+    expectingProgram = false;
+    return { kind: "plain" as Kind, text: part };
+  });
+}
+
+const tokens = tokenize(command);
+---
+
+<pre class="cmd" aria-label={ariaLabel}><code>{tokens.map((t) => <span class={`tok tok--${t.kind}`}>{t.text}</span>)}</code></pre>
+
+<style>
+  .cmd {
+    margin: 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background-color: #0d1117;
+    border: 1px solid #30363d;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    color: #e6edf3;
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .cmd code {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }
+  .tok--program { color: #7ee787; font-weight: 600; }
+  .tok--flag { color: #79c0ff; font-weight: 600; }
+  .tok--value { color: #a5d6ff; font-weight: 500; }
+  .tok--variable,
+  .tok--assignment { color: #ffa657; font-weight: 500; }
+  .tok--separator { color: #ff7b72; font-weight: 600; }
+  .tok--comment { color: #8b949e; font-style: italic; }
+</style>
