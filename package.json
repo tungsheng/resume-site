@@ -10,6 +10,8 @@
     "astro:dev": "astro dev",
     "astro:build": "astro build",
     "astro:preview": "astro preview",
+    "build": "astro build && bun run build:pdf",
+    "build:pdf": "bun run scripts/build-resume-pdf.ts",
     "test": "bun run test:unit",
     "test:unit": "bun test tests/unit",
     "test:integration": "RUN_INTEGRATION_TESTS=1 bun test tests/integration",

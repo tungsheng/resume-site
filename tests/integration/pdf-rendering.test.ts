@@ -7,6 +7,7 @@ import {
   LETTER_PDF_SIZE_PX,
   measurePDFContent,
 } from "../../src/services/pdf";
+import { buildResumePdf } from "../../scripts/build-resume-pdf";
 
 const RUN_INTEGRATION_TESTS = process.env.RUN_INTEGRATION_TESTS === "1";
 const itIfIntegration = RUN_INTEGRATION_TESTS ? test : test.skip;
@@ -29,5 +30,18 @@ describe("PDF Rendering", () => {
       expect(calculatePdfScale(contentSize.contentWidthPx, contentSize.contentHeightPx)).toBe(1);
     },
     20000
+  );
+
+  itIfIntegration(
+    "writes a non-empty resume.pdf build artifact",
+    async () => {
+      const outPath = await buildResumePdf("dist");
+      const bytes = new Uint8Array(await Bun.file(outPath).arrayBuffer());
+
+      expect(bytes.byteLength).toBeGreaterThan(1000);
+      // PDF magic number "%PDF-"
+      expect(new TextDecoder().decode(bytes.subarray(0, 5))).toBe("%PDF-");
+    },
+    30000
   );
 });
