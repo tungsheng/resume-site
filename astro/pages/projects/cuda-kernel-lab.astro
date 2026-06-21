@@ -1,0 +1,175 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  CUDA_KERNEL_DECISIONS_PATH,
+  CUDA_KERNEL_EXPERIMENTS_PATH,
+} from "../../../src/features/site/content";
+import {
+  cudaKernelProjectContent,
+  getProjectById,
+} from "../../../src/features/site/projects-content";
+
+// Faithful port of CudaKernelProjectRoute (/projects/cuda-kernel-lab) from
+// src/features/project/page.tsx. Design frozen (ADR-0003 §5); typed data reused
+// unchanged (ADR-0003 §9). The DecisionReadoutStrip evidence visual is
+// re-rendered as plain .astro markup (no MUI). The gpu-inference-lab detail
+// route is a separate sub-slice.
+const content = cudaKernelProjectContent;
+const project = getProjectById("cuda-kernel-lab");
+
+const repo = content.repositoryUrl;
+const reportLinks = [
+  { label: "Strategy report", href: `${repo}/blob/main/experiments/reports/aws-ec2/2026-05-21-strategy-next.md` },
+  { label: "Decode replay report", href: `${repo}/blob/main/experiments/reports/aws-ec2/2026-05-22-round12-kv-active-views.md` },
+  { label: "H200 report", href: `${repo}/blob/main/experiments/reports/runpod/20260526-h200-persistent-waves-073234.md` },
+  { label: "Profiler reports", href: `${repo}/tree/main/profiling/reports/2026-05-21-strategy-next` },
+];
+
+// DecisionReadoutStrip tone -> chip color (color-mix keeps it close to the MUI
+// outlined chip palette without pulling in MUI).
+const TONE = {
+  success: "#006B40",
+  warning: "#743914",
+  info: "#276f89",
+  error: "#d32f2f",
+  neutral: "#465750",
+};
+const toneChipStyle = (tone = "neutral") => {
+  const c = TONE[tone] ?? TONE.neutral;
+  return `color:${c};border-color:color-mix(in srgb, ${c} 38%, transparent);background-color:color-mix(in srgb, ${c} 9%, transparent)`;
+};
+
+const eyebrow = "text-[0.74rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark";
+const h2 = "font-display text-[1.85rem] font-semibold leading-snug";
+const card = "rounded-lg border border-surface-border bg-paper p-5";
+const chipBase = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
+const chipMuted = chipBase + " border-go-green/25 bg-go-green/[0.065] text-ink/70";
+const chipDefault = chipBase + " border-go-green/30 bg-go-green/[0.075] text-ink";
+const toneChip = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
+
+const primaryBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
+const outlinedBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
+const textBtn = "inline-flex min-h-10 items-center px-2 text-sm font-medium text-ink hover:underline";
+---
+
+<BaseLayout
+  title={`${content.title} | Tony Lee`}
+  description={content.lede}
+  activeNav="projects"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Projects", href: "/projects" },
+    { label: content.title },
+  ]}
+>
+  <!-- Detail header -->
+  <section class="mb-10 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
+    <div class="flex max-w-[58rem] flex-col gap-4">
+      <h1 class="font-display text-[2.42rem] font-semibold leading-tight text-balance">
+        {content.title}
+      </h1>
+      <p class="text-base leading-relaxed text-muted">{content.lede}</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <a href={CUDA_KERNEL_EXPERIMENTS_PATH} class={primaryBtn}>View experiments</a>
+        <a href={CUDA_KERNEL_DECISIONS_PATH} class={outlinedBtn}>View decisions</a>
+        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class={textBtn}>GitHub</a>
+      </div>
+    </div>
+
+    <div class="grid gap-2 rounded-lg border border-go-green/20 bg-go-green/8 p-5">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class={chipMuted}>{project.layer}</span>
+        <span class={chipDefault}>{project.status}</span>
+        <span class={chipDefault}>{project.experimentCount} experiments</span>
+      </div>
+      <p class="text-sm leading-relaxed text-muted">{project.result}</p>
+    </div>
+  </section>
+
+  <!-- At a glance -->
+  <section class="mb-10 grid gap-4">
+    <div class="grid gap-2">
+      <h2 class={h2}>At a glance</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{content.overviewSummary}</p>
+    </div>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        content.overviewFacts.map((fact) => (
+          <section class={`${card} grid content-start gap-1.5`}>
+            <p class={eyebrow}>{fact.label}</p>
+            <p class="text-[1.05rem] font-semibold">{fact.value}</p>
+            <p class="text-sm leading-relaxed text-muted">{fact.body}</p>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Optimization loop -->
+  <section class="mb-10 grid gap-4">
+    <div class="grid gap-2">
+      <p class={eyebrow}>Workflow</p>
+      <h2 class={h2}>Optimization loop</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">
+        Every kernel claim moves through the same loop: profile first, isolate the bottleneck, change
+        only that path, then re-profile before calling it a win.
+      </p>
+    </div>
+    <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      {
+        content.optimizationLoop.map((step) => (
+          <section class={`${card} grid content-start gap-3`}>
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-go-green/10 text-[0.76rem] font-extrabold text-go-green-dark">
+              {step.step}
+            </span>
+            <div class="grid gap-1">
+              <p class={eyebrow}>{step.title}</p>
+              <p class="text-sm leading-relaxed text-muted">{step.body}</p>
+            </div>
+            <p class="text-sm font-semibold">{step.evidence}</p>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Benchmark readout -->
+  <section class="grid gap-4">
+    <div class="grid gap-2">
+      <p class={eyebrow}>A10G/H200 evidence</p>
+      <h2 class={h2}>Benchmark readout</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">
+        The selected runs show where custom kernels are useful, where profiler counters explain the
+        result, and where newer H200 matmul tuning remains measured but caveated.
+      </p>
+    </div>
+
+    <div class="grid gap-4 rounded-lg border border-surface-border bg-paper p-5 md:p-6">
+      <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="CUDA benchmark readout">
+        {
+          content.results.map((item) => (
+            <section class={`${card} grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2`}>
+              <p class={eyebrow}>{item.title}</p>
+              <div class="grid content-start gap-1.5">
+                <p class="text-sm font-bold">{item.call}</p>
+                <p class="text-sm leading-relaxed text-muted">{item.proof}</p>
+              </div>
+              <span class={toneChip} style={toneChipStyle(item.tone)}>{item.statusLabel}</span>
+            </section>
+          ))
+        }
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <a href={CUDA_KERNEL_EXPERIMENTS_PATH} class={primaryBtn}>Kernel experiments</a>
+        {
+          reportLinks.map((link) => (
+            <a href={link.href} target="_blank" rel="noreferrer" class={textBtn}>
+              {link.label}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>
