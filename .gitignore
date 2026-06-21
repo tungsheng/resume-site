@@ -46,3 +46,8 @@ Thumbs.db
 *.bak
 *.backup
 
+# Agent tooling (installed skills are reproducible from skills-lock.json; scratch is local)
+.agents
+.scratch
+ralph-once.sh
+
