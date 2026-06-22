@@ -1,8 +1,9 @@
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
-import { getCollection, render } from "astro:content";
-import { isPostVisible, sortByPublishedDesc } from "../content/blog-schema";
+import { render } from "astro:content";
+import { sortByPublishedDesc } from "../content/blog-schema";
+import { getVisiblePosts } from "../content/posts";
 
 // Full-content RSS 2.0 feed at /rss.xml (#9). Published Posts only, newest-first
 // — the exact same visibility + ordering as the /blog index (isPostVisible +
@@ -17,10 +18,7 @@ export async function GET(context: APIContext) {
   // valid feed and for absolutizing in-content URLs.
   const site = context.site!;
 
-  const visible = await getCollection("blog", (post) =>
-    isPostVisible(post.data.status, import.meta.env.PROD),
-  );
-  const posts = sortByPublishedDesc(visible);
+  const posts = sortByPublishedDesc(await getVisiblePosts());
 
   // Render each Post body to HTML with the project's Markdown pipeline (so the
   // #6 admonitions/figures/tables carry through) via the container API.

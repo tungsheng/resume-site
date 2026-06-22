@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { selectLatest } from "../content/blog-schema";
+import { getVisiblePosts } from "../content/posts";
 
 // Faithful port of src/features/home/page.tsx (HomePage). Design frozen
 // (ADR-0003 §5): centered hero with name, role, lede, and three CTAs.
@@ -12,6 +14,13 @@ const primaryBtn =
   "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
 const outlinedBtn =
   "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
+
+// "Latest writing" (#10): baked into the static HTML at build time — the newest
+// Published Posts, no runtime fetch. Drafts are filtered out by getVisiblePosts.
+const LATEST_COUNT = 3;
+const latest = selectLatest(await getVisiblePosts(), LATEST_COUNT);
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 ---
 
 <BaseLayout title={PAGE_TITLE} description={HOME_LEDE} activeNav="home">
@@ -42,4 +51,34 @@ const outlinedBtn =
       </div>
     </div>
   </section>
+
+  {
+    latest.length > 0 && (
+      <section class="mb-6 md:mb-8" aria-labelledby="latest-writing">
+        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="latest-writing" class="font-display text-[1.7rem] font-semibold leading-tight">
+            Latest writing
+          </h2>
+          <a href="/blog" class="text-sm font-semibold text-go-green-dark hover:underline">
+            Read the blog &rarr;
+          </a>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {latest.map((post) => (
+            <article class="grid content-start gap-2 rounded-lg border border-surface-border bg-paper p-5">
+              <span class="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark">
+                {post.data.category}
+              </span>
+              <h3 class="font-display text-[1.2rem] font-semibold leading-snug">
+                <a href={`/blog/${post.id}`} class="hover:underline">
+                  {post.data.title}
+                </a>
+              </h3>
+              <span class="text-xs text-muted">{formatDate(post.data.published)}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>

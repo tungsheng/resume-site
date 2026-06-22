@@ -3,6 +3,7 @@ import {
   blogPostSchema,
   isPostVisible,
   readingTimeMinutes,
+  selectLatest,
   sortByPublishedDesc,
 } from "../../astro/content/blog-schema";
 
@@ -71,6 +72,30 @@ describe("sortByPublishedDesc", () => {
     const input = [post("a", "2026-01-01"), post("b", "2026-02-01")];
     const snapshot = input.map((p) => p.slug);
     sortByPublishedDesc(input);
+    expect(input.map((p) => p.slug)).toEqual(snapshot);
+  });
+});
+
+describe("selectLatest (home 'Latest writing' slice, #10)", () => {
+  const post = (slug: string, iso: string) => ({ slug, data: { published: new Date(iso) } });
+
+  test("returns the newest `limit` Posts, newest-first", () => {
+    const latest = selectLatest(
+      [
+        post("older", "2026-06-18"),
+        post("newest", "2026-06-22"),
+        post("middle", "2026-06-20"),
+        post("oldest", "2026-06-10"),
+      ],
+      2,
+    );
+    expect(latest.map((p) => p.slug)).toEqual(["newest", "middle"]);
+  });
+
+  test("returns all Posts when fewer than the limit, and never mutates input", () => {
+    const input = [post("a", "2026-02-01"), post("b", "2026-01-01")];
+    const snapshot = input.map((p) => p.slug);
+    expect(selectLatest(input, 5).map((p) => p.slug)).toEqual(["a", "b"]);
     expect(input.map((p) => p.slug)).toEqual(snapshot);
   });
 });

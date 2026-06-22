@@ -160,4 +160,23 @@ describe("blog production build output", () => {
     const robots = await Bun.file("dist/robots.txt").text();
     expect(robots).toContain("Sitemap: https://tonylee.bio/sitemap-index.xml");
   });
+
+  // Issue #10: the home page bakes a "Latest writing" section into static HTML —
+  // newest Published Posts linking into the blog, no draft, no client fetch.
+  itIf("bakes a 'Latest writing' section into the home page, newest-first", async () => {
+    const html = await Bun.file("dist/index.html").text();
+    expect(html).toContain("Latest writing");
+    for (const post of PUBLISHED) {
+      expect(html).toContain(`href="/blog/${post.slug}"`);
+    }
+    // newest-first: kv-cache (06-21) before continuous (06-20) before prefix (06-18)
+    const kv = html.indexOf("/blog/kv-cache-is-the-batch-size-ceiling");
+    const cont = html.indexOf("/blog/continuous-batching-throughput");
+    const prefix = html.indexOf("/blog/prefix-cache-hit-rate-matters");
+    expect(kv).toBeLessThan(cont);
+    expect(cont).toBeLessThan(prefix);
+
+    expect(html).not.toContain(DRAFT.title);
+    expect(html).not.toContain(`/blog/${DRAFT.slug}`);
+  });
 });

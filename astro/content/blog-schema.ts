@@ -38,6 +38,15 @@ export function sortByPublishedDesc<T extends { data: { published: Date } }>(pos
   return [...posts].sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
 }
 
+// The home "Latest writing" slice (#10): the newest `limit` Posts. Non-mutating
+// and generic so it is unit-testable without the Astro runtime.
+export function selectLatest<T extends { data: { published: Date } }>(
+  posts: T[],
+  limit: number,
+): T[] {
+  return sortByPublishedDesc(posts).slice(0, limit);
+}
+
 // Auto table of contents (#7): Astro's render() returns headings as
 // { depth, slug, text }. The TOC surfaces H2/H3 only, and the detail page shows
 // it only once a Post has at least TOC_MIN_HEADINGS sections — short Posts get

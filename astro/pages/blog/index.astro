@@ -1,18 +1,11 @@
 ---
-import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import {
-  isPostVisible,
-  readingTimeMinutes,
-  sortByPublishedDesc,
-} from "../../content/blog-schema";
+import { readingTimeMinutes, sortByPublishedDesc } from "../../content/blog-schema";
+import { getVisiblePosts } from "../../content/posts";
 
 // Blog index at /blog — every visible Post, newest-first. Visibility by Status
 // (ADR-0003 §8): Published-only in prod, all statuses in dev.
-const all = await getCollection("blog", (post) =>
-  isPostVisible(post.data.status, import.meta.env.PROD),
-);
-const posts = sortByPublishedDesc(all).map((post) => ({
+const posts = sortByPublishedDesc(await getVisiblePosts()).map((post) => ({
   slug: post.id,
   data: post.data,
   minutes: readingTimeMinutes(post.body ?? ""),
