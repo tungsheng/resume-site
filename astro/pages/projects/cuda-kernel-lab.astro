@@ -51,11 +51,7 @@ const toneChip = "inline-flex items-center rounded-full border px-2.5 py-0.5 tex
 
 const primaryBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
 const outlinedBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
-const textBtn = "inline-flex min-h-10 items-center gap-1.5 px-2 text-sm font-medium text-ink hover:underline";
-
-// External-link glyph (MUI OpenInNewRounded equivalent) appended to off-site links.
-const extIcon =
-  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+const textBtn = "link-external inline-flex min-h-10 items-center gap-1.5 px-2 text-sm font-medium text-ink hover:underline";
 ---
 
 <BaseLayout
@@ -76,9 +72,7 @@ const extIcon =
       <div class="flex flex-wrap items-center gap-3">
         <a href={CUDA_KERNEL_EXPERIMENTS_PATH} class={primaryBtn}>View experiments</a>
         <a href={CUDA_KERNEL_DECISIONS_PATH} class={outlinedBtn}>View decisions</a>
-        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class={textBtn}>
-          GitHub<span class="inline-flex" set:html={extIcon} />
-        </a>
+        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class={textBtn}>GitHub</a>
       </div>
     </div>
 
@@ -170,9 +164,7 @@ const extIcon =
         <a href={CUDA_KERNEL_EXPERIMENTS_PATH} class={primaryBtn}>Kernel experiments</a>
         {
           reportLinks.map((link) => (
-            <a href={link.href} target="_blank" rel="noreferrer" class={textBtn}>
-              {link.label}<span class="inline-flex" set:html={extIcon} />
-            </a>
+            <a href={link.href} target="_blank" rel="noreferrer" class={textBtn}>{link.label}</a>
           ))
         }
       </div>
