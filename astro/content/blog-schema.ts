@@ -31,3 +31,9 @@ export function readingTimeMinutes(body: string): number {
   const words = body.trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / 220));
 }
+
+// Blog index ordering: newest Post first by `published`. Generic over the
+// collection entry shape so it is unit-testable without the Astro runtime.
+export function sortByPublishedDesc<T extends { data: { published: Date } }>(posts: T[]): T[] {
+  return [...posts].sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
+}

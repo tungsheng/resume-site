@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { blogPostSchema, readingTimeMinutes } from "../../astro/content/blog-schema";
+import {
+  blogPostSchema,
+  readingTimeMinutes,
+  sortByPublishedDesc,
+} from "../../astro/content/blog-schema";
 
 const validPost = {
   title: "Why Prefix Cache Hit Rate Is the First Number to Check",
@@ -47,5 +51,25 @@ describe("readingTimeMinutes (derived, not authored)", () => {
   test("computes ~220 wpm", () => {
     expect(readingTimeMinutes(Array(440).fill("word").join(" "))).toBe(2);
     expect(readingTimeMinutes(Array(1100).fill("word").join(" "))).toBe(5);
+  });
+});
+
+describe("sortByPublishedDesc", () => {
+  const post = (slug: string, iso: string) => ({ slug, data: { published: new Date(iso) } });
+
+  test("orders newest Post first", () => {
+    const ordered = sortByPublishedDesc([
+      post("older", "2026-06-18"),
+      post("newest", "2026-06-22"),
+      post("middle", "2026-06-20"),
+    ]);
+    expect(ordered.map((p) => p.slug)).toEqual(["newest", "middle", "older"]);
+  });
+
+  test("does not mutate the input array", () => {
+    const input = [post("a", "2026-01-01"), post("b", "2026-02-01")];
+    const snapshot = input.map((p) => p.slug);
+    sortByPublishedDesc(input);
+    expect(input.map((p) => p.slug)).toEqual(snapshot);
   });
 });
