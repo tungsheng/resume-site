@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from "astro/config";
+import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import remarkAdmonitions from "./astro/markdown/remark-admonitions.ts";
 import rehypeBlogImages from "./astro/markdown/rehype-blog-images.ts";
@@ -26,6 +27,16 @@ export default defineConfig({
     "/project/cloud-inference-platform": "/projects/gpu-inference-lab",
     "/project/cloud-inference-platform/validation": "/decisions/gpu-inference-lab",
   },
+  // Whole-site sitemap (#9): @astrojs/sitemap walks every built page and emits
+  // sitemap-index.xml + sitemap-0.xml. Drafts never reach the build in prod
+  // (getStaticPaths excludes them), so they can't appear here. Filter out the
+  // legacy redirect stubs so the sitemap lists only canonical URLs.
+  integrations: [
+    sitemap({
+      filter: (page) =>
+        !page.includes("/project/cloud-inference-platform"),
+    }),
+  ],
   vite: {
     plugins: [tailwindcss()],
   },

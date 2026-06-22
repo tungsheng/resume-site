@@ -116,4 +116,48 @@ describe("blog production build output", () => {
     expect(html).not.toContain('property="og:type" content="article"');
     expect(html).not.toContain("article:published_time");
   });
+
+  // Issue #9: RSS full-content feed — Published-only, newest-first, full body
+  // with absolute image URLs, draft excluded.
+  itIf("emits an RSS 2.0 full-content feed, Published-only newest-first", async () => {
+    const rss = await Bun.file("dist/rss.xml").text();
+    expect(rss).toContain('<rss version="2.0"');
+    for (const post of PUBLISHED) expect(rss).toContain(`<title>${post.title}</title>`);
+
+    // newest-first: kv-cache (06-21) before continuous (06-20) before prefix (06-18)
+    const kv = rss.indexOf("The KV Cache Is the Real Batch-Size Ceiling");
+    const cont = rss.indexOf("Continuous Batching Changes What Throughput Means");
+    const prefix = rss.indexOf("Why Prefix Cache Hit Rate Is the First Number to Check");
+    expect(kv).toBeLessThan(cont);
+    expect(cont).toBeLessThan(prefix);
+
+    // full content (not just summary): rendered body markup + a heading carry
+    // through, and the #6 self-hosted image is absolutized to the origin.
+    expect(rss).toContain("callout callout-note");
+    expect(rss).toContain("Compute is rarely what runs out first");
+    expect(rss).toContain(`https://tonylee.bio/${RICH.asset}`);
+
+    expect(rss).not.toContain(DRAFT.title);
+  });
+
+  // Issue #9: whole-site sitemap lists every public page + Published Post, no
+  // drafts and no legacy redirect stubs.
+  itIf("emits a sitemap covering public pages and Published Posts", async () => {
+    expect(await Bun.file("dist/sitemap-index.xml").exists()).toBe(true);
+    const sitemap = await Bun.file("dist/sitemap-0.xml").text();
+    for (const path of ["/", "/blog/", "/projects/", "/experiments/", "/decisions/", "/resume/"]) {
+      expect(sitemap).toContain(`<loc>https://tonylee.bio${path}</loc>`);
+    }
+    for (const post of PUBLISHED) {
+      expect(sitemap).toContain(`<loc>https://tonylee.bio/blog/${post.slug}/</loc>`);
+    }
+    expect(sitemap).not.toContain(DRAFT.slug);
+    expect(sitemap).not.toContain("/project/cloud-inference-platform"); // redirect stub filtered
+  });
+
+  // Issue #9: robots points crawlers at the sitemap.
+  itIf("emits robots.txt referencing the sitemap", async () => {
+    const robots = await Bun.file("dist/robots.txt").text();
+    expect(robots).toContain("Sitemap: https://tonylee.bio/sitemap-index.xml");
+  });
 });
