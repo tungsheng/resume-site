@@ -12,7 +12,7 @@
     "test:unit": "bun test tests/unit",
     "test:integration": "RUN_INTEGRATION_TESTS=1 bun test tests/integration",
     "test:all": "bun test tests/unit tests/integration",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "astro sync && tsc --noEmit",
     "check": "bun run typecheck && bun run test:unit"
   },
   "devDependencies": {
@@ -27,6 +27,7 @@
     "puppeteer-core": "^24.35.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "tailwindcss": "^4.3.1"
+    "tailwindcss": "^4.3.1",
+    "zod": "^4.4.3"
   }
 }
