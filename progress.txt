@@ -326,6 +326,30 @@ DONE
       getVisiblePosts is an Astro-runtime module (imports astro:content) — NOT
       bun-unit-testable; the pure slice logic lives in blog-schema.ts instead.
 
+- #11 DONE (commit e57af30): Migrate the two seed notes to Markdown Posts (Outline).
+    * Converted both typed seed Posts (src/features/site/post-content.ts
+      postRecords[]) into content/blog/ Markdown, status: Outline (dev-only):
+      sglang-architecture-request-lifecycle-scheduler-prefix-cache.md +
+      decode-process-deep-dive.md. published=2026-06-12 (the old `updated`).
+    * blocks[] -> Markdown: flow -> ORDERED list (per AC); list -> bullets;
+      table -> GFM table (#6); callout -> #6 admonition (tone "warning" =>
+      [!WARNING], else [!NOTE]) with old block title preserved as a **bold lead**
+      (admonition label is fixed Note/Warning, so title goes in body); code ->
+      fenced block; heading eyebrow dropped (kept H2 title). related.{projects,
+      experiments,decisions} carried from related* ids -> #7 resolver renders them.
+    * DELETED src/features/site/post-content.ts + tests/unit/post-content.test.ts.
+      No PROD code imported post-content — only the test did (verified by grep).
+      related-links.ts comment de-referenced (its dedup note is now moot).
+    * Tests: extended blog-build.test.ts (now 14) — both Outline slugs emit no
+      prod page + absent from sitemap/rss/home/index. Dev-mode build (NODE_ENV=
+      test) verified both render with ordered list/table/callout/code/related.
+    * 41 unit (post-content's ~few tests removed) + 14 integration, 0 <script>.
+
+*** ALL BLOG FEATURE SLICES #3-#11 ARE DONE on feat/blog. ***
+Remaining: #12 deploy (user adds Cloudflare secrets + merges feat/blog to main;
+that closes #12 + auto-closes #3-#11 via the "Closes #" commit trailers) and the
+OPTIONAL cosmetic SLICE 6b (srcDir ./astro -> ./src flip; defer).
+
 GOTCHA for future blog build-output tests: `bun test` sets NODE_ENV=test, so a
 build spawned inside a test runs in DEV mode (drafts included) unless you pass
 NODE_ENV=production. See blog-build.test.ts beforeAll.
@@ -366,49 +390,32 @@ REMAINING after SLICE 4:
 Closes once: user adds Cloudflare secrets + first pages.yml deploy, and
 feat/blog merges to main. Then the Blog feature work (#3-#11) is unblocked.
 
-NEXT TASK: #11 — "Migrate the two seed notes to Markdown Posts (kept Outline)".
-The LAST blog feature slice. Convert the two typed seed Posts in
-src/features/site/post-content.ts (postRecords[]) into Markdown files under
-content/blog/, then DELETE the typed module.
-- The two slugs: sglang-architecture-request-lifecycle-scheduler-prefix-cache,
-  decode-process-deep-dive. Both keep status: Outline (dev-only; NOT in prod
-  build — verify no dist page emitted, like the sizing-admission draft).
-- Frontmatter per blog-schema.ts: title, summary, category, status: Outline,
-  published (use the existing `updated` date 2026-06-12 as published, or pick a
-  sensible date — there's no published field in the old record, only `updated`;
-  set published and optionally updated), tags, and related: {projects,
-  experiments, decisions} from relatedProjectIds/relatedExperimentSlugs/
-  relatedDecisionProjectIds (the #7 resolver will render them).
-- Convert blocks[] -> Markdown body:
-    * paragraph -> plain paragraph.
-    * heading {eyebrow,title} -> "## {title}" (eyebrow can drop or become bold
-      lead-in; simplest: just the H2).
-    * list {title?, items} -> optional bold title line + "- " bullets.
-    * callout {title, body, tone} -> admonition: tone "warning" => > [!WARNING],
-      else > [!NOTE]; put the title as the first line or fold into body. The #6
-      remark-admonitions maps [!NOTE]/[!WARNING] to panels (note the old `title`
-      is custom text; admonitions render a fixed "Note"/"Warning" label — put the
-      old title into the body as a bold lead so it isn't lost).
-    * code {label, code} -> fenced ``` block (label as a preceding bold line or
-      a comment; there's no per-block language, use a plain fence).
-    * table {title, columns, rows} -> bold title line + GFM table (#6).
-    * flow {title, steps} -> bold title line + ORDERED list (1. 2. 3.) per AC.
-- DELETE src/features/site/post-content.ts after migrating. CHECK importers:
-  grep for post-content / getPostBySlug / postRecords / getPostRelatedLinks /
-  postPath / isPostProjectId. The #7 resolveRelatedLinks duplicated
-  getPostRelatedLinks — once post-content is gone, that dedup note is moot.
-  Also check tests/unit/post-content.test.ts (DELETE/rewrite it) and any .astro
-  importing postPath/BLOG_PATH (BLOG_PATH lives in content.ts, keep that).
-- Tests: update/remove post-content.test.ts. Add a dev-render or unit assertion
-  that the two Outline Posts parse against blogPostSchema (status Outline) and a
-  prod-build assertion they emit NO page (like the existing draft check). Could
-  extend blog-build.test.ts DRAFT-style checks for both Outline slugs.
-- After #11: ALL blog feature slices (#3-#11) done. Only #12 deploy (Cloudflare
-  secrets + merge) + optional SLICE 6b srcDir flip remain.
+NEXT TASK: none in the #3-#11 blog feature track — ALL DONE on feat/blog.
+What is left is HUMAN/DEPLOY work (#12) plus one OPTIONAL cosmetic refactor:
 
-Still pending: #11 migrate seed notes (LAST slice). #12 SLICE 6b optional srcDir
-flip (cosmetic; defer). User still must add Cloudflare secrets + merge feat/blog
-to deploy.
+1. #12 DEPLOY (requires the user — agent cannot do these):
+   - Add repo secrets CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID (Settings ->
+     Secrets) and confirm the Pages project name (.github/workflows/pages.yml,
+     currently "resume-site").
+   - Merge feat/blog -> main. The "Closes #N" trailers on the feature commits
+     auto-close #3-#11; the pages.yml workflow runs bun install -> check ->
+     `bun run build` (astro + PDF) -> wrangler `pages deploy dist`.
+   - After first green deploy, close #12 (and #1 epic) if not auto-closed.
+
+2. SLICE 6b (OPTIONAL cosmetic, safe to defer indefinitely): flip astro.config
+   srcDir ./astro -> ./src + publicDir ./public-astro -> ./public; move the Astro
+   tree; delete the old public/*.html Bun shells; drop ./public-astro. Rewrites
+   every .astro import depth (../../src/... etc.) — fiddly, no functional gain.
+   Current split-dir setup builds + deploys fine. See the SLICE 6 plan below.
+
+If continuing autonomously with nothing actionable in-repo: the only remaining
+agent-doable work is SLICE 6b (cosmetic). Prefer to STOP and report that #3-#11
+are complete and #12 needs the user, rather than do the risky srcDir flip
+unprompted. If asked to proceed, do SLICE 6b carefully (build + all tests green).
+
+--- (#11 reference — DONE in e57af30, kept for context) ---
+Both seed notes migrated to content/blog/ Markdown at status: Outline; typed
+post-content.ts removed. See the #11 DONE entry above.
 
 --- (#10 reference — DONE in 9081d03, kept for context) ---
 Home "Latest writing" section now bakes the newest Published Posts into
