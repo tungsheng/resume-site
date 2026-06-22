@@ -1,11 +1,14 @@
 // Build-time resume PDF generation (ADR-0003 §2).
 //
 // The resume PDF is a pure function of resume/data.ts and only changes on a
-// code deploy, so it is generated once at build time into dist/resume.pdf
-// instead of per request. This replaces the runtime /api/public-pdf endpoint
-// (which is removed when the Bun app is retired — slice 6). Run after
-// `astro build` via the `build` npm script; CI does the same with headless
-// Chrome (the PDF's only build-time dependency).
+// code deploy, so it is generated once at build time instead of per request.
+// This replaces the runtime /api/public-pdf endpoint (removed with the Bun app).
+//
+// It is written into the Astro publicDir (./public-astro) so it is served by
+// BOTH `astro dev` (at /resume.pdf — otherwise the resume page's "Download PDF"
+// link 404s in dev) and `astro build` (which copies publicDir into dist/). Run
+// before `astro build`/`astro dev` via the npm scripts; CI does the same with
+// headless Chrome (the PDF's only build-time dependency).
 //
 // Reuses the existing renderer + puppeteer pipeline unchanged.
 import { mkdir } from "node:fs/promises";
@@ -14,7 +17,7 @@ import { publicResumeData } from "../src/features/resume/data";
 import { renderResumeHtmlDocument } from "../src/features/resume/render-static-html";
 import { generatePDF } from "../src/services/pdf";
 
-export async function buildResumePdf(outDir = "dist"): Promise<string> {
+export async function buildResumePdf(outDir = "public-astro"): Promise<string> {
   const html = renderResumeHtmlDocument(publicResumeData);
   const pdf = await generatePDF(html);
   await mkdir(outDir, { recursive: true });

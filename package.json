@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "astro": "astro",
-    "dev": "astro dev",
+    "dev": "test -f public-astro/resume.pdf || bun run build:pdf; astro dev",
     "preview": "astro preview",
-    "build": "astro build && bun run build:pdf",
+    "build": "bun run build:pdf && astro build",
     "build:pdf": "bun run scripts/build-resume-pdf.ts",
     "test": "bun run test:unit",
     "test:unit": "bun test tests/unit",
