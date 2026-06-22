@@ -8,3 +8,8 @@
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
   Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'
+
+# Self-hosted blog images (#6) are content-addressed by post slug and effectively
+# immutable once published — let the browser cache them aggressively.
+/assets/blog/*
+  Cache-Control: public, max-age=31536000, immutable

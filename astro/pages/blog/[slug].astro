@@ -103,4 +103,76 @@ const dateLabel = post.data.published.toLocaleDateString("en-US", {
     padding-left: 1rem;
     color: var(--color-muted);
   }
+
+  /* Admonition callouts (#6): remark-admonitions emits
+     <div class="callout callout-note|callout-warning"> with a .callout-title.
+     Two tones reuse the site's accent / warning tokens. */
+  .post-body :global(.callout) {
+    margin-top: 1.6rem;
+    padding: 0.9rem 1.15rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-surface-border);
+    border-left-width: 4px;
+  }
+  .post-body :global(.callout > * + *) {
+    margin-top: 0.6rem;
+  }
+  .post-body :global(.callout-title) {
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .post-body :global(.callout-note) {
+    background: color-mix(in srgb, var(--color-accent-soft) 55%, transparent);
+    border-left-color: var(--color-go-green);
+  }
+  .post-body :global(.callout-note .callout-title) {
+    color: var(--color-go-green-dark);
+  }
+  .post-body :global(.callout-warning) {
+    background: color-mix(in srgb, var(--color-warning-soft) 55%, transparent);
+    border-left-color: var(--color-warning-warm);
+  }
+  .post-body :global(.callout-warning .callout-title) {
+    color: var(--color-warning-warm);
+  }
+
+  /* GFM tables (#6): GFM is on by default — this just styles the output. */
+  .post-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    display: block;
+    overflow-x: auto;
+  }
+  .post-body :global(th),
+  .post-body :global(td) {
+    border: 1px solid var(--color-surface-border);
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  .post-body :global(thead th) {
+    background: color-mix(in srgb, var(--color-ink) 5%, transparent);
+    font-weight: 600;
+  }
+
+  /* Self-hosted images (#6): rehype-blog-images adds loading/decoding and wraps
+     a lone image as <figure class="post-figure">. Cap width to avoid overflow
+     and layout shift. */
+  .post-body :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+  }
+  .post-body :global(.post-figure) {
+    margin-top: 1.6rem;
+    text-align: center;
+  }
+  .post-body :global(.post-figure figcaption) {
+    margin-top: 0.5rem;
+    font-size: 0.84rem;
+    color: var(--color-muted);
+  }
 </style>

@@ -1,6 +1,8 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
+import remarkAdmonitions from "./astro/markdown/remark-admonitions.ts";
+import rehypeBlogImages from "./astro/markdown/rehype-blog-images.ts";
 
 // NOTE: ADR-0003 — the site is migrating to Astro zero-JS static output.
 // During the migration the new Astro tree lives under ./astro so it does not
@@ -29,8 +31,11 @@ export default defineConfig({
   },
   markdown: {
     // ADR-0003 decision 6: Shiki highlighting matched to the dark code blocks.
-    // GFM is on by default; remark alerts + reading-time land in #6/#7.
+    // GFM (incl. tables) is on by default. #6 adds in-repo transforms: GitHub
+    // admonitions → callout panels (remark) and lazy/figure image handling (rehype).
     syntaxHighlight: "shiki",
     shikiConfig: { theme: "github-dark" },
+    remarkPlugins: [remarkAdmonitions],
+    rehypePlugins: [rehypeBlogImages],
   },
 });
