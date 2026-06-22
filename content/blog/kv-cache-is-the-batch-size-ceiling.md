@@ -5,6 +5,7 @@ category: "Inference internals"
 status: Published
 published: 2026-06-21
 updated: 2026-06-22
+cover: /assets/blog/kv-cache-is-the-batch-size-ceiling/kv-cache-layout.svg
 tags:
   - KV cache
   - Batching

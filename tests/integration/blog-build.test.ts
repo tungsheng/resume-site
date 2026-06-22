@@ -90,4 +90,30 @@ describe("blog production build output", () => {
     expect(html).not.toContain('class="post-toc"');
     expect(html).not.toContain('class="post-related"');
   });
+
+  // Issue #8: per-Post SEO head — canonical, OG, article:*, twitter:card, and
+  // og:image from the Post `cover`.
+  itIf("emits article SEO head tags on a Post detail page", async () => {
+    const html = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
+    expect(html).toContain("<title>The KV Cache Is the Real Batch-Size Ceiling | Tony Lee</title>");
+    expect(html).toContain('name="description"');
+    expect(html).toContain(`rel="canonical" href="https://tonylee.bio/blog/${RICH.slug}/"`);
+    expect(html).toContain('property="og:type" content="article"');
+    expect(html).toContain(`property="og:url" content="https://tonylee.bio/blog/${RICH.slug}/"`);
+    expect(html).toContain('property="article:published_time" content="2026-06-21T00:00:00.000Z"');
+    expect(html).toContain('property="article:modified_time" content="2026-06-22T00:00:00.000Z"');
+    expect(html).toContain('property="article:section" content="Inference internals"');
+    expect(html).toContain('property="article:tag"');
+    expect(html).toContain("twitter:card");
+    // og:image resolved from `cover` to an absolute, same-origin URL.
+    expect(html).toContain(`property="og:image" content="https://tonylee.bio/${RICH.asset}"`);
+  });
+
+  itIf("uses og:type=website with no article tags on non-blog pages", async () => {
+    const html = await Bun.file("dist/index.html").text();
+    expect(html).toContain('rel="canonical" href="https://tonylee.bio/"');
+    expect(html).toContain('property="og:type" content="website"');
+    expect(html).not.toContain('property="og:type" content="article"');
+    expect(html).not.toContain("article:published_time");
+  });
 });

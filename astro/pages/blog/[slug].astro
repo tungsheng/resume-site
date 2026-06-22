@@ -46,6 +46,12 @@ const relatedLinks = resolveRelatedLinks(post.data.related);
   title={`${post.data.title} | Tony Lee`}
   description={post.data.summary}
   activeNav="blog"
+  ogType="article"
+  image={post.data.cover}
+  publishedTime={post.data.published}
+  modifiedTime={updatedLabel ? updated : undefined}
+  tags={post.data.tags}
+  section={post.data.category}
   breadcrumbs={[
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog" },
