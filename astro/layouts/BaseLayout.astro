@@ -49,7 +49,7 @@ const navItems: { key: NavKey; label: string; href: string }[] = [
 ];
 
 function navLinkClass(key: NavKey): string {
-  const base = "rounded-md px-3 py-1.5 text-sm font-medium transition-colors";
+  const base = "rounded-md px-3 py-1.5 text-[0.8125rem] font-medium transition-colors";
   return key === activeNav
     ? base + " bg-go-green/10 text-ink font-semibold"
     : base + " text-muted hover:bg-ink/5 hover:text-ink";
@@ -98,7 +98,7 @@ const isArticle = ogType === "article";
   </head>
   <body class="flex min-h-screen flex-col font-sans text-ink">
     <header class="sticky top-0 z-10 border-b border-surface-border bg-paper">
-      <div class="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-2 md:py-3">
+      <div class="mx-auto flex w-full max-w-[75rem] items-center gap-3 px-4 py-2 sm:px-6 md:py-3">
         <a
           href="/"
           aria-label="Tony Lee home"
@@ -109,7 +109,7 @@ const isArticle = ogType === "article";
 
         <!-- Desktop nav -->
         <nav aria-label="Primary" class="hidden sm:block">
-          <ul class="flex flex-wrap justify-end gap-1">
+          <ul class="flex flex-wrap justify-end gap-2">
             {
               navItems.map((item) => (
                 <li>
@@ -166,10 +166,10 @@ const isArticle = ogType === "article";
       </div>
     </header>
 
-    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:py-10">
+    <main class="mx-auto w-full max-w-[75rem] flex-1 px-4 py-6 sm:px-6 md:py-8">
       {
         breadcrumbs.length > 0 && (
-          <nav aria-label="Breadcrumb" class="mb-4 text-[0.86rem] md:mb-5">
+          <nav aria-label="Breadcrumb" class="mb-3 text-[0.86rem] md:mb-4">
             <ol class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-muted">
               {breadcrumbs.map((crumb, i) => {
                 const isCurrent = i === breadcrumbs.length - 1 || !crumb.href;
@@ -197,7 +197,7 @@ const isArticle = ogType === "article";
 
     <footer class="border-t border-surface-border">
       <div
-        class="mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-1 px-4 py-6 text-center sm:flex-row sm:gap-2"
+        class="mx-auto flex w-full max-w-[75rem] flex-col items-center justify-center gap-1 px-4 py-5 text-center sm:flex-row sm:gap-2 sm:px-6 md:py-7"
       >
         <span class="text-sm font-semibold text-ink">Tony Lee</span>
         <span class="hidden text-surface-border sm:inline" aria-hidden="true">|</span>

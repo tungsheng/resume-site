@@ -40,8 +40,10 @@ const toneChipStyle = (tone = "neutral") => {
 };
 
 const eyebrow = "text-[0.74rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark";
-const h2 = "font-display text-[1.85rem] font-semibold leading-snug";
-const card = "rounded-lg border border-surface-border bg-paper p-5";
+// Display headings mirror the MUI h3 (title) / h4 (section) scale incl. the
+// responsive shrink — see .h-detail-title / .h-section-title in global.css.
+const h2 = "h-section-title";
+const card = "rounded-lg border border-surface-border bg-paper";
 const chipBase = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
 const chipMuted = chipBase + " border-go-green/25 bg-go-green/[0.065] text-ink/70";
 const chipDefault = chipBase + " border-go-green/30 bg-go-green/[0.075] text-ink";
@@ -49,7 +51,11 @@ const toneChip = "inline-flex items-center rounded-full border px-2.5 py-0.5 tex
 
 const primaryBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
 const outlinedBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
-const textBtn = "inline-flex min-h-10 items-center px-2 text-sm font-medium text-ink hover:underline";
+const textBtn = "inline-flex min-h-10 items-center gap-1.5 px-2 text-sm font-medium text-ink hover:underline";
+
+// External-link glyph (MUI OpenInNewRounded equivalent) appended to off-site links.
+const extIcon =
+  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
 ---
 
 <BaseLayout
@@ -63,42 +69,42 @@ const textBtn = "inline-flex min-h-10 items-center px-2 text-sm font-medium text
   ]}
 >
   <!-- Detail header -->
-  <section class="mb-10 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
-    <div class="flex max-w-[58rem] flex-col gap-4">
-      <h1 class="font-display text-[2.42rem] font-semibold leading-tight text-balance">
-        {content.title}
-      </h1>
-      <p class="text-base leading-relaxed text-muted">{content.lede}</p>
+  <section class="mb-[1.375rem] grid items-start gap-[0.85rem] md:mb-6 md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
+    <div class="flex max-w-[58rem] flex-col gap-2.5 md:gap-3">
+      <h1 class="h-detail-title">{content.title}</h1>
+      <p class="text-base leading-[1.64] text-muted">{content.lede}</p>
       <div class="flex flex-wrap items-center gap-3">
         <a href={CUDA_KERNEL_EXPERIMENTS_PATH} class={primaryBtn}>View experiments</a>
         <a href={CUDA_KERNEL_DECISIONS_PATH} class={outlinedBtn}>View decisions</a>
-        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class={textBtn}>GitHub</a>
+        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class={textBtn}>
+          GitHub<span class="inline-flex" set:html={extIcon} />
+        </a>
       </div>
     </div>
 
-    <div class="grid gap-2 rounded-lg border border-go-green/20 bg-go-green/8 p-5">
-      <div class="flex flex-wrap items-center gap-2">
+    <div class="grid gap-1.5 rounded-lg border border-go-green/20 bg-go-green/8 p-2.5 sm:p-3 md:gap-2">
+      <div class="flex flex-wrap items-center gap-1.5">
         <span class={chipMuted}>{project.layer}</span>
         <span class={chipDefault}>{project.status}</span>
         <span class={chipDefault}>{project.experimentCount} experiments</span>
       </div>
-      <p class="text-sm leading-relaxed text-muted">{project.result}</p>
+      <p class="text-[0.95rem] leading-[1.58] text-muted">{project.result}</p>
     </div>
   </section>
 
   <!-- At a glance -->
-  <section class="mb-10 grid gap-4">
-    <div class="grid gap-2">
+  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+    <div class="grid gap-2.5">
       <h2 class={h2}>At a glance</h2>
-      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{content.overviewSummary}</p>
+      <p class="max-w-[44rem] text-base leading-[1.64] text-muted">{content.overviewSummary}</p>
     </div>
-    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-2.5 sm:grid-cols-2 md:gap-3 lg:grid-cols-3">
       {
         content.overviewFacts.map((fact) => (
-          <section class={`${card} grid content-start gap-1.5`}>
+          <section class={`${card} grid content-start gap-1 p-3 md:p-3.5`}>
             <p class={eyebrow}>{fact.label}</p>
-            <p class="text-[1.05rem] font-semibold">{fact.value}</p>
-            <p class="text-sm leading-relaxed text-muted">{fact.body}</p>
+            <p class="text-[1.05rem] font-semibold leading-[1.35]">{fact.value}</p>
+            <p class="text-[0.95rem] leading-[1.58] text-muted">{fact.body}</p>
           </section>
         ))
       }
@@ -106,27 +112,27 @@ const textBtn = "inline-flex min-h-10 items-center px-2 text-sm font-medium text
   </section>
 
   <!-- Optimization loop -->
-  <section class="mb-10 grid gap-4">
-    <div class="grid gap-2">
+  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+    <div class="grid gap-2.5">
       <p class={eyebrow}>Workflow</p>
       <h2 class={h2}>Optimization loop</h2>
-      <p class="max-w-[44rem] text-base leading-relaxed text-muted">
+      <p class="max-w-[44rem] text-base leading-[1.64] text-muted">
         Every kernel claim moves through the same loop: profile first, isolate the bottleneck, change
         only that path, then re-profile before calling it a win.
       </p>
     </div>
-    <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <div class="grid gap-2 md:grid-cols-2 md:gap-2.5 min-[1536px]:grid-cols-4">
       {
         content.optimizationLoop.map((step) => (
-          <section class={`${card} grid content-start gap-3`}>
-            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-go-green/10 text-[0.76rem] font-extrabold text-go-green-dark">
+          <section class={`${card} grid h-full content-start gap-2 p-2.5 sm:p-3`}>
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-go-green/[0.12] text-[0.76rem] font-extrabold leading-none text-go-green-dark">
               {step.step}
             </span>
             <div class="grid gap-1">
               <p class={eyebrow}>{step.title}</p>
-              <p class="text-sm leading-relaxed text-muted">{step.body}</p>
+              <p class="text-[0.95rem] leading-[1.58] text-muted">{step.body}</p>
             </div>
-            <p class="text-sm font-semibold">{step.evidence}</p>
+            <p class="text-[0.95rem] font-semibold">{step.evidence}</p>
           </section>
         ))
       }
@@ -134,25 +140,25 @@ const textBtn = "inline-flex min-h-10 items-center px-2 text-sm font-medium text
   </section>
 
   <!-- Benchmark readout -->
-  <section class="grid gap-4">
-    <div class="grid gap-2">
+  <section class="grid gap-5 md:gap-6">
+    <div class="grid gap-2.5">
       <p class={eyebrow}>A10G/H200 evidence</p>
       <h2 class={h2}>Benchmark readout</h2>
-      <p class="max-w-[44rem] text-base leading-relaxed text-muted">
+      <p class="max-w-[44rem] text-base leading-[1.64] text-muted">
         The selected runs show where custom kernels are useful, where profiler counters explain the
         result, and where newer H200 matmul tuning remains measured but caveated.
       </p>
     </div>
 
-    <div class="grid gap-4 rounded-lg border border-surface-border bg-paper p-5 md:p-6">
-      <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="CUDA benchmark readout">
+    <div class="grid gap-3 rounded-lg border border-surface-border bg-paper p-3 sm:p-3.5 md:gap-3.5 md:p-[1.125rem]">
+      <div class="grid gap-2 md:grid-cols-2 md:gap-2.5 min-[1536px]:grid-cols-4" aria-label="CUDA benchmark readout">
         {
           content.results.map((item) => (
-            <section class={`${card} grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2`}>
+            <section class={`${card} grid grid-rows-[auto_minmax(0,1fr)_auto] gap-1.5 p-3 md:p-3.5`}>
               <p class={eyebrow}>{item.title}</p>
-              <div class="grid content-start gap-1.5">
+              <div class="grid content-start gap-1">
                 <p class="text-sm font-bold">{item.call}</p>
-                <p class="text-sm leading-relaxed text-muted">{item.proof}</p>
+                <p class="text-[0.95rem] leading-[1.58] text-muted">{item.proof}</p>
               </div>
               <span class={toneChip} style={toneChipStyle(item.tone)}>{item.statusLabel}</span>
             </section>
@@ -165,7 +171,7 @@ const textBtn = "inline-flex min-h-10 items-center px-2 text-sm font-medium text
         {
           reportLinks.map((link) => (
             <a href={link.href} target="_blank" rel="noreferrer" class={textBtn}>
-              {link.label}
+              {link.label}<span class="inline-flex" set:html={extIcon} />
             </a>
           ))
         }

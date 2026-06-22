@@ -37,3 +37,44 @@ body {
 ::selection {
   background-color: color-mix(in srgb, var(--color-warning-warm) 20%, transparent);
 }
+
+/*
+ * Faithful port of the MUI display headings (theme.ts h3/h4 + responsiveFontSizes).
+ * MUI scaled headings DOWN on small screens; Tailwind arbitrary breakpoints below
+ * mirror MUI's real breakpoints (sm 600 / md 900 / lg 1200) and the measured sizes
+ * so the type scale matches prod at every width — including mobile. Line-heights
+ * match MUI (h3 1.06, h4 1.12).
+ */
+.h-detail-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.06;
+  text-wrap: balance;
+  font-size: 1.71rem;
+}
+@media (min-width: 600px) {
+  .h-detail-title { font-size: 2.065rem; }
+}
+@media (min-width: 900px) {
+  .h-detail-title { font-size: 2.2425rem; }
+}
+@media (min-width: 1200px) {
+  .h-detail-title { font-size: 2.42rem; }
+}
+
+.h-section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.12;
+  text-wrap: balance;
+  font-size: 1.425rem;
+}
+@media (min-width: 600px) {
+  .h-section-title { font-size: 1.6375rem; }
+}
+@media (min-width: 900px) {
+  .h-section-title { font-size: 1.744rem; }
+}
+@media (min-width: 1200px) {
+  .h-section-title { font-size: 1.85rem; }
+}
