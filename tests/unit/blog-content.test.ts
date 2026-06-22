@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   blogPostSchema,
+  isPostVisible,
   readingTimeMinutes,
   sortByPublishedDesc,
 } from "../../astro/content/blog-schema";
@@ -71,5 +72,19 @@ describe("sortByPublishedDesc", () => {
     const snapshot = input.map((p) => p.slug);
     sortByPublishedDesc(input);
     expect(input.map((p) => p.slug)).toEqual(snapshot);
+  });
+});
+
+describe("isPostVisible (Status visibility, ADR-0003 §8)", () => {
+  test("Published is visible in prod and dev", () => {
+    expect(isPostVisible("Published", true)).toBe(true);
+    expect(isPostVisible("Published", false)).toBe(true);
+  });
+
+  test("Outline/Drafting are hidden in prod, visible in dev", () => {
+    expect(isPostVisible("Outline", true)).toBe(false);
+    expect(isPostVisible("Drafting", true)).toBe(false);
+    expect(isPostVisible("Outline", false)).toBe(true);
+    expect(isPostVisible("Drafting", false)).toBe(true);
   });
 });

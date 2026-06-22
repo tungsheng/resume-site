@@ -1,12 +1,16 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { readingTimeMinutes, sortByPublishedDesc } from "../../content/blog-schema";
+import {
+  isPostVisible,
+  readingTimeMinutes,
+  sortByPublishedDesc,
+} from "../../content/blog-schema";
 
-// #4: Blog index at /blog — every Published Post, newest-first. In prod only
-// Published Posts are listed (and built); dev shows all statuses (ADR-0003 §8).
+// Blog index at /blog — every visible Post, newest-first. Visibility by Status
+// (ADR-0003 §8): Published-only in prod, all statuses in dev.
 const all = await getCollection("blog", (post) =>
-  import.meta.env.PROD ? post.data.status === "Published" : true,
+  isPostVisible(post.data.status, import.meta.env.PROD),
 );
 const posts = sortByPublishedDesc(all).map((post) => ({
   slug: post.id,
@@ -16,6 +20,7 @@ const posts = sortByPublishedDesc(all).map((post) => ({
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC",
   }),
 }));
 

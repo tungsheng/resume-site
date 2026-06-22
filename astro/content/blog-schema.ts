@@ -37,3 +37,14 @@ export function readingTimeMinutes(body: string): number {
 export function sortByPublishedDesc<T extends { data: { published: Date } }>(posts: T[]): T[] {
   return [...posts].sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
 }
+
+// Post Status visibility (ADR-0003 §8): only Published Posts are public. In a
+// production build, Outline/Drafting Posts are excluded entirely (no page in
+// dist/); `astro dev` renders all statuses for preview. Single source of truth
+// for both blog/index.astro and blog/[slug].astro.
+export function isPostVisible(
+  status: BlogPostFrontmatter["status"],
+  isProd: boolean,
+): boolean {
+  return isProd ? status === "Published" : true;
+}

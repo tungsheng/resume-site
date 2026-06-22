@@ -1,15 +1,14 @@
 ---
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { readingTimeMinutes } from "../../content/blog-schema";
+import { isPostVisible, readingTimeMinutes } from "../../content/blog-schema";
 
-// #3 tracer bullet: prerender a Published Post at /blog/<slug>. In production
-// only Published Posts get a page (ADR-0003 §8 — drafts have no built URL); in
-// dev all statuses render for preview. Index, drafts-in-dev, rich body, TOC,
-// SEO head, feed live in #4-#9.
+// Prerender a Post at /blog/<slug>. Visibility by Status (ADR-0003 §8): in a
+// production build only Published Posts get a page; `astro dev` renders all
+// statuses for preview.
 export async function getStaticPaths() {
   const posts = await getCollection("blog", (post) =>
-    import.meta.env.PROD ? post.data.status === "Published" : true,
+    isPostVisible(post.data.status, import.meta.env.PROD),
   );
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
@@ -21,6 +20,7 @@ const dateLabel = post.data.published.toLocaleDateString("en-US", {
   year: "numeric",
   month: "long",
   day: "numeric",
+  timeZone: "UTC",
 });
 ---
 
