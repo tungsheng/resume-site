@@ -4,11 +4,20 @@ summary: "It is tempting to size a serving deployment by how many requests the G
 category: "Inference internals"
 status: Published
 published: 2026-06-21
+updated: 2026-06-22
 tags:
   - KV cache
   - Batching
   - GPU memory
   - Scheduler
+related:
+  projects:
+    - gpu-inference-lab
+  experiments:
+    - kv-cache
+    - batching
+  decisions:
+    - gpu-inference-lab
 ---
 
 ## Compute is rarely what runs out first

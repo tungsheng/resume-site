@@ -38,6 +38,22 @@ export function sortByPublishedDesc<T extends { data: { published: Date } }>(pos
   return [...posts].sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
 }
 
+// Auto table of contents (#7): Astro's render() returns headings as
+// { depth, slug, text }. The TOC surfaces H2/H3 only, and the detail page shows
+// it only once a Post has at least TOC_MIN_HEADINGS sections — short Posts get
+// none. Pure + generic so the threshold is unit-testable without the Astro runtime.
+export type PostHeading = { depth: number; slug: string; text: string };
+
+export const TOC_MIN_HEADINGS = 3;
+
+export function selectTocHeadings<T extends { depth: number }>(headings: T[]): T[] {
+  return headings.filter((h) => h.depth === 2 || h.depth === 3);
+}
+
+export function shouldShowToc(headings: { depth: number }[]): boolean {
+  return selectTocHeadings(headings).length >= TOC_MIN_HEADINGS;
+}
+
 // Post Status visibility (ADR-0003 §8): only Published Posts are public. In a
 // production build, Outline/Drafting Posts are excluded entirely (no page in
 // dist/); `astro dev` renders all statuses for preview. Single source of truth

@@ -70,4 +70,24 @@ describe("blog production build output", () => {
   itIf("copies the self-hosted blog image into dist/", async () => {
     expect(await Bun.file(`dist/${RICH.asset}`).exists()).toBe(true);
   });
+
+  // Issue #7: metadata surfaces — auto-TOC past the threshold, an "Updated"
+  // date when later than published, and resolved related links.
+  itIf("renders a TOC, related links, and an Updated date on a rich Post", async () => {
+    const html = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
+    expect(html).toContain('class="post-toc"'); // 3 headings ≥ threshold
+    expect(html).toContain("On this page");
+    expect(html).toContain("Updated"); // updated (2026-06-22) > published (2026-06-21)
+    expect(html).toContain('class="post-related"');
+    expect(html).toContain('href="/projects/gpu-inference-lab"');
+    expect(html).toContain('href="/experiments/kv-cache"');
+    expect(html).toContain('href="/decisions/gpu-inference-lab"');
+  });
+
+  itIf("omits the TOC and related block on a short standalone Post", async () => {
+    // continuous-batching has 2 headings and no `related` frontmatter.
+    const html = await Bun.file("dist/blog/continuous-batching-throughput/index.html").text();
+    expect(html).not.toContain('class="post-toc"');
+    expect(html).not.toContain('class="post-related"');
+  });
 });
