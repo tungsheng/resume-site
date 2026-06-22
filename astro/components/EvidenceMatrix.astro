@@ -38,7 +38,7 @@ const barWidth = (value: number, max: number) =>
   max <= 0 || value <= 0 ? "0%" : `${Math.min(100, Math.max(4, (value / max) * 100))}%`;
 ---
 
-<section class="grid gap-3 overflow-hidden rounded-lg border border-surface-border bg-paper p-5">
+<section class="grid gap-3 overflow-hidden rounded-lg border border-surface-border bg-paper p-3.5">
   <div class="grid gap-1">
     <h3 class="text-[1.05rem] font-semibold">{title}</h3>
     <p class="text-sm leading-relaxed text-muted">{takeaway}</p>

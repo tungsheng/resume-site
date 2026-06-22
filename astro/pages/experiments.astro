@@ -62,9 +62,9 @@ const textBtn =
 >
   <section class="grid gap-8 md:gap-9">
     <!-- Index header -->
-    <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.52fr)]">
+    <div class="grid items-start gap-[0.85rem] md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.52fr)]">
       <div class="flex max-w-[58rem] flex-col gap-3">
-        <h1 class="font-display text-[2.42rem] font-semibold leading-tight text-balance">
+        <h1 class="h-detail-title">
           Experiments
         </h1>
         <p class="text-base leading-relaxed text-muted">{LEDE}</p>
@@ -72,13 +72,13 @@ const textBtn =
           {facts.map((fact) => <span class={chipMuted}>{fact}</span>)}
         </div>
       </div>
-      <div class="rounded-lg border border-go-green/20 bg-go-green/8 p-5">
+      <div class="rounded-lg border border-go-green/20 bg-go-green/8 p-3">
         <p class="text-sm leading-relaxed text-muted">{SUPPORT}</p>
       </div>
     </div>
 
     <!-- Per-project cards -->
-    <div class="grid gap-5 lg:grid-cols-2">
+    <div class="grid gap-2.5 md:gap-3 lg:grid-cols-2">
       {
         cards.map(({ project, experimentCount, focusAreas }) => (
           <section class="flex h-full flex-col gap-4 rounded-lg border border-surface-border bg-paper p-6">
@@ -89,7 +89,7 @@ const textBtn =
             </div>
 
             <div class="grid gap-2">
-              <h2 class="font-display text-[1.85rem] font-semibold leading-snug">
+              <h2 class="h-section-title">
                 {project.title}
               </h2>
               <p class="text-sm leading-relaxed text-muted">{project.summary}</p>

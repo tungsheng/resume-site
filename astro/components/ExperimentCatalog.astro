@@ -69,9 +69,9 @@ const textBtn = "inline-flex min-h-9 items-center px-2 text-sm font-medium text-
     { label: project.title },
   ]}
 >
-  <section class="mb-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
-    <div class="flex max-w-[58rem] flex-col gap-4">
-      <h1 class="font-display text-[2.42rem] font-semibold leading-tight text-balance">
+  <section class="mb-[1.375rem] grid items-start gap-[0.85rem] md:mb-6 md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
+    <div class="flex max-w-[58rem] flex-col gap-2.5 md:gap-3">
+      <h1 class="h-detail-title">
         {catalogTitle}
       </h1>
       <p class="text-base leading-relaxed text-muted">{experimentCatalogContent.subtitle}</p>
@@ -154,7 +154,7 @@ const textBtn = "inline-flex min-h-9 items-center px-2 text-sm font-medium text-
 
     {
       projectId === "gpu-inference-lab" && (
-        <section class="grid items-center gap-3 rounded-lg border border-surface-border bg-paper p-5 md:grid-cols-[minmax(0,1fr)_auto]">
+        <section class="grid items-center gap-3 rounded-lg border border-surface-border bg-paper p-3.5 md:grid-cols-[minmax(0,1fr)_auto]">
           <div class="grid min-w-0 gap-1">
             <p class={eyebrow}>{experimentCatalogContent.platformValidation.status}</p>
             <p class="text-sm font-semibold">Decisions live in the project decision record</p>

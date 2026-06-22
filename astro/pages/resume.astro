@@ -22,7 +22,7 @@ const primaryBtn =
   "inline-flex min-h-10 items-center justify-center gap-2 rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
 const outlinedBtn =
   "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
-const card = "rounded-lg border border-surface-border bg-paper p-5";
+const card = "rounded-lg border border-surface-border bg-paper p-3.5";
 const sectionTitle = "text-[1.05rem] font-semibold";
 const subtitle = "text-base font-semibold";
 const meta = "text-sm text-muted";
@@ -35,9 +35,9 @@ const meta = "text-sm text-muted";
   breadcrumbs={[{ label: "Home", href: "/" }, { label: "Resume" }]}
 >
   <!-- Detail header -->
-  <section class="mb-8 grid items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(17.5rem,0.42fr)] md:items-center">
-    <div class="flex max-w-[58rem] flex-col gap-4">
-      <h1 class="font-display text-[2.42rem] font-semibold leading-tight text-balance">
+  <section class="mb-8 grid items-start gap-3.5 md:grid-cols-[minmax(0,1fr)_minmax(17.5rem,0.42fr)] md:items-center">
+    <div class="flex max-w-[58rem] flex-col gap-2.5 md:gap-3">
+      <h1 class="h-detail-title">
         {name}
       </h1>
       {
@@ -71,7 +71,7 @@ const meta = "text-sm text-muted";
 
     {
       (contacts.email || linkedinHref) && (
-        <address class="grid content-center gap-2 rounded-lg border border-go-green/20 bg-go-green/8 p-5 not-italic">
+        <address class="grid content-center gap-2 rounded-lg border border-go-green/20 bg-go-green/8 p-3 not-italic">
           {contacts.email && (
             <a
               href={`mailto:${contacts.email}`}
