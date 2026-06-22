@@ -14,6 +14,13 @@ const PUBLISHED = [
 ];
 const DRAFT = { slug: "sizing-admission-queues", title: "Sizing Admission Queues Without Guessing" };
 
+// The two seed notes migrated to Markdown at status: Outline (#11) — dev-only,
+// so a production build must emit no page and never reference them.
+const OUTLINE = [
+  { slug: "sglang-architecture-request-lifecycle-scheduler-prefix-cache", title: "SGLang Architecture Deep Dive" },
+  { slug: "decode-process-deep-dive", title: "Decode Process Deep Dive" },
+];
+
 // The rich-markdown showcase Post (#6) exercises an admonition, a GFM table, and
 // a self-hosted image; the assertions below check the rendered HTML + the copied
 // asset. Keep its index position out of the ordering assertion (uses [0]/[1]).
@@ -178,5 +185,20 @@ describe("blog production build output", () => {
 
     expect(html).not.toContain(DRAFT.title);
     expect(html).not.toContain(`/blog/${DRAFT.slug}`);
+  });
+
+  // Issue #11: the migrated seed notes are Outline — excluded from the prod build
+  // exactly like a draft (no page, and unreferenced anywhere public).
+  itIf("emits no page for Outline seed Posts and never references them", async () => {
+    const sitemap = await Bun.file("dist/sitemap-0.xml").text();
+    const home = await Bun.file("dist/index.html").text();
+    const rss = await Bun.file("dist/rss.xml").text();
+    for (const post of OUTLINE) {
+      expect(await Bun.file(`dist/blog/${post.slug}/index.html`).exists()).toBe(false);
+      expect(indexHtml).not.toContain(post.title);
+      expect(sitemap).not.toContain(post.slug);
+      expect(home).not.toContain(post.slug);
+      expect(rss).not.toContain(post.title);
+    }
   });
 });

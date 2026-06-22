@@ -11,10 +11,9 @@ import {
 import type { BlogPostFrontmatter } from "./blog-schema";
 
 // Resolve a Post's optional `related` frontmatter (#7) into concrete links.
-// Mirrors getPostRelatedLinks() in post-content.ts (the legacy seed-note model,
-// folded in by #11) but consumes the Markdown frontmatter shape and resolves
-// defensively: an author typo in an id is skipped, never a build crash — the
-// underlying getProjectById()/decisionProjectPath() throw on unknown ProjectIds.
+// Resolves defensively: an author typo in an id is skipped, never a build crash
+// — the underlying getProjectById()/decisionProjectPath() throw on unknown
+// ProjectIds, so unknown ids are filtered out before they reach those helpers.
 export type RelatedLink = {
   kind: "Project" | "Experiment" | "Decision";
   label: string;
