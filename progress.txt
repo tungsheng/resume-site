@@ -307,6 +307,25 @@ DONE
     * Content-Type: handled by Cloudflare Pages (.xml->application/xml, robots.txt
       ->text/plain); no _headers change needed.
 
+- #10 DONE (commit 9081d03): Home "Latest writing" section from the Post collection.
+    * index.astro (home): "Latest writing" section = selectLatest(visible, 3)
+      compact cards (category, title->/blog/<slug>, UTC date) + "Read the blog"
+      link. Baked into static HTML at build time (no endpoint/fetch). Rendered
+      only when latest.length>0 (empty state leaves the hero clean). 0 JS.
+    * blog-schema.ts: NEW pure selectLatest(posts, limit) = sortByPublishedDesc +
+      slice (generic, non-mutating, unit-tested) — the "newest-first slice".
+    * DEDUP (the trio flagged in #9): extracted getCollection + isPostVisible
+      filter into astro/content/posts.ts getVisiblePosts() (returns UNSORTED;
+      callers sort/slice). Routed blog/index.astro + rss.xml.ts through it; home
+      uses it too. Three call sites now agree on visibility.
+    * Tests: 2 new unit in blog-content.test.ts (selectLatest newest-first slice +
+      under-limit/non-mutating; 43 unit total). Extended blog-build.test.ts (now
+      13) — home lists Published Posts newest-first linking /blog/<slug>, draft
+      excluded. typecheck clean, 0 <script> in dist/index.html.
+    * NOTE: LATEST_COUNT=3; there are exactly 3 Published fixtures so all show.
+      getVisiblePosts is an Astro-runtime module (imports astro:content) — NOT
+      bun-unit-testable; the pure slice logic lives in blog-schema.ts instead.
+
 GOTCHA for future blog build-output tests: `bun test` sets NODE_ENV=test, so a
 build spawned inside a test runs in DEV mode (drafts included) unless you pass
 NODE_ENV=production. See blog-build.test.ts beforeAll.
@@ -347,35 +366,54 @@ REMAINING after SLICE 4:
 Closes once: user adds Cloudflare secrets + first pages.yml deploy, and
 feat/blog merges to main. Then the Blog feature work (#3-#11) is unblocked.
 
-NEXT TASK: #10 — "Home 'Latest writing' section from the Post collection at build
-time". Surface the most recent Published Posts on the home page (astro/pages/
-index.astro), linking into the blog.
-- index.astro is currently a static hero port (no Post data). Add a "Latest
-  writing" section: getCollection("blog", isPostVisible(...,import.meta.env.PROD))
-  + sortByPublishedDesc, take the top N (likely 2-3). Render compact cards/list
-  (title -> /blog/<slug>, category, date, maybe summary) reusing the visual
-  language of the /blog index cards. Zero JS.
-- DECIDE N + empty state: if 0 Published, render nothing (or a subtle "writing
-  soon") — keep the hero intact. Match home's existing layout width/tokens.
-- A "View all" / "Read the blog" link to /blog.
-- Reuse: the same isPostVisible + sortByPublishedDesc + readingTime + UTC date
-  format already used by blog/index.astro. Consider extracting a tiny shared
-  helper (e.g. getVisiblePostsSorted()) if the duplication is annoying — blog/
-  index.astro and rss.xml.ts now BOTH inline the getCollection+visible+sort
-  trio; a shared loader in blog-schema.ts or a new astro/content/posts.ts would
-  dedup three call sites (optional cleanup, do if clean).
-- Tests: built-output assert that dist/index.html lists the latest Published
-  title(s) newest-first and links to /blog/<slug>/, and does NOT list the draft.
-  Add to blog-build.test.ts (reuses the same prod build).
+NEXT TASK: #11 — "Migrate the two seed notes to Markdown Posts (kept Outline)".
+The LAST blog feature slice. Convert the two typed seed Posts in
+src/features/site/post-content.ts (postRecords[]) into Markdown files under
+content/blog/, then DELETE the typed module.
+- The two slugs: sglang-architecture-request-lifecycle-scheduler-prefix-cache,
+  decode-process-deep-dive. Both keep status: Outline (dev-only; NOT in prod
+  build — verify no dist page emitted, like the sizing-admission draft).
+- Frontmatter per blog-schema.ts: title, summary, category, status: Outline,
+  published (use the existing `updated` date 2026-06-12 as published, or pick a
+  sensible date — there's no published field in the old record, only `updated`;
+  set published and optionally updated), tags, and related: {projects,
+  experiments, decisions} from relatedProjectIds/relatedExperimentSlugs/
+  relatedDecisionProjectIds (the #7 resolver will render them).
+- Convert blocks[] -> Markdown body:
+    * paragraph -> plain paragraph.
+    * heading {eyebrow,title} -> "## {title}" (eyebrow can drop or become bold
+      lead-in; simplest: just the H2).
+    * list {title?, items} -> optional bold title line + "- " bullets.
+    * callout {title, body, tone} -> admonition: tone "warning" => > [!WARNING],
+      else > [!NOTE]; put the title as the first line or fold into body. The #6
+      remark-admonitions maps [!NOTE]/[!WARNING] to panels (note the old `title`
+      is custom text; admonitions render a fixed "Note"/"Warning" label — put the
+      old title into the body as a bold lead so it isn't lost).
+    * code {label, code} -> fenced ``` block (label as a preceding bold line or
+      a comment; there's no per-block language, use a plain fence).
+    * table {title, columns, rows} -> bold title line + GFM table (#6).
+    * flow {title, steps} -> bold title line + ORDERED list (1. 2. 3.) per AC.
+- DELETE src/features/site/post-content.ts after migrating. CHECK importers:
+  grep for post-content / getPostBySlug / postRecords / getPostRelatedLinks /
+  postPath / isPostProjectId. The #7 resolveRelatedLinks duplicated
+  getPostRelatedLinks — once post-content is gone, that dedup note is moot.
+  Also check tests/unit/post-content.test.ts (DELETE/rewrite it) and any .astro
+  importing postPath/BLOG_PATH (BLOG_PATH lives in content.ts, keep that).
+- Tests: update/remove post-content.test.ts. Add a dev-render or unit assertion
+  that the two Outline Posts parse against blogPostSchema (status Outline) and a
+  prod-build assertion they emit NO page (like the existing draft check). Could
+  extend blog-build.test.ts DRAFT-style checks for both Outline slugs.
+- After #11: ALL blog feature slices (#3-#11) done. Only #12 deploy (Cloudflare
+  secrets + merge) + optional SLICE 6b srcDir flip remain.
 
-Still pending: #10 home latest-writing, #11 migrate seed notes (post-content.ts).
-#12 SLICE 6b optional srcDir flip (cosmetic; defer). User still must add
-Cloudflare secrets + merge feat/blog to deploy.
+Still pending: #11 migrate seed notes (LAST slice). #12 SLICE 6b optional srcDir
+flip (cosmetic; defer). User still must add Cloudflare secrets + merge feat/blog
+to deploy.
 
-NOTE (dedup opportunity for #10/#11): the getCollection("blog") + isPostVisible +
-sortByPublishedDesc trio is now inlined in blog/index.astro AND rss.xml.ts (and
-#10 will add a 3rd in index.astro). Good moment to extract getVisiblePostsSorted()
-into blog-schema.ts or astro/content/posts.ts.
+--- (#10 reference — DONE in 9081d03, kept for context) ---
+Home "Latest writing" section now bakes the newest Published Posts into
+dist/index.html. Shared getVisiblePosts() (astro/content/posts.ts) +
+selectLatest() (blog-schema.ts). See the #10 DONE entry above.
 
 --- (#9 reference — DONE in b28c895, kept for context) ---
 RSS full-content feed (/rss.xml), @astrojs/sitemap, static robots.txt now emit
