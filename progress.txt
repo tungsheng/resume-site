@@ -229,6 +229,32 @@ DONE
     * GOTCHA: appended the new post to the integration PUBLISHED[] at the END so
       the ordering assertion (uses PUBLISHED[0]/[1]) stays valid.
 
+- #7 DONE (commit b577d22): Post metadata surfaces — auto-TOC, updated date, related.
+    * Auto-TOC in blog/[slug].astro from H2/H3 headings (Astro `render()` returns
+      `headings` = {depth,slug,text}; built-in heading ids make #slug anchors
+      work). Shown only past a 3-heading threshold; short Posts get none. Helpers
+      selectTocHeadings/shouldShowToc/TOC_MIN_HEADINGS added to blog-schema.ts
+      (pure, generic, unit-tested). Zero-JS (scroll-behavior:smooth in global.css).
+    * "Updated <date>" shows only when frontmatter `updated` > `published`
+      (formatDate helper, timeZone:"UTC" like the publish date).
+    * Related links via NEW astro/content/related-links.ts resolveRelatedLinks():
+      resolves frontmatter related.{projects,experiments,decisions} against the
+      typed portfolio modules (getProjectById / experimentCatalogContent +
+      experimentDetailPath / decisionProjectPath). DEFENSIVE: unknown ids are
+      skipped (isProjectId guard + experiment .find) so a typo never crashes the
+      build (those helpers throw on unknown ProjectIds). Omitted when none.
+    * Scoped styles for .post-toc + .post-related (authored markup -> Astro scopes
+      directly, no :global needed, unlike the .post-body Content styles).
+    * Fixture kv-cache-is-the-batch-size-ceiling.md gained `updated:2026-06-22` +
+      `related:` (gpu-inference-lab project/decision, kv-cache+batching experiments).
+    * Tests: tests/unit/blog-metadata.test.ts (6 new; 41 unit total) — TOC
+      threshold incl. H1/H4 noise + related resolution incl. unknown-id skip.
+      Extended blog-build.test.ts (now 7) with built-output asserts: TOC/related/
+      Updated present on the rich Post, absent on a short standalone Post.
+    * DEDUP NOTE: resolveRelatedLinks parallels getPostRelatedLinks() in
+      post-content.ts (legacy seed-note model) but for the frontmatter shape —
+      fold together when #11 migrates those notes into the collection.
+
 GOTCHA for future blog build-output tests: `bun test` sets NODE_ENV=test, so a
 build spawned inside a test runs in DEV mode (drafts included) unless you pass
 NODE_ENV=production. See blog-build.test.ts beforeAll.
@@ -269,61 +295,43 @@ REMAINING after SLICE 4:
 Closes once: user adds Cloudflare secrets + first pages.yml deploy, and
 feat/blog merges to main. Then the Blog feature work (#3-#11) is unblocked.
 
-NEXT TASK: #7 — "Post metadata surfaces: auto-TOC, reading time, updated date,
-related links". reading-time is already computed/shown in blog/[slug].astro
-(readingTimeMinutes in blog-schema.ts). Remaining for #7:
-- Auto-TOC: collect h2/h3 headings from the rendered Post and render an in-page
-  table of contents. Astro exposes headings via `const { headings } = await
-  render(post)` (array of {depth, slug, text}). Heading ids/slugs are added by
-  Astro's built-in rehype-heading-ids — no plugin needed. Render a nav from
-  headings (filter depth 2-3) in the article; style in .post-body / aside. 0 JS
-  (anchor links + scroll-behavior:smooth already set in global.css).
-- Updated date: schema already has optional `updated`; show "Updated <date>"
-  when present (format with timeZone:"UTC" like `published`).
-- Related links: schema has optional `related.{projects,experiments,decisions}`
-  (arrays of ids). Resolve ids -> titles/paths via the typed content modules
-  (projects-content / experiment-catalog-content / decision-content) and render a
-  "Related" block linking to /projects/<id>, /experiments/<slug>,
-  /decisions/<id>. Reuse the path helpers already imported by the catalog pages.
-- Tests: unit for any heading-filter/related-resolver helper; built-output assert
-  that a fixture with headings emits a TOC and a post with `updated`/`related`
-  shows them.
+NEXT TASK: #8 — "Per-Post SEO head: title, description, canonical, OG, article,
+twitter:card". Add per-Post SEO meta tags to the <head> on blog/[slug].astro
+(and ideally generalize so other pages can pass the same).
+- Current head: BaseLayout.astro takes `title` + `description` props and renders
+  <title> + <meta name="description">. CHECK what it already emits (canonical?
+  charset? viewport?) before adding — don't duplicate. astro.config `site` is
+  https://tonylee.bio (drives Astro.url/canonical).
+- Canonical: <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)}>.
+  Astro.site is the configured origin; build absolute URLs from it.
+- Open Graph: og:title, og:description, og:type="article", og:url (canonical),
+  og:image (use post.data.cover if present, else a site default — note cover is
+  already an optional schema field; resolve to an ABSOLUTE url via Astro.site).
+  og:site_name.
+- article:* (since og:type=article): article:published_time (post.data.published
+  ISO), article:modified_time (updated, if present), article:tag (per tag),
+  article:section (category).
+- twitter:card="summary_large_image" + twitter:title/description/image.
+- Likely refactor: add optional props to BaseLayout (canonical, ogType, image,
+  publishedTime, modifiedTime, tags, section) OR a dedicated <SeoHead> component
+  the layout renders. Keep non-blog pages working (sensible defaults: website type,
+  no article:*). Decide: extend BaseLayout vs new component — BaseLayout already
+  owns <head>, so threading optional SEO props through it is least churn.
+- CSP note: og/twitter tags are just <meta>, no CSP impact. Still 0 JS.
+- Tests: built-output assertions on dist/blog/<slug>/index.html for canonical +
+  og:type=article + article:published_time + twitter:card; and that a non-blog
+  page (e.g. dist/index.html) has canonical + og but NO article:* tags. Consider
+  a small unit helper if any URL-absolutizing logic is extracted (e.g.
+  toAbsoluteUrl(path, site)).
 
---- (#6 reference — DONE in 6e70da0, kept for context) ---
-Extended the Astro Markdown pipeline (astro.config.mjs markdown config)
-beyond the basic prose now rendered in blog/[slug].astro:
-- Admonitions: `> [!NOTE]` / `> [!WARNING]` (GitHub alert syntax) -> styled
-  accent/warning callout panels. Add a remark plugin: either
-  `remark-github-admonitions-to-directives` + directive handling, OR the simpler
-  `remark-directive` + custom, OR `@flowershow`/`rehype-github-alerts` /
-  `remark-gfm` alerts. EASIEST: add `rehype-github-alerts` (renders GH-style
-  alert markup) and style its output. Pick one, add to astro.config rehype/remark
-  plugins, and add CSS in the .post-body style (map note->accent panel,
-  warning->warning panel using the same token classes as the rest of the site).
-- GFM tables: GFM is ON by default in Astro markdown (tables already render).
-  Add table styling to .post-body (borders, header bg) — verify with a fixture.
-- Images: self-hosted under public/assets/blog/<slug>/... served at
-  /assets/blog/<slug>/... Rendered <img> get loading="lazy" + decoding="async"
-  and are capped to container width; a lone image in a paragraph wraps as
-  <figure> with alt -> <figcaption>. Add a rehype plugin to add the img attrs +
-  figure wrapping (e.g. small custom rehype plugin), OR set via CSS for width +
-  a rehype plugin for the attributes/figure.
-  NOTE publicDir is currently ./public-astro (srcDir=./astro), so blog assets go
-  under ./public-astro/assets/blog/<slug>/ to land at dist/assets/blog/<slug>/.
-- Keep raw HTML disabled / MDX off (this issue is also where raw-HTML hardening
-  belongs — consider rehype-sanitize-free approach since the author is trusted;
-  at minimum confirm no <script> passes through; CSP already blocks execution).
-- Tests: loader/transform unit asserts admonition->panel mapping + img
-  lazy/async attrs (can unit-test a small rehype/remark transform, or assert on
-  built HTML for a fixture post that uses an admonition, a table, and an image);
-  a built-output assertion serves a blog asset.
-- Add ONE fixture exercising all three (admonition + table + image) — but keep it
-  Published only if you want it public, else Drafting + assert via dev/unit.
+Still pending: #8 SEO head, #9 RSS/sitemap/robots, #10 home latest-writing,
+#11 migrate seed notes (post-content.ts). #12 SLICE 6b optional srcDir flip
+(cosmetic; defer). User still must add Cloudflare secrets + merge feat/blog to
+deploy.
 
-Still pending: #7 metadata/TOC, #8 SEO head, #9 RSS/sitemap/robots,
-#10 home latest-writing, #11 migrate seed notes (post-content.ts).
-#12 SLICE 6b optional srcDir flip (cosmetic; defer).
-User still must add Cloudflare secrets + merge feat/blog to deploy.
+--- (#7 reference — DONE in b577d22, kept for context) ---
+Post metadata surfaces (auto-TOC / updated date / related links) now render on
+blog/[slug].astro. See the #7 DONE entry above for specifics.
 
 --- (old SLICE 6 teardown plan, now DONE in 6a, kept for reference) ---
 SLICE 6 (FINAL) — remove the Bun app and flip Astro to the default
