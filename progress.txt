@@ -255,6 +255,29 @@ DONE
       post-content.ts (legacy seed-note model) but for the frontmatter shape —
       fold together when #11 migrates those notes into the collection.
 
+- #8 DONE (commit 6431ada): Per-Post SEO head — canonical, OG, article, twitter.
+    * Threaded optional SEO props through BaseLayout.astro (it already owned
+      <head> + title/description/canonical). New props: ogType ("website"|
+      "article", default website), image, publishedTime, modifiedTime, tags,
+      section. Least churn vs a separate <head> partial; every page benefits.
+    * Emits og:title/description/type/url/site_name on every page. article:*
+      (published_time/modified_time/section/tag) ONLY when ogType="article".
+      twitter:card=summary_large_image + twitter:title/description/image.
+    * og:image/twitter:image resolved from Post `cover` -> absolute same-origin
+      URL via new URL(image, Astro.site); omitted when no cover. modifiedTime
+      passed only when updatedLabel set (updated > published), reusing #7 logic.
+    * blog/[slug].astro passes ogType="article", image=cover, publishedTime=
+      published, modifiedTime=updated(if later), tags, section=category.
+    * Added cover: /assets/blog/<slug>/kv-cache-layout.svg to the kv-cache
+      fixture (reuses the #6 SVG asset) so og:image is exercised.
+    * Tests: extended blog-build.test.ts (now 9) — asserts canonical + og:type=
+      article + article:published_time(2026-06-21T00:00:00.000Z)/modified_time/
+      section/tag + twitter:card + og:image-from-cover on the Post; and that
+      dist/index.html is og:type=website with NO article:* tags. 0 <script>.
+    * NOTE: published.toISOString() -> "...T00:00:00.000Z" (dates authored as
+      plain calendar days, coerced to UTC midnight). Canonical/og:url carry the
+      default trailing slash (https://tonylee.bio/blog/<slug>/).
+
 GOTCHA for future blog build-output tests: `bun test` sets NODE_ENV=test, so a
 build spawned inside a test runs in DEV mode (drafts included) unless you pass
 NODE_ENV=production. See blog-build.test.ts beforeAll.
@@ -295,43 +318,46 @@ REMAINING after SLICE 4:
 Closes once: user adds Cloudflare secrets + first pages.yml deploy, and
 feat/blog merges to main. Then the Blog feature work (#3-#11) is unblocked.
 
-NEXT TASK: #8 — "Per-Post SEO head: title, description, canonical, OG, article,
-twitter:card". Add per-Post SEO meta tags to the <head> on blog/[slug].astro
-(and ideally generalize so other pages can pass the same).
-- Current head: BaseLayout.astro takes `title` + `description` props and renders
-  <title> + <meta name="description">. CHECK what it already emits (canonical?
-  charset? viewport?) before adding — don't duplicate. astro.config `site` is
-  https://tonylee.bio (drives Astro.url/canonical).
-- Canonical: <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)}>.
-  Astro.site is the configured origin; build absolute URLs from it.
-- Open Graph: og:title, og:description, og:type="article", og:url (canonical),
-  og:image (use post.data.cover if present, else a site default — note cover is
-  already an optional schema field; resolve to an ABSOLUTE url via Astro.site).
-  og:site_name.
-- article:* (since og:type=article): article:published_time (post.data.published
-  ISO), article:modified_time (updated, if present), article:tag (per tag),
-  article:section (category).
-- twitter:card="summary_large_image" + twitter:title/description/image.
-- Likely refactor: add optional props to BaseLayout (canonical, ogType, image,
-  publishedTime, modifiedTime, tags, section) OR a dedicated <SeoHead> component
-  the layout renders. Keep non-blog pages working (sensible defaults: website type,
-  no article:*). Decide: extend BaseLayout vs new component — BaseLayout already
-  owns <head>, so threading optional SEO props through it is least churn.
-- CSP note: og/twitter tags are just <meta>, no CSP impact. Still 0 JS.
-- Tests: built-output assertions on dist/blog/<slug>/index.html for canonical +
-  og:type=article + article:published_time + twitter:card; and that a non-blog
-  page (e.g. dist/index.html) has canonical + og but NO article:* tags. Consider
-  a small unit helper if any URL-absolutizing logic is extracted (e.g.
-  toAbsoluteUrl(path, site)).
+NEXT TASK: #9 — "Syndication & discovery: RSS full-content feed, whole-site
+sitemap, robots". Three discovery artifacts, all build-time, all zero-JS:
+- RSS feed at /rss.xml (or /feed.xml — confirm against issue body): FULL-CONTENT
+  feed of Published Posts, newest-first. Astro's official @astrojs/rss package is
+  the path: `import rss from "@astrojs/rss"` in astro/pages/rss.xml.ts (an
+  endpoint, `export const GET`). Reuse getCollection("blog") +
+  isPostVisible(...,import.meta.env.PROD) + sortByPublishedDesc (blog-schema.ts)
+  so the feed matches the index exactly. For FULL content, render each Post body
+  to HTML — @astrojs/rss `content` field; use container/`render()` or the
+  `markdown` -> sanitized HTML. Check @astrojs/rss is installed (likely NOT —
+  `bun add @astrojs/rss`). Set <title>, <description>, site (Astro.site),
+  per-item title/description(summary)/pubDate(published)/link(postPath)/content.
+  ABSOLUTE image URLs (Astro.site) — relevant to the #6 self-hosted images.
+- Sitemap: whole-site. Easiest = official @astrojs/sitemap integration (add to
+  astro.config integrations[]) -> emits /sitemap-index.xml + /sitemap-0.xml for
+  ALL pages (home, projects, experiments, decisions, resume, blog index + posts).
+  Verify it respects drafts (it only sees built pages, so drafts already excluded
+  in prod). `bun add @astrojs/sitemap`.
+- robots.txt: static public-astro/robots.txt -> dist/robots.txt. Allow all +
+  point Sitemap: https://tonylee.bio/sitemap-index.xml. (Static file is simplest;
+  or a tiny endpoint. Prefer static under publicDir.)
+- _headers / CSP: XML endpoints are same-origin; no CSP change. Confirm Content-
+  Type is application/xml/rss for the feed (the endpoint/Response sets it).
+- Tests: gated prod-build assertions (extend blog-build.test.ts or a new
+  syndication.test.ts): dist/rss.xml exists, contains both Published titles
+  newest-first, contains FULL body markup (e.g. a known phrase from a post body,
+  not just summary), EXCLUDES the draft; dist/sitemap-index.xml (or sitemap-0)
+  exists and lists /blog/<slug>/ + top-level routes; dist/robots.txt has the
+  Sitemap: line. Watch the NODE_ENV=production gotcha (drafts leak in dev).
+- GOTCHA: @astrojs/rss content sanitization — it strips some HTML by default;
+  for full-content with the #6 callouts/figures, may need sanitize-html config or
+  pass pre-rendered HTML. Verify the admonition/figure markup survives.
 
-Still pending: #8 SEO head, #9 RSS/sitemap/robots, #10 home latest-writing,
-#11 migrate seed notes (post-content.ts). #12 SLICE 6b optional srcDir flip
-(cosmetic; defer). User still must add Cloudflare secrets + merge feat/blog to
-deploy.
+Still pending: #9 RSS/sitemap/robots, #10 home latest-writing, #11 migrate seed
+notes (post-content.ts). #12 SLICE 6b optional srcDir flip (cosmetic; defer).
+User still must add Cloudflare secrets + merge feat/blog to deploy.
 
---- (#7 reference — DONE in b577d22, kept for context) ---
-Post metadata surfaces (auto-TOC / updated date / related links) now render on
-blog/[slug].astro. See the #7 DONE entry above for specifics.
+--- (#8 reference — DONE in 6431ada, kept for context) ---
+Per-Post SEO head (canonical, OG, article:*, twitter:card, og:image-from-cover)
+now renders via BaseLayout SEO props. See the #8 DONE entry above for specifics.
 
 --- (old SLICE 6 teardown plan, now DONE in 6a, kept for reference) ---
 SLICE 6 (FINAL) — remove the Bun app and flip Astro to the default
