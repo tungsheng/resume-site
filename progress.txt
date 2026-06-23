@@ -2,6 +2,53 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+SWISS-MINIMAL REDESIGN (ADR-0005) — current track, branch feat/swiss-minimal-redesign
+#############################################################################
+Branched off main (after the Astro-7 merge). PRD #20 = tracer; #21 = page-rollout
+tracking issue (checklist). PRESENTATION ONLY — data/view-models, routes, the
+Sätteri pipeline (ADR-0004), SEO/RSS untouched; every slice keeps 0 <script> and
+the structural integration tests green. Reverses ADR-0003 §5 "design frozen".
+
+DESIGN SYSTEM (established by the tracer; in astro/styles/global.css):
+  * Light Swiss palette: white paper, neutral near-black ink (#14171a), greys,
+    hairline rules (#e6e6e6), single accent go-green (#00ab66 / dark #006b40).
+  * Inter (sans, headings+body) self-hosted via @font-face reusing the resume-PDF
+    woff2 (copied to public-astro/fonts/; /fonts/* cache header added). JetBrains
+    Mono for labels/metadata/code (system fallback; not self-hosted yet). Serif +
+    Avenir DROPPED. --font-display now = Inter too.
+  * Primitives: .eyebrow (mono UPPERCASE letterspaced label), .section-index
+    (mono accent tabular number), .tabular (tabular figures), .cta (mono
+    uppercase CTA link; pair with `group` + arrow span). Token NAMES preserved so
+    un-redesigned pages + blog callouts still render.
+
+DONE
+----
+- TRACER (commit bbb1940; #20): global.css token re-author + @font-face; BaseLayout
+  Swiss header (mono wordmark + nav, active = go-green underline) + mono breadcrumbs
+  + footer; mobile nav stays zero-JS <details>/<summary>; home (index.astro) flush-
+  left grid hero (mono eyebrow + big Inter H1 + mono CTA links) + hairline "Latest
+  writing" list (mono category, ISO tabular date). Tweak (commit 2484413): dropped
+  the "02" section number from the Latest-writing heading per user feedback.
+- PROJECTS INDEX (commit 682cc89; #21): /projects redesigned — flush-left header
+  with hairline right-rail summary note; projects as hairline-separated editorial
+  blocks (mono meta rail: layer/status/experiment-count) instead of shadowed cards
+  w/ rounded-pill chips + filled buttons; evidence as mono-dashed list; actions as
+  .cta links. Added .cta primitive to global.css.
+
+NEXT (rollout order, tracked in #21):
+  [ ] Project DETAILS (/projects/gpu-inference-lab 318L, /projects/cuda-kernel-lab
+      173L) — large bespoke layouts (At-a-glance, optimization-loop cards,
+      benchmark readout, CommandCodeBlock). Translate panels->hairline blocks,
+      chips->mono labels, readout strips->tabular figures.
+  [ ] Experiments (index + [entry] catalog/detail) · Decisions (index + [project])
+  [ ] Blog index (reuse the home Latest-writing list pattern) · Blog .post-body
+      restyle (callout/figure/table/code tokens; markup unchanged)
+  [ ] Resume web · then Resume PDF re-theme (document-css) as a fast-follow.
+
+NOTE: each slice leaves the not-yet-done pages under the NEW Swiss chrome (shared
+BaseLayout) with their OLD MUI-ish content — expected mixed state during rollout.
+
+#############################################################################
 ASTRO 7 + SÄTTERI MIGRATION (ADR-0004) — current track, branch feat/astro-7-satteri
 #############################################################################
 Epic #14 (closed, decomposed) -> slices #15 -> (#16 || #17) -> #18.
