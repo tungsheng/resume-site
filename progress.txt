@@ -40,7 +40,35 @@ DONE
     * Issue: posted implementation-complete comment on #15 (NOT closed — closes
       on merge per repo convention). #16/#17 unblocked, branch off this branch.
 
-API NOTES FOR #16 / #17 (verified from installed satteri@0.9.1 dist types)
+- #16 DONE (commit 70f76fd): Port admonition callouts to a Sätteri mdast plugin.
+    * NEW astro/markdown/mdast-admonitions.ts (renamed from remark-admonitions.ts;
+      git rm'd the old file). Pure buildAdmonition(blockquote) -> replacement
+      callout node or null; thin defineMdastPlugin({ name:'admonitions',
+      blockquote }) wrapper. Registered via satteri({ mdastPlugins:[mdastAdmonitions] }).
+    * Sätteri honors data.hName/hProperties, so the marker-detect + tone-map
+      (5 GitHub kinds -> note/warning) + hName:'div' + callout classes +
+      title-prepend logic carries over. Output is VERBATIM the Astro-6 markup:
+      <div class="callout callout-note"><p class="callout-title">Note</p>
+      <p>…body…</p></div>. Verified in the built post AND the RSS feed body.
+    * PURE / NON-MUTATING: Sätteri passes readonly nodes, so the visitor RETURNS
+      a replacement (per satteri README) rather than mutating in place. The old
+      transformAdmonitions mutated the tree; buildAdmonition builds a new node
+      reusing child refs. A re-visit of the replacement is a safe no-op (title
+      carries no marker) — no infinite loop.
+    * TYPECHECK GOTCHA: the loose structural MdastNode we read/build isn't
+      assignable to satteri's strict node union at the visitor return boundary.
+      Bridged with one `as unknown as MdastNode` (param) + `as SatteriMdastNode`
+      (return) cast in the WRAPPER only; the pure helper stays dep-free.
+    * Unit suite rewritten to buildAdmonition signature (tone map, marker
+      stripped, body kept, plain-blockquote -> null, + a no-mutation test).
+      Un-skipped the callout integration assertion (split test now asserts
+      callouts + GFM table) and the RSS `callout callout-note` body assertion.
+    * VERIFIED: typecheck clean, 42 unit, 16 integration (+1 skip = the #17
+      figure test), full `bun run build` under Bun, 0 <script>.
+    * Issue: implementation-complete comment on #16 (NOT closed — closes on
+      merge). NEXT: #17 (blog-image figure hast plugin), independent, unblocked.
+
+API NOTES FOR #17 (verified from installed satteri@0.9.1 dist types)
 ----
 - Plugin helpers: defineMdastPlugin / defineHastPlugin from "satteri".
   Register via satteri({ mdastPlugins:[...], hastPlugins:[...] }).
