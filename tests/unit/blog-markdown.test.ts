@@ -1,26 +1,22 @@
 import { describe, expect, test } from "bun:test";
-import { transformAdmonitions } from "../../astro/markdown/remark-admonitions";
+import { buildAdmonition } from "../../astro/markdown/mdast-admonitions";
 import { transformBlogImages } from "../../astro/markdown/rehype-blog-images";
 
-// Issue #6: the two in-repo Markdown transforms are unit-tested directly against
-// minimal mdast/hast trees so the mapping is asserted without a full build.
+// Issue #6 / ADR-0004 (#16): the two in-repo Markdown transforms are unit-tested
+// directly against minimal mdast/hast nodes so the mapping is asserted without a
+// full build. The admonition transform is now a Sätteri mdast plugin: a pure
+// per-blockquote builder that returns the replacement callout node (or null).
 
-// Build the mdast a GitHub alert parses into: a blockquote → paragraph whose
-// first text node carries the `[!KIND]` marker (newline folded into the value).
-const alert = (kind: string, body: string) => ({
-  type: "root",
-  children: [
-    {
-      type: "blockquote",
-      children: [{ type: "paragraph", children: [{ type: "text", value: `[!${kind}]\n${body}` }] }],
-    },
-  ],
+// Build the blockquote a GitHub alert parses into: a paragraph whose first text
+// node carries the `[!KIND]` marker (newline folded into the value).
+const blockquote = (kind: string, body: string) => ({
+  type: "blockquote",
+  children: [{ type: "paragraph", children: [{ type: "text", value: `[!${kind}]\n${body}` }] }],
 });
 
-describe("transformAdmonitions (remark)", () => {
+describe("buildAdmonition (mdast)", () => {
   test("maps [!NOTE] to a note callout panel with a title and the body kept", () => {
-    const tree = transformAdmonitions(alert("NOTE", "Body text."));
-    const callout = tree.children![0]!;
+    const callout = buildAdmonition(blockquote("NOTE", "Body text."))!;
     expect(callout.data?.hName).toBe("div");
     expect(callout.data?.hProperties?.className).toEqual(["callout", "callout-note"]);
 
@@ -33,26 +29,30 @@ describe("transformAdmonitions (remark)", () => {
   });
 
   test("maps cautionary kinds to the warning tone with the right label", () => {
-    const note = transformAdmonitions(alert("WARNING", "Careful."));
-    expect(note.children![0]!.data?.hProperties?.className).toEqual(["callout", "callout-warning"]);
-    expect(note.children![0]!.children![0]!.children![0]!.value).toBe("Warning");
+    const warning = buildAdmonition(blockquote("WARNING", "Careful."))!;
+    expect(warning.data?.hProperties?.className).toEqual(["callout", "callout-warning"]);
+    expect(warning.children![0]!.children![0]!.value).toBe("Warning");
 
-    const caution = transformAdmonitions(alert("CAUTION", "Careful."));
-    expect(caution.children![0]!.data?.hProperties?.className).toEqual(["callout", "callout-warning"]);
+    const caution = buildAdmonition(blockquote("CAUTION", "Careful."))!;
+    expect(caution.data?.hProperties?.className).toEqual(["callout", "callout-warning"]);
 
-    const tip = transformAdmonitions(alert("TIP", "Hint."));
-    expect(tip.children![0]!.data?.hProperties?.className).toEqual(["callout", "callout-note"]);
+    const tip = buildAdmonition(blockquote("TIP", "Hint."))!;
+    expect(tip.data?.hProperties?.className).toEqual(["callout", "callout-note"]);
   });
 
-  test("leaves an ordinary blockquote untouched", () => {
-    const tree = {
-      type: "root",
-      children: [
-        { type: "blockquote", children: [{ type: "paragraph", children: [{ type: "text", value: "Just a quote." }] }] },
-      ],
+  test("returns null for an ordinary blockquote (left untouched)", () => {
+    const plain = {
+      type: "blockquote",
+      children: [{ type: "paragraph", children: [{ type: "text", value: "Just a quote." }] }],
     };
-    const out = transformAdmonitions(tree);
-    expect(out.children![0]!.data).toBeUndefined();
+    expect(buildAdmonition(plain)).toBeNull();
+  });
+
+  test("does not mutate the input blockquote (Sätteri passes readonly nodes)", () => {
+    const input = blockquote("NOTE", "Body text.");
+    const before = JSON.stringify(input);
+    buildAdmonition(input);
+    expect(JSON.stringify(input)).toBe(before);
   });
 });
 

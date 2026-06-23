@@ -60,23 +60,23 @@ describe("blog production build output", () => {
     expect(await Bun.file(`dist/blog/${DRAFT.slug}/index.html`).exists()).toBe(false);
   });
 
-  // Issue #6 / ADR-0004: GFM tables and self-hosted images render natively under
-  // the Astro 7 Sätteri pipeline (#15). The admonition-callout and figure/lazy
-  // image behaviors are the two in-repo transforms, ported onto Sätteri's plugin
-  // API separately — their assertions live in the skipped test below.
-  itIf("renders a GFM table and the self-hosted image natively", async () => {
+  // Issue #6 / ADR-0004: GFM tables, admonition callouts, and self-hosted images
+  // render under the Astro 7 Sätteri pipeline. Admonitions are a Sätteri mdast
+  // plugin (#16); the figure/lazy-image behavior is a hast plugin ported in #17.
+  itIf("renders admonition callouts and a GFM table", async () => {
     const html = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
+    expect(html).toContain('class="callout callout-note"');
+    expect(html).toContain('class="callout callout-warning"');
+    expect(html).toContain('class="callout-title"');
     expect(html).toContain("<table>");
     expect(html).toContain(`src="/${RICH.asset}"`);
   });
 
-  // TODO(#16/#17): un-skip once the admonition (mdast) and blog-image (hast)
-  // transforms are ported onto Sätteri's plugin API. Until then Sätteri renders
-  // `> [!NOTE]` as a plain blockquote and a lone image as a bare <img>.
-  test.skip("renders admonition callouts and lazy figure images", async () => {
+  // TODO(#17): un-skip once the blog-image (hast) transform is ported onto
+  // Sätteri's plugin API. Until then Sätteri renders a lone image as a bare
+  // <img> with no <figure> wrap and no lazy/async attributes.
+  test.skip("wraps lone images in lazy figures", async () => {
     const html = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
-    expect(html).toContain('class="callout callout-note"');
-    expect(html).toContain('class="callout callout-warning"');
     expect(html).toContain('loading="lazy"');
     expect(html).toContain('decoding="async"');
     expect(html).toContain("<figure");
@@ -148,9 +148,9 @@ describe("blog production build output", () => {
     expect(cont).toBeLessThan(prefix);
 
     // full content (not just summary): rendered body markup + a heading carry
-    // through, and the #6 self-hosted image is absolutized to the origin.
-    // TODO(#16): re-add the `callout callout-note` body assertion once the
-    // admonition transform is ported onto Sätteri (dropped this slice, #15).
+    // through, and the #6 self-hosted image is absolutized to the origin. The
+    // admonition callout (Sätteri mdast plugin, #16) renders into the feed body.
+    expect(rss).toContain("callout callout-note");
     expect(rss).toContain("Compute is rarely what runs out first");
     expect(rss).toContain(`https://tonylee.bio/${RICH.asset}`);
 

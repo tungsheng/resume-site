@@ -3,6 +3,7 @@ import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { satteri } from "@astrojs/markdown-satteri";
+import mdastAdmonitions from "./astro/markdown/mdast-admonitions.ts";
 
 // NOTE: ADR-0003 — the site is migrating to Astro zero-JS static output.
 // During the migration the new Astro tree lives under ./astro so it does not
@@ -47,11 +48,13 @@ export default defineConfig({
     shikiConfig: { theme: "github-dark" },
     // Sätteri GFM (incl. tables) is on by default; smartPunctuation is opt-in,
     // enabled here for parity with Astro 6's smartypants (ADR-0004 decision 6).
-    // The two in-repo transforms (admonition callouts, blog-image figures) are
-    // dropped this slice (#15) and ported onto Sätteri's mdast/hast plugin API
-    // in #16 / #17 — @astrojs/markdown-remark is intentionally NOT installed.
+    // In-repo transforms run as Sätteri plugins (ADR-0004 decision 3):
+    // admonition callouts via mdastPlugins (#16). Blog-image figures (hast,
+    // #17) are still pending. @astrojs/markdown-remark is intentionally NOT
+    // installed — these are native Sätteri plugins.
     processor: satteri({
       features: { gfm: true, smartPunctuation: true },
+      mdastPlugins: [mdastAdmonitions],
     }),
   },
 });
