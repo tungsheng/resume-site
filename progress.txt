@@ -68,7 +68,44 @@ DONE
     * Issue: implementation-complete comment on #16 (NOT closed — closes on
       merge). NEXT: #17 (blog-image figure hast plugin), independent, unblocked.
 
-API NOTES FOR #17 (verified from installed satteri@0.9.1 dist types)
+- #17 DONE (commit cd40979): Port blog-image figures to a Sätteri hast plugin.
+    * NEW astro/markdown/hast-blog-images.ts (renamed from rehype-blog-images.ts;
+      git rm'd the old file). Two pure helpers: figureForParagraph(p) -> <figure>
+      for a lone-image paragraph or null; withImgAttrs(img) -> copy with
+      loading=lazy/decoding=async. Thin defineHastPlugin({ element:{ filter:
+      ['img','p'], visit } }) branches on tagName. Registered via
+      satteri({ hastPlugins:[hastBlogImages] }).
+    * Visit branches: lone-image <p> -> <figure> (figureForParagraph sets the img
+      attrs itself); any other <img> (inline) just gets withImgAttrs. The two
+      paths are independent so VISIT ORDER DOESN'T MATTER — every img ends lazy,
+      only lone imgs wrap. The double-processing worry (img also matched by the
+      filter) was UNFOUNDED — verified output has exactly one <figure>, no
+      nested/double wrap. Markup is verbatim Astro-6:
+      <figure class="post-figure"><img … loading="lazy" decoding="async">
+      <figcaption>…alt…</figcaption></figure>.
+    * PURE / NON-MUTATING (readonly nodes; visitor returns replacements). Same
+      `as unknown as HastNode` / `as SatteriHastNode` cast bridge as #16, in the
+      WRAPPER only.
+    * Unit suite rewritten to figureForParagraph/withImgAttrs (figure wrap,
+      caption-from-alt, empty-alt no caption, whitespace-sibling ignore, inline
+      -> null, non-mutation). GOTCHA: the test img() helper's properties needed
+      `as Record<string,unknown>` so the non-mutation assertion can read .loading.
+    * Un-skipped the figure integration assertions — MERGED them back into the
+      live rich-Markdown test, so NO integration skips remain (16 pass, 0 skip).
+    * VERIFIED: typecheck clean, 44 unit, 16 integration (0 skip), full
+      `bun run build` under Bun, 0 <script>.
+    * Issue: implementation-complete comment on #17 (NOT closed — closes on
+      merge). ALL THREE transform slices #15/#16/#17 DONE.
+
+NEXT: #18 — parity sign-off + live Astro-6 visual diff. The full integration
+suite already passes unchanged against the Astro-7 build; #18 adds the one-off
+puppeteer local-vs-live-Astro-6 visual diff (blog: admonition/table/figure/code
++ portfolio spot-check) and the final go/no-go. NOTE: #18 needs the live
+Astro-6 site as the diff baseline — that is the production site at
+https://tonylee.bio (the #12 launch). Confirm it's serving the Astro-6 build
+before diffing.
+
+API NOTES (verified from installed satteri@0.9.1 dist types — kept for ref)
 ----
 - Plugin helpers: defineMdastPlugin / defineHastPlugin from "satteri".
   Register via satteri({ mdastPlugins:[...], hastPlugins:[...] }).
