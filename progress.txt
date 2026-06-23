@@ -121,18 +121,26 @@ DONE
 *** ASTRO-7 MIGRATION IS CODE-COMPLETE + PARITY-VERIFIED on feat/astro-7-satteri
     (#15/#16/#17 done, #18 verified GO). 6 commits ahead of main. ***
 
-!!! DEPLOYMENT BLOCKER (surfaced during #18) !!!
-    https://tonylee.bio is serving the OLD pre-Astro React SPA
-    (<div id="root"> + client JS chunk); /blog/ /resume/ /projects/ all 404.
-    The Astro-6 launch (#12) is NOT actually live despite being closed "live"
-    — most likely DNS still points at the old Hostinger VPS, or the Cloudflare
-    Pages custom-domain isn't attached. Flagged on #12 + #18. NEEDS THE USER:
-    confirm the *.pages.dev deploy is green and re-point tonylee.bio DNS to
-    Cloudflare Pages; then decide ship-Astro-6-first (ADR-0004 two-deploy plan)
-    vs go-straight-to-Astro-7 (parity now holds). Agent cannot do DNS/secrets.
+#18 LIVE DIFF DONE (the real one). Cloudflare Pages IS live + green at
+    https://resume-site-4js.pages.dev serving the Astro-6 build (zero-JS, all
+    routes 200). Fetched 12 live pages and diffed vs the local Astro-7 dist:
+    text content IDENTICAL on all 12 (only the /resume/ [&>div] tailwind-class
+    tag-stripping artifact); rich-markdown structural markup IDENTICAL
+    (callouts/table/figure/lazy/shiki). Matches the local-baseline diff exactly,
+    now confirmed against production. #18 verdict GO, all ACs met.
 
-    Also pending (normal): merge feat/astro-7-satteri -> main (closes
-    #15/#16/#17; #18 closes after the production cutover sign-off).
+DEPLOYMENT STATUS (clarified — NOT a blocker for the build):
+    * Cloudflare Pages build + deploy = DONE/green at resume-site-4js.pages.dev.
+    * The ONLY gap: custom domain. tonylee.bio still resolves to the OLD
+      pre-Astro React SPA (old Hostinger VPS via DNS). To finish #12: attach
+      tonylee.bio as a Pages custom domain + point its DNS at Cloudflare Pages.
+      (DNS = user action; agent cannot do it.) Clarified on #12.
+    * THEN decide the Astro-7 cutover: parity holds, so promoting feat/
+      astro-7-satteri is safe whenever desired (ADR-0004 two-deploy plan, or
+      straight to 7).
+
+PENDING (normal): merge feat/astro-7-satteri -> main (closes #15/#16/#17;
+    #18 closes after the production cutover sign-off).
 
 API NOTES (verified from installed satteri@0.9.1 dist types — kept for ref)
 ----
