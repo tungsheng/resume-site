@@ -1,6 +1,8 @@
 ---
-// Plain-.astro port of TwoMetricEvidenceMatrix (src/features/site/evidence-visuals.tsx):
-// a titled card with a takeaway and rows of two labeled horizontal bars. Zero JS.
+// Swiss-minimal port of TwoMetricEvidenceMatrix (ADR-0005 / #21): a titled cell
+// with a takeaway and rows of two labeled horizontal bars (sharp, hairline-
+// separated). Rendered inside the parent's hairline grid, so the root is a plain
+// bg-paper cell rather than its own bordered card. Zero JS.
 interface Cell {
   value: number;
   label: string;
@@ -27,30 +29,30 @@ interface Props {
 const { title, takeaway, sourceLabel, columns, rows } = Astro.props;
 
 const TONE: Record<string, string> = {
-  success: "#00AB66",
+  success: "#006b40",
   info: "#276f89",
-  warning: "#a95718",
-  error: "#d32f2f",
-  neutral: "rgba(22,35,31,0.58)",
+  warning: "#8a4413",
+  error: "#b3261e",
+  neutral: "#8b939c",
 };
 const toneColor = (tone = "neutral") => TONE[tone] ?? TONE.neutral;
 const barWidth = (value: number, max: number) =>
   max <= 0 || value <= 0 ? "0%" : `${Math.min(100, Math.max(4, (value / max) * 100))}%`;
 ---
 
-<section class="grid gap-3 overflow-hidden rounded-lg border border-surface-border bg-paper p-3.5">
+<section class="grid content-start gap-3 bg-paper p-4">
   <div class="grid gap-1">
-    <h3 class="text-[1.05rem] font-semibold">{title}</h3>
-    <p class="text-sm leading-relaxed text-muted">{takeaway}</p>
+    <h3 class="text-[1.02rem] font-semibold text-ink">{title}</h3>
+    <p class="text-[0.92rem] leading-relaxed text-muted">{takeaway}</p>
   </div>
 
-  <div class="grid gap-1">
+  <div class="grid gap-2.5">
     {
       rows.map((row) => (
-        <div class="grid items-center gap-2 border-t border-ink/[0.08] pt-2 first:border-t-0 md:grid-cols-[minmax(10rem,0.7fr)_repeat(2,minmax(8rem,1fr))] md:gap-4">
+        <div class="grid items-baseline gap-2 border-t border-surface-border pt-2.5 first:border-t-0 first:pt-0 md:grid-cols-[minmax(9rem,0.7fr)_repeat(2,minmax(8rem,1fr))] md:gap-4">
           <div class="grid min-w-0 gap-0.5">
-            <p class="text-sm font-bold">{row.label}</p>
-            {row.context && <p class="text-xs text-muted">{row.context}</p>}
+            <p class="text-[0.88rem] font-bold text-ink">{row.label}</p>
+            {row.context && <p class="text-[0.78rem] text-muted">{row.context}</p>}
           </div>
           {
             columns.map((column) => {
@@ -59,12 +61,12 @@ const barWidth = (value: number, max: number) =>
               return (
                 <div class="grid min-w-0 gap-1">
                   <div class="flex items-baseline justify-between gap-2">
-                    <span class="text-xs font-semibold text-muted">{column.label}</span>
-                    <span class="text-xs font-bold" style="overflow-wrap:anywhere">{cell.label}</span>
+                    <span class="eyebrow">{column.label}</span>
+                    <span class="text-[0.78rem] font-bold tabular text-ink" style="overflow-wrap:anywhere">{cell.label}</span>
                   </div>
-                  <div class="relative h-[0.7rem] w-full overflow-hidden rounded-full bg-ink/[0.07]">
+                  <div class="relative h-[0.4rem] w-full overflow-hidden bg-surface-border">
                     <div
-                      class="h-full rounded-[inherit]"
+                      class="h-full"
                       style={`width:${barWidth(cell.value, column.max)};background-color:${toneColor(cell.tone ?? column.tone)}`}
                     >
                     </div>
@@ -78,5 +80,5 @@ const barWidth = (value: number, max: number) =>
     }
   </div>
 
-  {sourceLabel && <p class="text-xs text-muted">{sourceLabel}</p>}
+  {sourceLabel && <p class="text-[0.78rem] text-muted">{sourceLabel}</p>}
 </section>

@@ -65,16 +65,13 @@ const tables = evidence
   : [];
 
 const READINESS_HEX: Record<string, string> = {
-  supported: "#006B40",
+  supported: "#006b40",
   selected: "#276f89",
-  rejected: "#d32f2f",
-  pending: "#743914",
-  blocked: "#743914",
+  rejected: "#b3261e",
+  pending: "#8a4413",
+  blocked: "#8a4413",
 };
-const readinessChipStyle = (tone: string) => {
-  const c = READINESS_HEX[tone] ?? "#465750";
-  return `color:${c};border-color:color-mix(in srgb, ${c} 38%, transparent);background-color:color-mix(in srgb, ${c} 9%, transparent)`;
-};
+const toneStyle = (tone: string) => `color:${READINESS_HEX[tone] ?? "#5c6670"}`;
 
 const primary = experiment.readiness.primary;
 const secondary = experiment.readiness.secondary;
@@ -105,19 +102,13 @@ const summaryFacts = [
   },
 ];
 
-const eyebrow = "text-[0.74rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark";
-const h2 = "h-section-title";
-const card = "rounded-lg border border-surface-border bg-paper p-3.5";
-const accent = "rounded-lg border border-go-green/20 bg-go-green/8 p-3";
-const successPanel = "rounded-lg border border-go-green/25 bg-accent-soft/70 p-3.5 md:p-[1.125rem]";
-const warnPanel = "rounded-lg border border-surface-border border-l-[3px] border-l-warning-warm/60 bg-paper p-4";
-const chipBase = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
-const chipDefault = chipBase + " border-go-green/30 bg-go-green/[0.075] text-ink";
-const chipMuted = chipBase + " border-go-green/25 bg-go-green/[0.065] text-ink/70";
-const chipErr = chipBase + " border-[color:color-mix(in_srgb,#d32f2f_38%,transparent)] text-[#d32f2f]";
+// Swiss idioms (ADR-0005 / #21): hairline spec-sheet grids, hairline-left accent/
+// warning blocks, tone-colored mono labels, .cta links.
+const grid = "grid gap-px border border-surface-border bg-surface-border";
+const cell = "bg-paper p-4 grid content-start";
+const accentBlock = "border-l-2 border-l-go-green pl-4";
+const warnBlock = "border-l-2 border-l-warning-warm/70 pl-4";
 const tableCols = "md:grid-cols-[minmax(7rem,0.9fr)_minmax(10rem,1fr)_repeat(3,minmax(5.5rem,0.7fr))]";
-const primaryBtn = "inline-flex min-h-10 items-center justify-center gap-1.5 rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
-const textBtn = "link-external inline-flex min-h-9 items-center gap-1.5 px-2 text-sm font-medium text-ink hover:underline";
 ---
 
 <BaseLayout
@@ -132,21 +123,24 @@ const textBtn = "link-external inline-flex min-h-9 items-center gap-1.5 px-2 tex
   ]}
 >
   <!-- Header -->
-  <section class="mb-[1.375rem] grid items-start gap-[0.85rem] md:mb-6 md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
-    <div class="flex max-w-[58rem] flex-col gap-2.5 md:gap-3">
-      <h1 class="h-detail-title">{experiment.title}</h1>
-      <p class="text-base leading-relaxed text-muted">{experiment.question}</p>
-      <div class="flex flex-wrap items-center gap-3">
-        <a href={catalogPath} class={primaryBtn}>&larr; Experiment catalog</a>
-        <a href={experimentSourceLink(experiment.projectId, experiment.sourcePath)} target="_blank" rel="noreferrer" class={textBtn}>Source</a>
+  <section class="grid gap-6 border-b border-surface-border pb-9 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.46fr)] lg:gap-12">
+    <div class="flex max-w-[52rem] flex-col gap-5">
+      <h1 class="text-balance font-semibold leading-[1.04] tracking-[-0.02em] text-[clamp(1.9rem,4.5vw,3rem)]">{experiment.title}</h1>
+      <p class="text-[1.02rem] leading-relaxed text-muted md:text-[1.12rem]">{experiment.question}</p>
+      <div class="mt-1 flex flex-wrap items-center gap-x-7 gap-y-3">
+        <a href={catalogPath} class="cta group text-go-green-dark hover:text-ink">
+          <span aria-hidden="true" class="transition-transform group-hover:-translate-x-1">&larr;</span>
+          Experiment catalog
+        </a>
+        <a href={experimentSourceLink(experiment.projectId, experiment.sourcePath)} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">Source</a>
       </div>
     </div>
-    <div class={`grid grid-cols-1 gap-1.5 sm:grid-cols-2 ${accent}`} aria-label={`${experiment.title} summary facts`}>
+    <div class={`${grid} grid-cols-1 sm:grid-cols-2`} aria-label={`${experiment.title} summary facts`}>
       {
         summaryFacts.map((f) => (
-          <div class="grid content-center gap-0.5 rounded-md border border-surface-border bg-paper px-3 py-2">
-            <p class="text-xs font-semibold text-muted">{f.label}</p>
-            <p class="text-sm font-semibold" style="overflow-wrap:anywhere">{f.value}</p>
+          <div class={`${cell} gap-1`}>
+            <p class="eyebrow">{f.label}</p>
+            <p class="text-[0.9rem] font-semibold text-ink" style="overflow-wrap:anywhere">{f.value}</p>
           </div>
         ))
       }
@@ -154,51 +148,47 @@ const textBtn = "link-external inline-flex min-h-9 items-center gap-1.5 px-2 tex
   </section>
 
   <!-- Why it matters -->
-  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
-    <div class="grid gap-2">
-      <h2 class={h2}>Why it matters</h2>
-      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{experiment.summary}</p>
-    </div>
-    <div class={accent}>
-      <p class="leading-relaxed">{experiment.whyItMatters}</p>
+  <section class="mt-12 md:mt-16">
+    <h2 class="h-section-title">Why it matters</h2>
+    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{experiment.summary}</p>
+    <div class={`mt-5 ${accentBlock}`}>
+      <p class="max-w-[48rem] leading-relaxed text-ink">{experiment.whyItMatters}</p>
     </div>
   </section>
 
   <!-- Result -->
-  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
-    <div class="grid gap-2">
-      <p class={eyebrow}>{primary.label}</p>
-      <h2 class={h2}>{evidence ? "Result evidence" : "Result status"}</h2>
-      <p class="max-w-[44rem] text-base leading-relaxed text-muted">
-        {evidence
-          ? "Selected live-cluster runs, readiness state, and evidence boundary are shown together."
-          : isBlocked
-            ? "Definition is ready; the live attempt stopped before a comparable result."
-            : "Artifacts stay separate from conclusions until a run is selected."}
-      </p>
-    </div>
+  <section class="mt-12 md:mt-16">
+    <p class="eyebrow mb-2" style={toneStyle(primary.tone)}>{primary.label}</p>
+    <h2 class="h-section-title">{evidence ? "Result evidence" : "Result status"}</h2>
+    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">
+      {evidence
+        ? "Selected live-cluster runs, readiness state, and evidence boundary are shown together."
+        : isBlocked
+          ? "Definition is ready; the live attempt stopped before a comparable result."
+          : "Artifacts stay separate from conclusions until a run is selected."}
+    </p>
 
     {
       evidence ? (
-        <div class={`grid gap-5 ${successPanel}`}>
-          <div class="flex flex-wrap items-center gap-2">
-            <span class={chipBase} style={readinessChipStyle(primary.tone)}>{primary.label}: {primary.detail}</span>
-            <span class={chipDefault}>Latest reports: {evidence.reportDate}</span>
-            {secondary && <span class={chipErr}>{secondary.label}: {secondary.detail}</span>}
+        <div class="mt-5 grid gap-6">
+          <div class="flex flex-wrap items-baseline gap-x-6 gap-y-2 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.08em]">
+            <span style={toneStyle(primary.tone)}>{primary.label}: {primary.detail}</span>
+            <span class="text-go-green-dark">Latest reports: {evidence.reportDate}</span>
+            {secondary && <span style={toneStyle(secondary.tone)}>{secondary.label}: {secondary.detail}</span>}
           </div>
 
           <div class="grid gap-1.5">
-            <h3 class="text-[1.05rem] font-semibold">{evidence.title}</h3>
-            <p class="text-sm leading-relaxed text-muted">{evidence.summary}</p>
+            <h3 class="text-[1.05rem] font-semibold text-ink">{evidence.title}</h3>
+            <p class="max-w-[48rem] text-[0.92rem] leading-relaxed text-muted">{evidence.summary}</p>
           </div>
 
-          <div class="grid gap-3 md:grid-cols-3" aria-label={`${experiment.title} measured result highlights`}>
+          <div class={`${grid} md:grid-cols-3`} aria-label={`${experiment.title} measured result highlights`}>
             {
               evidence.stats.map((stat) => (
-                <div class={card}>
-                  <p class="text-xs font-semibold text-muted">{stat.label}</p>
-                  <p class="text-[1.05rem] font-semibold" style="overflow-wrap:anywhere">{stat.value}</p>
-                  <p class="text-xs leading-relaxed text-muted">{stat.context}</p>
+                <div class={`${cell} gap-1`}>
+                  <p class="eyebrow">{stat.label}</p>
+                  <p class="text-[1.05rem] font-semibold tabular text-ink" style="overflow-wrap:anywhere">{stat.value}</p>
+                  <p class="text-[0.85rem] leading-relaxed text-muted">{stat.context}</p>
                 </div>
               ))
             }
@@ -208,20 +198,18 @@ const textBtn = "link-external inline-flex min-h-9 items-center gap-1.5 px-2 tex
             tables.map((table) => {
               const cols = { ...RT_DEFAULT, ...(table.columns ?? {}) };
               return (
-                <div class="grid gap-2">
-                  <div class="grid gap-0.5">
-                    <p class="text-sm font-semibold">{table.title}</p>
-                    {table.summary && <p class="text-sm leading-relaxed text-muted">{table.summary}</p>}
-                  </div>
-                  <div class="overflow-hidden rounded-lg border border-surface-border bg-paper" role="table" aria-label={`${experiment.title} ${table.title}`}>
-                    <div class={`hidden gap-3 bg-ink/[0.035] px-5 py-2 text-[0.72rem] font-semibold uppercase tracking-wide text-muted md:grid ${tableCols}`} role="row">
-                      {RT_KEYS.map((k) => <span>{cols[k]}</span>)}
+                <div>
+                  <p class="text-[0.97rem] font-semibold text-ink">{table.title}</p>
+                  {table.summary && <p class="text-[0.92rem] leading-relaxed text-muted">{table.summary}</p>}
+                  <div class="mt-2.5" role="table" aria-label={`${experiment.title} ${table.title}`}>
+                    <div class={`hidden gap-3 border-b border-ink/15 pb-2 md:grid ${tableCols}`} role="row">
+                      {RT_KEYS.map((k) => <span class="eyebrow">{cols[k]}</span>)}
                     </div>
                     {table.rows.map((row) => (
-                      <div class={`grid gap-1 border-t border-ink/10 px-5 py-3 first:md:border-t md:items-center md:gap-3 ${tableCols}`} role="row">
+                      <div class={`grid gap-1 border-b border-surface-border py-3 md:items-baseline md:gap-3 ${tableCols}`} role="row">
                         {RT_KEYS.map((k, i) => (
-                          <p class={`text-sm ${i === 0 ? "font-semibold" : "text-muted"}`} role="cell" style="overflow-wrap:anywhere">
-                            <span class="mr-1 text-[0.7rem] font-semibold uppercase text-muted md:hidden">{cols[k]}: </span>
+                          <p class={`text-[0.92rem] ${i === 0 ? "font-semibold text-ink" : "tabular text-muted"}`} role="cell" style="overflow-wrap:anywhere">
+                            <span class="mr-1 font-mono text-[0.64rem] uppercase tracking-wide text-faint md:hidden">{cols[k]}: </span>
                             {row[k]}
                           </p>
                         ))}
@@ -233,55 +221,52 @@ const textBtn = "link-external inline-flex min-h-9 items-center gap-1.5 px-2 tex
             })
           }
 
-          <div class={warnPanel}>
-            <p class="mb-1 text-sm font-semibold">Evidence boundary</p>
-            <p class="text-sm leading-relaxed text-muted">{evidence.boundary}</p>
+          <div class={warnBlock}>
+            <p class="eyebrow mb-1" style="color:#8a4413">Evidence boundary</p>
+            <p class="max-w-[48rem] text-[0.92rem] leading-relaxed text-muted">{evidence.boundary}</p>
             {evidence.boundaryPoints && evidence.boundaryPoints.length > 0 && (
-              <ul class="mt-2 list-disc pl-5 text-sm leading-relaxed text-muted">
-                {evidence.boundaryPoints.map((p) => <li>{p}</li>)}
+              <ul class="mt-2 grid max-w-[48rem] gap-1.5">
+                {evidence.boundaryPoints.map((p) => (
+                  <li class="grid grid-cols-[0.9rem_minmax(0,1fr)] gap-2 text-[0.92rem] leading-relaxed text-muted">
+                    <span class="font-mono text-faint" aria-hidden="true">&mdash;</span>
+                    <span>{p}</span>
+                  </li>
+                ))}
               </ul>
             )}
           </div>
 
-          <div class={`grid gap-2 ${card}`}>
-            {evidence.sourceReports && evidence.sourceReports.length > 0 && (
-              <div class="grid gap-0.5">
-                <p class="text-sm font-semibold">Selected reports</p>
-                <p class="text-sm leading-relaxed text-muted">Generated reports behind this summary.</p>
-              </div>
-            )}
-            <div class="flex flex-wrap items-center gap-3">
-              {(evidence.sourceReports ?? []).map((report) => (
-                <a href={experimentSourceLink(experiment.projectId, report.path)} target="_blank" rel="noreferrer" class={textBtn}>{report.label}</a>
-              ))}
-              <a href={experimentSourceLink(experiment.projectId, experiment.resultsPath)} target="_blank" rel="noreferrer" class={textBtn}>
-                {evidence.curatedResults === false ? "Results template" : "Results summary"}
-              </a>
-              <a href={experimentSourceLink(experiment.projectId, reportRulesPath(experiment))} target="_blank" rel="noreferrer" class={textBtn}>Report rules</a>
-            </div>
+          <div class="flex flex-wrap items-center gap-x-7 gap-y-3">
+            {(evidence.sourceReports ?? []).map((report) => (
+              <a href={experimentSourceLink(experiment.projectId, report.path)} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">{report.label}</a>
+            ))}
+            <a href={experimentSourceLink(experiment.projectId, experiment.resultsPath)} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">
+              {evidence.curatedResults === false ? "Results template" : "Results summary"}
+            </a>
+            <a href={experimentSourceLink(experiment.projectId, reportRulesPath(experiment))} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">Report rules</a>
           </div>
         </div>
       ) : (
-        <div class={`grid gap-3 ${warnPanel}`}>
-          <h3 class="text-[1.05rem] font-semibold">{isBlocked ? blockedTitle : "Live result pending"}</h3>
-          <p class="text-sm leading-relaxed text-muted">{pendingCopy}</p>
+        <div class={`mt-5 ${warnBlock}`}>
+          <h3 class="text-[1.05rem] font-semibold text-ink">{isBlocked ? blockedTitle : "Live result pending"}</h3>
+          <p class="mt-1 max-w-[48rem] text-[0.92rem] leading-relaxed text-muted">{pendingCopy}</p>
           {experiment.pendingNextRuns && experiment.pendingNextRuns.length > 0 && (
-            <div class="grid gap-2">
-              <p class={eyebrow}>Next runs to curate</p>
-              <div class="grid gap-3 lg:grid-cols-2">
+            <div class="mt-4">
+              <p class="eyebrow mb-2">Next runs to curate</p>
+              <div class={`${grid} lg:grid-cols-2`}>
                 {experiment.pendingNextRuns.map((run) => (
-                  <div class={`grid gap-2 ${card}`}>
-                    <p class="text-sm font-semibold">{run.label}</p>
-                    <p class="text-sm leading-relaxed text-muted">{run.reason}</p>
+                  <div class={`${cell} gap-2`}>
+                    <p class="text-[0.97rem] font-semibold text-ink">{run.label}</p>
+                    <p class="text-[0.92rem] leading-relaxed text-muted">{run.reason}</p>
                     <CommandCodeBlock command={run.command} ariaLabel={`${run.label} next run command`} />
                   </div>
                 ))}
               </div>
             </div>
           )}
-          <div class="flex flex-wrap items-center gap-3">
-            <a href={experimentSourceLink(experiment.projectId, experiment.resultsPath)} target="_blank" rel="noreferrer" class={textBtn}>Results template</a>
-            <a href={experimentSourceLink(experiment.projectId, reportRulesPath(experiment))} target="_blank" rel="noreferrer" class={textBtn}>Report rules</a>
+          <div class="mt-4 flex flex-wrap items-center gap-x-7 gap-y-3">
+            <a href={experimentSourceLink(experiment.projectId, experiment.resultsPath)} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">Results template</a>
+            <a href={experimentSourceLink(experiment.projectId, reportRulesPath(experiment))} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">Report rules</a>
           </div>
         </div>
       )
@@ -291,25 +276,26 @@ const textBtn = "link-external inline-flex min-h-9 items-center gap-1.5 px-2 tex
   <!-- Related decisions -->
   {
     relatedDecisions.length > 0 && (
-      <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
-        <div class="grid gap-2">
-          <p class={eyebrow}>Decision links</p>
-          <h2 class={h2}>Supports decisions</h2>
-          <p class="max-w-[44rem] text-base leading-relaxed text-muted">
-            Decision records own the project conclusions; this experiment supplies evidence for the calls below.
-          </p>
-        </div>
-        <div class="grid gap-3 md:grid-cols-2">
+      <section class="mt-12 md:mt-16">
+        <p class="eyebrow mb-2">Decision links</p>
+        <h2 class="h-section-title">Supports decisions</h2>
+        <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">
+          Decision records own the project conclusions; this experiment supplies evidence for the calls below.
+        </p>
+        <div class={`${grid} md:grid-cols-2`}>
           {relatedDecisions.map((decision) => (
-            <section class={`grid content-start gap-2 ${card}`}>
-              <div class="flex flex-wrap items-center gap-2">
-                <span class={chipBase + " border-go-green/35 bg-go-green/15 text-go-green-dark"}>{decision.status}</span>
-                <span class={eyebrow}>{decision.domain}</span>
+            <section class={`${cell} gap-2`}>
+              <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span class="eyebrow text-go-green-dark">{decision.status}</span>
+                <span class="eyebrow text-faint">{decision.domain}</span>
               </div>
-              <h3 class="text-[1.05rem] font-semibold">{decision.title}</h3>
-              <p class="text-sm font-bold">{decision.call}</p>
-              <p class="text-sm leading-relaxed text-muted">{decision.evidence}</p>
-              <a href={decisionProjectPath(decision.projectId)} class={textBtn + " justify-self-start"}>View decision record &rarr;</a>
+              <h3 class="text-[1.05rem] font-semibold text-ink">{decision.title}</h3>
+              <p class="text-[0.92rem] font-bold text-ink">{decision.call}</p>
+              <p class="text-[0.92rem] leading-relaxed text-muted">{decision.evidence}</p>
+              <a href={decisionProjectPath(decision.projectId)} class="cta group mt-1 justify-self-start text-ink hover:text-go-green-dark">
+                Decision record
+                <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+              </a>
             </section>
           ))}
         </div>
@@ -318,61 +304,61 @@ const textBtn = "link-external inline-flex min-h-9 items-center gap-1.5 px-2 tex
   }
 
   <!-- Run shape -->
-  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
-    <div class="grid gap-2">
-      <p class={eyebrow}>Run shape</p>
-      <h2 class={h2}>Run shape</h2>
-      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{formatRunShapeCopy(experiment)}</p>
-    </div>
-    <div class="grid gap-6 lg:grid-cols-2">
-      <div class="grid content-start gap-3">
-        <div class="flex flex-wrap items-baseline justify-between gap-2">
-          <p class={eyebrow}>Cases</p>
-          <p class="text-xs text-muted">{formatCount(experiment.cases.length, "case")}</p>
+  <section class="mt-12 md:mt-16">
+    <p class="eyebrow mb-2">Run shape</p>
+    <h2 class="h-section-title">Run shape</h2>
+    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{formatRunShapeCopy(experiment)}</p>
+    <div class="mt-5 grid gap-8 lg:grid-cols-2">
+      <div>
+        <div class="mb-2 flex flex-wrap items-baseline justify-between gap-2 border-b border-surface-border pb-2">
+          <p class="eyebrow">Cases</p>
+          <p class="eyebrow text-faint">{formatCount(experiment.cases.length, "case")}</p>
         </div>
-        {
-          experiment.cases.map((item) => (
-            <div class={`grid gap-1.5 ${card}`}>
-              <p class="text-[1.05rem] font-semibold" style="overflow-wrap:anywhere">{item.id}</p>
-              <p class="text-sm leading-relaxed text-muted">{item.description}</p>
-              <div class="flex flex-wrap gap-1.5">
-                {caseMeasureLabels(item).map((label) => <span class={chipDefault}>{label}</span>)}
+        <div class={grid}>
+          {
+            experiment.cases.map((item) => (
+              <div class={`${cell} gap-1.5`}>
+                <p class="text-[1.02rem] font-semibold text-ink" style="overflow-wrap:anywhere">{item.id}</p>
+                <p class="text-[0.92rem] leading-relaxed text-muted">{item.description}</p>
+                <div class="flex flex-wrap gap-x-4 gap-y-1">
+                  {caseMeasureLabels(item).map((label) => <span class="eyebrow text-go-green-dark">{label}</span>)}
+                </div>
               </div>
-            </div>
-          ))
-        }
-      </div>
-      <div class="grid content-start gap-3">
-        <div class="flex flex-wrap items-baseline justify-between gap-2">
-          <p class={eyebrow}>Run profiles</p>
-          <p class="text-xs text-muted">{formatCount(experiment.servingProfiles.length, "profile")}</p>
+            ))
+          }
         </div>
-        {
-          experiment.servingProfiles.map((profile) => (
-            <div class={`grid gap-1.5 ${card}`}>
-              <p class="text-[1.05rem] font-semibold" style="overflow-wrap:anywhere">{profile.id}</p>
-              <p class="text-sm leading-relaxed text-muted">{profile.description}</p>
-            </div>
-          ))
-        }
+      </div>
+      <div>
+        <div class="mb-2 flex flex-wrap items-baseline justify-between gap-2 border-b border-surface-border pb-2">
+          <p class="eyebrow">Run profiles</p>
+          <p class="eyebrow text-faint">{formatCount(experiment.servingProfiles.length, "profile")}</p>
+        </div>
+        <div class={grid}>
+          {
+            experiment.servingProfiles.map((profile) => (
+              <div class={`${cell} gap-1.5`}>
+                <p class="text-[1.02rem] font-semibold text-ink" style="overflow-wrap:anywhere">{profile.id}</p>
+                <p class="text-[0.92rem] leading-relaxed text-muted">{profile.description}</p>
+              </div>
+            ))
+          }
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Metrics -->
-  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
-    <div class="grid gap-2">
-      <p class={eyebrow}>Measurement focus</p>
-      <h2 class={h2}>Metrics to capture</h2>
-      <p class="max-w-[44rem] text-base leading-relaxed text-muted">Metric groups show the signal this experiment needs.</p>
-    </div>
-    <div class="grid gap-3 md:grid-cols-3">
+  <section class="mt-12 md:mt-16">
+    <p class="eyebrow mb-2">Measurement focus</p>
+    <h2 class="h-section-title">Metrics to capture</h2>
+    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">Metric groups show the signal this experiment needs.</p>
+    <div class={`${grid} md:grid-cols-3`}>
       {
         experiment.metricGroups.map((group) => (
-          <div class={`grid content-start gap-2 ${card}`}>
-            <p class="text-[1.05rem] font-semibold">{group.label}</p>
-            <div class="flex flex-wrap gap-1.5">
-              {group.metrics.map((m) => <span class={chipMuted}>{m}</span>)}
+          <div class={`${cell} gap-2`}>
+            <p class="text-[1.02rem] font-semibold text-ink">{group.label}</p>
+            <div class="flex flex-wrap gap-x-4 gap-y-1">
+              {group.metrics.map((m) => <span class="eyebrow">{m}</span>)}
             </div>
           </div>
         ))
@@ -381,25 +367,23 @@ const textBtn = "link-external inline-flex min-h-9 items-center gap-1.5 px-2 tex
   </section>
 
   <!-- How to run -->
-  <section class="grid gap-4">
-    <div class="grid gap-2">
-      <p class={eyebrow}>Usage</p>
-      <h2 class={h2}>How to run</h2>
-      <p class="max-w-[44rem] text-base leading-relaxed text-muted">Examples show one local render path and one live-cluster path.</p>
-    </div>
-    <div class="grid gap-4 md:grid-cols-2">
+  <section class="mt-12 md:mt-16">
+    <p class="eyebrow mb-2">Usage</p>
+    <h2 class="h-section-title">How to run</h2>
+    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">Examples show one local render path and one live-cluster path.</p>
+    <div class="mt-5 grid gap-5 md:grid-cols-2">
       <div class="grid content-start gap-2">
-        <p class={eyebrow}>Example local command</p>
+        <p class="eyebrow">Example local command</p>
         {localCommand && <CommandCodeBlock command={localCommand} ariaLabel={`${experiment.title} example local command`} />}
       </div>
       <div class="grid content-start gap-2">
-        <p class={eyebrow}>Example live command</p>
+        <p class="eyebrow">Example live command</p>
         {liveCommand && <CommandCodeBlock command={liveCommand} ariaLabel={`${experiment.title} example live command`} />}
       </div>
     </div>
-    <div class="flex flex-wrap items-center gap-3">
-      <a href={experimentSourceLink(experiment.projectId, experiment.sourcePath)} target="_blank" rel="noreferrer" class={textBtn}>Source</a>
-      <a href={experimentSourceLink(experiment.projectId, experiment.resultsPath)} target="_blank" rel="noreferrer" class={textBtn}>{resultLinkLabel}</a>
+    <div class="mt-5 flex flex-wrap items-center gap-x-7 gap-y-3">
+      <a href={experimentSourceLink(experiment.projectId, experiment.sourcePath)} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">Source</a>
+      <a href={experimentSourceLink(experiment.projectId, experiment.resultsPath)} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">{resultLinkLabel}</a>
     </div>
   </section>
 </BaseLayout>
