@@ -34,13 +34,24 @@ DONE
   blocks (mono meta rail: layer/status/experiment-count) instead of shadowed cards
   w/ rounded-pill chips + filled buttons; evidence as mono-dashed list; actions as
   .cta links. Added .cta primitive to global.css.
+- PROJECT DETAILS (commit 1418769; #21): both /projects/gpu-inference-lab +
+  /projects/cuda-kernel-lab. Established the reusable Swiss idioms for data-dense
+  pages:
+    * HAIRLINE SPEC-SHEET GRID: `grid gap-px border border-surface-border
+      bg-surface-border` wrapper + `bg-paper p-4` cells — 1px gaps over the border
+      color render as a clean hairline grid (used for facts/steps/readout/evidence).
+    * Detail header: flush-left title + .cta actions; status panel -> hairline-left
+      (border-l) mono meta rail (layer/status/experiment-count + result).
+    * rounded-pill chips -> .eyebrow mono labels; tone chips -> tone-colored mono
+      labels via `toneLabel(tone)` -> `color:#...` (TONE map kept, no pill bg);
+      numbered steps -> .section-index mono tabular.
+    * Workflow flows (foundation/paths/rejoin/concept) -> sharp bordered `tag`
+      spans + mono `arrow` (→) + small mono `nodeBadge` Code links.
+    * CommandCodeBlock UNCHANGED (dark #0d1117 panel reads fine on the light page).
 
 NEXT (rollout order, tracked in #21):
-  [ ] Project DETAILS (/projects/gpu-inference-lab 318L, /projects/cuda-kernel-lab
-      173L) — large bespoke layouts (At-a-glance, optimization-loop cards,
-      benchmark readout, CommandCodeBlock). Translate panels->hairline blocks,
-      chips->mono labels, readout strips->tabular figures.
-  [ ] Experiments (index + [entry] catalog/detail) · Decisions (index + [project])
+  [ ] Experiments (index 127L + [entry] catalog/detail) · Decisions (index 130L +
+      [project]) — reuse the hairline-grid + mono-label + tone-label idioms above.
   [ ] Blog index (reuse the home Latest-writing list pattern) · Blog .post-body
       restyle (callout/figure/table/code tokens; markup unchanged)
   [ ] Resume web · then Resume PDF re-theme (document-css) as a fast-follow.
