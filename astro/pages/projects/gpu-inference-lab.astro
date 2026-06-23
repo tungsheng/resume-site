@@ -1,0 +1,318 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CommandCodeBlock from "../../components/CommandCodeBlock.astro";
+import {
+  EXPERIMENTS_PATH,
+  GPU_INFERENCE_DECISIONS_PATH,
+  GPU_INFERENCE_EXPERIMENTS_PATH,
+} from "../../../src/features/site/content";
+import { implementation, projectContent } from "../../../src/features/site/project-content";
+import { getProjectById } from "../../../src/features/site/projects-content";
+
+// Faithful port of ProjectOverviewRoute (/projects/gpu-inference-lab) from
+// src/features/project/page.tsx. Design frozen (ADR-0003 §5); typed data reused
+// unchanged (ADR-0003 §9). MUI visuals (CommandCodeBlock, DecisionReadoutStrip,
+// workflow pills/flows) re-rendered as plain .astro/HTML. The responsive
+// connector lines of the workflow flows are approximated with inline arrows.
+const project = getProjectById("gpu-inference-lab");
+const c = projectContent;
+
+const TONE = {
+  success: "#006B40",
+  warning: "#743914",
+  info: "#276f89",
+  error: "#d32f2f",
+  neutral: "#465750",
+};
+const toneChipStyle = (tone = "neutral") => {
+  const col = TONE[tone] ?? TONE.neutral;
+  return `color:${col};border-color:color-mix(in srgb, ${col} 38%, transparent);background-color:color-mix(in srgb, ${col} 9%, transparent)`;
+};
+
+const eyebrow = "text-[0.74rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark";
+const h2 = "h-section-title";
+const card = "rounded-lg border border-surface-border bg-paper p-3.5";
+const surface = "rounded-lg border border-surface-border bg-paper p-3.5 md:p-[1.125rem]";
+const accent = "rounded-lg border border-go-green/20 bg-go-green/8 p-3";
+const chipBase = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
+const chipMuted = chipBase + " border-go-green/25 bg-go-green/[0.065] text-ink/70";
+const chipDefault = chipBase + " border-go-green/30 bg-go-green/[0.075] text-ink";
+const toneChip = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
+const pill = "inline-flex items-center gap-2 rounded-lg border border-surface-border bg-paper px-3 py-2 text-[0.88rem] font-semibold leading-snug";
+const pillBadge = "inline-flex items-center rounded-full border border-go-green/15 bg-go-green/5 px-2 py-0.5 text-[0.72rem] font-semibold text-go-green-dark/80 hover:bg-paper";
+const arrow = "select-none text-go-green-dark/40";
+
+const primaryBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
+const outlinedBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
+const textBtn = "link-external inline-flex min-h-10 items-center gap-1.5 px-2 text-sm font-medium text-ink hover:underline";
+---
+
+<BaseLayout
+  title={`${c.title} | Tony Lee`}
+  description={c.lede}
+  activeNav="projects"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Projects", href: "/projects" },
+    { label: c.title },
+  ]}
+>
+  <!-- Detail header -->
+  <section class="mb-[1.375rem] grid items-start gap-[0.85rem] md:mb-6 md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
+    <div class="flex max-w-[58rem] flex-col gap-2.5 md:gap-3">
+      <h1 class="h-detail-title">{c.title}</h1>
+      <p class="text-base leading-relaxed text-muted">{c.lede}</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <a href={GPU_INFERENCE_EXPERIMENTS_PATH} class={primaryBtn}>View experiments</a>
+        <a href={GPU_INFERENCE_DECISIONS_PATH} class={outlinedBtn}>View decisions</a>
+        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class={textBtn}>GitHub</a>
+      </div>
+    </div>
+    <div class={`grid gap-2 ${accent}`}>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class={chipMuted}>{project.layer}</span>
+        <span class={chipDefault}>{project.status}</span>
+        <span class={chipDefault}>{project.experimentCount} experiments</span>
+      </div>
+      <p class="text-sm leading-relaxed text-muted">{project.result}</p>
+    </div>
+  </section>
+
+  <!-- At a glance -->
+  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+    <div class="grid gap-2">
+      <h2 class={h2}>At a glance</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{c.overviewSummary}</p>
+    </div>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        c.overviewFacts.map((fact) => (
+          <section class={`${card} grid content-start gap-1.5`}>
+            <p class={eyebrow}>{fact.label}</p>
+            <p class="text-[1.05rem] font-semibold">{fact.value}</p>
+            <p class="text-sm leading-relaxed text-muted">{fact.body}</p>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Lab usage -->
+  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+    <div class="grid gap-2">
+      <h2 class={h2}>{c.usage.title}</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{c.usage.lead}</p>
+    </div>
+
+    <div class={`grid gap-6 ${surface}`}>
+      <!-- Workflows -->
+      <div class="grid gap-3 lg:grid-cols-3">
+        {
+          c.usage.workflows.map((w) => (
+            <section class={`${card} grid content-start gap-3`}>
+              <div class="grid gap-1">
+                <p class={eyebrow}>Workflow</p>
+                <p class="text-[1.05rem] font-semibold">{w.title}</p>
+                <p class="text-sm leading-relaxed text-muted">{w.body}</p>
+              </div>
+              <div class="grid gap-2">
+                <p class="text-sm">{w.when}</p>
+                <div class="flex flex-wrap gap-1.5">
+                  {w.outputs.map((o) => <span class={chipMuted}>{o}</span>)}
+                </div>
+              </div>
+              <div class="grid gap-2">
+                <CommandCodeBlock command={w.command} ariaLabel={`${w.title} command`} />
+                <a href={w.href} target="_blank" rel="noreferrer" class={textBtn}>Source</a>
+              </div>
+            </section>
+          ))
+        }
+      </div>
+
+      <!-- Default path quick start -->
+      <section class={`${card} grid gap-5`}>
+        <div class="grid max-w-[52rem] gap-1">
+          <p class={eyebrow}>{implementation.defaultPathTitle}</p>
+          <p class="text-base leading-relaxed text-muted">{implementation.defaultPathLead}</p>
+        </div>
+        <div class="grid gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-stretch">
+          {
+            implementation.defaultPathSteps.map((step, i) => (
+              <>
+                <section class={`${card} grid content-start gap-3`}>
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center rounded-full border border-go-green/15 bg-go-green/5 px-2 py-0.5 text-[0.66rem] font-medium text-go-green-dark/70" aria-label={`Step ${i + 1}`}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <p class="text-[1.05rem] font-semibold">{step.title}</p>
+                  </div>
+                  <CommandCodeBlock command={step.command} ariaLabel={`${step.title} command`} />
+                  <p class="text-sm leading-relaxed text-muted">{step.body}</p>
+                </section>
+                {i < implementation.defaultPathSteps.length - 1 && (
+                  <span class={`hidden items-center justify-center md:inline-flex ${arrow}`} aria-hidden="true">&rarr;</span>
+                )}
+              </>
+            ))
+          }
+        </div>
+
+        <div class="grid gap-2">
+          <p class={eyebrow}>{implementation.verifyProofTitle}</p>
+          <div class="grid gap-3 md:grid-cols-3">
+            {
+              implementation.verifyProofs.map((proof) => (
+                <div class={`${card} grid grid-cols-[1.1rem_minmax(0,1fr)] items-start gap-2`}>
+                  <span class="mt-0.5 text-go-green-dark" aria-hidden="true">&check;</span>
+                  <div>
+                    <p class="text-sm font-semibold">{proof.title}</p>
+                    <p class="text-sm leading-relaxed text-muted">{proof.body}</p>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Decision contract concept -->
+      <section class={`${accent} grid gap-3`}>
+        <div class="grid max-w-[52rem] gap-1">
+          <p class={eyebrow}>{c.usage.conceptTitle}</p>
+          <p class="text-sm leading-relaxed text-muted">{c.usage.conceptLead}</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2" aria-label="Experiment concept flow">
+          {
+            c.usage.conceptSteps.map((step, i) => (
+              <>
+                {i > 0 && <span class={arrow} aria-hidden="true">&rarr;</span>}
+                <span class="inline-flex min-h-9 items-center rounded-full border border-surface-border bg-paper px-3.5 py-1.5 text-sm font-semibold">
+                  {step}
+                </span>
+              </>
+            ))
+          }
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          {c.usage.links.map((link) => <a href={link.href} target="_blank" rel="noreferrer" class={textBtn}>{link.label}</a>)}
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- How serving scales -->
+  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+    <div class="grid gap-2">
+      <h2 class={h2}>{c.workflowSectionTitle}</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{c.workflowLead}</p>
+    </div>
+
+    <div class={`grid gap-4 ${surface}`}>
+      <!-- Foundation -->
+      <section class={`${card} grid gap-3`}>
+        <div class="grid gap-1">
+          <p class={eyebrow}>{c.workflowFoundation.title}</p>
+          <p class="text-sm leading-relaxed text-muted">{c.workflowFoundation.summary}</p>
+        </div>
+        <div class="flex flex-wrap gap-2" aria-label="Foundation workflow">
+          {
+            c.workflowFoundation.nodes.map((node) => (
+              <span class={pill}>
+                <span class="min-w-0">{node.label}</span>
+                {"href" in node && node.href && (
+                  <a href={node.href} target="_blank" rel="noreferrer" class={pillBadge}>
+                    {("linkLabel" in node && node.linkLabel) || "Code"}
+                  </a>
+                )}
+              </span>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Paths -->
+      {
+        c.workflowPaths.map((path) => (
+          <section class={`${card} grid gap-3`}>
+            <div class="grid gap-1">
+              <p class="text-[1.05rem] font-semibold">{path.title}</p>
+              <p class="text-sm leading-relaxed text-muted">{path.summary}</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2" aria-label={`${path.title} workflow`}>
+              {path.nodes.map((node, i) => (
+                <>
+                  {i > 0 && <span class={arrow} aria-hidden="true">&rarr;</span>}
+                  <span class={pill}>
+                    <span class="min-w-0">{node.label}</span>
+                    {"href" in node && node.href && (
+                      <a href={node.href} target="_blank" rel="noreferrer" class={pillBadge}>
+                        {("linkLabel" in node && node.linkLabel) || "Code"}
+                      </a>
+                    )}
+                  </span>
+                </>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+
+      <!-- Rejoin -->
+      <section class={`${card} grid gap-3`}>
+        <div class="grid gap-1">
+          <p class={eyebrow}>Rejoin point</p>
+          <p class="text-sm leading-relaxed text-muted">{c.workflowRejoin.body}</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2" aria-label="Rejoin workflow">
+          {
+            c.workflowRejoin.nodes.map((node, i) => (
+              <>
+                {i > 0 && <span class={arrow} aria-hidden="true">&rarr;</span>}
+                <span class={pill}>
+                  <span class="min-w-0">{node.label}</span>
+                  {"href" in node && node.href && (
+                    <a href={node.href} target="_blank" rel="noreferrer" class={pillBadge}>
+                      {("linkLabel" in node && node.linkLabel) || "Code"}
+                    </a>
+                  )}
+                </span>
+              </>
+            ))
+          }
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- Evidence -->
+  <section class="grid gap-4">
+    <div class="grid gap-2">
+      <h2 class={h2}>{c.evidence.title}</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{c.evidence.lead}</p>
+    </div>
+
+    <div class={`grid gap-4 ${surface}`}>
+      <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Architecture readout">
+        {
+          c.evidence.items.map((item) => (
+            <section class={`${card} grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2`}>
+              <p class={eyebrow}>{item.title}</p>
+              <div class="grid content-start gap-1.5">
+                <p class="text-sm font-bold">{item.call}</p>
+                <p class="text-sm leading-relaxed text-muted">{item.proof}</p>
+              </div>
+              <span class={toneChip} style={toneChipStyle(item.tone)}>{item.statusLabel}</span>
+            </section>
+          ))
+        }
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <a href={GPU_INFERENCE_DECISIONS_PATH} class={primaryBtn}>Architecture decisions</a>
+        <a href={EXPERIMENTS_PATH} class={outlinedBtn}>Experiment catalog</a>
+        {c.evidence.links.map((link) => <a href={link.href} target="_blank" rel="noreferrer" class={textBtn}>{link.label}</a>)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

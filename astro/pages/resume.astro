@@ -1,0 +1,220 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { buildResumeViewModel } from "../../src/features/resume/view-model";
+import { publicResumeData } from "../../src/features/resume/data";
+
+// Faithful port of src/features/resume/page.tsx (ResumePageContent). Design
+// frozen (ADR-0003 §5); typed data + view-model reused unchanged (ADR-0003 §9).
+// Zero JS: the runtime /api/public-pdf download (toasts, fetch, spinner) becomes
+// a plain link to the build-time artifact /resume.pdf (ADR-0003 §2). Generating
+// that PDF at build time is a separate slice — the link 404s until it lands.
+const data = publicResumeData;
+const view = buildResumeViewModel(data);
+const { name, badges, contacts } = data.header;
+
+const linkedinHref = contacts.linkedin
+  ? contacts.linkedin.startsWith("http")
+    ? contacts.linkedin
+    : `https://linkedin.com/in/${contacts.linkedin}`
+  : null;
+
+const primaryBtn =
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
+const outlinedBtn =
+  "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
+const card = "rounded-lg border border-surface-border bg-paper p-3.5";
+const sectionTitle = "text-[1.05rem] font-semibold";
+const subtitle = "text-base font-semibold";
+const meta = "text-sm text-muted";
+---
+
+<BaseLayout
+  title={`${name} - Resume`}
+  description={`Resume of ${name} — ${badges.join(" • ")}`}
+  activeNav="resume"
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Resume" }]}
+>
+  <!-- Detail header -->
+  <section class="mb-8 grid items-start gap-3.5 md:grid-cols-[minmax(0,1fr)_minmax(17.5rem,0.42fr)] md:items-center">
+    <div class="flex max-w-[58rem] flex-col gap-2.5 md:gap-3">
+      <h1 class="h-detail-title">
+        {name}
+      </h1>
+      {
+        badges.length > 0 && (
+          <p class="font-semibold text-go-green-dark" style="overflow-wrap:anywhere">
+            {badges.join(" • ")}
+          </p>
+        )
+      }
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="/resume.pdf" download class={primaryBtn}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download PDF
+        </a>
+        <a href="/projects" class={outlinedBtn}>View projects</a>
+        <a href="/experiments" class={outlinedBtn}>View experiments</a>
+      </div>
+    </div>
+
+    {
+      (contacts.email || linkedinHref) && (
+        <address class="grid content-center gap-2 rounded-lg border border-go-green/20 bg-go-green/8 p-3 not-italic">
+          {contacts.email && (
+            <a
+              href={`mailto:${contacts.email}`}
+              class="inline-flex items-center gap-2 text-[0.95rem] font-medium text-muted hover:underline"
+              style="overflow-wrap:anywhere"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 text-go-green-dark" aria-hidden="true">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m22 7-10 6L2 7" />
+              </svg>
+              {contacts.email}
+            </a>
+          )}
+          {linkedinHref && (
+            <a
+              href={linkedinHref}
+              target="_blank"
+              rel="noreferrer"
+              class="inline-flex items-center gap-2 text-[0.95rem] font-medium text-muted hover:underline"
+              style="overflow-wrap:anywhere"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 text-go-green-dark" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="18" rx="2" />
+                <line x1="8" y1="10" x2="8" y2="16" />
+                <line x1="8" y1="7" x2="8" y2="7" />
+                <path d="M12 16v-3a2 2 0 0 1 4 0v3" />
+              </svg>
+              {`linkedin.com/in/${contacts.linkedin}`}
+            </a>
+          )}
+        </address>
+      )
+    }
+  </section>
+
+  <!-- Web resume view -->
+  <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.85fr)]" aria-label="Web resume view">
+    <!-- Left column -->
+    <div class="grid gap-7">
+      {
+        view.summary && (
+          <section class="grid gap-3">
+            <h2 class={sectionTitle}>Professional Summary</h2>
+            <div class={card}>
+              <p class="leading-relaxed text-muted">{view.summary}</p>
+            </div>
+          </section>
+        )
+      }
+
+      {
+        view.projects.length > 0 && (
+          <section class="grid gap-3">
+            <h2 class={sectionTitle}>{view.projectsTitle}</h2>
+            <div class="grid gap-4">
+              {view.projects.map((project) => (
+                <div class={card}>
+                  <p class={subtitle}>{project.title}</p>
+                  {project.highlights.length > 0 && (
+                    <ul class="mt-3 grid list-none gap-3">
+                      {project.highlights.map((item) => (
+                        <li class="grid grid-cols-[0.7rem_minmax(0,1fr)] gap-2 text-sm leading-relaxed text-muted">
+                          <span class="text-go-green-dark" aria-hidden="true">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {
+        view.experience.length > 0 && (
+          <section class="grid gap-3">
+            <h2 class={sectionTitle}>Experience</h2>
+            <div class="grid gap-4">
+              {view.experience.map((exp) => (
+                <div class={card}>
+                  <div class="flex flex-col justify-between gap-1 sm:flex-row">
+                    <div>
+                      <p class={subtitle}>{exp.title}</p>
+                      <p class={meta}>{exp.company}</p>
+                    </div>
+                    <p class={meta}>{exp.dateRange}</p>
+                  </div>
+                  {exp.highlights.length > 0 && (
+                    <ul class="mt-4 grid list-none gap-3">
+                      {exp.highlights.map((item) => (
+                        <li class="grid grid-cols-[0.7rem_minmax(0,1fr)] gap-2 text-sm leading-relaxed text-muted">
+                          <span class="text-go-green-dark" aria-hidden="true">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </div>
+
+    <!-- Right column -->
+    <div class="grid gap-7">
+      {
+        view.skills.length > 0 && (
+          <section class="grid gap-3">
+            <h2 class={sectionTitle}>Skills</h2>
+            <div class={card}>
+              <div class="grid gap-4 divide-y divide-surface-border [&>div:not(:first-child)]:pt-4">
+                {view.skills.map((skill) => (
+                  <div>
+                    <p class={subtitle}>{skill.categoryLabel}</p>
+                    <p class={meta}>{skill.itemsText}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+      }
+
+      {
+        view.education.length > 0 && (
+          <section class="grid gap-3">
+            <h2 class={sectionTitle}>Education</h2>
+            <div class="grid gap-4">
+              {view.education.map((edu) => (
+                <div class={card}>
+                  <p class={subtitle}>{edu.degree}</p>
+                  <p class={meta}>{edu.school}</p>
+                  <p class={meta}>{edu.dateRange}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>

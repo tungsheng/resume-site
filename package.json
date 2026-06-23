@@ -1,16 +1,18 @@
 {
   "name": "resume-site",
-  "module": "src/index.ts",
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun run src/index.ts",
-    "dev": "bun --watch src/index.ts",
+    "astro": "astro",
+    "dev": "test -f public-astro/resume.pdf || bun run build:pdf; astro dev",
+    "preview": "astro preview",
+    "build": "bun run build:pdf && astro build",
+    "build:pdf": "bun run scripts/build-resume-pdf.ts",
     "test": "bun run test:unit",
     "test:unit": "bun test tests/unit",
     "test:integration": "RUN_INTEGRATION_TESTS=1 bun test tests/integration",
     "test:all": "bun test tests/unit tests/integration",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "astro sync && tsc --noEmit",
     "check": "bun run typecheck && bun run test:unit"
   },
   "devDependencies": {
@@ -20,12 +22,14 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^9.0.0",
-    "@mui/material": "^9.0.0",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.3",
+    "@tailwindcss/vite": "^4.3.1",
+    "astro": "^6.4.8",
     "puppeteer-core": "^24.35.0",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^4.3.1",
+    "zod": "^4.4.3"
   }
 }

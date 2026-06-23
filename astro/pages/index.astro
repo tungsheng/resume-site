@@ -1,0 +1,84 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { selectLatest } from "../content/blog-schema";
+import { getVisiblePosts } from "../content/posts";
+
+// Faithful port of src/features/home/page.tsx (HomePage). Design frozen
+// (ADR-0003 §5): centered hero with name, role, lede, and three CTAs.
+const PAGE_TITLE = "Tony Lee | ML Inference Performance Engineering";
+const HOME_ROLE = "ML Inference Performance Engineering";
+const HOME_LEDE =
+  "I optimize GPU serving paths from Kubernetes scheduling to CUDA kernels with reproducible latency, throughput, and cost measurements.";
+
+const primaryBtn =
+  "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
+const outlinedBtn =
+  "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
+
+// "Latest writing" (#10): baked into the static HTML at build time — the newest
+// Published Posts, no runtime fetch. Drafts are filtered out by getVisiblePosts.
+const LATEST_COUNT = 3;
+const latest = selectLatest(await getVisiblePosts(), LATEST_COUNT);
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+---
+
+<BaseLayout title={PAGE_TITLE} description={HOME_LEDE} activeNav="home">
+  <section
+    class="relative mb-6 grid place-items-center overflow-hidden rounded border border-surface-border bg-paper px-6 py-16 shadow-sm md:mb-8 md:px-10 md:py-24 min-h-[clamp(400px,calc(100svh-260px),560px)] md:min-h-[clamp(460px,58vh,580px)]"
+  >
+    <div class="mx-auto flex max-w-3xl flex-col items-center gap-8 text-center md:gap-12">
+      <div class="flex flex-col items-center gap-4 md:gap-5">
+        <h1
+          class="font-display font-semibold text-balance leading-[1.02] text-[3.05rem] sm:text-[3.8rem] md:text-[4.8rem] lg:text-[5rem]"
+        >
+          Tony Lee
+        </h1>
+        <p class="text-[1.05rem] font-semibold leading-snug text-go-green-dark md:text-[1.22rem]">
+          {HOME_ROLE}
+        </p>
+      </div>
+
+      <div class="flex max-w-xl flex-col items-center gap-7 md:gap-9">
+        <p class="text-base leading-relaxed text-muted md:text-[1.08rem]">
+          {HOME_LEDE}
+        </p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <a href="/projects" class={primaryBtn}>View projects</a>
+          <a href="/experiments" class={outlinedBtn}>View experiments</a>
+          <a href="/resume" class={outlinedBtn}>View resume</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {
+    latest.length > 0 && (
+      <section class="mb-6 md:mb-8" aria-labelledby="latest-writing">
+        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="latest-writing" class="font-display text-[1.7rem] font-semibold leading-tight">
+            Latest writing
+          </h2>
+          <a href="/blog" class="text-sm font-semibold text-go-green-dark hover:underline">
+            Read the blog &rarr;
+          </a>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {latest.map((post) => (
+            <article class="grid content-start gap-2 rounded-lg border border-surface-border bg-paper p-3.5">
+              <span class="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark">
+                {post.data.category}
+              </span>
+              <h3 class="font-display text-[1.2rem] font-semibold leading-snug">
+                <a href={`/blog/${post.id}`} class="hover:underline">
+                  {post.data.title}
+                </a>
+              </h3>
+              <span class="text-xs text-muted">{formatDate(post.data.published)}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>

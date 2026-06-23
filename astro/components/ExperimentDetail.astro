@@ -1,0 +1,405 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CommandCodeBlock from "./CommandCodeBlock.astro";
+import { EXPERIMENTS_PATH } from "../../src/features/site/content";
+import {
+  experimentSourceLink,
+  type ExperimentCatalogItem,
+} from "../../src/features/site/experiment-catalog-content";
+import {
+  decisionProjectPath,
+  getDecisionRecordsByExperimentSlug,
+} from "../../src/features/site/decision-content";
+import { getProjectById } from "../../src/features/site/projects-content";
+
+// Detail view (/experiments/<slug>) — faithful port of ExperimentDetailRoute.
+// Rendered by experiments/[entry].astro when the segment is an experiment slug.
+interface Props {
+  experiment: ExperimentCatalogItem;
+}
+const { experiment } = Astro.props;
+const project = getProjectById(experiment.projectId);
+const catalogPath = `${EXPERIMENTS_PATH}/${project.id}`;
+
+// ---- helpers (ported from src/features/experiments/page.tsx) ----
+function formatCount(value: number, singular: string, plural = `${singular}s`): string {
+  return `${value} ${value === 1 ? singular : plural}`;
+}
+function formatTokenRange(values: number[]): string {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  return min === max
+    ? min.toLocaleString("en-US")
+    : `${min.toLocaleString("en-US")}-${max.toLocaleString("en-US")}`;
+}
+function formatRunShapeCopy(e: ExperimentCatalogItem): string {
+  if (e.runShapeSummary) return e.runShapeSummary;
+  const pt = e.cases.map((c) => c.promptTokens).filter((v): v is number => typeof v === "number");
+  const ot = e.cases.map((c) => c.outputTokens).filter((v): v is number => typeof v === "number");
+  if (pt.length === e.cases.length && ot.length === e.cases.length) {
+    return `${formatCount(e.cases.length, "case")} across ${formatTokenRange(pt)} prompt tokens and ${formatTokenRange(ot)} output tokens, paired with ${formatCount(e.servingProfiles.length, "run profile")}.`;
+  }
+  return `${formatCount(e.cases.length, "case")} paired with ${formatCount(e.servingProfiles.length, "run profile")}.`;
+}
+function caseMeasureLabels(item: ExperimentCatalogItem["cases"][number]): string[] {
+  const labels: string[] = [];
+  if (item.primaryMeasure) labels.push(item.primaryMeasure);
+  else if (typeof item.promptTokens === "number") labels.push(`${item.promptTokens.toLocaleString("en-US")} prompt tokens`);
+  if (item.secondaryMeasure) labels.push(item.secondaryMeasure);
+  else if (typeof item.outputTokens === "number") labels.push(`${item.outputTokens.toLocaleString("en-US")} output tokens`);
+  return labels;
+}
+function reportRulesPath(e: ExperimentCatalogItem): string {
+  return e.projectId === "cuda-kernel-lab" ? "docs/optimization-strategies.md" : "docs/reports/README.md";
+}
+
+const RT_KEYS = ["target", "outcome", "p95Latency", "peakWaiting", "gpuMax"] as const;
+const RT_DEFAULT = { target: "Target", outcome: "Outcome", p95Latency: "p95 latency", peakWaiting: "Peak waiting", gpuMax: "GPU max" };
+const evidence = experiment.resultEvidence;
+const tables = evidence
+  ? evidence.tables && evidence.tables.length > 0
+    ? evidence.tables
+    : evidence.rows && evidence.rows.length > 0
+      ? [{ title: `${evidence.title} table`, columns: evidence.tableColumns, rows: evidence.rows }]
+      : []
+  : [];
+
+const READINESS_HEX: Record<string, string> = {
+  supported: "#006B40",
+  selected: "#276f89",
+  rejected: "#d32f2f",
+  pending: "#743914",
+  blocked: "#743914",
+};
+const readinessChipStyle = (tone: string) => {
+  const c = READINESS_HEX[tone] ?? "#465750";
+  return `color:${c};border-color:color-mix(in srgb, ${c} 38%, transparent);background-color:color-mix(in srgb, ${c} 9%, transparent)`;
+};
+
+const primary = experiment.readiness.primary;
+const secondary = experiment.readiness.secondary;
+const isBlocked = primary.tone === "blocked";
+const blockedTitle = experiment.projectId === "gpu-inference-lab" ? "Blackwell capacity blocked" : `${primary.detail} blocked`;
+const blockedCopy = experiment.projectId === "gpu-inference-lab"
+  ? "Blackwell capacity blocked the live run. Store generated Markdown, JSON, and client logs in docs/reports/ until a comparable result is selected."
+  : `${primary.detail} blocked this proof. Store compact profiler notes with the project until comparable counters are selected.`;
+const pendingCopy = isBlocked
+  ? blockedCopy
+  : `${experiment.resultsPath} is still a template. Store generated Markdown, JSON, and client logs in docs/reports/ until a representative run is selected.`;
+const resultLinkLabel = evidence?.curatedResults === false ? "Results template" : evidence ? "Results summary" : "Results template";
+
+const relatedDecisions = getDecisionRecordsByExperimentSlug(experiment.slug);
+const localCommand = experiment.localCommands[0];
+const liveCommand = experiment.liveCommands[0];
+
+const summaryFacts = [
+  { label: "Project", value: project.title },
+  { label: "Focus", value: experiment.category },
+  { label: "Run shape", value: `${formatCount(experiment.cases.length, "case")} / ${formatCount(experiment.servingProfiles.length, "profile")}` },
+  {
+    label: "Evidence",
+    value: [
+      `${primary.label}: ${primary.detail}`,
+      secondary ? `${secondary.label}: ${secondary.detail}` : null,
+    ].filter(Boolean).join(" / "),
+  },
+];
+
+const eyebrow = "text-[0.74rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark";
+const h2 = "h-section-title";
+const card = "rounded-lg border border-surface-border bg-paper p-3.5";
+const accent = "rounded-lg border border-go-green/20 bg-go-green/8 p-3";
+const successPanel = "rounded-lg border border-go-green/25 bg-accent-soft/70 p-3.5 md:p-[1.125rem]";
+const warnPanel = "rounded-lg border border-surface-border border-l-[3px] border-l-warning-warm/60 bg-paper p-4";
+const chipBase = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
+const chipDefault = chipBase + " border-go-green/30 bg-go-green/[0.075] text-ink";
+const chipMuted = chipBase + " border-go-green/25 bg-go-green/[0.065] text-ink/70";
+const chipErr = chipBase + " border-[color:color-mix(in_srgb,#d32f2f_38%,transparent)] text-[#d32f2f]";
+const tableCols = "md:grid-cols-[minmax(7rem,0.9fr)_minmax(10rem,1fr)_repeat(3,minmax(5.5rem,0.7fr))]";
+const primaryBtn = "inline-flex min-h-10 items-center justify-center gap-1.5 rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
+const textBtn = "link-external inline-flex min-h-9 items-center gap-1.5 px-2 text-sm font-medium text-ink hover:underline";
+---
+
+<BaseLayout
+  title={`${experiment.title} | Tony Lee`}
+  description={experiment.summary}
+  activeNav="experiments"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Experiments", href: EXPERIMENTS_PATH },
+    { label: project.title, href: catalogPath },
+    { label: experiment.title },
+  ]}
+>
+  <!-- Header -->
+  <section class="mb-[1.375rem] grid items-start gap-[0.85rem] md:mb-6 md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
+    <div class="flex max-w-[58rem] flex-col gap-2.5 md:gap-3">
+      <h1 class="h-detail-title">{experiment.title}</h1>
+      <p class="text-base leading-relaxed text-muted">{experiment.question}</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <a href={catalogPath} class={primaryBtn}>&larr; Experiment catalog</a>
+        <a href={experimentSourceLink(experiment.projectId, experiment.sourcePath)} target="_blank" rel="noreferrer" class={textBtn}>Source</a>
+      </div>
+    </div>
+    <div class={`grid grid-cols-1 gap-1.5 sm:grid-cols-2 ${accent}`} aria-label={`${experiment.title} summary facts`}>
+      {
+        summaryFacts.map((f) => (
+          <div class="grid content-center gap-0.5 rounded-md border border-surface-border bg-paper px-3 py-2">
+            <p class="text-xs font-semibold text-muted">{f.label}</p>
+            <p class="text-sm font-semibold" style="overflow-wrap:anywhere">{f.value}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Why it matters -->
+  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+    <div class="grid gap-2">
+      <h2 class={h2}>Why it matters</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{experiment.summary}</p>
+    </div>
+    <div class={accent}>
+      <p class="leading-relaxed">{experiment.whyItMatters}</p>
+    </div>
+  </section>
+
+  <!-- Result -->
+  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+    <div class="grid gap-2">
+      <p class={eyebrow}>{primary.label}</p>
+      <h2 class={h2}>{evidence ? "Result evidence" : "Result status"}</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">
+        {evidence
+          ? "Selected live-cluster runs, readiness state, and evidence boundary are shown together."
+          : isBlocked
+            ? "Definition is ready; the live attempt stopped before a comparable result."
+            : "Artifacts stay separate from conclusions until a run is selected."}
+      </p>
+    </div>
+
+    {
+      evidence ? (
+        <div class={`grid gap-5 ${successPanel}`}>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class={chipBase} style={readinessChipStyle(primary.tone)}>{primary.label}: {primary.detail}</span>
+            <span class={chipDefault}>Latest reports: {evidence.reportDate}</span>
+            {secondary && <span class={chipErr}>{secondary.label}: {secondary.detail}</span>}
+          </div>
+
+          <div class="grid gap-1.5">
+            <h3 class="text-[1.05rem] font-semibold">{evidence.title}</h3>
+            <p class="text-sm leading-relaxed text-muted">{evidence.summary}</p>
+          </div>
+
+          <div class="grid gap-3 md:grid-cols-3" aria-label={`${experiment.title} measured result highlights`}>
+            {
+              evidence.stats.map((stat) => (
+                <div class={card}>
+                  <p class="text-xs font-semibold text-muted">{stat.label}</p>
+                  <p class="text-[1.05rem] font-semibold" style="overflow-wrap:anywhere">{stat.value}</p>
+                  <p class="text-xs leading-relaxed text-muted">{stat.context}</p>
+                </div>
+              ))
+            }
+          </div>
+
+          {
+            tables.map((table) => {
+              const cols = { ...RT_DEFAULT, ...(table.columns ?? {}) };
+              return (
+                <div class="grid gap-2">
+                  <div class="grid gap-0.5">
+                    <p class="text-sm font-semibold">{table.title}</p>
+                    {table.summary && <p class="text-sm leading-relaxed text-muted">{table.summary}</p>}
+                  </div>
+                  <div class="overflow-hidden rounded-lg border border-surface-border bg-paper" role="table" aria-label={`${experiment.title} ${table.title}`}>
+                    <div class={`hidden gap-3 bg-ink/[0.035] px-5 py-2 text-[0.72rem] font-semibold uppercase tracking-wide text-muted md:grid ${tableCols}`} role="row">
+                      {RT_KEYS.map((k) => <span>{cols[k]}</span>)}
+                    </div>
+                    {table.rows.map((row) => (
+                      <div class={`grid gap-1 border-t border-ink/10 px-5 py-3 first:md:border-t md:items-center md:gap-3 ${tableCols}`} role="row">
+                        {RT_KEYS.map((k, i) => (
+                          <p class={`text-sm ${i === 0 ? "font-semibold" : "text-muted"}`} role="cell" style="overflow-wrap:anywhere">
+                            <span class="mr-1 text-[0.7rem] font-semibold uppercase text-muted md:hidden">{cols[k]}: </span>
+                            {row[k]}
+                          </p>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+          }
+
+          <div class={warnPanel}>
+            <p class="mb-1 text-sm font-semibold">Evidence boundary</p>
+            <p class="text-sm leading-relaxed text-muted">{evidence.boundary}</p>
+            {evidence.boundaryPoints && evidence.boundaryPoints.length > 0 && (
+              <ul class="mt-2 list-disc pl-5 text-sm leading-relaxed text-muted">
+                {evidence.boundaryPoints.map((p) => <li>{p}</li>)}
+              </ul>
+            )}
+          </div>
+
+          <div class={`grid gap-2 ${card}`}>
+            {evidence.sourceReports && evidence.sourceReports.length > 0 && (
+              <div class="grid gap-0.5">
+                <p class="text-sm font-semibold">Selected reports</p>
+                <p class="text-sm leading-relaxed text-muted">Generated reports behind this summary.</p>
+              </div>
+            )}
+            <div class="flex flex-wrap items-center gap-3">
+              {(evidence.sourceReports ?? []).map((report) => (
+                <a href={experimentSourceLink(experiment.projectId, report.path)} target="_blank" rel="noreferrer" class={textBtn}>{report.label}</a>
+              ))}
+              <a href={experimentSourceLink(experiment.projectId, experiment.resultsPath)} target="_blank" rel="noreferrer" class={textBtn}>
+                {evidence.curatedResults === false ? "Results template" : "Results summary"}
+              </a>
+              <a href={experimentSourceLink(experiment.projectId, reportRulesPath(experiment))} target="_blank" rel="noreferrer" class={textBtn}>Report rules</a>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div class={`grid gap-3 ${warnPanel}`}>
+          <h3 class="text-[1.05rem] font-semibold">{isBlocked ? blockedTitle : "Live result pending"}</h3>
+          <p class="text-sm leading-relaxed text-muted">{pendingCopy}</p>
+          {experiment.pendingNextRuns && experiment.pendingNextRuns.length > 0 && (
+            <div class="grid gap-2">
+              <p class={eyebrow}>Next runs to curate</p>
+              <div class="grid gap-3 lg:grid-cols-2">
+                {experiment.pendingNextRuns.map((run) => (
+                  <div class={`grid gap-2 ${card}`}>
+                    <p class="text-sm font-semibold">{run.label}</p>
+                    <p class="text-sm leading-relaxed text-muted">{run.reason}</p>
+                    <CommandCodeBlock command={run.command} ariaLabel={`${run.label} next run command`} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div class="flex flex-wrap items-center gap-3">
+            <a href={experimentSourceLink(experiment.projectId, experiment.resultsPath)} target="_blank" rel="noreferrer" class={textBtn}>Results template</a>
+            <a href={experimentSourceLink(experiment.projectId, reportRulesPath(experiment))} target="_blank" rel="noreferrer" class={textBtn}>Report rules</a>
+          </div>
+        </div>
+      )
+    }
+  </section>
+
+  <!-- Related decisions -->
+  {
+    relatedDecisions.length > 0 && (
+      <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+        <div class="grid gap-2">
+          <p class={eyebrow}>Decision links</p>
+          <h2 class={h2}>Supports decisions</h2>
+          <p class="max-w-[44rem] text-base leading-relaxed text-muted">
+            Decision records own the project conclusions; this experiment supplies evidence for the calls below.
+          </p>
+        </div>
+        <div class="grid gap-3 md:grid-cols-2">
+          {relatedDecisions.map((decision) => (
+            <section class={`grid content-start gap-2 ${card}`}>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class={chipBase + " border-go-green/35 bg-go-green/15 text-go-green-dark"}>{decision.status}</span>
+                <span class={eyebrow}>{decision.domain}</span>
+              </div>
+              <h3 class="text-[1.05rem] font-semibold">{decision.title}</h3>
+              <p class="text-sm font-bold">{decision.call}</p>
+              <p class="text-sm leading-relaxed text-muted">{decision.evidence}</p>
+              <a href={decisionProjectPath(decision.projectId)} class={textBtn + " justify-self-start"}>View decision record &rarr;</a>
+            </section>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Run shape -->
+  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+    <div class="grid gap-2">
+      <p class={eyebrow}>Run shape</p>
+      <h2 class={h2}>Run shape</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">{formatRunShapeCopy(experiment)}</p>
+    </div>
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="grid content-start gap-3">
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <p class={eyebrow}>Cases</p>
+          <p class="text-xs text-muted">{formatCount(experiment.cases.length, "case")}</p>
+        </div>
+        {
+          experiment.cases.map((item) => (
+            <div class={`grid gap-1.5 ${card}`}>
+              <p class="text-[1.05rem] font-semibold" style="overflow-wrap:anywhere">{item.id}</p>
+              <p class="text-sm leading-relaxed text-muted">{item.description}</p>
+              <div class="flex flex-wrap gap-1.5">
+                {caseMeasureLabels(item).map((label) => <span class={chipDefault}>{label}</span>)}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <div class="grid content-start gap-3">
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <p class={eyebrow}>Run profiles</p>
+          <p class="text-xs text-muted">{formatCount(experiment.servingProfiles.length, "profile")}</p>
+        </div>
+        {
+          experiment.servingProfiles.map((profile) => (
+            <div class={`grid gap-1.5 ${card}`}>
+              <p class="text-[1.05rem] font-semibold" style="overflow-wrap:anywhere">{profile.id}</p>
+              <p class="text-sm leading-relaxed text-muted">{profile.description}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Metrics -->
+  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
+    <div class="grid gap-2">
+      <p class={eyebrow}>Measurement focus</p>
+      <h2 class={h2}>Metrics to capture</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">Metric groups show the signal this experiment needs.</p>
+    </div>
+    <div class="grid gap-3 md:grid-cols-3">
+      {
+        experiment.metricGroups.map((group) => (
+          <div class={`grid content-start gap-2 ${card}`}>
+            <p class="text-[1.05rem] font-semibold">{group.label}</p>
+            <div class="flex flex-wrap gap-1.5">
+              {group.metrics.map((m) => <span class={chipMuted}>{m}</span>)}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- How to run -->
+  <section class="grid gap-4">
+    <div class="grid gap-2">
+      <p class={eyebrow}>Usage</p>
+      <h2 class={h2}>How to run</h2>
+      <p class="max-w-[44rem] text-base leading-relaxed text-muted">Examples show one local render path and one live-cluster path.</p>
+    </div>
+    <div class="grid gap-4 md:grid-cols-2">
+      <div class="grid content-start gap-2">
+        <p class={eyebrow}>Example local command</p>
+        {localCommand && <CommandCodeBlock command={localCommand} ariaLabel={`${experiment.title} example local command`} />}
+      </div>
+      <div class="grid content-start gap-2">
+        <p class={eyebrow}>Example live command</p>
+        {liveCommand && <CommandCodeBlock command={liveCommand} ariaLabel={`${experiment.title} example live command`} />}
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+      <a href={experimentSourceLink(experiment.projectId, experiment.sourcePath)} target="_blank" rel="noreferrer" class={textBtn}>Source</a>
+      <a href={experimentSourceLink(experiment.projectId, experiment.resultsPath)} target="_blank" rel="noreferrer" class={textBtn}>{resultLinkLabel}</a>
+    </div>
+  </section>
+</BaseLayout>

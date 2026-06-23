@@ -1,0 +1,127 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { EXPERIMENTS_PATH } from "../../src/features/site/content";
+import { experimentCatalogContent } from "../../src/features/site/experiment-catalog-content";
+import { decisionProjectPath } from "../../src/features/site/decision-content";
+import {
+  getProjectById,
+  projectPortfolioContent,
+} from "../../src/features/site/projects-content";
+
+// Faithful port of the /experiments index route (ExperimentsIndexRoute in
+// src/features/experiments/page.tsx). Design frozen (ADR-0003 §5); typed data
+// modules reused unchanged (ADR-0003 §9). The per-project catalog routes
+// (/experiments/<projectId>) and per-experiment detail routes
+// (/experiments/<slug>) are a separate slice.
+const PAGE_TITLE = "Experiments | Tony Lee";
+const LEDE =
+  "Project-linked catalogs that turn GPU serving and kernel questions into evidence-backed decisions.";
+const SUPPORT =
+  "Choose a project to browse its experiment table. Detail routes stay available for individual run shape, evidence, and commands.";
+
+const { experiments } = experimentCatalogContent;
+const countTone = (tone) =>
+  experiments.filter((e) => e.readiness.primary.tone === tone).length;
+const projectCount = new Set(experiments.map((e) => e.projectId)).size;
+const facts = [
+  `${experiments.length} experiments`,
+  `${projectCount} projects`,
+  "Run-ready",
+  `${countTone("supported")} supported`,
+  `${countTone("selected")} selected`,
+  `${countTone("rejected")} rejected`,
+  `${countTone("pending")} pending`,
+  `${countTone("blocked")} blocked`,
+];
+
+const cards = projectPortfolioContent.projects.map((p) => {
+  const project = getProjectById(p.id);
+  const projectExperiments = experiments.filter((e) => e.projectId === p.id);
+  const focusAreas = new Set(projectExperiments.map((e) => e.category)).size;
+  return { project, experimentCount: projectExperiments.length, focusAreas };
+});
+
+const chipBase =
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
+const chipMuted = chipBase + " border-go-green/25 bg-go-green/[0.065] text-ink/70";
+const chipDefault = chipBase + " border-go-green/30 bg-go-green/[0.075] text-ink";
+
+const primaryBtn =
+  "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
+const outlinedBtn =
+  "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
+const textBtn =
+  "inline-flex min-h-10 items-center px-2 text-sm font-medium text-ink hover:underline";
+---
+
+<BaseLayout
+  title={PAGE_TITLE}
+  description={LEDE}
+  activeNav="experiments"
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Experiments" }]}
+>
+  <section class="grid gap-8 md:gap-9">
+    <!-- Index header -->
+    <div class="grid items-start gap-[0.85rem] md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.52fr)]">
+      <div class="flex max-w-[58rem] flex-col gap-3">
+        <h1 class="h-detail-title">
+          Experiments
+        </h1>
+        <p class="text-base leading-relaxed text-muted">{LEDE}</p>
+        <div class="flex flex-wrap items-center gap-2" aria-label="Experiment catalog status facts">
+          {facts.map((fact) => <span class={chipMuted}>{fact}</span>)}
+        </div>
+      </div>
+      <div class="rounded-lg border border-go-green/20 bg-go-green/8 p-3">
+        <p class="text-sm leading-relaxed text-muted">{SUPPORT}</p>
+      </div>
+    </div>
+
+    <!-- Per-project cards -->
+    <div class="grid gap-2.5 md:gap-3 lg:grid-cols-2">
+      {
+        cards.map(({ project, experimentCount, focusAreas }) => (
+          <section class="flex h-full flex-col gap-4 rounded-lg border border-surface-border bg-paper p-6">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class={chipMuted}>{project.layer}</span>
+              <span class={chipDefault}>{experimentCount} experiments</span>
+              <span class={chipDefault}>{focusAreas} focus areas</span>
+            </div>
+
+            <div class="grid gap-2">
+              <h2 class="h-section-title">
+                {project.title}
+              </h2>
+              <p class="text-sm leading-relaxed text-muted">{project.summary}</p>
+              <p class="text-sm font-semibold">{project.result}</p>
+            </div>
+
+            <ul class="grid gap-2">
+              {project.evidence.map((item) => (
+                <li class="grid grid-cols-[0.55rem_minmax(0,1fr)] items-baseline gap-2 text-[0.92rem] leading-normal text-muted">
+                  <span
+                    class="mt-1 inline-block h-[0.45rem] w-[0.45rem] rounded-full bg-go-green/90"
+                    aria-hidden="true"
+                  />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div class="mt-auto flex flex-wrap items-center gap-3 pt-1">
+              <a href={`${EXPERIMENTS_PATH}/${project.id}`} class={primaryBtn}>
+                View experiments
+              </a>
+              <a href={decisionProjectPath(project.id)} class={outlinedBtn}>
+                Project decisions
+              </a>
+              <a href={project.path} class={textBtn}>
+                Project overview
+              </a>
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>

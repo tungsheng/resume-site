@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens ported 1:1 from the original MUI theme (ADR-0003 decision 5: faithful
+ * port, design frozen). Exposing them through Tailwind's @theme makes them
+ * available as utilities (text-ink, bg-paper, font-display, …) so the page
+ * ports in later #12 slices match the current look.
+ */
+@theme {
+  --color-ink: #16231f;
+  --color-muted: #465750;
+  --color-go-green: #00ab66;
+  --color-go-green-dark: #006b40;
+  --color-accent-soft: #dff6ee;
+  --color-warning-warm: #a95718;
+  --color-warning-soft: #f5e0cb;
+  --color-support-cool: #276f89;
+  --color-paper: #ffffff;
+  --color-surface-border: #d8ded8;
+  --color-canvas: #f7f8f5;
+
+  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--color-warning-warm) 20%, transparent);
+}
+
+/*
+ * Faithful port of the MUI display headings (theme.ts h3/h4 + responsiveFontSizes).
+ * MUI scaled headings DOWN on small screens; Tailwind arbitrary breakpoints below
+ * mirror MUI's real breakpoints (sm 600 / md 900 / lg 1200) and the measured sizes
+ * so the type scale matches prod at every width — including mobile. Line-heights
+ * match MUI (h3 1.06, h4 1.12).
+ */
+.h-detail-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.06;
+  text-wrap: balance;
+  font-size: 1.71rem;
+}
+@media (min-width: 600px) {
+  .h-detail-title { font-size: 2.065rem; }
+}
+@media (min-width: 900px) {
+  .h-detail-title { font-size: 2.2425rem; }
+}
+@media (min-width: 1200px) {
+  .h-detail-title { font-size: 2.42rem; }
+}
+
+.h-section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.12;
+  text-wrap: balance;
+  font-size: 1.425rem;
+}
+@media (min-width: 600px) {
+  .h-section-title { font-size: 1.6375rem; }
+}
+@media (min-width: 900px) {
+  .h-section-title { font-size: 1.744rem; }
+}
+@media (min-width: 1200px) {
+  .h-section-title { font-size: 1.85rem; }
+}
+
+/*
+ * External-link affordance (MUI OpenInNewRounded equivalent). A mask-painted
+ * glyph so it inherits the link's text color via currentColor. Append
+ * `link-external` to any off-site link to get the trailing icon prod shows.
+ */
+.link-external::after {
+  content: "";
+  display: inline-block;
+  width: 0.82em;
+  height: 0.82em;
+  margin-left: 0.1em;
+  vertical-align: -0.05em;
+  background-color: currentColor;
+  --ext-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cline x1='10' y1='14' x2='21' y2='3'/%3E%3C/svg%3E");
+  -webkit-mask: var(--ext-mask) center / contain no-repeat;
+  mask: var(--ext-mask) center / contain no-repeat;
+}

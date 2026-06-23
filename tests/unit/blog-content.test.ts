@@ -1,0 +1,115 @@
+import { describe, expect, test } from "bun:test";
+import {
+  blogPostSchema,
+  isPostVisible,
+  readingTimeMinutes,
+  selectLatest,
+  sortByPublishedDesc,
+} from "../../astro/content/blog-schema";
+
+const validPost = {
+  title: "Why Prefix Cache Hit Rate Is the First Number to Check",
+  summary: "A short summary of the post.",
+  category: "Inference internals",
+  status: "Published",
+  published: "2026-06-18",
+};
+
+describe("blog post frontmatter schema", () => {
+  test("accepts a valid Published post and coerces the date", () => {
+    const result = blogPostSchema.safeParse(validPost);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.published).toBeInstanceOf(Date);
+    }
+  });
+
+  test("accepts optional tags/updated/related", () => {
+    const result = blogPostSchema.safeParse({
+      ...validPost,
+      updated: "2026-06-20",
+      tags: ["Prefix cache", "SGLang"],
+      related: { projects: ["gpu-inference-lab"] },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  test("rejects a missing required field (title)", () => {
+    const { title, ...withoutTitle } = validPost;
+    expect(blogPostSchema.safeParse(withoutTitle).success).toBe(false);
+  });
+
+  test("rejects an unknown status", () => {
+    expect(blogPostSchema.safeParse({ ...validPost, status: "Live" }).success).toBe(false);
+  });
+});
+
+describe("readingTimeMinutes (derived, not authored)", () => {
+  test("returns at least 1 minute for short bodies", () => {
+    expect(readingTimeMinutes("one two three")).toBe(1);
+    expect(readingTimeMinutes("   ")).toBe(1);
+  });
+
+  test("computes ~220 wpm", () => {
+    expect(readingTimeMinutes(Array(440).fill("word").join(" "))).toBe(2);
+    expect(readingTimeMinutes(Array(1100).fill("word").join(" "))).toBe(5);
+  });
+});
+
+describe("sortByPublishedDesc", () => {
+  const post = (slug: string, iso: string) => ({ slug, data: { published: new Date(iso) } });
+
+  test("orders newest Post first", () => {
+    const ordered = sortByPublishedDesc([
+      post("older", "2026-06-18"),
+      post("newest", "2026-06-22"),
+      post("middle", "2026-06-20"),
+    ]);
+    expect(ordered.map((p) => p.slug)).toEqual(["newest", "middle", "older"]);
+  });
+
+  test("does not mutate the input array", () => {
+    const input = [post("a", "2026-01-01"), post("b", "2026-02-01")];
+    const snapshot = input.map((p) => p.slug);
+    sortByPublishedDesc(input);
+    expect(input.map((p) => p.slug)).toEqual(snapshot);
+  });
+});
+
+describe("selectLatest (home 'Latest writing' slice, #10)", () => {
+  const post = (slug: string, iso: string) => ({ slug, data: { published: new Date(iso) } });
+
+  test("returns the newest `limit` Posts, newest-first", () => {
+    const latest = selectLatest(
+      [
+        post("older", "2026-06-18"),
+        post("newest", "2026-06-22"),
+        post("middle", "2026-06-20"),
+        post("oldest", "2026-06-10"),
+      ],
+      2,
+    );
+    expect(latest.map((p) => p.slug)).toEqual(["newest", "middle"]);
+  });
+
+  test("returns all Posts when fewer than the limit, and never mutates input", () => {
+    const input = [post("a", "2026-02-01"), post("b", "2026-01-01")];
+    const snapshot = input.map((p) => p.slug);
+    expect(selectLatest(input, 5).map((p) => p.slug)).toEqual(["a", "b"]);
+    expect(input.map((p) => p.slug)).toEqual(snapshot);
+  });
+});
+
+describe("isPostVisible (Status visibility, ADR-0003 §8)", () => {
+  test("Published is visible in prod and dev", () => {
+    expect(isPostVisible("Published", true)).toBe(true);
+    expect(isPostVisible("Published", false)).toBe(true);
+  });
+
+  test("Outline/Drafting are hidden in prod, visible in dev", () => {
+    expect(isPostVisible("Outline", true)).toBe(false);
+    expect(isPostVisible("Drafting", true)).toBe(false);
+    expect(isPostVisible("Outline", false)).toBe(true);
+    expect(isPostVisible("Drafting", false)).toBe(true);
+  });
+});

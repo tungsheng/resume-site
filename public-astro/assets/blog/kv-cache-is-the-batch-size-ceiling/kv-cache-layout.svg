@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 220" role="img"
+     aria-label="GPU memory split between model weights and the growing KV cache">
+  <style>
+    .label { font: 600 14px "Avenir Next", "Segoe UI", sans-serif; fill: #16231f; }
+    .sub { font: 12px "Avenir Next", "Segoe UI", sans-serif; fill: #465750; }
+  </style>
+  <rect x="0" y="0" width="640" height="220" fill="#f7f8f5" rx="8" />
+  <text class="label" x="24" y="36">GPU memory budget</text>
+
+  <!-- Weights: fixed -->
+  <rect x="24" y="56" width="180" height="64" rx="6" fill="#dff6ee" stroke="#00ab66" />
+  <text class="label" x="114" y="84" text-anchor="middle">Model weights</text>
+  <text class="sub" x="114" y="104" text-anchor="middle">fixed</text>
+
+  <!-- KV cache: grows with concurrency -->
+  <rect x="220" y="56" width="396" height="64" rx="6" fill="#f5e0cb" stroke="#a95718" />
+  <text class="label" x="418" y="84" text-anchor="middle">KV cache</text>
+  <text class="sub" x="418" y="104" text-anchor="middle">grows with batch size &times; sequence length</text>
+
+  <!-- Arrow showing the ceiling -->
+  <line x1="220" y1="150" x2="616" y2="150" stroke="#465750" stroke-width="1.5" />
+  <polygon points="616,150 606,145 606,155" fill="#465750" />
+  <text class="sub" x="418" y="172" text-anchor="middle">more concurrent requests &rarr; less headroom</text>
+</svg>

@@ -7,6 +7,12 @@ dist
 .build
 *.tgz
 
+# Generated resume PDF (built into publicDir from resume/data.ts by build:pdf)
+public-astro/resume.pdf
+
+# Astro generated types/cache (not the ./astro source dir)
+.astro/
+
 # Database
 data/
 *.db
@@ -45,4 +51,9 @@ Thumbs.db
 # Backups
 *.bak
 *.backup
+
+# Agent tooling (installed skills are reproducible from skills-lock.json; scratch is local)
+.agents
+.scratch
+ralph-once.sh
 

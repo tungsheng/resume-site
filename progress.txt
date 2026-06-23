@@ -1,0 +1,503 @@
+BLOG MIGRATION — PROGRESS LOG
+=============================
+
+Source of truth: GitHub issues (gh issue list). The PRD epic is #1; child
+slices are #3-#12. NOTE: .scratch/blog-prd.md is the PRE-ADR-0003 PRD
+(Bun server-rendered) and is SUPERSEDED — do not implement from it. ADR-0003
+(docs/adr/0003-migrate-to-astro-static-site.md) moved the whole site to Astro
+zero-JS static output on Cloudflare Pages; the issues were re-triaged to match.
+
+Build order (from #1): #12 -> #3 -> #4 -> (#5,#6,#7,#8) -> (#9,#10) -> #11
+
+
+DONE
+----
+- #2  Rename Notes prototype -> Blog (closed; pre-existing).
+- Re-triage of #1-#11 against ADR-0003 + filed foundation issue #12.
+- #12 SLICE 1 (commit 7a45fa2): Bootstrap Astro foundation.
+    * Installed astro@6 + tailwindcss@4 + @tailwindcss/vite.
+    * astro.config.mjs: static output, Shiki markdown, srcDir ./astro,
+      publicDir ./public-astro (isolated from the live Bun app).
+    * astro/styles/global.css: theme.ts design tokens ported into Tailwind @theme.
+    * astro/layouts/BaseLayout.astro: header + footer + CSS-only mobile nav (0 JS).
+    * astro/pages/index.astro: placeholder home; `astro build` -> dist/index.html
+      with correct <title>, content, and zero <script> tags.
+    * package.json: added astro / astro:dev / astro:build / astro:preview scripts.
+    * Existing Bun app untouched: typecheck clean, 63 unit tests pass.
+- #12 SLICE 2a (commit f07f106): Port HOME page.
+    * astro/pages/index.astro now a faithful port of src/features/home/page.tsx
+      (centered hero: name, role, lede, 3 CTAs) using the Tailwind tokens.
+    * `astro build` -> dist/index.html, correct <title>/description, 0 <script>.
+- #12 SLICE 2b (commit e2b6f5f): Port PROJECTS INDEX page.
+    * astro/pages/projects.astro = faithful port of the /projects index route
+      (header + portfolio cards: chips, evidence bullets, CTAs). Imports the
+      typed projects-content.ts unchanged (ADR-0003 §9).
+    * Added optional breadcrumbs prop to BaseLayout (Home / Projects).
+    * `astro build` -> dist/projects/index.html, breadcrumb present, 0 <script>.
+    * NOTE: only the INDEX is ported; the two project DETAIL routes are deferred.
+
+- #12 SLICE 2c (commit ae9f223): Port EXPERIMENTS INDEX page.
+    * astro/pages/experiments.astro = faithful port of the /experiments index
+      route: header + computed catalog fact strip (experiment/project/readiness
+      counts) + per-project cards (experiment / decision / overview links).
+      Imports experiment-catalog-content.ts, projects-content.ts,
+      decision-content.ts unchanged (ADR-0003 §9).
+    * `astro build` -> dist/experiments/index.html, fact strip + breadcrumb, 0 <script>.
+    * NOTE: index only; per-project catalog + per-experiment detail routes deferred.
+
+- #12 SLICE 2d (commit 91e85b8): Port DECISIONS INDEX page.
+    * astro/pages/decisions.astro = faithful port of the /decisions index route:
+      header + per-project cards with status-count chips (color-mapped by
+      decision status via inline color-mix), domains line, and
+      decisions/experiments/overview links. Reuses decision-content.ts +
+      projects-content.ts unchanged (ADR-0003 §9).
+    * `astro build` -> dist/decisions/index.html, status chips + breadcrumb, 0 <script>.
+    * NOTE: index only; per-project decision routes (/decisions/<projectId>) deferred.
+
+- #12 SLICE 2e (commit 224282b): Port RESUME page (LAST top-level page).
+    * astro/pages/resume.astro = faithful port of src/features/resume/page.tsx:
+      detail header (name, badges, contact panel) + two-column web view
+      (summary/projects/experience | skills/education). Reuses resume/data.ts +
+      view-model.ts unchanged (ADR-0003 §9).
+    * Zero JS: runtime /api/public-pdf download -> plain <a href="/resume.pdf"
+      download>. The build-time PDF artifact is a SEPARATE slice; link 404s
+      until then.
+    * `astro build` -> 5 static pages total, all 0 <script>.
+
+- #12 SLICE 3 (commit 94e4b49): Build-time resume PDF -> dist/resume.pdf.
+    * scripts/build-resume-pdf.ts renders + writes dist/resume.pdf, reusing
+      renderResumeHtmlDocument + the puppeteer-core pipeline (src/services/pdf.ts)
+      unchanged (ADR-0003 §2). Exports buildResumePdf() + has a CLI entry.
+    * package.json: `build` = `astro build && bun run build:pdf`; `build:pdf` =
+      `bun run scripts/build-resume-pdf.ts`.
+    * Verified: dist/resume.pdf = 313 KB, valid %PDF-. /resume "Download PDF"
+      link now resolves.
+    * tests/integration/pdf-rendering.test.ts: added artifact assertion
+      (non-empty, %PDF- magic). typecheck + 63 unit + 2 PDF integration tests pass.
+    * Runtime /api/public-pdf left intact (removed in SLICE 6).
+
+- #12 SLICE 4a (commit b6dec4c): Port CUDA Kernel Lab project DETAIL.
+    * astro/pages/projects/cuda-kernel-lab.astro = faithful port of
+      CudaKernelProjectRoute (/projects/cuda-kernel-lab): header + support panel,
+      At a glance facts, optimization-loop cards, benchmark readout.
+    * DecisionReadoutStrip re-rendered as plain .astro (tone chips via color-mix,
+      no MUI). Reuses cudaKernelProjectContent unchanged (ADR-0003 §9).
+    * `astro build` -> dist/projects/cuda-kernel-lab/index.html, 0 <script>.
+    * Used SEPARATE .astro files per project (not a [slug].astro with
+      getStaticPaths) so detail routes can be ported one per iteration.
+
+- #12 SLICE 4b (commit 9969a32): Port GPU Inference Lab project DETAIL (large).
+    * astro/pages/projects/gpu-inference-lab.astro = faithful port of
+      ProjectOverviewRoute: header+support, At a glance, lab-usage (workflow
+      cards, default-path quick start, verify proofs, decision-contract concept),
+      How serving scales (foundation pills + serve/scale/rejoin flows), evidence
+      readout. Reuses projectContent + implementation unchanged (ADR-0003 §9).
+    * NEW reusable astro/components/CommandCodeBlock.astro (tokenized GitHub-dark
+      shell block, tokenizer ported verbatim, scoped CSS, zero JS).
+    * Added legacy redirect in astro.config.mjs:
+      /project/cloud-inference-platform -> /projects/gpu-inference-lab.
+    * Workflow connector lines approximated with inline arrows. 0 <script>.
+
+- #12 SLICE 4c (commit 51c4416): Port EXPERIMENT CATALOG routes.
+    * astro/pages/experiments/[project].astro = single dynamic route
+      (getStaticPaths for both projects) porting ExperimentCatalogRoute:
+      header + CatalogStatusNote + global fact strip + browse table
+      (purpose, focus chips, tone-coded status signals, per-row View details)
+      + gpu-only project-evidence band. Reuses experimentCatalogContent +
+      experimentDetailPath + decisionProjectPath unchanged (ADR-0003 §9).
+    * Emits /experiments/gpu-inference-lab (7 rows) +
+      /experiments/cuda-kernel-lab (9 rows). 0 <script>.
+
+- #12 SLICE 4d (commit 02b9521): Port per-experiment DETAIL routes (all 16).
+    * astro/components/ExperimentDetail.astro = faithful port of
+      ExperimentDetailRoute: header+summary strip, why it matters, result section
+      (measured: stats + result tables + boundary + source reports; OR
+      pending/blocked: next runs + links), related decisions, run shape
+      (cases+profiles), metrics groups, how-to-run commands (CommandCodeBlock).
+    * ROUTING FIX: replaced experiments/[project].astro with
+      experiments/[entry].astro (single dynamic route; getStaticPaths emits both
+      project catalogs + every experiment slug; branches project-id vs slug).
+      Catalog extracted to astro/components/ExperimentCatalog.astro.
+    * Build = 25 static pages incl. all 16 details. 0 <script>.
+
+- #12 SLICE 4e (commit 92fe95c): Port DECISIONS DETAIL routes (both) — LAST detail family.
+    * astro/pages/decisions/[project].astro = faithful port of DecisionProjectRoute:
+      status dashboard + domain-grouped decision matrix (status chips,
+      call/evidence, next-evidence panel, related-experiment links) + gpu-only
+      evidence visuals. Reuses decision-content + project-content (ADR-0003 §9).
+    * NEW astro/components/EvidenceMatrix.astro = zero-JS port of
+      TwoMetricEvidenceMatrix (labeled horizontal bars via value/max width).
+    * Added redirect /project/cloud-inference-platform/validation ->
+      /decisions/gpu-inference-lab in astro.config.mjs.
+    * SLICE 4 COMPLETE. Build = 29 static pages + resume.pdf, 0 <script>.
+
+- #12 SLICE 5 (commit c063871): Deploy plumbing.
+    * public-astro/_headers -> dist/_headers: security headers ported from the
+      Bun addSecurityHeaders() (ADR-0003 §3); script-src tightened to 'self'
+      (zero-JS). Verified it copies into dist/ on build.
+    * .github/workflows/pages.yml: bun install -> check -> `bun run build`
+      (astro + PDF via browser-actions/setup-chrome) -> cloudflare/wrangler-action
+      `pages deploy dist` (ADR-0003 §4).
+    * ACTION NEEDED (user): add repo secrets CLOUDFLARE_API_TOKEN +
+      CLOUDFLARE_ACCOUNT_ID; confirm Pages project name (currently "resume-site").
+    * Old ci.yml/deploy.yml left in place; removed in slice 6.
+
+- #12 SLICE 6a (commit 3fbd7f4): Remove the Bun app — site is now Astro-only.
+    * Deleted Bun server (src/index.ts), all React pages (src/pages/*,
+      features/*/page.tsx), MUI shell (layout/styles/command-code-block/
+      evidence-visuals/use-document-title), theme.ts, src/server/ (incl. runtime
+      /api/public-pdf + static route).
+    * Deleted ops: Dockerfile, docker-compose*, .dockerignore, deploy.env.example,
+      .github/workflows/ci.yml + deploy.yml (superseded by pages.yml).
+    * Removed MUI + Emotion deps (react/react-dom kept for PDF render).
+    * Deleted server/MUI tests; 19 unit tests pass, typecheck clean, build ->
+      29 pages + resume.pdf + _headers, 0 JS.
+    * KEPT: typed data/view-model/content modules + PDF pipeline
+      (services/pdf.ts, render-static-html, document*, pdf-fonts);
+      post-content.ts kept for #11.
+    * srcDir still ./astro (flip to ./src deferred as optional 6b).
+
+- ISSUES: milestone comment posted on #12 (Bun app removed; migration
+  functionally complete). #12 ready-for-agent until merged + deployed.
+
+=== BLOG FEATURE WORK (post-migration; the actual product) ===
+- #3 DONE (commit 5463fe0): Prerender a Published Markdown Post at /blog/<slug>.
+    * astro/content.config.ts: content collection "blog" via glob loader over
+      content/blog/*.md (entry id = filename = slug).
+    * astro/content/blog-schema.ts: Zod schema (shared w/ tests) +
+      readingTimeMinutes(). title/summary/category/status/published required.
+    * astro/pages/blog/[slug].astro: prerenders Published (prod) / all (dev,
+      ADR-0003 §8); render() body in BaseLayout + minimal prose styles; Shiki
+      code; 0 JS. Shows category, date, "N min read".
+    * tests/unit/blog-content.test.ts: schema accept/reject + reading time (6).
+    * TOOLING: typecheck now `astro sync && tsc --noEmit`; tsconfig `include`
+      adds .astro/types.d.ts so tsc resolves the virtual astro:content module.
+      (.astro/ is gitignored; astro sync regenerates it.)
+    * Build = 30 html pages (incl. the post) + resume.pdf. 25 unit tests pass.
+    * Raw-HTML hardening deferred to #6; CSP (script-src 'self') is the backstop.
+- #4 DONE (commit cdb4815): Blog index at /blog, Published newest-first.
+    * astro/pages/blog/index.astro: getCollection Published(prod)/all(dev),
+      sorted via sortByPublishedDesc(); card per Post (category, date, reading
+      time, title->/blog/<slug>, summary, tags). 0 JS.
+    * sortByPublishedDesc() added to blog-schema.ts (generic, non-mutating) + 2
+      unit tests (ordering + no-mutation).
+    * Added 2nd Published fixture content/blog/continuous-batching-throughput.md
+      (2026-06-20) so ordering is real/testable. Now 2 posts.
+    * Verified dist/blog/index.html: both titles, newest-first, full cards, 0
+      <script>. 27 unit tests pass.
+- #5 DONE (commit 3c682e1): Enforce Post Status visibility (drafts dev-only).
+    * isPostVisible(status, isProd) in blog-schema.ts = single source of truth;
+      used by both blog pages (ADR-0003 §8). Prod build = Published-only; dev =
+      all statuses.
+    * Added Drafting fixture content/blog/sizing-admission-queues.md.
+    * Unit tests for the predicate (prod/dev x status).
+    * NEW gated integration test tests/integration/blog-build.test.ts: runs a
+      real prod `astro build` (NODE_ENV=production — bun test sets it to "test",
+      which Astro treats as non-prod and would leak drafts) and asserts the draft
+      is absent + no draft page, both Published build newest-first. 3 pass.
+    * Fixed off-by-one publish-date display -> format with timeZone:"UTC"
+      (dates are authored as plain calendar days) in both blog pages.
+    * 29 unit tests pass; integration 3 pass.
+
+- #6 DONE (commit 6e70da0): Rich Markdown body — admonitions, GFM tables, images.
+    * astro/markdown/remark-admonitions.ts: GitHub alert blockquotes
+      (> [!NOTE]/[!TIP]/[!IMPORTANT]/[!WARNING]/[!CAUTION]) -> <div class=
+      "callout callout-note|callout-warning"> with a titled .callout-title header.
+      5 GitHub kinds collapse onto the site's 2 tones (accent / warning).
+    * astro/markdown/rehype-blog-images.ts: every <img> gets loading="lazy" +
+      decoding="async"; a lone-paragraph image is promoted to <figure> with its
+      alt as <figcaption>. Both are IN-REPO transforms (no new deps), exported as
+      transformAdmonitions()/transformBlogImages() so they unit-test in isolation.
+    * Wired both into astro.config.mjs markdown.{remarkPlugins,rehypePlugins}.
+      NOTE: Astro 6 prints a deprecation warning ("pass to unified({...}) +
+      markdown.processor") for these keys — they still APPLY correctly and keep
+      Shiki+GFM automatically; migrating to processor would force re-specifying
+      the whole pipeline (risk of dropping shiki). Kept the supported path;
+      removal only "in a future major". Revisit if/when it's actually removed.
+    * GFM tables already render (built in) — added table/callout/figure styling +
+      width-capped images (max-width:100%;height:auto) to .post-body in
+      blog/[slug].astro.
+    * public-astro/_headers: long-lived immutable Cache-Control for /assets/blog/*.
+    * Published fixture content/blog/kv-cache-is-the-batch-size-ceiling.md
+      (2026-06-21) exercises admonition(x2 tones)+GFM table+SVG image; asset at
+      public-astro/assets/blog/<slug>/kv-cache-layout.svg -> dist/assets/blog/...
+    * Tests: tests/unit/blog-markdown.test.ts (6 new; 35 unit total) asserts
+      admonition->panel mapping + image attrs/figure/figcaption. Extended
+      tests/integration/blog-build.test.ts (now 5) with built-output asserts of
+      the rendered callout/table/lazy-img/figure + the copied asset over a real
+      prod build. 0 <script> in output.
+    * GOTCHA: appended the new post to the integration PUBLISHED[] at the END so
+      the ordering assertion (uses PUBLISHED[0]/[1]) stays valid.
+
+- #7 DONE (commit b577d22): Post metadata surfaces — auto-TOC, updated date, related.
+    * Auto-TOC in blog/[slug].astro from H2/H3 headings (Astro `render()` returns
+      `headings` = {depth,slug,text}; built-in heading ids make #slug anchors
+      work). Shown only past a 3-heading threshold; short Posts get none. Helpers
+      selectTocHeadings/shouldShowToc/TOC_MIN_HEADINGS added to blog-schema.ts
+      (pure, generic, unit-tested). Zero-JS (scroll-behavior:smooth in global.css).
+    * "Updated <date>" shows only when frontmatter `updated` > `published`
+      (formatDate helper, timeZone:"UTC" like the publish date).
+    * Related links via NEW astro/content/related-links.ts resolveRelatedLinks():
+      resolves frontmatter related.{projects,experiments,decisions} against the
+      typed portfolio modules (getProjectById / experimentCatalogContent +
+      experimentDetailPath / decisionProjectPath). DEFENSIVE: unknown ids are
+      skipped (isProjectId guard + experiment .find) so a typo never crashes the
+      build (those helpers throw on unknown ProjectIds). Omitted when none.
+    * Scoped styles for .post-toc + .post-related (authored markup -> Astro scopes
+      directly, no :global needed, unlike the .post-body Content styles).
+    * Fixture kv-cache-is-the-batch-size-ceiling.md gained `updated:2026-06-22` +
+      `related:` (gpu-inference-lab project/decision, kv-cache+batching experiments).
+    * Tests: tests/unit/blog-metadata.test.ts (6 new; 41 unit total) — TOC
+      threshold incl. H1/H4 noise + related resolution incl. unknown-id skip.
+      Extended blog-build.test.ts (now 7) with built-output asserts: TOC/related/
+      Updated present on the rich Post, absent on a short standalone Post.
+    * DEDUP NOTE: resolveRelatedLinks parallels getPostRelatedLinks() in
+      post-content.ts (legacy seed-note model) but for the frontmatter shape —
+      fold together when #11 migrates those notes into the collection.
+
+- #8 DONE (commit 6431ada): Per-Post SEO head — canonical, OG, article, twitter.
+    * Threaded optional SEO props through BaseLayout.astro (it already owned
+      <head> + title/description/canonical). New props: ogType ("website"|
+      "article", default website), image, publishedTime, modifiedTime, tags,
+      section. Least churn vs a separate <head> partial; every page benefits.
+    * Emits og:title/description/type/url/site_name on every page. article:*
+      (published_time/modified_time/section/tag) ONLY when ogType="article".
+      twitter:card=summary_large_image + twitter:title/description/image.
+    * og:image/twitter:image resolved from Post `cover` -> absolute same-origin
+      URL via new URL(image, Astro.site); omitted when no cover. modifiedTime
+      passed only when updatedLabel set (updated > published), reusing #7 logic.
+    * blog/[slug].astro passes ogType="article", image=cover, publishedTime=
+      published, modifiedTime=updated(if later), tags, section=category.
+    * Added cover: /assets/blog/<slug>/kv-cache-layout.svg to the kv-cache
+      fixture (reuses the #6 SVG asset) so og:image is exercised.
+    * Tests: extended blog-build.test.ts (now 9) — asserts canonical + og:type=
+      article + article:published_time(2026-06-21T00:00:00.000Z)/modified_time/
+      section/tag + twitter:card + og:image-from-cover on the Post; and that
+      dist/index.html is og:type=website with NO article:* tags. 0 <script>.
+    * NOTE: published.toISOString() -> "...T00:00:00.000Z" (dates authored as
+      plain calendar days, coerced to UTC midnight). Canonical/og:url carry the
+      default trailing slash (https://tonylee.bio/blog/<slug>/).
+
+- #9 DONE (commit b28c895): Syndication & discovery — RSS feed, sitemap, robots.
+    * Installed @astrojs/rss + @astrojs/sitemap.
+    * RSS 2.0 FULL-content feed at /rss.xml (astro/pages/rss.xml.ts, endpoint
+      `export async function GET`). Reuses isPostVisible(...,import.meta.env.PROD)
+      + sortByPublishedDesc so it matches the /blog index: Published-only in prod,
+      newest-first. Full body per item rendered via the CONTAINER API
+      (experimental_AstroContainer.create() + container.renderToString(Content)
+      from render(post)) so #6 admonitions/tables/figures carry through. Root-
+      relative src="/ + href="/ absolutized to context.site.origin so readers
+      resolve the #6 self-hosted images. pubDate=published, categories=tags.
+    * Sitemap via @astrojs/sitemap integration in astro.config integrations[] ->
+      sitemap-index.xml + sitemap-0.xml (31 urls). Drafts never in prod build so
+      excluded automatically; added filter:(page)=>!page.includes(
+      "/project/cloud-inference-platform") to drop the legacy redirect stubs.
+    * Static public-astro/robots.txt -> dist/robots.txt: Allow all + Sitemap:
+      https://tonylee.bio/sitemap-index.xml.
+    * Tests: extended blog-build.test.ts (now 12) — RSS 2.0 + Published-only
+      newest-first + full body markup (callout class + a heading) + absolutized
+      image URL + draft excluded; sitemap covers all public routes + Published
+      Posts, no draft, no redirect stub; robots references the sitemap.
+    * GOTCHA: @astrojs/rss ENTITY-ESCAPES item content (&quot; not CDATA) — valid
+      RSS, readers decode it. Absolute image URL is present, just &quot;-wrapped;
+      grep for the bare URL substring, not src="...".
+    * GOTCHA: container.renderToString triggers a harmless Astro deprecation
+      warning (markdown.gfm/smartypants -> move onto processor). Pre-existing
+      internal; we don't set those keys. Ignore (same family as the #6 warning).
+    * Content-Type: handled by Cloudflare Pages (.xml->application/xml, robots.txt
+      ->text/plain); no _headers change needed.
+
+- #10 DONE (commit 9081d03): Home "Latest writing" section from the Post collection.
+    * index.astro (home): "Latest writing" section = selectLatest(visible, 3)
+      compact cards (category, title->/blog/<slug>, UTC date) + "Read the blog"
+      link. Baked into static HTML at build time (no endpoint/fetch). Rendered
+      only when latest.length>0 (empty state leaves the hero clean). 0 JS.
+    * blog-schema.ts: NEW pure selectLatest(posts, limit) = sortByPublishedDesc +
+      slice (generic, non-mutating, unit-tested) — the "newest-first slice".
+    * DEDUP (the trio flagged in #9): extracted getCollection + isPostVisible
+      filter into astro/content/posts.ts getVisiblePosts() (returns UNSORTED;
+      callers sort/slice). Routed blog/index.astro + rss.xml.ts through it; home
+      uses it too. Three call sites now agree on visibility.
+    * Tests: 2 new unit in blog-content.test.ts (selectLatest newest-first slice +
+      under-limit/non-mutating; 43 unit total). Extended blog-build.test.ts (now
+      13) — home lists Published Posts newest-first linking /blog/<slug>, draft
+      excluded. typecheck clean, 0 <script> in dist/index.html.
+    * NOTE: LATEST_COUNT=3; there are exactly 3 Published fixtures so all show.
+      getVisiblePosts is an Astro-runtime module (imports astro:content) — NOT
+      bun-unit-testable; the pure slice logic lives in blog-schema.ts instead.
+
+- #11 DONE (commit e57af30): Migrate the two seed notes to Markdown Posts (Outline).
+    * Converted both typed seed Posts (src/features/site/post-content.ts
+      postRecords[]) into content/blog/ Markdown, status: Outline (dev-only):
+      sglang-architecture-request-lifecycle-scheduler-prefix-cache.md +
+      decode-process-deep-dive.md. published=2026-06-12 (the old `updated`).
+    * blocks[] -> Markdown: flow -> ORDERED list (per AC); list -> bullets;
+      table -> GFM table (#6); callout -> #6 admonition (tone "warning" =>
+      [!WARNING], else [!NOTE]) with old block title preserved as a **bold lead**
+      (admonition label is fixed Note/Warning, so title goes in body); code ->
+      fenced block; heading eyebrow dropped (kept H2 title). related.{projects,
+      experiments,decisions} carried from related* ids -> #7 resolver renders them.
+    * DELETED src/features/site/post-content.ts + tests/unit/post-content.test.ts.
+      No PROD code imported post-content — only the test did (verified by grep).
+      related-links.ts comment de-referenced (its dedup note is now moot).
+    * Tests: extended blog-build.test.ts (now 14) — both Outline slugs emit no
+      prod page + absent from sitemap/rss/home/index. Dev-mode build (NODE_ENV=
+      test) verified both render with ordered list/table/callout/code/related.
+    * 41 unit (post-content's ~few tests removed) + 14 integration, 0 <script>.
+
+*** ALL BLOG FEATURE SLICES #3-#11 ARE DONE on feat/blog. ***
+Remaining: #12 deploy (user adds Cloudflare secrets + merges feat/blog to main;
+that closes #12 + auto-closes #3-#11 via the "Closes #" commit trailers) and the
+OPTIONAL cosmetic SLICE 6b (srcDir ./astro -> ./src flip; defer).
+
+GOTCHA for future blog build-output tests: `bun test` sets NODE_ENV=test, so a
+build spawned inside a test runs in DEV mode (drafts included) unless you pass
+NODE_ENV=production. See blog-build.test.ts beforeAll.
+
+REUSE NOTES for remaining detail routes:
+    * CommandCodeBlock -> astro/components/CommandCodeBlock.astro (done).
+    * DecisionReadoutStrip pattern is INLINED in both project detail pages
+      (tone chips via color-mix + TONE map). Consider extracting to
+      astro/components/ReadoutStrip.astro when porting experiment/decision
+      details (they use the same readout) — optional cleanup.
+    * TwoMetricEvidenceMatrix (evidence-visuals.tsx) is still NOT ported; it is
+      used by the gpu DECISIONS detail (GpuEvidenceVisualsSection) -> port it
+      when doing /decisions/gpu-inference-lab.
+
+
+IN PROGRESS / NEXT
+------------------
+#12 SLICE 2 (top-level pages) + SLICE 3 (build PDF) COMPLETE.
+SLICE 4 (detail routes) IN PROGRESS — separate .astro files, ONE route family
+per iteration. Status:
+    [x] /projects/cuda-kernel-lab            (commit b6dec4c)
+    [x] /projects/gpu-inference-lab          (commit 9969a32)
+    [x] /experiments/<projectId> catalogs    (commit 51c4416 -> merged into [entry] in 02b9521)
+    [x] /experiments/<slug> details (all 16) (commit 02b9521)
+    [x] /decisions/<projectId> (both)        (commit 92fe95c)
+    [x] legacy redirects (both)              (commit 9969a32 + 92fe95c)
+SLICE 4 COMPLETE — entire site presentation ported to Astro.
+
+REMAINING after SLICE 4:
+    [x] SLICE 5 — Cloudflare _headers; GitHub Actions + wrangler deploy. (c063871)
+    [x] SLICE 6a — Remove the Bun app; Astro-only repo. (3fbd7f4)
+    [ ] SLICE 6b (OPTIONAL polish) — flip astro.config srcDir ./astro -> ./src and
+          publicDir ./public-astro -> ./public; move files; delete old
+          public/*.html shells; drop ./public-astro. Cosmetic — current setup
+          builds fine. Watch relative-import depth in .astro files if moved.
+
+#12 IS FUNCTIONALLY COMPLETE (whole site migrated to Astro zero-JS static).
+Closes once: user adds Cloudflare secrets + first pages.yml deploy, and
+feat/blog merges to main. Then the Blog feature work (#3-#11) is unblocked.
+
+NEXT TASK: none in the #3-#11 blog feature track — ALL DONE on feat/blog.
+What is left is HUMAN/DEPLOY work (#12) plus one OPTIONAL cosmetic refactor:
+
+1. #12 DEPLOY (requires the user — agent cannot do these):
+   - Add repo secrets CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID (Settings ->
+     Secrets) and confirm the Pages project name (.github/workflows/pages.yml,
+     currently "resume-site").
+   - Merge feat/blog -> main. The "Closes #N" trailers on the feature commits
+     auto-close #3-#11; the pages.yml workflow runs bun install -> check ->
+     `bun run build` (astro + PDF) -> wrangler `pages deploy dist`.
+   - After first green deploy, close #12 (and #1 epic) if not auto-closed.
+
+2. SLICE 6b (OPTIONAL cosmetic, safe to defer indefinitely): flip astro.config
+   srcDir ./astro -> ./src + publicDir ./public-astro -> ./public; move the Astro
+   tree; delete the old public/*.html Bun shells; drop ./public-astro. Rewrites
+   every .astro import depth (../../src/... etc.) — fiddly, no functional gain.
+   Current split-dir setup builds + deploys fine. See the SLICE 6 plan below.
+
+If continuing autonomously with nothing actionable in-repo: the only remaining
+agent-doable work is SLICE 6b (cosmetic). Prefer to STOP and report that #3-#11
+are complete and #12 needs the user, rather than do the risky srcDir flip
+unprompted. If asked to proceed, do SLICE 6b carefully (build + all tests green).
+
+--- (#11 reference — DONE in e57af30, kept for context) ---
+Both seed notes migrated to content/blog/ Markdown at status: Outline; typed
+post-content.ts removed. See the #11 DONE entry above.
+
+--- (#10 reference — DONE in 9081d03, kept for context) ---
+Home "Latest writing" section now bakes the newest Published Posts into
+dist/index.html. Shared getVisiblePosts() (astro/content/posts.ts) +
+selectLatest() (blog-schema.ts). See the #10 DONE entry above.
+
+--- (#9 reference — DONE in b28c895, kept for context) ---
+RSS full-content feed (/rss.xml), @astrojs/sitemap, static robots.txt now emit
+at build time. See the #9 DONE entry above for specifics.
+
+--- (#8 reference — DONE in 6431ada, kept for context) ---
+Per-Post SEO head (canonical, OG, article:*, twitter:card, og:image-from-cover)
+now renders via BaseLayout SEO props. See the #8 DONE entry above for specifics.
+
+--- (old SLICE 6 teardown plan, now DONE in 6a, kept for reference) ---
+SLICE 6 (FINAL) — remove the Bun app and flip Astro to the default
+layout. This is large + destructive; do carefully and keep the build + tests
+green at the end. Steps:
+1. astro.config.mjs: remove `srcDir: "./astro"` and `publicDir: "./public-astro"`
+   overrides (revert to defaults ./src + ./public). Keep site, redirects,
+   tailwind vite plugin, markdown config.
+2. Move the Astro tree ./astro/* -> ./src/* (pages, layouts, components, styles).
+   The old Bun ./src/* must go first (step 4) or move into a temp — simplest:
+   delete the Bun server source (step 4), then move ./astro/* into ./src.
+   Wait: KEEP the typed data/view-model/content modules under src/features/**
+   that the .astro files import (projects-content, project-content,
+   experiment-catalog-content, decision-content, resume/{data,view-model},
+   site/content). Only remove the SERVER + React-presentation files.
+3. Move ./public-astro/* (favicon.svg, _headers) -> ./public; delete the old
+   Bun static shells public/*.html (index/resume/project/experiments/decisions/
+   blog.html); drop ./public-astro. Update astro.config import paths in the moved
+   .astro files (../../src/... becomes ../... etc. once under src/).
+   *** This path-rewrite is the fiddly part — every .astro import of
+   "../../src/features/..." changes depth when files move under src/. ***
+   Consider a tsconfig path alias (e.g. "@data/*") to avoid brittle relative
+   depths, OR keep ./astro as srcDir permanently and only delete the Bun server
+   (simpler, less churn — RECONSIDER whether the flip is worth it vs just
+   removing the server and leaving srcDir=./astro). Document the choice.
+4. Delete Bun server + runtime-only code: src/index.ts, src/site.tsx,
+   src/site/, src/pages/*.tsx, src/features/*/page.tsx (React pages),
+   src/features/site/layout.tsx + styles.ts + use-document-title.ts +
+   command-code-block.tsx + evidence-visuals.tsx (MUI; re-rendered in .astro),
+   src/server/, src/services/pdf.ts runtime endpoint? NO — build-pdf.ts still
+   needs generatePDF from services/pdf.ts; KEEP services/pdf.ts +
+   render-static-html.tsx + document*.ts(x) + pdf-fonts.ts. Remove only
+   server/routes/pdf.ts (the HTTP endpoint).
+5. Remove ops: Dockerfile, docker-compose*.yml, .dockerignore, deploy.env.example,
+   .github/workflows/ci.yml + deploy.yml (superseded by pages.yml).
+6. package.json: drop MUI/emotion deps + the Bun "start"/"dev" server scripts
+   (keep astro:* + build + build:pdf + test + typecheck). Make "dev"=astro dev,
+   "start"/"build" as needed.
+7. Tests: remove/rewrite server-only suites (tests/unit/pdf-route.test.ts,
+   tests/integration/api.test.ts, any notes-page/component tests using MUI).
+   Keep public-resume + view-model + pdf-rendering(build artifact) tests.
+   Add dist-output assertions if time permits.
+8. Verify: bun run typecheck, bun test (unit), bun run build all green; dist has
+   all pages at the SAME urls + resume.pdf + _headers.
+Given the size, this may take more than one iteration — if so, split: (6a) delete
+server + ops + deps + tests while keeping srcDir=./astro; (6b) optional flip to
+./src. Recommend 6a first (gets to a clean Astro-only repo) and treat the
+srcDir/publicDir flip as optional polish.
+
+Then the rest of #12: build-time resume PDF -> dist/resume.pdf, Cloudflare
+_headers, GitHub Actions + wrangler deploy, and finally remove the Bun app
+(delete src/index.ts server, Dockerfile/compose, runtime PDF endpoint) and
+flip srcDir/publicDir back to the defaults.
+
+Only after #12 is complete do the Blog feature slices unblock:
+  #3 content collection + Zod + tracer Post detail
+  #4 Blog index
+  #5 draft visibility (build-time exclusion)
+  #6 rich markdown  #7 metadata surfaces  #8 SEO head
+  #9 RSS/sitemap/robots  #10 home "Latest writing"  #11 migrate 2 seed notes
+
+
+GOTCHAS / NOTES
+---------------
+- astro.config.mjs `site` is set to the production origin https://tonylee.bio
+  (drives canonical URLs, sitemap, absolute RSS image URLs).
+- During migration two trees coexist: ./astro (new) and ./src (old Bun app).
+  Astro routes from ./astro/pages; the old app still serves from ./src.
+- ./public holds the old Bun static HTML shells; they would shadow Astro pages,
+  hence the temporary ./public-astro. Clean ./public when removing the Bun app.
+- content/blog/prefix-cache-hit-rate-matters.md already exists as a clean
+  Published fixture for the content collection (#3).

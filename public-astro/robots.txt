@@ -1,0 +1,6 @@
+# Static robots (#9): the whole site is public. Point crawlers at the sitemap
+# index emitted by @astrojs/sitemap.
+User-agent: *
+Allow: /
+
+Sitemap: https://tonylee.bio/sitemap-index.xml
