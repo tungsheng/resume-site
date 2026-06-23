@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { buildAdmonition } from "../../astro/markdown/mdast-admonitions";
-import { transformBlogImages } from "../../astro/markdown/rehype-blog-images";
+import { figureForParagraph, withImgAttrs } from "../../astro/markdown/hast-blog-images";
 
 // Issue #6 / ADR-0004 (#16): the two in-repo Markdown transforms are unit-tested
 // directly against minimal mdast/hast nodes so the mapping is asserted without a
@@ -56,19 +56,17 @@ describe("buildAdmonition (mdast)", () => {
   });
 });
 
-describe("transformBlogImages (rehype)", () => {
+describe("blog-images (hast)", () => {
   const img = (alt: string) => ({
     type: "element",
     tagName: "img",
-    properties: { src: "/assets/blog/x/y.svg", alt },
+    properties: { src: "/assets/blog/x/y.svg", alt } as Record<string, unknown>,
     children: [],
   });
+  const para = (...children: any[]) => ({ type: "element", tagName: "p", properties: {}, children });
 
   test("wraps a lone paragraph image as a figure with the alt as figcaption", () => {
-    const tree = { type: "root", children: [{ type: "element", tagName: "p", properties: {}, children: [img("A diagram")] }] };
-    const out = transformBlogImages(tree);
-
-    const figure = out.children![0]!;
+    const figure = figureForParagraph(para(img("A diagram")))!;
     expect(figure.tagName).toBe("figure");
     expect(figure.properties?.className).toEqual(["post-figure"]);
 
@@ -81,30 +79,27 @@ describe("transformBlogImages (rehype)", () => {
   });
 
   test("omits the figcaption when the image has no alt text", () => {
-    const tree = { type: "root", children: [{ type: "element", tagName: "p", properties: {}, children: [img("")] }] };
-    const out = transformBlogImages(tree);
-    const figure = out.children![0]!;
+    const figure = figureForParagraph(para(img("")))!;
     expect(figure.tagName).toBe("figure");
     expect(figure.children!.length).toBe(1);
   });
 
-  test("adds lazy/async to an inline image without rewrapping the paragraph", () => {
-    const tree = {
-      type: "root",
-      children: [
-        {
-          type: "element",
-          tagName: "p",
-          properties: {},
-          children: [{ type: "text", value: "before " }, img("inline"), { type: "text", value: " after" }],
-        },
-      ],
-    };
-    const out = transformBlogImages(tree);
-    const para = out.children![0]!;
-    expect(para.tagName).toBe("p");
-    const inline = para.children!.find((c) => c.tagName === "img")!;
-    expect(inline.properties?.loading).toBe("lazy");
-    expect(inline.properties?.decoding).toBe("async");
+  test("ignores whitespace-only text siblings when detecting a lone image", () => {
+    const figure = figureForParagraph(para({ type: "text", value: "  \n" }, img("Diagram")))!;
+    expect(figure.tagName).toBe("figure");
+  });
+
+  test("returns null for a paragraph that is not a lone image (inline image)", () => {
+    const p = para({ type: "text", value: "before " }, img("inline"), { type: "text", value: " after" });
+    expect(figureForParagraph(p)).toBeNull();
+  });
+
+  test("withImgAttrs adds lazy/async to an inline image without mutating the input", () => {
+    const original = img("inline");
+    const out = withImgAttrs(original);
+    expect(out.properties?.loading).toBe("lazy");
+    expect(out.properties?.decoding).toBe("async");
+    // Sätteri passes readonly nodes — the original must be untouched.
+    expect(original.properties?.loading).toBeUndefined();
   });
 });

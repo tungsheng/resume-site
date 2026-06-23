@@ -60,23 +60,16 @@ describe("blog production build output", () => {
     expect(await Bun.file(`dist/blog/${DRAFT.slug}/index.html`).exists()).toBe(false);
   });
 
-  // Issue #6 / ADR-0004: GFM tables, admonition callouts, and self-hosted images
-  // render under the Astro 7 Sätteri pipeline. Admonitions are a Sätteri mdast
-  // plugin (#16); the figure/lazy-image behavior is a hast plugin ported in #17.
-  itIf("renders admonition callouts and a GFM table", async () => {
+  // Issue #6 / ADR-0004: rich Markdown renders under the Astro 7 Sätteri
+  // pipeline — admonition callouts (mdast plugin, #16) and figure/lazy images
+  // (hast plugin, #17) — alongside native GFM tables and Shiki.
+  itIf("renders admonition callouts, a GFM table, and a lazy figure image", async () => {
     const html = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
     expect(html).toContain('class="callout callout-note"');
     expect(html).toContain('class="callout callout-warning"');
     expect(html).toContain('class="callout-title"');
     expect(html).toContain("<table>");
     expect(html).toContain(`src="/${RICH.asset}"`);
-  });
-
-  // TODO(#17): un-skip once the blog-image (hast) transform is ported onto
-  // Sätteri's plugin API. Until then Sätteri renders a lone image as a bare
-  // <img> with no <figure> wrap and no lazy/async attributes.
-  test.skip("wraps lone images in lazy figures", async () => {
-    const html = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
     expect(html).toContain('loading="lazy"');
     expect(html).toContain('decoding="async"');
     expect(html).toContain("<figure");
