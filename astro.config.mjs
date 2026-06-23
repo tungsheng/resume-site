@@ -2,8 +2,9 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
-import remarkAdmonitions from "./astro/markdown/remark-admonitions.ts";
-import rehypeBlogImages from "./astro/markdown/rehype-blog-images.ts";
+import { satteri } from "@astrojs/markdown-satteri";
+import mdastAdmonitions from "./astro/markdown/mdast-admonitions.ts";
+import hastBlogImages from "./astro/markdown/hast-blog-images.ts";
 
 // NOTE: ADR-0003 — the site is migrating to Astro zero-JS static output.
 // During the migration the new Astro tree lives under ./astro so it does not
@@ -41,12 +42,21 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   markdown: {
-    // ADR-0003 decision 6: Shiki highlighting matched to the dark code blocks.
-    // GFM (incl. tables) is on by default. #6 adds in-repo transforms: GitHub
-    // admonitions → callout panels (remark) and lazy/figure image handling (rehype).
+    // ADR-0004: adopt Astro 7's native Sätteri Markdown pipeline in place of
+    // remark/rehype. Shiki stays at the markdown level — Astro 7 applies syntax
+    // highlighting itself, independent of the engine (ADR-0004 decision 4).
     syntaxHighlight: "shiki",
     shikiConfig: { theme: "github-dark" },
-    remarkPlugins: [remarkAdmonitions],
-    rehypePlugins: [rehypeBlogImages],
+    // Sätteri GFM (incl. tables) is on by default; smartPunctuation is opt-in,
+    // enabled here for parity with Astro 6's smartypants (ADR-0004 decision 6).
+    // In-repo transforms run as Sätteri plugins (ADR-0004 decision 3):
+    // admonition callouts via mdastPlugins (#16); blog-image figures + lazy/
+    // async attrs via hastPlugins (#17). @astrojs/markdown-remark is
+    // intentionally NOT installed — these are native Sätteri plugins.
+    processor: satteri({
+      features: { gfm: true, smartPunctuation: true },
+      mdastPlugins: [mdastAdmonitions],
+      hastPlugins: [hastBlogImages],
+    }),
   },
 });

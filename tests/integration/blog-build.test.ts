@@ -60,12 +60,14 @@ describe("blog production build output", () => {
     expect(await Bun.file(`dist/blog/${DRAFT.slug}/index.html`).exists()).toBe(false);
   });
 
-  // Issue #6: rich Markdown renders in the built Post and the self-hosted asset
-  // is copied into dist/.
-  itIf("renders admonition callouts, a GFM table, and a lazy self-hosted image", async () => {
+  // Issue #6 / ADR-0004: rich Markdown renders under the Astro 7 Sätteri
+  // pipeline — admonition callouts (mdast plugin, #16) and figure/lazy images
+  // (hast plugin, #17) — alongside native GFM tables and Shiki.
+  itIf("renders admonition callouts, a GFM table, and a lazy figure image", async () => {
     const html = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
     expect(html).toContain('class="callout callout-note"');
     expect(html).toContain('class="callout callout-warning"');
+    expect(html).toContain('class="callout-title"');
     expect(html).toContain("<table>");
     expect(html).toContain(`src="/${RICH.asset}"`);
     expect(html).toContain('loading="lazy"');
@@ -139,7 +141,8 @@ describe("blog production build output", () => {
     expect(cont).toBeLessThan(prefix);
 
     // full content (not just summary): rendered body markup + a heading carry
-    // through, and the #6 self-hosted image is absolutized to the origin.
+    // through, and the #6 self-hosted image is absolutized to the origin. The
+    // admonition callout (Sätteri mdast plugin, #16) renders into the feed body.
     expect(rss).toContain("callout callout-note");
     expect(rss).toContain("Compute is rarely what runs out first");
     expect(rss).toContain(`https://tonylee.bio/${RICH.asset}`);

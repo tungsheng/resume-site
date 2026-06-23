@@ -1,6 +1,166 @@
 BLOG MIGRATION — PROGRESS LOG
 =============================
 
+#############################################################################
+ASTRO 7 + SÄTTERI MIGRATION (ADR-0004) — current track, branch feat/astro-7-satteri
+#############################################################################
+Epic #14 (closed, decomposed) -> slices #15 -> (#16 || #17) -> #18.
+The Astro-6 site is LIVE (#12 closed); this is the second of the two deploys.
+Astro 7 + Sätteri postdate the model cutoff — every API claim was re-verified
+against the INSTALLED package types, not memory / the ADR prose.
+
+DONE
+----
+- #15 DONE (commit e3390d8): Stand up Astro 7 + Sätteri end-to-end (tracer).
+    * astro 6.4.8 -> 7.0.0 (engines.node >=22.12 recorded; Vite 8 via the bump).
+    * astro.config markdown: processor = satteri({ features: { gfm:true,
+      smartPunctuation:true } }) from @astrojs/markdown-satteri@0.3.1. Dropped
+      remarkPlugins/rehypePlugins. @astrojs/markdown-remark NOT a direct dep.
+      syntaxHighlight:'shiki' + shikiConfig github-dark kept at markdown level
+      (Astro 7 applies Shiki independent of the engine — confirmed
+      <pre class="astro-code github-dark" style="background-color:#24292e">).
+    * BUILD-RUNTIME SPIKE (ADR-0004 dec.5) RESOLVED: astro build clean under
+      Bun 1.3.4 -> STAY ON BUN. Pinned bun-version:1.3.4 in pages.yml. No Node
+      step. Bun stays for install / test / PDF too.
+    * The two in-repo transforms (remark-admonitions, rehype-blog-images) are
+      DROPPED this slice (config no longer wires them; .ts files KEPT, still
+      unit-tested as pure fns). Sätteri renders `> [!NOTE]` as a plain
+      blockquote and a lone image as a bare <img>. Their integration assertions
+      are skipped with TODO(#16/#17) in blog-build.test.ts; one rich-markdown
+      test split into a live "GFM table + native img" test + a skipped
+      "callouts + lazy figures" test; the RSS `callout callout-note` assertion
+      removed with a TODO(#16).
+    * VERIFIED: typecheck clean, 41 unit pass, 16 integration pass (+1 skip),
+      full `bun run build` (astro + PDF) green under Bun, 0 <script> across all
+      31 pages. GFM tables / smart quotes / RSS full-content / sitemap / robots
+      / per-Post SEO / Status visibility all pass natively.
+    * Deprecation warning `markdown.gfm/smartypants are deprecated` still prints
+      during the /rss.xml container render — pre-existing internal (we don't set
+      those keys), same family as the #6/#9 warnings. Harmless.
+    * Issue: posted implementation-complete comment on #15 (NOT closed — closes
+      on merge per repo convention). #16/#17 unblocked, branch off this branch.
+
+- #16 DONE (commit 70f76fd): Port admonition callouts to a Sätteri mdast plugin.
+    * NEW astro/markdown/mdast-admonitions.ts (renamed from remark-admonitions.ts;
+      git rm'd the old file). Pure buildAdmonition(blockquote) -> replacement
+      callout node or null; thin defineMdastPlugin({ name:'admonitions',
+      blockquote }) wrapper. Registered via satteri({ mdastPlugins:[mdastAdmonitions] }).
+    * Sätteri honors data.hName/hProperties, so the marker-detect + tone-map
+      (5 GitHub kinds -> note/warning) + hName:'div' + callout classes +
+      title-prepend logic carries over. Output is VERBATIM the Astro-6 markup:
+      <div class="callout callout-note"><p class="callout-title">Note</p>
+      <p>…body…</p></div>. Verified in the built post AND the RSS feed body.
+    * PURE / NON-MUTATING: Sätteri passes readonly nodes, so the visitor RETURNS
+      a replacement (per satteri README) rather than mutating in place. The old
+      transformAdmonitions mutated the tree; buildAdmonition builds a new node
+      reusing child refs. A re-visit of the replacement is a safe no-op (title
+      carries no marker) — no infinite loop.
+    * TYPECHECK GOTCHA: the loose structural MdastNode we read/build isn't
+      assignable to satteri's strict node union at the visitor return boundary.
+      Bridged with one `as unknown as MdastNode` (param) + `as SatteriMdastNode`
+      (return) cast in the WRAPPER only; the pure helper stays dep-free.
+    * Unit suite rewritten to buildAdmonition signature (tone map, marker
+      stripped, body kept, plain-blockquote -> null, + a no-mutation test).
+      Un-skipped the callout integration assertion (split test now asserts
+      callouts + GFM table) and the RSS `callout callout-note` body assertion.
+    * VERIFIED: typecheck clean, 42 unit, 16 integration (+1 skip = the #17
+      figure test), full `bun run build` under Bun, 0 <script>.
+    * Issue: implementation-complete comment on #16 (NOT closed — closes on
+      merge). NEXT: #17 (blog-image figure hast plugin), independent, unblocked.
+
+- #17 DONE (commit cd40979): Port blog-image figures to a Sätteri hast plugin.
+    * NEW astro/markdown/hast-blog-images.ts (renamed from rehype-blog-images.ts;
+      git rm'd the old file). Two pure helpers: figureForParagraph(p) -> <figure>
+      for a lone-image paragraph or null; withImgAttrs(img) -> copy with
+      loading=lazy/decoding=async. Thin defineHastPlugin({ element:{ filter:
+      ['img','p'], visit } }) branches on tagName. Registered via
+      satteri({ hastPlugins:[hastBlogImages] }).
+    * Visit branches: lone-image <p> -> <figure> (figureForParagraph sets the img
+      attrs itself); any other <img> (inline) just gets withImgAttrs. The two
+      paths are independent so VISIT ORDER DOESN'T MATTER — every img ends lazy,
+      only lone imgs wrap. The double-processing worry (img also matched by the
+      filter) was UNFOUNDED — verified output has exactly one <figure>, no
+      nested/double wrap. Markup is verbatim Astro-6:
+      <figure class="post-figure"><img … loading="lazy" decoding="async">
+      <figcaption>…alt…</figcaption></figure>.
+    * PURE / NON-MUTATING (readonly nodes; visitor returns replacements). Same
+      `as unknown as HastNode` / `as SatteriHastNode` cast bridge as #16, in the
+      WRAPPER only.
+    * Unit suite rewritten to figureForParagraph/withImgAttrs (figure wrap,
+      caption-from-alt, empty-alt no caption, whitespace-sibling ignore, inline
+      -> null, non-mutation). GOTCHA: the test img() helper's properties needed
+      `as Record<string,unknown>` so the non-mutation assertion can read .loading.
+    * Un-skipped the figure integration assertions — MERGED them back into the
+      live rich-Markdown test, so NO integration skips remain (16 pass, 0 skip).
+    * VERIFIED: typecheck clean, 44 unit, 16 integration (0 skip), full
+      `bun run build` under Bun, 0 <script>.
+    * Issue: implementation-complete comment on #17 (NOT closed — closes on
+      merge). ALL THREE transform slices #15/#16/#17 DONE.
+
+- #18 VERIFIED (no code commit — verification slice; ADR-0004 says the visual
+  diff is one-off, NOT a permanent test). Parity sign-off: **GO** (technically).
+    * Deterministic: full integration suite passes UNCHANGED on Astro-7 (16/0),
+      typecheck + 44 unit green, 0 <script> across 31 pages, compressHTML on the
+      Astro-7 default (jsx), CONTEXT.md unchanged vs main, RSS full-fidelity
+      (callout + absolutized image + shiki in feed body).
+    * VISUAL DIFF — substituted a LOCAL Astro-6 baseline for the (missing, see
+      below) live one: `git worktree add /tmp/astro6-baseline main` + bun install
+      + bunx astro build (astro 6.4.8), diffed its dist/ vs the Astro-7 dist/.
+      For a zero-JS site the HTML IS the page, so this is a complete proxy.
+      RESULTS: visible TEXT content IDENTICAL on every page; smart punctuation
+      IDENTICAL (curly quotes/dashes pair the same — better than ADR-0004
+      feared); rich-markdown structural markup IDENTICAL (callout-note/warning/
+      title 1/1/2, table/th/td 1/3/9, figure/figcaption/lazy/async 1/1/1/1,
+      shiki astro-code github-dark #24292e). Only deltas are build-volatile/
+      toolchain: asset content-hashes, scoped data-astro-cid-* ids, compressHTML
+      whitespace, and CSS from the newer Lightning CSS in Vite 8 (modern
+      @media (width>=40rem) range syntax ≡ min-width; equivalent computed style,
+      same Tailwind 4.3.1 source). Worktree removed after.
+    * Issue: posted full go/no-go on #18 (GO, left OPEN — see blocker).
+
+*** ASTRO-7 MIGRATION IS CODE-COMPLETE + PARITY-VERIFIED on feat/astro-7-satteri
+    (#15/#16/#17 done, #18 verified GO). 6 commits ahead of main. ***
+
+#18 LIVE DIFF DONE (the real one). Cloudflare Pages IS live + green at
+    https://resume-site-4js.pages.dev serving the Astro-6 build (zero-JS, all
+    routes 200). Fetched 12 live pages and diffed vs the local Astro-7 dist:
+    text content IDENTICAL on all 12 (only the /resume/ [&>div] tailwind-class
+    tag-stripping artifact); rich-markdown structural markup IDENTICAL
+    (callouts/table/figure/lazy/shiki). Matches the local-baseline diff exactly,
+    now confirmed against production. #18 verdict GO, all ACs met.
+
+DEPLOYMENT STATUS (clarified — NOT a blocker for the build):
+    * Cloudflare Pages build + deploy = DONE/green at resume-site-4js.pages.dev.
+    * The ONLY gap: custom domain. tonylee.bio still resolves to the OLD
+      pre-Astro React SPA (old Hostinger VPS via DNS). To finish #12: attach
+      tonylee.bio as a Pages custom domain + point its DNS at Cloudflare Pages.
+      (DNS = user action; agent cannot do it.) Clarified on #12.
+    * THEN decide the Astro-7 cutover: parity holds, so promoting feat/
+      astro-7-satteri is safe whenever desired (ADR-0004 two-deploy plan, or
+      straight to 7).
+
+PENDING (normal): merge feat/astro-7-satteri -> main (closes #15/#16/#17;
+    #18 closes after the production cutover sign-off).
+
+API NOTES (verified from installed satteri@0.9.1 dist types — kept for ref)
+----
+- Plugin helpers: defineMdastPlugin / defineHastPlugin from "satteri".
+  Register via satteri({ mdastPlugins:[...], hastPlugins:[...] }).
+- Admonition (#16): defineMdastPlugin({ name, blockquote(node, ctx) }).
+- Blog images (#17): defineHastPlugin({ name,
+    element: { filter:['img','p'], visit(node, ctx) } }).
+- *** MUTATION MODEL IS DIFFERENT *** — nodes are Readonly; mutate through the
+  CONTEXT, not in place: ctx.replaceNode(node, newNode),
+  ctx.setProperty(node,'data',{ hName, hProperties }), ctx.prependChild(...),
+  ctx.removeNode(...), ctx.insertChildAt(...). data.hName/hProperties ARE
+  honored (so the callout div + classes + title-prepend mechanism carries
+  over). The current transformAdmonitions/transformBlogImages mutate trees
+  directly, so the port rewrites the MECHANISM; the marker-detect / tone-map /
+  figure-wrap LOGIC and the unit-test expectations carry over.
+- features.gfm DEFAULTS TRUE (ADR said "opt-in" — reality: on by default);
+  features.smartPunctuation defaults FALSE (must enable, done in #15).
+
+
 Source of truth: GitHub issues (gh issue list). The PRD epic is #1; child
 slices are #3-#12. NOTE: .scratch/blog-prd.md is the PRE-ADR-0003 PRD
 (Bun server-rendered) and is SUPERSEDED — do not implement from it. ADR-0003
