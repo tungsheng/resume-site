@@ -1,6 +1,64 @@
 BLOG MIGRATION — PROGRESS LOG
 =============================
 
+#############################################################################
+ASTRO 7 + SÄTTERI MIGRATION (ADR-0004) — current track, branch feat/astro-7-satteri
+#############################################################################
+Epic #14 (closed, decomposed) -> slices #15 -> (#16 || #17) -> #18.
+The Astro-6 site is LIVE (#12 closed); this is the second of the two deploys.
+Astro 7 + Sätteri postdate the model cutoff — every API claim was re-verified
+against the INSTALLED package types, not memory / the ADR prose.
+
+DONE
+----
+- #15 DONE (commit e3390d8): Stand up Astro 7 + Sätteri end-to-end (tracer).
+    * astro 6.4.8 -> 7.0.0 (engines.node >=22.12 recorded; Vite 8 via the bump).
+    * astro.config markdown: processor = satteri({ features: { gfm:true,
+      smartPunctuation:true } }) from @astrojs/markdown-satteri@0.3.1. Dropped
+      remarkPlugins/rehypePlugins. @astrojs/markdown-remark NOT a direct dep.
+      syntaxHighlight:'shiki' + shikiConfig github-dark kept at markdown level
+      (Astro 7 applies Shiki independent of the engine — confirmed
+      <pre class="astro-code github-dark" style="background-color:#24292e">).
+    * BUILD-RUNTIME SPIKE (ADR-0004 dec.5) RESOLVED: astro build clean under
+      Bun 1.3.4 -> STAY ON BUN. Pinned bun-version:1.3.4 in pages.yml. No Node
+      step. Bun stays for install / test / PDF too.
+    * The two in-repo transforms (remark-admonitions, rehype-blog-images) are
+      DROPPED this slice (config no longer wires them; .ts files KEPT, still
+      unit-tested as pure fns). Sätteri renders `> [!NOTE]` as a plain
+      blockquote and a lone image as a bare <img>. Their integration assertions
+      are skipped with TODO(#16/#17) in blog-build.test.ts; one rich-markdown
+      test split into a live "GFM table + native img" test + a skipped
+      "callouts + lazy figures" test; the RSS `callout callout-note` assertion
+      removed with a TODO(#16).
+    * VERIFIED: typecheck clean, 41 unit pass, 16 integration pass (+1 skip),
+      full `bun run build` (astro + PDF) green under Bun, 0 <script> across all
+      31 pages. GFM tables / smart quotes / RSS full-content / sitemap / robots
+      / per-Post SEO / Status visibility all pass natively.
+    * Deprecation warning `markdown.gfm/smartypants are deprecated` still prints
+      during the /rss.xml container render — pre-existing internal (we don't set
+      those keys), same family as the #6/#9 warnings. Harmless.
+    * Issue: posted implementation-complete comment on #15 (NOT closed — closes
+      on merge per repo convention). #16/#17 unblocked, branch off this branch.
+
+API NOTES FOR #16 / #17 (verified from installed satteri@0.9.1 dist types)
+----
+- Plugin helpers: defineMdastPlugin / defineHastPlugin from "satteri".
+  Register via satteri({ mdastPlugins:[...], hastPlugins:[...] }).
+- Admonition (#16): defineMdastPlugin({ name, blockquote(node, ctx) }).
+- Blog images (#17): defineHastPlugin({ name,
+    element: { filter:['img','p'], visit(node, ctx) } }).
+- *** MUTATION MODEL IS DIFFERENT *** — nodes are Readonly; mutate through the
+  CONTEXT, not in place: ctx.replaceNode(node, newNode),
+  ctx.setProperty(node,'data',{ hName, hProperties }), ctx.prependChild(...),
+  ctx.removeNode(...), ctx.insertChildAt(...). data.hName/hProperties ARE
+  honored (so the callout div + classes + title-prepend mechanism carries
+  over). The current transformAdmonitions/transformBlogImages mutate trees
+  directly, so the port rewrites the MECHANISM; the marker-detect / tone-map /
+  figure-wrap LOGIC and the unit-test expectations carry over.
+- features.gfm DEFAULTS TRUE (ADR said "opt-in" — reality: on by default);
+  features.smartPunctuation defaults FALSE (must enable, done in #15).
+
+
 Source of truth: GitHub issues (gh issue list). The PRD epic is #1; child
 slices are #3-#12. NOTE: .scratch/blog-prd.md is the PRE-ADR-0003 PRD
 (Bun server-rendered) and is SUPERSEDED — do not implement from it. ADR-0003
