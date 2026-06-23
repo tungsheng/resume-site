@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
 /*
- * Design tokens ported 1:1 from the original MUI theme (ADR-0003 decision 5: faithful
- * port, design frozen). Exposing them through Tailwind's @theme makes them
- * available as utilities (text-ink, bg-paper, font-display, …) so the page
- * ports in later #12 slices match the current look.
+ * Swiss-minimal design system (ADR-0005). A light, grid-led, typographically
+ * disciplined look with restrained monospace "system detailing". This re-authors
+ * the token layer that ADR-0003 froze; it is the single source of truth for the
+ * redesign. Token NAMES are preserved where existing pages/utilities depend on
+ * them (bg-paper, text-ink, text-muted, border-surface-border, text-go-green-dark,
+ * the accent-soft/warning/support callout tokens) so un-redesigned pages keep
+ * rendering while the redesign rolls out page-by-page.
  */
+
+/* Self-hosted Inter (ADR-0005): reuses the woff2 already shipped for the resume
+ * PDF, so web + PDF type unify with no new font infrastructure. Variable weight. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/InterVariable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/InterVariable-Italic.woff2") format("woff2");
+}
+
 @theme {
-  --color-ink: #16231f;
-  --color-muted: #465750;
+  /* Near-monochrome Swiss palette: white paper, neutral near-black ink, greys,
+   * hairline rules, and a single accent. */
+  --color-paper: #ffffff;
+  --color-canvas: #ffffff;
+  --color-ink: #14171a;
+  --color-muted: #5c6670;
+  --color-faint: #8b939c;
+  --color-surface-border: #e6e6e6;
+  --color-rule: #e6e6e6;
+
+  /* Single accent — go-green (ADR-0005). go-green-dark is the on-white text tone
+   * (AA contrast); go-green is the mark/rule tone. */
   --color-go-green: #00ab66;
   --color-go-green-dark: #006b40;
+
+  /* Retained semantic tokens — the Markdown callout panels (ADR-0004) and the
+   * not-yet-redesigned portfolio pages still consume these. */
   --color-accent-soft: #dff6ee;
   --color-warning-warm: #a95718;
   --color-warning-soft: #f5e0cb;
   --color-support-cool: #276f89;
-  --color-paper: #ffffff;
-  --color-surface-border: #d8ded8;
-  --color-canvas: #f7f8f5;
 
-  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  /* Type: Inter for headings + body, JetBrains Mono for labels/metadata/code.
+   * The serif display face and the Avenir system stack are dropped (ADR-0005). */
+  --font-sans: "Inter", system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-display: "Inter", system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
@@ -32,23 +65,51 @@ body {
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background-color: color-mix(in srgb, var(--color-warning-warm) 20%, transparent);
+  background-color: color-mix(in srgb, var(--color-go-green) 22%, transparent);
 }
 
 /*
- * Faithful port of the MUI display headings (theme.ts h3/h4 + responsiveFontSizes).
- * MUI scaled headings DOWN on small screens; Tailwind arbitrary breakpoints below
- * mirror MUI's real breakpoints (sm 600 / md 900 / lg 1200) and the measured sizes
- * so the type scale matches prod at every width — including mobile. Line-heights
- * match MUI (h3 1.06, h4 1.12).
+ * System-detailing primitives (ADR-0005 §6). The techie character lives here:
+ * monospace uppercase labels, section numbering, tabular figures, hairlines.
+ */
+
+/* Monospace UPPERCASE letter-spaced eyebrow/label — the workhorse mono accent. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Section index (01 — 02 — 03): mono, accent, tabular so digits align. */
+.section-index {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-go-green-dark);
+}
+
+/* Tabular figures for data/metadata so numbers align in a column. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Display heading sizes (kept for not-yet-redesigned portfolio pages, now set in
+ * Inter via --font-display). line-heights tightened for the grotesque.
  */
 .h-detail-title {
   font-family: var(--font-display);
   font-weight: 600;
-  line-height: 1.06;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
   text-wrap: balance;
   font-size: 1.71rem;
 }
@@ -65,7 +126,8 @@ body {
 .h-section-title {
   font-family: var(--font-display);
   font-weight: 600;
-  line-height: 1.12;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   text-wrap: balance;
   font-size: 1.425rem;
 }
