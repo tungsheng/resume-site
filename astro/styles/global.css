@@ -101,6 +101,22 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Monospace uppercase call-to-action link — the Swiss replacement for filled
+ * buttons. Pair with `group` + an arrow <span> for the hover nudge, and a
+ * color/hover utility (e.g. text-go-green-dark hover:text-ink). */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+
 /*
  * Display heading sizes (kept for not-yet-redesigned portfolio pages, now set in
  * Inter via --font-display). line-heights tightened for the grotesque.

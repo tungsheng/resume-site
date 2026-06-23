@@ -2,26 +2,12 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { projectPortfolioContent } from "../../src/features/site/projects-content";
 
-// Faithful port of the /projects index route (ProjectsIndexRoute in
-// src/features/project/page.tsx). Design frozen (ADR-0003 §5); the typed data
-// module is reused unchanged (ADR-0003 §9). The two project DETAIL routes
-// (/projects/gpu-inference-lab, /projects/cuda-kernel-lab) are a separate slice.
+// Swiss-minimal redesign — Projects index (ADR-0005 / PRD #20 rollout). Flush-
+// left header with a hairline-ruled right-rail note, and projects as hairline-
+// separated editorial blocks (mono meta rail + content) instead of shadowed
+// cards. Presentation only — the typed data module is reused unchanged.
 const PAGE_TITLE = "Projects | Tony Lee";
 const { title, lede, summary, projects } = projectPortfolioContent;
-
-const chipBase =
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
-const chipMuted = chipBase + " border-go-green/25 bg-go-green/[0.065] text-ink/70";
-const chipDefault = chipBase + " border-go-green/30 bg-go-green/[0.075] text-ink";
-const chipSuccess = chipBase + " border-go-green/30 bg-go-green/10 text-go-green-dark";
-const chipInfo = chipBase + " border-support-cool/30 bg-support-cool/10 text-support-cool";
-
-const primaryBtn =
-  "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
-const outlinedBtn =
-  "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
-const textBtn =
-  "link-external inline-flex min-h-10 items-center gap-1.5 px-2 text-sm font-medium text-ink hover:underline";
 ---
 
 <BaseLayout
@@ -30,72 +16,86 @@ const textBtn =
   activeNav="projects"
   breadcrumbs={[{ label: "Home", href: "/" }, { label: "Projects" }]}
 >
-  <section class="grid gap-8 md:gap-9">
-    <!-- Index header -->
-    <div class="grid items-start gap-[0.85rem] md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.52fr)]">
-      <div class="flex max-w-[58rem] flex-col gap-3">
-        <h1 class="h-detail-title">
-          {title}
-        </h1>
-        <p class="text-base leading-relaxed text-muted">{lede}</p>
-      </div>
-      <div class="rounded-lg border border-go-green/20 bg-go-green/8 p-3">
-        <p class="text-sm leading-relaxed text-muted">{summary}</p>
-      </div>
+  <!-- Index header -->
+  <section
+    class="grid gap-6 border-b border-surface-border pb-10 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.5fr)] lg:gap-12"
+  >
+    <div class="flex max-w-[52rem] flex-col gap-5">
+      <h1
+        class="text-balance font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.25rem)]"
+      >
+        {title}
+      </h1>
+      <p class="text-[1.05rem] leading-relaxed text-muted md:text-[1.15rem]">{lede}</p>
     </div>
+    <p class="border-l border-surface-border pl-4 text-sm leading-relaxed text-muted lg:self-end">
+      {summary}
+    </p>
+  </section>
 
-    <!-- Project cards -->
-    <div class="grid gap-2.5 md:gap-3 lg:grid-cols-2">
-      {
-        projects.map((project) => (
-          <section class="flex h-full flex-col gap-4 rounded-lg border border-surface-border bg-paper p-6">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class={chipMuted}>{project.layer}</span>
-              <span class={project.statusTone === "supported" ? chipSuccess : chipInfo}>
-                {project.status}
-              </span>
-              <span class={chipDefault}>{project.experimentCount} experiments</span>
-            </div>
+  <!-- Project blocks -->
+  <section>
+    {
+      projects.map((project) => (
+        <article class="grid gap-4 border-b border-surface-border py-9 md:grid-cols-[minmax(0,8rem)_minmax(0,1fr)] md:gap-10">
+          <div class="flex flex-row flex-wrap gap-x-4 gap-y-1 md:flex-col md:gap-2">
+            <span class="eyebrow">{project.layer}</span>
+            <span
+              class={
+                "eyebrow " +
+                (project.statusTone === "supported" ? "text-go-green-dark" : "text-support-cool")
+              }
+            >
+              {project.status}
+            </span>
+            <span class="eyebrow text-faint">{project.experimentCount} experiments</span>
+          </div>
 
-            <div class="grid gap-2">
-              <h2 class="h-section-title">
+          <div class="grid gap-3">
+            <h2 class="text-[1.4rem] font-semibold leading-tight tracking-[-0.01em] md:text-[1.7rem]">
+              <a href={project.path} class="transition-colors hover:text-go-green-dark">
                 {project.title}
-              </h2>
-              <p class="text-sm leading-relaxed text-muted">{project.summary}</p>
-              <p class="text-sm font-semibold">{project.result}</p>
-            </div>
+              </a>
+            </h2>
+            <p class="max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{project.summary}</p>
+            <p class="text-[0.97rem] font-semibold text-ink">{project.result}</p>
 
-            <ul class="grid gap-2">
+            <ul class="mt-1 grid gap-2">
               {project.evidence.map((item) => (
-                <li class="grid grid-cols-[0.55rem_minmax(0,1fr)] items-baseline gap-2 text-[0.92rem] leading-normal text-muted">
-                  <span
-                    class="mt-1 inline-block h-[0.45rem] w-[0.45rem] rounded-full bg-go-green/90"
-                    aria-hidden="true"
-                  />
-                  <span>{item}</span>
+                <li class="grid grid-cols-[0.9rem_minmax(0,1fr)] gap-2 text-[0.92rem] leading-normal text-muted">
+                  <span class="font-mono text-go-green-dark" aria-hidden="true">
+                    &mdash;
+                  </span>
+                  <span class="max-w-[44rem]">{item}</span>
                 </li>
               ))}
             </ul>
 
-            <div class="mt-auto flex flex-wrap items-center gap-3 pt-1">
-              <a href={project.path} class={primaryBtn}>
+            <div class="mt-3 flex flex-wrap items-center gap-x-7 gap-y-3">
+              <a href={project.path} class="cta group text-go-green-dark hover:text-ink">
                 View project
+                <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">
+                  &rarr;
+                </span>
               </a>
-              <a href={project.primaryAction.href} class={outlinedBtn}>
+              <a href={project.primaryAction.href} class="cta group text-ink hover:text-go-green-dark">
                 {project.primaryAction.label}
+                <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">
+                  &rarr;
+                </span>
               </a>
               <a
                 href={project.repositoryUrl}
                 target="_blank"
                 rel="noreferrer"
-                class={textBtn}
+                class="cta link-external text-ink hover:text-go-green-dark"
               >
                 GitHub
               </a>
             </div>
-          </section>
-        ))
-      }
-    </div>
+          </div>
+        </article>
+      ))
+    }
   </section>
 </BaseLayout>
