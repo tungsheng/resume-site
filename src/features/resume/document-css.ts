@@ -49,7 +49,7 @@ body {
 }
 
 .resume-document .header {
-  padding: 0.22in var(--page-x) 0.1in;
+  padding: 0.24in var(--page-x) 0.12in;
 }
 
 .resume-document .header-content {
@@ -66,22 +66,24 @@ body {
   row-gap: 5px;
 }
 
+/* Full-width tagline below the name/contacts row — one clean accent line rather
+   than a dense two-line block crowding the name. */
 .resume-document .header-subtitle {
-  margin: 0;
-  font-size: 7.6pt;
+  margin: 12px 0 0;
+  font-size: 7.5pt;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.7px;
   color: var(--resume-accent-dark);
-  font-weight: 600;
-  line-height: 1.35;
+  font-weight: 500;
+  line-height: 1.4;
   font-family: var(--ui-font);
 }
 
 .resume-document .name {
   margin: 0;
-  font-size: 25pt;
+  font-size: 24pt;
   font-weight: 600;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.3px;
   text-transform: none;
   color: var(--resume-ink);
   font-family: var(--ui-font);
@@ -91,9 +93,9 @@ body {
 .resume-document .contact-info {
   min-width: 2.12in;
   max-width: 2.28in;
-  padding-top: 4px;
+  padding-top: 3px;
   display: grid;
-  row-gap: 5px;
+  row-gap: 6px;
   text-align: right;
   font-family: var(--ui-font);
 }
@@ -121,7 +123,7 @@ body {
 }
 
 .resume-document .header-divider {
-  margin-top: 10px;
+  margin-top: 12px;
   border-top: 1px solid var(--resume-rule);
 }
 

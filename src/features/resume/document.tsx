@@ -149,7 +149,6 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
         <div className="header-content">
           <div className="header-left">
             <h1 className="name">{view.header.name}</h1>
-            {headlineText ? <p className="header-subtitle">{headlineText}</p> : null}
           </div>
 
           {view.header.contacts.email || view.header.contacts.linkedin ? (
@@ -184,6 +183,8 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
             </div>
           ) : null}
         </div>
+
+        {headlineText ? <p className="header-subtitle">{headlineText}</p> : null}
 
         <div className="header-divider" />
       </header>
