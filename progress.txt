@@ -49,9 +49,30 @@ DONE
       spans + mono `arrow` (→) + small mono `nodeBadge` Code links.
     * CommandCodeBlock UNCHANGED (dark #0d1117 panel reads fine on the light page).
 
+- EXPERIMENTS + DECISIONS (commit 3dc1b31; #21): index + detail families.
+    * Index pages (experiments.astro, decisions.astro): same hairline editorial
+      blocks as the projects index. Decision status counts -> tone-colored mono
+      labels (STATUS_COLOR map -> `color:#...`).
+    * Experiment CATALOG (ExperimentCatalog.astro): the browse table is now a
+      SWISS HAIRLINE TABLE — mono-eyebrow column headers over `border-b
+      border-ink/15`, rows `border-b border-surface-border`, no outer box; focus
+      -> mono labels; status -> tone-colored mono lines; details -> .cta.
+    * Experiment DETAIL (ExperimentDetail.astro): panels->hairline spec grids;
+      result tables->hairline tables w/ .tabular figures; accent/warn panels->
+      hairline-left blocks (border-l-2 + pl-4, accent=go-green warn=warning-warm);
+      chips->mono labels; tone chips->tone-colored mono; buttons->.cta.
+    * Decision DETAIL ([project].astro): status dashboard->hairline count grid
+      (tone-colored status eyebrow + tabular count); decision matrix->domain-
+      grouped hairline cells w/ tone status labels + hairline-left next-evidence.
+    * EvidenceMatrix.astro: now a plain `bg-paper p-4` cell inside the parent
+      hairline grid; bars are SHARP (rounded-none) on a bg-surface-border track;
+      mono column labels, tabular values. CommandCodeBlock unchanged throughout.
+
 NEXT (rollout order, tracked in #21):
-  [ ] Experiments (index 127L + [entry] catalog/detail) · Decisions (index 130L +
-      [project]) — reuse the hairline-grid + mono-label + tone-label idioms above.
+  [ ] Blog index (/blog 68L — reuse the home Latest-writing list pattern) ·
+      Blog .post-body restyle (callout/figure/table/code tokens in blog/[slug]
+      .astro; markup UNCHANGED so ADR-0004 transforms + tests stay green).
+  [ ] Resume web (/resume 220L) · then Resume PDF re-theme (document-css) fast-follow.
   [ ] Blog index (reuse the home Latest-writing list pattern) · Blog .post-body
       restyle (callout/figure/table/code tokens; markup unchanged)
   [ ] Resume web · then Resume PDF re-theme (document-css) as a fast-follow.
