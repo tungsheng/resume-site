@@ -68,11 +68,23 @@ DONE
       hairline grid; bars are SHARP (rounded-none) on a bg-surface-border track;
       mono column labels, tabular values. CommandCodeBlock unchanged throughout.
 
+- BLOG (commit 9f8c501; #21): index + post body.
+    * Blog index (blog/index.astro): hairline-ruled post list w/ mono meta rail
+      (category / ISO date / reading time) + mono tag labels.
+    * Post page (blog/[slug].astro): mono eyebrow + clamp Inter title + mono
+      ISO/reading-time meta; TOC -> hairline top/bottom block w/ mono title;
+      related -> hairline-ruled list w/ mono kind labels (ISO dates via
+      toISOString().slice(0,10)).
+    * .post-body RESTYLE — <Content/> MARKUP UNCHANGED (ADR-0004 Sätteri
+      transforms + the callout/figure/table integration asserts untouched);
+      only CSS changed: callouts -> flat hairline-left blocks (border-left 3px
+      + faint tone tint, mono uppercase title, no radius); GFM tables -> Swiss
+      horizontal-rule tables w/ mono column headers; figures -> sharp imgs w/
+      mono uppercase captions; sharp code blocks; Inter prose.
+
 NEXT (rollout order, tracked in #21):
-  [ ] Blog index (/blog 68L — reuse the home Latest-writing list pattern) ·
-      Blog .post-body restyle (callout/figure/table/code tokens in blog/[slug]
-      .astro; markup UNCHANGED so ADR-0004 transforms + tests stay green).
-  [ ] Resume web (/resume 220L) · then Resume PDF re-theme (document-css) fast-follow.
+  [ ] Resume web (/resume 220L) — last web page.
+  [ ] Resume PDF re-theme (document-css) — fast-follow (print, separate render).
   [ ] Blog index (reuse the home Latest-writing list pattern) · Blog .post-body
       restyle (callout/figure/table/code tokens; markup unchanged)
   [ ] Resume web · then Resume PDF re-theme (document-css) as a fast-follow.
