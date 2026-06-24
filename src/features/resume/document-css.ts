@@ -18,15 +18,24 @@ body {
   margin: 0;
 }
 
+/* Swiss-minimal PDF re-theme (ADR-0005 / #21). Aligns the build-time resume PDF
+   to the web Swiss system within the constraint that ONLY Inter is embedded
+   (no monospace): ink name, neutral hairline rules under section labels, dropped
+   timeline ornament, uppercase letter-spaced tabular dates, single accent
+   reserved for the badges line and list bullets. Layout metrics kept so the
+   resume still fits one Letter page. */
 .resume-document {
-  --resume-accent: #00AB66;
-  --resume-ink: #16231f;
-  --resume-muted: #465750;
+  --resume-accent: #00ab66;
+  --resume-accent-dark: #006b40;
+  --resume-ink: #14171a;
+  --resume-muted: #5c6670;
+  --resume-faint: #8b939c;
+  --resume-rule: #e0e2e0;
   --ui-font: '${RESUME_PDF_FONT_FAMILY}', Arial, sans-serif;
   --page-x: 0.38in;
   --column-gap: 0.2in;
   --sidebar-width: 2.05in;
-  --section-gap: 0.2in;
+  --section-gap: 0.18in;
   --experience-gap: 0.13in;
 
   width: 8.5in;
@@ -40,7 +49,7 @@ body {
 }
 
 .resume-document .header {
-  padding: 0.22in var(--page-x) 0.1in;
+  padding: 0.24in var(--page-x) 0.12in;
 }
 
 .resume-document .header-content {
@@ -57,24 +66,26 @@ body {
   row-gap: 5px;
 }
 
+/* Full-width tagline below the name/contacts row — one clean accent line rather
+   than a dense two-line block crowding the name. */
 .resume-document .header-subtitle {
-  margin: 0;
-  font-size: 8.75pt;
-  letter-spacing: 0;
-  color: var(--resume-muted);
+  margin: 12px 0 0;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--resume-accent-dark);
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.4;
   font-family: var(--ui-font);
-  white-space: nowrap;
 }
 
 .resume-document .name {
   margin: 0;
-  font-size: 26pt;
-  font-weight: 500;
-  letter-spacing: 0.28px;
+  font-size: 24pt;
+  font-weight: 600;
+  letter-spacing: -0.3px;
   text-transform: none;
-  color: var(--resume-accent);
+  color: var(--resume-ink);
   font-family: var(--ui-font);
   line-height: 1;
 }
@@ -82,9 +93,9 @@ body {
 .resume-document .contact-info {
   min-width: 2.12in;
   max-width: 2.28in;
-  padding-top: 4px;
+  padding-top: 3px;
   display: grid;
-  row-gap: 5px;
+  row-gap: 6px;
   text-align: right;
   font-family: var(--ui-font);
 }
@@ -97,35 +108,23 @@ body {
 }
 
 .resume-document .contact-link {
-  font-size: 8.65pt;
-  color: var(--resume-ink);
-  max-width: 1.95in;
-  line-height: 1.28;
+  font-size: 8.5pt;
+  color: var(--resume-muted);
+  max-width: 2.1in;
+  line-height: 1.3;
   text-align: right;
   word-break: break-word;
   text-decoration: none;
 }
 
+/* Swiss: drop the contact icons (matches the web rail), keep mono-clean text. */
 .resume-document .contact-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--resume-muted);
-  width: 11px;
-  height: 11px;
-  line-height: 0;
-  flex-shrink: 0;
-}
-
-.resume-document .contact-icon svg {
-  width: 11px;
-  height: 11px;
-  display: block;
+  display: none;
 }
 
 .resume-document .header-divider {
-  margin-top: 10px;
-  border-top: 1px solid var(--resume-accent);
+  margin-top: 12px;
+  border-top: 1px solid var(--resume-rule);
 }
 
 .resume-document .main-content {
@@ -151,10 +150,12 @@ body {
 
 .resume-document .section-title {
   margin: 0 0 7px;
-  font-size: 9.7pt;
-  font-weight: 700;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--resume-rule);
+  font-size: 8.4pt;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1.15px;
+  letter-spacing: 1.3px;
   color: var(--resume-ink);
   font-family: var(--ui-font);
 }
@@ -167,8 +168,8 @@ body {
 .resume-document .project-title,
 .resume-document .experience-title {
   font-weight: 600;
-  font-size: 9.85pt;
-  color: var(--resume-muted);
+  font-size: 9.7pt;
+  color: var(--resume-ink);
 }
 
 .resume-document .education-school,
@@ -182,10 +183,12 @@ body {
 
 .resume-document .education-date,
 .resume-document .experience-date {
-  font-size: 7.85pt;
-  color: var(--resume-muted);
-  font-style: italic;
-  letter-spacing: 0.18px;
+  font-size: 7.6pt;
+  color: var(--resume-faint);
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
 }
 
 .resume-document .skills-list {
@@ -264,32 +267,19 @@ body {
   position: relative;
 }
 
+/* Swiss: drop the decorative timeline rail + dots; entries stand on spacing. */
 .resume-document .experience-rail {
-  display: block;
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: 5px;
-  width: 2px;
-  background: rgba(0, 171, 102, 0.5);
+  display: none;
 }
 
 .resume-document .experience-item {
   margin-bottom: var(--experience-gap);
   position: relative;
-  padding-left: 22px;
+  padding-left: 0;
 }
 
 .resume-document .experience-dot {
-  display: block;
-  position: absolute;
-  left: 1px;
-  top: 3px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid var(--resume-accent);
-  background: #fff;
+  display: none;
 }
 
 .resume-document .experience-content {
@@ -316,7 +306,7 @@ body {
 }
 
 .resume-document .experience-separator {
-  color: #9ca3af;
+  color: var(--resume-faint);
   font-size: 8.2pt;
 }
 

@@ -11,9 +11,9 @@ import {
   type ProjectId,
 } from "../../src/features/site/projects-content";
 
-// Catalog view (/experiments/<projectId>) — faithful port of
-// ExperimentCatalogRoute. Rendered by experiments/[entry].astro when the path
-// segment is a project id.
+// Swiss-minimal redesign — experiment catalog (/experiments/<projectId>),
+// ADR-0005 / #21. The browse table becomes a hairline table (horizontal rules,
+// mono column headers, tone-colored status lines). Presentation only.
 interface Props {
   projectId: ProjectId;
 }
@@ -41,22 +41,16 @@ const facts = [
 ];
 
 const READINESS_COLOR: Record<string, string> = {
-  supported: "#00AB66",
+  supported: "#006b40",
   selected: "#276f89",
-  rejected: "#d32f2f",
-  pending: "#a95718",
-  blocked: "#a95718",
+  rejected: "#b3261e",
+  pending: "#8a4413",
+  blocked: "#8a4413",
 };
-const readinessColor = (tone: string) => READINESS_COLOR[tone] ?? "#00AB66";
+const readinessColor = (tone: string) => READINESS_COLOR[tone] ?? "#006b40";
 
-const eyebrow = "text-[0.74rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark";
-const chipBase = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold";
-const chipMuted = chipBase + " border-go-green/25 bg-go-green/[0.065] text-ink/70";
-const chipAccent = chipBase + " border-go-green/35 bg-go-green/15 text-go-green-dark";
-const fieldLabel = "mb-0.5 text-[0.68rem] font-semibold uppercase tracking-wide text-muted md:hidden";
+const fieldLabel = "eyebrow mb-1 md:hidden";
 const rowCols = "md:grid-cols-[minmax(14rem,1fr)_minmax(11rem,0.75fr)_minmax(12rem,1fr)_minmax(11rem,0.85fr)_8rem]";
-const detailBtn = "inline-flex min-h-9 items-center gap-1 text-sm font-medium text-ink hover:underline";
-const textBtn = "inline-flex min-h-9 items-center px-2 text-sm font-medium text-ink hover:underline";
 ---
 
 <BaseLayout
@@ -69,101 +63,108 @@ const textBtn = "inline-flex min-h-9 items-center px-2 text-sm font-medium text-
     { label: project.title },
   ]}
 >
-  <section class="mb-[1.375rem] grid items-start gap-[0.85rem] md:mb-6 md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
-    <div class="flex max-w-[58rem] flex-col gap-2.5 md:gap-3">
-      <h1 class="h-detail-title">
+  <!-- Header -->
+  <section
+    class="grid gap-6 border-b border-surface-border pb-9 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.46fr)] lg:gap-12"
+  >
+    <div class="flex max-w-[52rem] flex-col gap-5">
+      <h1 class="text-balance font-semibold leading-[1.04] tracking-[-0.02em] text-[clamp(1.9rem,4.5vw,3rem)]">
         {catalogTitle}
       </h1>
-      <p class="text-base leading-relaxed text-muted">{experimentCatalogContent.subtitle}</p>
-      <div class="flex flex-wrap items-center gap-2" aria-label="Experiment catalog status facts">
-        {facts.map((fact) => <span class={chipMuted}>{fact}</span>)}
+      <p class="text-[1.02rem] leading-relaxed text-muted md:text-[1.12rem]">
+        {experimentCatalogContent.subtitle}
+      </p>
+      <div class="flex flex-wrap gap-x-5 gap-y-1.5" aria-label="Experiment catalog status facts">
+        {facts.map((fact) => <span class="eyebrow">{fact}</span>)}
       </div>
     </div>
-
-    <div class="relative grid content-center gap-2 overflow-hidden rounded-lg border border-surface-border bg-paper py-4 pr-4 pl-6" role="note">
-      <span class="absolute inset-y-0 left-0 w-[0.28rem] bg-go-green" aria-hidden="true"></span>
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <span class={chipAccent}>Catalog ready</span>
-        <a href={decisionProjectPath(projectId)} class={textBtn}>View project decisions &rarr;</a>
-      </div>
-      <p class="text-sm leading-relaxed text-muted">{experimentCatalogContent.statusNote}</p>
+    <div class="flex flex-col gap-2 border-l border-surface-border pl-5 lg:self-end" role="note">
+      <span class="eyebrow text-go-green-dark">Catalog ready</span>
+      <p class="text-[0.92rem] leading-relaxed text-muted">{experimentCatalogContent.statusNote}</p>
+      <a href={decisionProjectPath(projectId)} class="cta group mt-1 text-ink hover:text-go-green-dark">
+        Project decisions
+        <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+      </a>
     </div>
   </section>
 
-  <section class="grid gap-4">
-    <div class="overflow-hidden rounded-lg border border-surface-border bg-paper">
-      <div class={`hidden gap-5 border-b border-ink/10 bg-ink/[0.035] px-6 py-2.5 text-[0.72rem] font-semibold uppercase tracking-wide text-muted md:grid ${rowCols}`} aria-hidden="true">
-        <span>Experiment</span>
-        <span>Purpose</span>
-        <span>Focus</span>
-        <span>Status</span>
-        <span>Details</span>
-      </div>
-
-      {
-        selected.map((exp) => {
-          const signals = [exp.readiness.primary, ...(exp.readiness.secondary ? [exp.readiness.secondary] : [])];
-          return (
-            <section class={`grid gap-3 border-t border-ink/10 px-6 py-5 first:border-t-0 md:items-center md:gap-5 ${rowCols}`}>
-              <div class="min-w-0">
-                <span class={fieldLabel}>Experiment</span>
-                <p class="text-[0.74rem] font-semibold text-muted">{exp.category}</p>
-                <p class="text-sm font-semibold">{exp.title}</p>
-              </div>
-
-              <div class="min-w-0">
-                <span class={fieldLabel}>Purpose</span>
-                <p class="text-sm leading-relaxed text-muted">{exp.cardSummary}</p>
-              </div>
-
-              <div class="min-w-0">
-                <span class={fieldLabel}>Focus</span>
-                <div class="flex flex-wrap gap-1.5">
-                  {exp.metricFocus.map((m) => <span class={chipAccent}>{m}</span>)}
-                </div>
-              </div>
-
-              <div class="min-w-0">
-                <span class={fieldLabel}>Status</span>
-                <div class="grid max-w-[13rem] gap-1.5" aria-label={`${exp.title} status`}>
-                  <span class="flex items-baseline gap-1.5" style="color:#00AB66">
-                    <span class="mt-[0.15rem] h-[0.45rem] w-[0.45rem] shrink-0 rounded-full bg-current" aria-hidden="true"></span>
-                    <span class="text-[0.78rem] font-semibold leading-snug">Run ready</span>
-                  </span>
-                  {signals.map((sig) => (
-                    <span class="flex items-baseline gap-1.5" style={`color:${readinessColor(sig.tone)}`}>
-                      <span class="mt-[0.15rem] h-[0.45rem] w-[0.45rem] shrink-0 rounded-full bg-current" aria-hidden="true"></span>
-                      <span class="text-[0.78rem] font-semibold leading-snug">
-                        {sig.label}
-                        <span class="font-semibold text-muted"> &middot; {sig.detail}</span>
-                      </span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div class="min-w-0 md:justify-self-end">
-                <span class={fieldLabel}>Details</span>
-                <a href={experimentDetailPath(exp.slug)} class={detailBtn}>View details &rarr;</a>
-              </div>
-            </section>
-          );
-        })
-      }
+  <!-- Browse table -->
+  <section class="mt-10 md:mt-12">
+    <div
+      class={`hidden gap-5 border-b border-ink/15 pb-2.5 md:grid ${rowCols}`}
+      aria-hidden="true"
+    >
+      {["Experiment", "Purpose", "Focus", "Status", "Details"].map((h) => (
+        <span class="eyebrow">{h}</span>
+      ))}
     </div>
 
     {
+      selected.map((exp) => {
+        const signals = [exp.readiness.primary, ...(exp.readiness.secondary ? [exp.readiness.secondary] : [])];
+        return (
+          <section class={`grid gap-3 border-b border-surface-border py-5 md:items-baseline md:gap-5 ${rowCols}`}>
+            <div class="min-w-0">
+              <span class={fieldLabel}>Experiment</span>
+              <p class="eyebrow mb-1">{exp.category}</p>
+              <p class="text-[0.95rem] font-semibold text-ink">{exp.title}</p>
+            </div>
+
+            <div class="min-w-0">
+              <span class={fieldLabel}>Purpose</span>
+              <p class="text-[0.92rem] leading-relaxed text-muted">{exp.cardSummary}</p>
+            </div>
+
+            <div class="min-w-0">
+              <span class={fieldLabel}>Focus</span>
+              <div class="flex flex-wrap gap-x-3 gap-y-1">
+                {exp.metricFocus.map((m) => <span class="eyebrow text-go-green-dark">{m}</span>)}
+              </div>
+            </div>
+
+            <div class="min-w-0">
+              <span class={fieldLabel}>Status</span>
+              <div class="grid max-w-[14rem] gap-1" aria-label={`${exp.title} status`}>
+                <span class="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.08em]" style="color:#006b40">
+                  Run ready
+                </span>
+                {signals.map((sig) => (
+                  <span
+                    class="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.08em] leading-snug"
+                    style={`color:${readinessColor(sig.tone)}`}
+                  >
+                    {sig.label}
+                    <span class="text-faint"> &middot; {sig.detail}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div class="min-w-0 md:justify-self-end">
+              <span class={fieldLabel}>Details</span>
+              <a href={experimentDetailPath(exp.slug)} class="cta group text-ink hover:text-go-green-dark">
+                Details
+                <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+              </a>
+            </div>
+          </section>
+        );
+      })
+    }
+
+    {
       projectId === "gpu-inference-lab" && (
-        <section class="grid items-center gap-3 rounded-lg border border-surface-border bg-paper p-3.5 md:grid-cols-[minmax(0,1fr)_auto]">
+        <section class="mt-8 grid items-baseline gap-3 border-t border-surface-border pt-8 md:grid-cols-[minmax(0,1fr)_auto]">
           <div class="grid min-w-0 gap-1">
-            <p class={eyebrow}>{experimentCatalogContent.platformValidation.status}</p>
-            <p class="text-sm font-semibold">Decisions live in the project decision record</p>
-            <p class="text-sm leading-relaxed text-muted">
+            <p class="eyebrow">{experimentCatalogContent.platformValidation.status}</p>
+            <p class="text-[0.97rem] font-semibold text-ink">Decisions live in the project decision record</p>
+            <p class="text-[0.92rem] leading-relaxed text-muted">
               {experimentCatalogContent.platformValidation.question}
             </p>
           </div>
-          <a href={experimentCatalogContent.platformValidation.href} class={textBtn}>
-            View project decisions &rarr;
+          <a href={experimentCatalogContent.platformValidation.href} class="cta group text-ink hover:text-go-green-dark">
+            Project decisions
+            <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
           </a>
         </section>
       )

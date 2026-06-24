@@ -16,10 +16,10 @@ import {
   type ProjectId,
 } from "../../../src/features/site/projects-content";
 
-// Faithful port of DecisionProjectRoute (/decisions/<projectId>) from
-// src/features/decisions/page.tsx. Design frozen (ADR-0003 §5); typed data
-// reused unchanged (ADR-0003 §9). TwoMetricEvidenceMatrix re-rendered via the
-// new EvidenceMatrix.astro component. Last detail-route family.
+// Swiss-minimal redesign — decision project record (/decisions/<projectId>),
+// ADR-0005 / #21. Status dashboard becomes a hairline count grid; the decision
+// matrix becomes domain-grouped hairline cells with tone-colored status labels.
+// Presentation only — typed data reused unchanged.
 export function getStaticPaths() {
   return projectPortfolioContent.projects.map((p) => ({ params: { project: p.id } }));
 }
@@ -30,34 +30,24 @@ const summary = getDecisionProjectSummary(projectId);
 const decisions = getDecisionRecordsByProject(projectId);
 const domains = getDecisionDomains(projectId);
 
-// Mirrors statusColor()/getStatusCounts() in the React source.
 const STATUS_ORDER = ["Supported", "Measured", "Caveated", "Partial", "Rejected", "Blocked"];
 const STATUS_COLOR: Record<string, string> = {
-  Supported: "#00AB66",
-  Measured: "#006B40",
-  Caveated: "#743914",
+  Supported: "#006b40",
+  Measured: "#006b40",
+  Caveated: "#8a4413",
   Partial: "#276f89",
-  Rejected: "#d32f2f",
-  Blocked: "#743914",
+  Rejected: "#b3261e",
+  Blocked: "#8a4413",
 };
 const statusCounts = STATUS_ORDER.map((status) => ({
   status,
   count: decisions.filter((d) => d.status === status).length,
 })).filter((item) => item.count > 0);
-const statusChipStyle = (status: string) => {
-  const c = STATUS_COLOR[status] ?? "#465750";
-  return `color:${c};border-color:color-mix(in srgb, ${c} 35%, transparent);background-color:color-mix(in srgb, ${c} 5.5%, transparent)`;
-};
+const statusLabel = (status: string) => `color:${STATUS_COLOR[status] ?? "#5c6670"}`;
 
-const eyebrow = "text-[0.74rem] font-semibold uppercase tracking-[0.1em] text-go-green-dark";
-const h2 = "h-section-title";
-const card = "rounded-lg border border-surface-border bg-paper p-3.5";
-const accent = "rounded-lg border border-go-green/20 bg-go-green/8 p-3";
-const statusChip = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold";
-const expBtn = "inline-flex min-h-8 items-center rounded border border-ink/25 px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:bg-ink/5";
-const primaryBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium bg-ink text-paper transition-opacity hover:opacity-90";
-const outlinedBtn = "inline-flex min-h-10 items-center justify-center rounded px-4 py-2 text-sm font-medium border border-ink/25 text-ink transition-colors hover:bg-ink/5";
-const textBtn = "link-external inline-flex min-h-10 items-center gap-1.5 px-2 text-sm font-medium text-ink hover:underline";
+const grid = "grid gap-px border border-surface-border bg-surface-border";
+const cell = "bg-paper p-4 grid content-start";
+const warnBlock = "border-l-2 border-l-warning-warm/70 pl-3";
 
 const evidenceVisuals = projectId === "gpu-inference-lab" ? projectContent.validation.evidenceVisuals : [];
 ---
@@ -73,22 +63,28 @@ const evidenceVisuals = projectId === "gpu-inference-lab" ? projectContent.valid
   ]}
 >
   <!-- Header -->
-  <section class="mb-[1.375rem] grid items-start gap-[0.85rem] md:mb-6 md:gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.52fr)]">
-    <div class="flex max-w-[58rem] flex-col gap-2.5 md:gap-3">
-      <h1 class="h-detail-title">{summary.title}</h1>
-      <p class="text-base leading-relaxed text-muted">{summary.lead}</p>
-      <div class="flex flex-wrap items-center gap-3">
-        <a href={summary.experimentsPath} class={primaryBtn}>View experiments</a>
-        <a href={project.path} class={outlinedBtn}>Project overview</a>
-        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class={textBtn}>GitHub</a>
+  <section class="grid gap-6 border-b border-surface-border pb-9 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.46fr)] lg:gap-12">
+    <div class="flex max-w-[52rem] flex-col gap-5">
+      <h1 class="text-balance font-semibold leading-[1.04] tracking-[-0.02em] text-[clamp(1.9rem,4.5vw,3rem)]">{summary.title}</h1>
+      <p class="text-[1.02rem] leading-relaxed text-muted md:text-[1.12rem]">{summary.lead}</p>
+      <div class="mt-1 flex flex-wrap items-center gap-x-7 gap-y-3">
+        <a href={summary.experimentsPath} class="cta group text-go-green-dark hover:text-ink">
+          View experiments
+          <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+        </a>
+        <a href={project.path} class="cta group text-ink hover:text-go-green-dark">
+          Project overview
+          <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+        </a>
+        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">GitHub</a>
       </div>
     </div>
-    <div class={`grid grid-cols-2 gap-2 sm:grid-cols-3 ${accent}`} aria-label="Decision status dashboard">
+    <div class={`${grid} grid-cols-2 sm:grid-cols-3 lg:self-end`} aria-label="Decision status dashboard">
       {
         statusCounts.map((item) => (
-          <div class="grid content-start gap-0.5 rounded-md border border-surface-border bg-paper px-3 py-2">
-            <p class={eyebrow}>{item.status}</p>
-            <p class="text-[1.18rem] font-semibold">{item.count}</p>
+          <div class={`${cell} gap-1`}>
+            <p class="eyebrow" style={statusLabel(item.status)}>{item.status}</p>
+            <p class="text-[1.3rem] font-semibold tabular text-ink">{item.count}</p>
           </div>
         ))
       }
@@ -96,47 +92,44 @@ const evidenceVisuals = projectId === "gpu-inference-lab" ? projectContent.valid
   </section>
 
   <!-- Decision matrix -->
-  <section class="mb-7 grid gap-5 md:mb-[2.125rem] md:gap-6">
-    <div class="grid max-w-[52rem] gap-1">
-      <p class={eyebrow}>Decision matrix</p>
-      <h2 class={h2}>{summary.sectionTitle}</h2>
-      <p class="text-base leading-relaxed text-muted">
-        Each decision is grouped by domain and links back to the experiments that produced the evidence.
-      </p>
-    </div>
+  <section class="mt-12 md:mt-16">
+    <p class="eyebrow mb-2">Decision matrix</p>
+    <h2 class="h-section-title">{summary.sectionTitle}</h2>
+    <p class="mt-2.5 max-w-[52rem] text-[0.97rem] leading-relaxed text-muted">
+      Each decision is grouped by domain and links back to the experiments that produced the evidence.
+    </p>
 
-    <div class="grid gap-4">
+    <div class="mt-6 grid gap-10">
       {
         domains.map((domain) => {
           const domainDecisions = decisions.filter((d) => d.domain === domain);
           return (
-            <section class={`grid gap-3 ${card}`}>
-              <div class="grid gap-0.5">
-                <p class={eyebrow}>Domain</p>
-                <h3 class="font-display text-[1.18rem] font-semibold">{domain}</h3>
+            <section>
+              <div class="mb-3 flex items-baseline gap-3 border-b border-ink/15 pb-2">
+                <span class="eyebrow">Domain</span>
+                <h3 class="text-[1.15rem] font-semibold tracking-[-0.01em] text-ink">{domain}</h3>
               </div>
-              <div class="grid gap-3 lg:grid-cols-2">
+              <div class={`${grid} lg:grid-cols-2`}>
                 {domainDecisions.map((decision) => (
-                  <section class="grid content-start gap-2.5 rounded-lg border border-surface-border bg-paper p-3.5">
-                    <div class="flex flex-wrap items-start justify-between gap-2">
-                      <div class="grid min-w-0 gap-0.5">
-                        <p class={eyebrow}>{decision.domain}</p>
-                        <h4 class="text-[1.05rem] font-semibold" style="overflow-wrap:anywhere">{decision.title}</h4>
-                      </div>
-                      <span class={statusChip} style={statusChipStyle(decision.status)}>{decision.status}</span>
+                  <section class={`${cell} gap-2.5`}>
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                      <h4 class="text-[1.05rem] font-semibold text-ink" style="overflow-wrap:anywhere">{decision.title}</h4>
+                      <span class="eyebrow shrink-0" style={statusLabel(decision.status)}>{decision.status}</span>
                     </div>
-                    <p class="text-sm font-bold">{decision.call}</p>
-                    <p class="text-sm leading-relaxed text-muted">{decision.evidence}</p>
+                    <p class="text-[0.92rem] font-bold text-ink">{decision.call}</p>
+                    <p class="text-[0.92rem] leading-relaxed text-muted">{decision.evidence}</p>
                     {decision.nextEvidence && (
-                      <div class="rounded-md border border-surface-border border-l-[3px] border-l-warning-warm/60 bg-paper p-2.5">
-                        <p class="text-xs font-bold text-muted">Next evidence</p>
-                        <p class="text-sm leading-relaxed text-muted">{decision.nextEvidence}</p>
+                      <div class={warnBlock}>
+                        <p class="eyebrow mb-0.5" style="color:#8a4413">Next evidence</p>
+                        <p class="text-[0.9rem] leading-relaxed text-muted">{decision.nextEvidence}</p>
                       </div>
                     )}
                     {decision.experimentSlugs.length > 0 && (
-                      <div class="flex flex-wrap gap-2" aria-label={`${decision.title} related experiments`}>
+                      <div class="mt-0.5 flex flex-wrap gap-x-5 gap-y-1.5" aria-label={`${decision.title} related experiments`}>
                         {decision.experimentSlugs.map((slug) => (
-                          <a href={experimentDetailPath(slug)} class={expBtn}>{getDecisionExperimentTitle(slug)}</a>
+                          <a href={experimentDetailPath(slug)} class="cta text-ink hover:text-go-green-dark">
+                            {getDecisionExperimentTitle(slug)}
+                          </a>
                         ))}
                       </div>
                     )}
@@ -153,15 +146,13 @@ const evidenceVisuals = projectId === "gpu-inference-lab" ? projectContent.valid
   <!-- GPU evidence visuals -->
   {
     evidenceVisuals.length > 0 && (
-      <section class="grid gap-4">
-        <div class="grid max-w-[52rem] gap-1">
-          <p class={eyebrow}>Evidence visuals</p>
-          <h2 class={h2}>Decision evidence visuals</h2>
-          <p class="text-base leading-relaxed text-muted">
-            Local visuals recreate the key proof points without depending on the lab repository at runtime.
-          </p>
-        </div>
-        <div class="grid gap-4 lg:grid-cols-2">
+      <section class="mt-12 md:mt-16">
+        <p class="eyebrow mb-2">Evidence visuals</p>
+        <h2 class="h-section-title">Decision evidence visuals</h2>
+        <p class="mt-2.5 max-w-[52rem] text-[0.97rem] leading-relaxed text-muted">
+          Local visuals recreate the key proof points without depending on the lab repository at runtime.
+        </p>
+        <div class="mt-5 grid gap-px border border-surface-border bg-surface-border lg:grid-cols-2">
           {evidenceVisuals.map((visual) => (
             <EvidenceMatrix
               title={visual.title}
