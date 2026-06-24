@@ -1,12 +1,12 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { publicResumeData } from "../../src/features/resume/data";
-import { renderResumeHtmlDocument } from "../../src/features/resume/render-static-html";
+import { publicResumeData } from "@resume/data";
+import { renderResumeHtmlDocument } from "@resume/render-static-html";
 import {
   calculatePdfScale,
   closePDFBrowser,
   LETTER_PDF_SIZE_PX,
   measurePDFContent,
-} from "../../src/services/pdf";
+} from "@services/pdf";
 import { buildResumePdf } from "../../scripts/build-resume-pdf";
 
 const RUN_INTEGRATION_TESTS = process.env.RUN_INTEGRATION_TESTS === "1";

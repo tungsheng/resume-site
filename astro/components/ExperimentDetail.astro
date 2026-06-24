@@ -1,16 +1,14 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import CommandCodeBlock from "./CommandCodeBlock.astro";
-import { EXPERIMENTS_PATH } from "../../src/features/site/content";
 import {
+  EXPERIMENTS_PATH,
   experimentSourceLink,
   type ExperimentCatalogItem,
-} from "../../src/features/site/experiment-catalog-content";
-import {
   decisionProjectPath,
   getDecisionRecordsByExperimentSlug,
-} from "../../src/features/site/decision-content";
-import { getProjectById } from "../../src/features/site/projects-content";
+  getProjectById,
+} from "@site";
 
 // Detail view (/experiments/<slug>) — faithful port of ExperimentDetailRoute.
 // Rendered by experiments/[entry].astro when the segment is an experiment slug.

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ResumeDocument } from "../../src/features/resume/document";
+import { ResumeDocument } from "@resume/document";
 import type { ResumeData } from "../../src/types";
 
 const sampleResume: ResumeData = {

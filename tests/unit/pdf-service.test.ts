@@ -3,7 +3,7 @@ import {
   calculatePdfScale,
   getPDFRenderTimeoutMs,
   LETTER_PDF_SIZE_PX,
-} from "../../src/services/pdf";
+} from "@services/pdf";
 
 describe("PDF Service", () => {
   test("keeps scale at 1 when content already fits letter size", () => {

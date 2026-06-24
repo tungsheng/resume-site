@@ -14,6 +14,16 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
+    // Path aliases for the src/ feature modules (decouples call sites from the
+    // in-flight srcDir migration; Astro/Vite, tsc, and bun test all honor these).
+    "baseUrl": ".",
+    "paths": {
+      "@site": ["src/features/site/index.ts"],
+      "@site/*": ["src/features/site/*"],
+      "@resume/*": ["src/features/resume/*"],
+      "@services/*": ["src/services/*"]
+    },
+
     // Best practices
     "strict": true,
     "skipLibCheck": true,

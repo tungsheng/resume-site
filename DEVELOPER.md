@@ -1,137 +1,133 @@
 # Developer Guide
 
-This project is a Bun server that serves Tony Lee's public site and one PDF export endpoint. The source of truth for the public resume is `src/features/resume/data.ts`.
+This project is an [Astro 7](https://astro.build) static site (built and tested
+with Bun) plus a build-time resume PDF generator. The source of truth for the
+public resume is `src/features/resume/data.ts`.
 
 ## Stack
 
-- Bun for the HTTP server, HTML imports, and test runner
-- React 19 for page rendering
-- `puppeteer-core` for PDF generation
+- Astro 7 (`output: "static"`) with the Sätteri Markdown engine — see `docs/adr/`
+- React 19 for the shared resume document and PDF render
+- Tailwind CSS v4 (`@tailwindcss/vite`)
+- `puppeteer-core` for build-time PDF generation
+- Bun for installs, scripts, and the test runner
 
 ## Commands
 
 ```bash
-bun install
-bun run dev
-bun run start
-bun run check
-bun run test:unit
-bun run test:integration
-bun run test:all
-bun run typecheck
+bun run dev               # Astro dev server (builds the PDF first if missing)
+bun run build             # build:pdf, then astro build -> dist/
+bun run build:pdf         # render the resume PDF into public-astro/resume.pdf
+bun run check             # typecheck + unit tests
+bun run typecheck         # astro sync + tsc --noEmit
+bun run test:unit         # unit tests
+bun run test:integration  # integration tests (RUN_INTEGRATION_TESTS=1, needs a Chrome/Chromium binary)
+bun run test:all          # unit + integration
 ```
-
-`bun run test:integration` expects a running server at `http://localhost:3000` unless `TEST_BASE_URL` is set.
 
 ## Project Layout
 
 ```text
-public/                  HTML entrypoints loaded directly by Bun
+astro/                     Astro source (configured as srcDir)
+  pages/                   routes (.astro / .ts) -> static HTML
+  components/              .astro UI components
+  layouts/                 BaseLayout and shared shells
+  content/                 content-collection schema + selectors (blog)
+  content.config.ts        Astro content collections config
+  markdown/                Sätteri AST plugins (admonitions, blog images)
+  styles/                  global.css (Tailwind entry)
+public-astro/              static assets served as-is (configured as publicDir)
 src/
-  features/              page-specific React code
-    experiments/
-    home/
-    project/
-    resume/              typed resume data, shared resume document, and page UI
-    site/                shared public-site content, layout, and styles
-  server/
-    routes/              API handlers and static-file fallback
-  services/              PDF generation helpers
-  index.ts               Bun server entrypoint
+  features/
+    resume/                typed resume data + shared document + PDF render
+    site/                  portfolio content model (projects/decisions/experiments)
+  services/
+    pdf.ts                 generic HTML -> PDF service (puppeteer-core)
+scripts/
+  build-resume-pdf.ts      orchestrates the resume PDF build
 tests/
-  unit/                  Bun unit tests
-  integration/           HTTP-level integration tests
+  unit/                    Bun unit tests
+  integration/             PDF rendering integration tests
 ```
 
-## Runtime Model
+`astro.config.mjs` sets `srcDir: "./astro"` and `publicDir: "./public-astro"`
+while the data/services layer still lives under `./src` (migration in progress —
+see `docs/adr/0003-migrate-to-astro-static-site.md`).
 
-`src/index.ts` uses Bun's `routes` API to serve:
+## Import Aliases
 
-- `GET /`
-- `GET /project/cloud-inference-platform`
-- `GET /experiments`
-- `GET /resume`
-- `POST /api/public-pdf`
+`tsconfig.json` defines path aliases so call sites do not hard-code the `src/`
+layout (and the eventual `srcDir` flip is a one-line config change):
 
-Any other request falls through to `src/server/routes/static.ts`, which serves files from `public/` after path sanitization.
+| Alias        | Resolves to                       |
+| ------------ | --------------------------------- |
+| `@site`      | `src/features/site/index.ts` (content facade barrel) |
+| `@site/*`    | `src/features/site/*`             |
+| `@resume/*`  | `src/features/resume/*`           |
+| `@services/*`| `src/services/*`                  |
 
-## Public Page Roles
+Pages and components import the portfolio content model from the `@site` barrel;
+the resume pipeline and PDF service use `@resume/*` and `@services/*`.
 
-- `/` introduces Tony Lee and highlights the flagship project.
-- `/project/cloud-inference-platform` is the narrative case study.
-- `/experiments` is the evidence archive for checked-in evaluation runs.
-- `/resume` is the public resume route with a screen-first web view and PDF download path.
+## Pages
+
+- `/` — intro and flagship-project highlight
+- `/projects`, `/projects/gpu-inference-lab`, `/projects/cuda-kernel-lab`
+- `/experiments`, `/experiments/<slug>`
+- `/decisions`, `/decisions/<project>`
+- `/blog`, `/blog/<slug>` (Markdown content collection), `/rss.xml`
+- `/resume` — screen resume; the downloadable PDF is built at `public-astro/resume.pdf`
 
 ## Resume Content Flow
 
-1. `src/features/resume/data.ts` exports the checked-in public `ResumeData` object.
-2. `src/features/resume/view-model.ts` prepares display-only fields such as date ranges and skill text.
-3. `src/features/resume/page.tsx` renders the screen resume and calls the PDF request helper.
-4. PDF downloads call `/api/public-pdf`, which renders `src/features/resume/document.tsx` through React SSR and hands the HTML to Puppeteer.
+The screen resume (`astro/pages/resume.astro`) and the PDF share the same typed
+data and view model, so the two renderings cannot drift:
 
-## Environment Variables
+1. `@resume/data` exports the checked-in public `ResumeData`.
+2. `@resume/view-model` (`buildResumeViewModel`) prepares display-only fields
+   (date ranges, skill text).
+3. `@resume/document` (`ResumeDocument`) is the shared React document.
+4. `@resume/render-static-html` renders the document to an HTML string with CSS
+   and fonts inlined (`@resume/document-css`, `@resume/pdf-fonts`).
+5. `scripts/build-resume-pdf.ts` hands that HTML to `generatePDF` in
+   `@services/pdf` and writes `public-astro/resume.pdf`.
+
+## PDF Service
+
+`src/services/pdf.ts` is a content-agnostic HTML→PDF wrapper over a pooled
+`puppeteer-core` browser. It measures the `.resume-document` element and scales
+the output to Letter size.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `PORT` | `3000` | HTTP port for the Bun server |
-| `TRUST_PROXY` | unset | When set to `1`, rate limiting trusts forwarded IP headers |
-| `PUPPETEER_EXECUTABLE_PATH` | unset | Absolute path to Chrome or Chromium for PDF export |
-| `PDF_MAX_CONCURRENT_EXPORTS` | `2` | Process-wide cap for simultaneous PDF renders |
-| `PDF_RENDER_TIMEOUT_MS` | `30000` | Puppeteer PDF generation timeout in milliseconds |
+| `PUPPETEER_EXECUTABLE_PATH` | auto-detected | Absolute path to Chrome/Chromium used for rendering |
 
-## PDF Export
-
-`POST /api/public-pdf` uses the checked-in public resume data.
-
-Notes:
-
-- Requests are rate-limited per client IP.
-- PDF rendering has a process-wide concurrency cap.
-- PDF typography is bundled into the static render HTML instead of relying on host OS fonts.
-- The route returns `429` when the rate limit is exceeded.
-- The route returns `503` when the PDF renderer is already at capacity.
-- If no browser binary can be launched, the route returns `500` with a PDF engine error.
-
-## Docker
-
-Local container run:
-
-```bash
-docker compose up --build
-```
-
-Production-oriented container run:
-
-```bash
-docker compose -f docker-compose.prod.yml up --build -d
-```
-
-The production compose file binds to `127.0.0.1:3000` and enables `TRUST_PROXY=1` for reverse-proxy deployments.
+The integration test (`tests/integration/pdf-rendering.test.ts`) exercises a real
+browser and is gated behind `RUN_INTEGRATION_TESTS=1`.
 
 ## Editing the Site
 
-For a new public page with its own route:
+To add a public page:
 
-1. Add a Bun HTML entrypoint in `public/`.
-2. Add the page component and any page-local helpers.
-3. Register the route in `src/index.ts` and `src/site.tsx`.
-4. Add or update tests if the new page changes routing or content expectations.
+1. Add a `.astro` route under `astro/pages/`.
+2. Add any new content to the relevant module under `src/features/site/` and
+   re-export it from `src/features/site/index.ts` (the `@site` barrel).
+3. Update tests if routing or content expectations change.
 
 To replace the public resume:
 
 1. Update `src/features/resume/data.ts`.
-2. Visit `/resume`.
+2. Run `bun run build:pdf` (or `bun run dev`) and review `/resume`.
 
 ## Testing Focus
 
-Current tests cover:
+Covered:
 
-- checked-in public resume data
-- public page rendering and route shells
+- checked-in public resume data and view model
+- decision-content referential integrity
 - PDF scaling helpers
-- selected HTTP integration behavior for the home, project, experiments, and resume routes
+- static HTML render of the resume document
 
-What is not fully covered:
+Not covered by default:
 
-- successful PDF generation against a real Chrome/Chromium binary through the optional integration test and deploy smoke test
-- live browser interaction with the rendered pages
+- real-browser PDF generation (the optional integration test)
