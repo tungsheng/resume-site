@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 
-type NavKey = "home" | "projects" | "experiments" | "decisions" | "blog" | "resume";
+type NavKey = "home" | "work" | "projects" | "experiments" | "decisions" | "blog" | "resume";
 
 interface Crumb {
   label: string;
@@ -38,22 +38,28 @@ const {
 
 const SITE_NAME = "Tony Lee";
 
-// Canonical paths mirror src/features/site/content.ts.
+// Projects, Experiments, and Decisions live under the Work hub (/work), so the
+// top-level nav is four items. Those section pages still pass their own
+// activeNav key; WORK_KEYS maps them onto the single "Work" nav item.
 const navItems: { key: NavKey; label: string; href: string }[] = [
   { key: "home", label: "Home", href: "/" },
-  { key: "projects", label: "Projects", href: "/projects" },
-  { key: "experiments", label: "Experiments", href: "/experiments" },
-  { key: "decisions", label: "Decisions", href: "/decisions" },
+  { key: "work", label: "Work", href: "/work" },
   { key: "blog", label: "Blog", href: "/blog" },
   { key: "resume", label: "Resume", href: "/resume" },
 ];
+
+const WORK_KEYS: NavKey[] = ["work", "projects", "experiments", "decisions"];
+function isNavActive(key: NavKey): boolean {
+  if (!activeNav) return false;
+  return key === "work" ? WORK_KEYS.includes(activeNav) : key === activeNav;
+}
 
 // Swiss/mono nav (ADR-0005): uppercase letter-spaced monospace links; the active
 // item is marked by ink color + a go-green underline rather than a filled pill.
 function navLinkClass(key: NavKey): string {
   const base =
     "font-mono text-[0.72rem] font-medium uppercase tracking-[0.14em] pb-1 border-b-2 transition-colors";
-  return key === activeNav
+  return isNavActive(key)
     ? base + " border-go-green text-ink"
     : base + " border-transparent text-muted hover:text-ink";
 }
@@ -102,12 +108,14 @@ const isArticle = ogType === "article";
   <body class="flex min-h-screen flex-col font-sans text-ink antialiased">
     <header class="sticky top-0 z-20 border-b border-surface-border bg-paper">
       <div class="mx-auto flex w-full max-w-[75rem] items-center gap-6 px-4 py-3 sm:px-6">
+        <!-- Brand: the original "T│L" monospace monogram (ported from the
+             pre-Astro header), restyled Swiss — ink glyphs, go-green divider. -->
         <a
           href="/"
           aria-label="Tony Lee home"
-          class="mr-auto font-mono text-sm font-bold uppercase tracking-[0.2em] text-ink"
+          class="mr-auto font-mono text-[1.35rem] font-semibold leading-none tracking-[-0.03em] text-ink"
         >
-          Tony Lee
+          <span aria-hidden="true">T<span class="text-go-green">│</span>L</span>
         </a>
 
         <!-- Desktop nav -->
