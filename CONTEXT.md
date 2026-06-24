@@ -13,7 +13,7 @@ A single unit of writing in the Blog. Authored as Markdown. May optionally link 
 _Avoid_: Note, Article, Entry
 
 **Category**:
-The single required broad bucket a Post belongs to (e.g. "Inference", "CUDA", "Career"). One per Post; the primary axis a reader scans.
+The single required broad bucket a Post belongs to. One per Post; the primary axis a reader scans. A **closed set**, enforced as a Zod enum: `Inference`, `CUDA`, `Career`. Finer distinctions (e.g. serving architecture vs. infrastructure vs. internals) are Tags, not new Categories.
 _Avoid_: Section, Topic
 
 **Tag**:

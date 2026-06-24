@@ -1,6 +1,6 @@
 # Adopt Astro 7 and its native Sätteri Markdown pipeline
 
-Status: proposed (execution sequenced after the Astro-6 production launch; one item — build runtime — gated on a spike)
+Status: accepted — executed across #14/#15/#16/#17 (Astro 7 + Sätteri live; both Markdown transforms ported). The build-runtime spike (decision 5) resolved to **stay on Bun**, pinned in `pages.yml`. The final parity sign-off (decision 7) is tracked by #18; its live-vs-Astro-6 visual diff is now moot — `main` builds Astro 7, so no Astro-6 baseline remains to diff against.
 
 Astro 7.0.0 shipped 2026-06-22 (the same day this was scoped). We will move the site from Astro 6.4.8 to Astro 7 and, rather than do a minimal-parity bump, **adopt Astro 7's new native Markdown pipeline (Sätteri)** in place of the remark/rehype pipeline — porting our two in-repo Markdown transforms onto Sätteri's plugin API. This extends ADR-0003 (Astro zero-JS static site); ADR-0001 (Posts authored as Markdown, MDX off) is preserved.
 
