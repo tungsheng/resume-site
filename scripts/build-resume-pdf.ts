@@ -13,9 +13,9 @@
 // Reuses the existing renderer + puppeteer pipeline unchanged.
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { publicResumeData } from "../src/features/resume/data";
-import { renderResumeHtmlDocument } from "../src/features/resume/render-static-html";
-import { generatePDF } from "../src/services/pdf";
+import { publicResumeData } from "@resume/data";
+import { renderResumeHtmlDocument } from "@resume/render-static-html";
+import { generatePDF } from "@services/pdf";
 
 export async function buildResumePdf(outDir = "public-astro"): Promise<string> {
   const html = renderResumeHtmlDocument(publicResumeData);
@@ -27,7 +27,7 @@ export async function buildResumePdf(outDir = "public-astro"): Promise<string> {
 }
 
 if (import.meta.main) {
-  const { closePDFBrowser } = await import("../src/services/pdf");
+  const { closePDFBrowser } = await import("@services/pdf");
   try {
     const outPath = await buildResumePdf();
     const size = (await Bun.file(outPath).arrayBuffer()).byteLength;

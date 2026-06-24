@@ -4,8 +4,8 @@ import {
   decisionProjectSummaries,
   decisionRecords,
   getDecisionProjectSummary,
-} from "../../src/features/site/decision-content";
-import { experimentCatalogContent } from "../../src/features/site/experiment-catalog-content";
+  experimentCatalogContent,
+} from "@site";
 
 describe("decision content", () => {
   test("keeps project decision paths canonical", () => {

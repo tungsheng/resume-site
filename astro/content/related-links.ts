@@ -1,13 +1,11 @@
-import { decisionProjectPath } from "../../src/features/site/decision-content";
 import {
+  decisionProjectPath,
   experimentCatalogContent,
   experimentDetailPath,
-} from "../../src/features/site/experiment-catalog-content";
-import {
   getProjectById,
   projectPortfolioContent,
   type ProjectId,
-} from "../../src/features/site/projects-content";
+} from "@site";
 import type { BlogPostFrontmatter } from "./blog-schema";
 
 // Resolve a Post's optional `related` frontmatter (#7) into concrete links.

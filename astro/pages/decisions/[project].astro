@@ -1,20 +1,18 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import EvidenceMatrix from "../../components/EvidenceMatrix.astro";
-import { DECISIONS_PATH } from "../../../src/features/site/content";
 import {
+  DECISIONS_PATH,
   getDecisionDomains,
   getDecisionExperimentTitle,
   getDecisionProjectSummary,
   getDecisionRecordsByProject,
-} from "../../../src/features/site/decision-content";
-import { experimentDetailPath } from "../../../src/features/site/experiment-catalog-content";
-import { projectContent } from "../../../src/features/site/project-content";
-import {
+  experimentDetailPath,
+  projectContent,
   getProjectById,
   projectPortfolioContent,
   type ProjectId,
-} from "../../../src/features/site/projects-content";
+} from "@site";
 
 // Swiss-minimal redesign — decision project record (/decisions/<projectId>),
 // ADR-0005 / #21. Status dashboard becomes a hairline count grid; the decision

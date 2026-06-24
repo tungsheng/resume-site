@@ -1,15 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { EXPERIMENTS_PATH } from "../../src/features/site/content";
 import {
+  EXPERIMENTS_PATH,
   experimentCatalogContent,
   experimentDetailPath,
-} from "../../src/features/site/experiment-catalog-content";
-import { decisionProjectPath } from "../../src/features/site/decision-content";
-import {
+  decisionProjectPath,
   getProjectById,
   type ProjectId,
-} from "../../src/features/site/projects-content";
+} from "@site";
 
 // Swiss-minimal redesign — experiment catalog (/experiments/<projectId>),
 // ADR-0005 / #21. The browse table becomes a hairline table (horizontal rules,

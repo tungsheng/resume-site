@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { publicResumeData } from "../../src/features/resume/data";
-import { renderResumeHtmlDocument } from "../../src/features/resume/render-static-html";
+import { publicResumeData } from "@resume/data";
+import { renderResumeHtmlDocument } from "@resume/render-static-html";
 import type { ResumeData } from "../../src/types";
 
 describe("Resume Service", () => {

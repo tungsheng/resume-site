@@ -1,12 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { EXPERIMENTS_PATH } from "../../src/features/site/content";
-import { experimentCatalogContent } from "../../src/features/site/experiment-catalog-content";
-import { decisionProjectPath } from "../../src/features/site/decision-content";
 import {
+  EXPERIMENTS_PATH,
+  experimentCatalogContent,
+  decisionProjectPath,
   getProjectById,
   projectPortfolioContent,
-} from "../../src/features/site/projects-content";
+} from "@site";
 
 // Swiss-minimal redesign — Experiments index (ADR-0005 / #21). Flush-left header
 // with a mono facts strip + hairline right-rail note; per-project hairline
