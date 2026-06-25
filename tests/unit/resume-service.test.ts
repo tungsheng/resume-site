@@ -6,38 +6,36 @@ import type { ResumeData } from "../../src/types";
 describe("Resume Service", () => {
   test("publicResumeData contains the checked-in public resume", () => {
     expect(publicResumeData.header.name).toBe("Tony Lee");
-    expect(publicResumeData.header.badges).toContain("ML Inference Performance Engineering");
-    expect(publicResumeData.header.badges).toContain("GPU Serving Systems");
-    expect(publicResumeData.header.badges).toContain("CUDA/Triton Optimization");
-    expect(publicResumeData.header.badges).not.toContain("GPU Kernel Optimization");
-    expect(publicResumeData.header.badges).not.toContain("GPU Kernel Experiments");
-    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("vLLM");
-    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Inference Load Testing (k6)");
-    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Admission Control");
-    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Quantization Evaluation");
-    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("CUDA / Triton Benchmarking");
-    expect(publicResumeData.skills["ML Infrastructure / Inference"]).toContain("Kernel Fusion");
-    expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("AWS (VPC, IAM, EC2, ALB)");
-    expect(publicResumeData.skills["Infrastructure / Cloud"]).toContain("DCGM Exporter");
-    expect(publicResumeData.skills["Languages"]).toBeArray();
-    expect(publicResumeData.projects?.title).toBe("Selected Projects");
+    // Honest repositioning: lead with the paid full-stack identity, frame ML
+    // inference as an explicit self-directed transition (the goal, not a job title).
+    expect(publicResumeData.header.badges).toContain("Staff Software Engineer (Full-Stack)");
+    expect(publicResumeData.header.badges).toContain("Transitioning to ML Inference Engineering");
+    expect(publicResumeData.header.badges).not.toContain("ML Inference Performance Engineering");
+    expect(publicResumeData.header.contacts.website).toBe("tonylee.bio");
+    // Skills split into two buckets: Professional (paid) vs Self-Directed / Lab (unpaid).
+    expect(Object.keys(publicResumeData.skills)).toEqual([
+      "Professional (Production Experience)",
+      "Self-Directed / Lab",
+    ]);
+    expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("TypeScript");
+    expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("React");
+    expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("CI/CD Automation");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("AWS (VPC, IAM, EC2, ALB)");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("DCGM Exporter");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("CUDA / Triton Benchmarking");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Inference Load Testing (k6)");
+    // Deep-mechanism specialties dropped from Skills (too scrutiny-heavy to assert as skills).
+    const allSkills = Object.values(publicResumeData.skills).flat();
+    expect(allSkills).not.toContain("Kernel Fusion");
+    expect(allSkills).not.toContain("GPU Profiling");
+    // Labs are a clearly-labeled self-directed section, with an honesty note.
+    expect(publicResumeData.projects?.title).toBe("ML Inference — Self-Directed (2025–Present)");
+    expect(publicResumeData.projects?.note).toContain("negative results");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
-    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Built an AWS EKS/vLLM inference performance lab that turns KV-cache/context-length behavior, autoscaling, admission control, scheduler/quantization probes, useful-work cost, and failure-mitigation drills into supported, rejected, or pending architecture evidence.",
-    );
-    expect(publicResumeData.projects?.items[0]?.highlights).toContain(
-      "Measured burst and 8192/300 long-context behavior: bounded queues preserved 100% delivery near 2s p95 for bursts, 1.20 req/s long-context traffic repeated 62.66-63.40s p95 latency, and FP8 KV was rejected after delivery fell to 47.58-69.12%.",
-    );
+    expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(2);
     expect(publicResumeData.projects?.items[1]?.title).toBe("CUDA/Triton GPU Kernel Lab (PyTorch baselines + A10G/H200)");
-    expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Built a reproducible CUDA/Triton benchmarking lab for LLM-shaped GPU primitives, comparing custom Triton kernels against PyTorch/cuBLAS baselines with correctness checks, latency percentiles, bandwidth, TFLOP/s, roofline analysis, and Nsight evidence.",
-    );
-    expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Separated supported wins from caveats: RMSNorm fp16 reached 5.901x with 90.91% DRAM throughput, while same-stream dynamic decode replay reached about 0.156 ms p50 / 0.230 ms p95 as a synthetic resident-KV upper bound.",
-    );
-    expect(publicResumeData.projects?.items[1]?.highlights).toContain(
-      "Extended the H200 matmul track with standard and persistent-wave Triton schedules; the focused 512x11008x4096 bf16 standard row reached 471.4 TFLOP/s (89.41% of PyTorch/cuBLAS), while persistent waves remained below the standard schedule.",
-    );
+    expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(2);
   });
 
   test("renderResumeHtmlDocument creates valid HTML", () => {

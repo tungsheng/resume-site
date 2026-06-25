@@ -217,6 +217,14 @@ body {
   color: var(--resume-ink);
 }
 
+.resume-document .project-note {
+  margin: 2px 0 6px;
+  font-size: 8pt;
+  line-height: 1.32;
+  font-style: italic;
+  color: var(--resume-muted, #555);
+}
+
 .resume-document .project-list {
   display: grid;
   row-gap: var(--experience-gap);

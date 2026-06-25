@@ -7,11 +7,13 @@ export interface ResumeData {
     contacts: {
       linkedin?: string;
       email?: string;
+      website?: string;
     };
     summary: string;
   };
   projects?: {
     title: string;
+    note?: string;
     items: Array<{
       title: string;
       highlights: string[];
