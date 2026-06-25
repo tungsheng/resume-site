@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { PROJECTS_PATH, EXPERIMENTS_PATH, DECISIONS_PATH } from "@site";
+
+// Work hub — minimal switchboard collapsing Projects / Experiments / Decisions
+// under one nav slot (Home / Work / Blog / Resume). Presentation only; the three
+// sections keep their own routes and pages, this just frames them together.
+const PAGE_TITLE = "Work | Tony Lee";
+const LEDE =
+  "Three views of the same body of inference-performance engineering: what I built, the evidence behind it, and the calls it produced.";
+
+const sections = [
+  {
+    label: "Projects",
+    href: PROJECTS_PATH,
+    body: "The GPU labs themselves — what I built, the architecture, and the result.",
+  },
+  {
+    label: "Experiments",
+    href: EXPERIMENTS_PATH,
+    body: "The measured runs behind the work — the evidence archive for each call.",
+  },
+  {
+    label: "Decisions",
+    href: DECISIONS_PATH,
+    body: "Architecture calls derived from the measurements, each tied back to its evidence.",
+  },
+];
+---
+
+<BaseLayout
+  title={PAGE_TITLE}
+  description={LEDE}
+  activeNav="work"
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Work" }]}
+>
+  <!-- Index header -->
+  <section
+    class="grid gap-6 border-b border-surface-border pb-10 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.5fr)] lg:gap-12"
+  >
+    <div class="flex max-w-[52rem] flex-col gap-5">
+      <span class="eyebrow">Work</span>
+      <h1
+        class="text-balance font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.25rem)]"
+      >
+        The labs, the evidence, the calls
+      </h1>
+      <p class="text-[1.05rem] leading-relaxed text-muted md:text-[1.15rem]">{LEDE}</p>
+    </div>
+  </section>
+
+  <!-- Switchboard -->
+  <section>
+    {
+      sections.map((section, i) => (
+        <article class="grid gap-3 border-b border-surface-border py-8 md:grid-cols-[minmax(0,4rem)_minmax(0,1fr)] md:gap-10">
+          <span class="section-index text-[0.72rem] tabular" aria-hidden="true">
+            {String(i + 1).padStart(2, "0")}
+          </span>
+          <div class="grid gap-2">
+            <h2 class="text-[1.4rem] font-semibold leading-tight tracking-[-0.01em] md:text-[1.6rem]">
+              <a href={section.href} class="transition-colors hover:text-go-green-dark">
+                {section.label}
+              </a>
+            </h2>
+            <p class="max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{section.body}</p>
+            <div class="mt-1">
+              <a href={section.href} class="cta group text-go-green-dark hover:text-ink">
+                View {section.label.toLowerCase()}
+                <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">
+                  &rarr;
+                </span>
+              </a>
+            </div>
+          </div>
+        </article>
+      ))
+    }
+  </section>
+</BaseLayout>

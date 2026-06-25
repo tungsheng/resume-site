@@ -2,7 +2,103 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
-SWISS-MINIMAL REDESIGN (ADR-0005) — current track, branch feat/swiss-minimal-redesign
+CURRENT STATUS (2026-06-24)
+#############################################################################
+DONE + MERGED to main:
+  * Blog feature (issues #1–#11) — Markdown content collections, draft
+    exclusion, RSS/sitemap/robots, per-Post SEO, TOC/reading-time, related links.
+  * Astro zero-JS static migration (ADR-0003, #12) — Bun server removed; builds
+    to dist/, deploys to Cloudflare Pages via pages.yml + wrangler.
+  * Astro 7 + Sätteri (ADR-0004, #14–#17) — engine swapped, both Markdown
+    transforms ported; build-runtime spike resolved to stay on Bun (pinned).
+  * Swiss-minimal redesign (ADR-0005, #20/#21) — all pages reskinned.
+  * Architecture/cleanup pass (PR #24) — @site/@resume/@services path aliases +
+    content facade, dead-code prune, docs refreshed (README/DEVELOPER/deployment).
+
+THE SITE IS LIVE on Cloudflare Pages (*.pages.dev). NOT yet pointed at the
+custom domain — that cutover is the final gate.
+
+REMAINING before domain cutover:
+  * First real blog post: transformer architecture + the prefill/decode process.
+  * Header nav reorg: Home / Work / Blog / Resume (consolidate
+    Projects+Experiments+Decisions under "Work" — was deferred in the blog PRD).
+  * Restore the original header icon, restyled for Swiss-minimal.
+  * #18 parity sign-off — record go/no-go. NOTE: its "live Astro-6 visual diff"
+    is now moot (main builds Astro 7; no Astro-6 baseline remains).
+  * Point the domain at Cloudflare Pages.
+
+Historical detail (per-slice notes for the redesign + migration) follows below.
+
+#############################################################################
+BLOG ORGANIZATION + FIRST POST — resolved via grilling (2026-06-24)
+#############################################################################
+Information architecture (decisions):
+  * CATEGORY = closed set, enforced as a Zod ENUM: {Inference, CUDA, Career}.
+    The primary scan axis. Finer serving distinctions (architecture/infra/
+    internals) become Tags, NOT Categories. (CONTEXT.md updated.)
+  * TAGS = free-form (open cross-cut axis); lowercase-kebab convention
+    (prefix-cache, kv-cache, prefill-decode). No tag-filter pages.
+  * SERIES = deferred (PRD out-of-scope holds). Cluster related posts with a
+    shared Tag + manual "next:" prose cross-links; revisit a formal Series
+    concept only if the archive grows past ~4 must-read-in-order posts.
+  * /blog INDEX = flat, newest-first (current impl), Category shown as a card
+    label. Group-by-Category deferred until CUDA/Career fill in.
+  * HOME "Latest writing" = newest 3 Published.
+
+FIRST POST (foundational explainer; the "start here" entry for Inference):
+  * Working title: "How Transformer Inference Runs: Prefill, Decode, and Why
+    They Behave Differently"
+  * Category: Inference. Tags: transformer, prefill-decode, kv-cache.
+  * Audience: ML-literate engineer who is NOT an inference-serving specialist
+    (knows transformers conceptually; no prefill/decode or KV-cache internalized).
+  * CONCEPT-ONLY — no raw lab numbers; cross-link the data-driven posts for the
+    serving angle. WITH diagrams: hand-authored inline SVG (Swiss-minimal:
+    hairline rules, mono labels, go-green accent), ~1500-2200 words.
+  * Outline: (1) the forward pass, briefly; (2) two phases, one model —
+    prefill (compute-bound, parallel) vs decode (memory-bound, autoregressive);
+    (3) why decode is memory-bound — the KV cache; (4) why it matters for
+    serving — opposite bottlenecks, batching/throughput-vs-latency, cross-link
+    continuous-batching + kv-cache-is-the-batch-size-ceiling; (5) next ->
+    decode-process-deep-dive.
+  * LADDER: the existing decode-process-deep-dive Outline stays as the rescoped
+    SEQUEL (assumes this foundation, goes deep on decode); cross-linked both ways.
+
+Implementation TODOs (NOT yet done — plan only):
+  * blog-schema.ts: change category z.string() -> z.enum(["Inference","CUDA",
+    "Career"]). Build will then reject drift.
+  * Remap the 6 existing posts' categories to the enum: "Inference internals" /
+    "Serving architecture" / "Serving infrastructure" -> "Inference"; move the
+    old fine labels into tags. (decode-process, sglang, sizing-admission-queues,
+    continuous-batching, kv-cache, prefix-cache.)
+  * Write the first post (Drafting -> Published) + its two SVG diagrams.
+
+#############################################################################
+HEADER NAV REORG + BRAND ICON — resolved via grilling + implemented (2026-06-24)
+#############################################################################
+Decisions (grilled):
+  * Top-level nav collapses to FOUR: Home / Work / Blog / Resume. Projects,
+    Experiments, Decisions move UNDER a new "Work" slot.
+  * "Work" = a minimal SWITCHBOARD PAGE at /work (not a zero-JS dropdown):
+    framing sentence + three hairline blocks (01 Projects / 02 Experiments /
+    03 Decisions), each a one-liner + .cta link. The three sections KEEP their
+    own routes/pages — /work just frames + links them.
+  * Active state: "Work" lights up (go-green underline) on /work AND on
+    /projects, /experiments, /decisions and their detail pages. BaseLayout maps
+    the existing projects/experiments/decisions activeNav keys onto "work"
+    (WORK_KEYS), so no per-page activeNav churn.
+  * Breadcrumbs reflect the parent: Home / Work / Projects[/ <detail>], etc.
+  * Brand icon: restored the ORIGINAL "T│L" monospace monogram (ported from the
+    deleted pre-Astro src/features/site/header.tsx), restyled Swiss — ink glyphs
+    with the │ divider in go-green. favicon.svg updated to match (mono, drops
+    the old Georgia-serif "T|L" that ADR-0005 had superseded).
+IMPLEMENTED (this branch): BaseLayout nav + brand + WORK_KEYS active logic;
+  new astro/pages/work.astro; Work breadcrumb inserted on the 6 section pages +
+  2 experiment components; public-astro/favicon.svg. Verified: typecheck + 44
+  unit tests + full build (32 pages incl. /work), 0 <script>, previewed
+  desktop+mobile, Work-active confirmed on /projects.
+
+#############################################################################
+SWISS-MINIMAL REDESIGN (ADR-0005) — historical track, branch feat/swiss-minimal-redesign (MERGED)
 #############################################################################
 Branched off main (after the Astro-7 merge). PRD #20 = tracer; #21 = page-rollout
 tracking issue (checklist). PRESENTATION ONLY — data/view-models, routes, the

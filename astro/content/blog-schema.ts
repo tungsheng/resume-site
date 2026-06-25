@@ -5,10 +5,15 @@ import { z } from "zod";
 // tests so the schema is asserted directly, not only through the build.
 export const POST_STATUSES = ["Outline", "Drafting", "Published"] as const;
 
+// Category is a closed set (CONTEXT.md): the single broad bucket a reader scans.
+// Finer distinctions (serving architecture/infra/internals, SGLang, etc.) are
+// Tags, not Categories. Enforced as an enum so the value can't drift.
+export const POST_CATEGORIES = ["Inference", "CUDA", "Career"] as const;
+
 export const blogPostSchema = z.object({
   title: z.string(),
   summary: z.string(),
-  category: z.string(),
+  category: z.enum(POST_CATEGORIES),
   status: z.enum(POST_STATUSES),
   published: z.coerce.date(),
   // optional — richer surfaces (#6/#7/#8) consume these later
