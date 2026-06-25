@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 320" role="img"
+     aria-label="The KV cache grows by one entry per generated token, and each new decode step must read the entire cache, so decode is limited by memory bandwidth rather than compute">
+  <style>
+    .bg   { fill:#ffffff; stroke:#e6e6e6; }
+    .hair { stroke:#e6e6e6; stroke-width:1; }
+    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .cap  { font:400 13px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .axis { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .kv   { fill:#dff6ee; stroke:#006b40; }
+    .arr  { stroke:#006b40; stroke-width:1.5; fill:none; stroke-dasharray:4 3; }
+  </style>
+  <defs>
+    <marker id="ah2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="318" rx="2"/>
+  <text class="ey" x="26" y="40">KV CACHE — ONE ENTRY ADDED PER TOKEN</text>
+
+  <!-- baseline -->
+  <line class="hair" x1="26" y1="250" x2="654" y2="250"/>
+
+  <!-- six steps, stack grows by one block each step (block h=22, gap=4, baseline=248 up) -->
+  <!-- t1: 1 -->
+  <rect class="kv" x="40"  y="226" width="76" height="22" rx="2"/>
+  <!-- t2: 2 -->
+  <rect class="kv" x="140" y="226" width="76" height="22" rx="2"/>
+  <rect class="kv" x="140" y="200" width="76" height="22" rx="2"/>
+  <!-- t3: 3 -->
+  <rect class="kv" x="240" y="226" width="76" height="22" rx="2"/>
+  <rect class="kv" x="240" y="200" width="76" height="22" rx="2"/>
+  <rect class="kv" x="240" y="174" width="76" height="22" rx="2"/>
+  <!-- t4: 4 -->
+  <rect class="kv" x="340" y="226" width="76" height="22" rx="2"/>
+  <rect class="kv" x="340" y="200" width="76" height="22" rx="2"/>
+  <rect class="kv" x="340" y="174" width="76" height="22" rx="2"/>
+  <rect class="kv" x="340" y="148" width="76" height="22" rx="2"/>
+  <!-- t5: 5 -->
+  <rect class="kv" x="440" y="226" width="76" height="22" rx="2"/>
+  <rect class="kv" x="440" y="200" width="76" height="22" rx="2"/>
+  <rect class="kv" x="440" y="174" width="76" height="22" rx="2"/>
+  <rect class="kv" x="440" y="148" width="76" height="22" rx="2"/>
+  <rect class="kv" x="440" y="122" width="76" height="22" rx="2"/>
+  <!-- t6: 6 -->
+  <rect class="kv" x="540" y="226" width="76" height="22" rx="2"/>
+  <rect class="kv" x="540" y="200" width="76" height="22" rx="2"/>
+  <rect class="kv" x="540" y="174" width="76" height="22" rx="2"/>
+  <rect class="kv" x="540" y="148" width="76" height="22" rx="2"/>
+  <rect class="kv" x="540" y="122" width="76" height="22" rx="2"/>
+  <rect class="kv" x="540" y="96"  width="76" height="22" rx="2"/>
+
+  <!-- growth trend -->
+  <path class="arr" d="M60,224 L600,98" marker-end="url(#ah2)"/>
+
+  <!-- step labels -->
+  <text class="axis" x="78"  y="268" text-anchor="middle">t1</text>
+  <text class="axis" x="178" y="268" text-anchor="middle">t2</text>
+  <text class="axis" x="278" y="268" text-anchor="middle">t3</text>
+  <text class="axis" x="378" y="268" text-anchor="middle">t4</text>
+  <text class="axis" x="478" y="268" text-anchor="middle">t5</text>
+  <text class="axis" x="578" y="268" text-anchor="middle">t6</text>
+
+  <text class="cap" x="26" y="298">Each step re-reads the whole cache — reads scale with length, so bandwidth (not FLOPs) is the limit.</text>
+</svg>

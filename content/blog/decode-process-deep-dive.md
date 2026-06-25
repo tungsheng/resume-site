@@ -6,6 +6,7 @@ status: Outline
 published: 2026-06-12
 tags:
   - inference-internals
+  - prefill-decode
   - Decode
   - KV cache
   - Attention
@@ -22,6 +23,8 @@ related:
     - gpu-inference-lab
     - cuda-kernel-lab
 ---
+
+_This is the deep-dive sequel to [How Transformer Inference Runs: Prefill, Decode, and Why They Behave Differently](/blog/transformer-inference-prefill-and-decode) — it assumes that foundation and zooms into the single decode step._
 
 This note focuses on the token-at-a-time path after prefill. It should explain the mechanics clearly enough to connect serving metrics with kernel-level experiments without pretending a synthetic kernel replay is an end-to-end serving result.
 

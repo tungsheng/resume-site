@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 340" role="img"
+     aria-label="Prefill processes the whole prompt in one parallel forward pass and is compute-bound; decode generates one token per forward pass in an autoregressive loop and is memory-bound">
+  <style>
+    .bg   { fill:#ffffff; stroke:#e6e6e6; }
+    .hair { stroke:#e6e6e6; stroke-width:1; }
+    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .cap  { font:400 13px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .strong { fill:#14171a; }
+    .tok  { fill:#ffffff; stroke:#14171a; }
+    .toktx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .pass { fill:#ffffff; stroke:#006b40; }
+    .passtx { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .out  { fill:#dff6ee; stroke:#006b40; }
+    .arr  { stroke:#006b40; stroke-width:1.5; fill:none; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="338" rx="2"/>
+  <line class="hair" x1="340" y1="22" x2="340" y2="318"/>
+
+  <!-- PREFILL -->
+  <text class="ey" x="26" y="42">PREFILL</text>
+  <g class="tok"><rect x="26"  y="62" width="52" height="32" rx="2"/></g>
+  <g class="tok"><rect x="86"  y="62" width="52" height="32" rx="2"/></g>
+  <g class="tok"><rect x="146" y="62" width="52" height="32" rx="2"/></g>
+  <g class="tok"><rect x="206" y="62" width="52" height="32" rx="2"/></g>
+  <g class="tok"><rect x="266" y="62" width="48" height="32" rx="2"/></g>
+  <text class="toktx" x="52"  y="82" text-anchor="middle">The</text>
+  <text class="toktx" x="112" y="82" text-anchor="middle">cat</text>
+  <text class="toktx" x="172" y="82" text-anchor="middle">sat</text>
+  <text class="toktx" x="232" y="82" text-anchor="middle">on</text>
+  <text class="toktx" x="290" y="82" text-anchor="middle">the</text>
+  <!-- converge into one pass -->
+  <path class="arr" d="M52,94 L170,134"/>
+  <path class="arr" d="M112,94 L170,134"/>
+  <path class="arr" d="M172,94 L170,134"/>
+  <path class="arr" d="M232,94 L170,134"/>
+  <path class="arr" d="M290,94 L170,134" marker-end="url(#ah)"/>
+  <g class="pass"><rect x="104" y="138" width="132" height="38" rx="2"/></g>
+  <text class="passtx" x="170" y="162" text-anchor="middle">1 forward pass</text>
+  <path class="arr" d="M170,176 L170,206" marker-end="url(#ah)"/>
+  <g class="out"><rect x="140" y="208" width="60" height="32" rx="2"/></g>
+  <text class="toktx" x="170" y="228" text-anchor="middle">mat</text>
+  <text class="cap" x="26" y="282">Whole prompt in one</text>
+  <text class="cap" x="26" y="300">parallel pass —</text>
+  <text class="cap strong" x="26" y="318" style="fill:#14171a;font-weight:600">compute-bound.</text>
+
+  <!-- DECODE -->
+  <text class="ey" x="364" y="42">DECODE</text>
+  <g class="out"><rect x="470" y="62" width="80" height="32" rx="2"/></g>
+  <text class="toktx" x="510" y="82" text-anchor="middle">mat</text>
+  <path class="arr" d="M510,94 L510,124" marker-end="url(#ah)"/>
+  <g class="pass"><rect x="444" y="126" width="132" height="38" rx="2"/></g>
+  <text class="passtx" x="510" y="150" text-anchor="middle">1 forward pass</text>
+  <path class="arr" d="M510,164 L510,194" marker-end="url(#ah)"/>
+  <g class="out"><rect x="470" y="196" width="80" height="32" rx="2"/></g>
+  <text class="toktx" x="510" y="216" text-anchor="middle">on</text>
+  <!-- autoregressive loop back -->
+  <path class="arr" d="M550,212 C628,212 628,78 558,78" marker-end="url(#ah)"/>
+  <text class="ey" x="600" y="148" transform="rotate(90 600 148)">APPEND · REPEAT</text>
+  <text class="cap" x="364" y="282">One new token per pass,</text>
+  <text class="cap" x="364" y="300">fed back in —</text>
+  <text class="cap strong" x="364" y="318" style="fill:#14171a;font-weight:600">memory-bound.</text>
+</svg>
