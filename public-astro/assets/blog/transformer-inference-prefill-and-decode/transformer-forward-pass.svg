@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 520" role="img"
+     aria-label="Anatomy of a transformer forward pass: tokens become embeddings, flow through N identical decoder blocks (each a normalized self-attention sublayer and a normalized MLP sublayer, both wrapped in a residual add), then a final norm projects to a next-token distribution">
+  <style>
+    .bg   { fill:#ffffff; stroke:#e6e6e6; }
+    .panel{ fill:#ffffff; stroke:#006b40; }
+    .hair { stroke:#e6e6e6; stroke-width:1; }
+    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .box  { fill:#ffffff; stroke:#14171a; }
+    .boxtx{ font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .sub  { fill:#f4f6f5; stroke:#14171a; }
+    .out  { fill:#dff6ee; stroke:#006b40; }
+    .cap  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .arr  { stroke:#14171a; stroke-width:1.5; fill:none; }
+    .loop { stroke:#006b40; stroke-width:1.5; fill:none; stroke-dasharray:4 3; }
+  </style>
+  <defs>
+    <marker id="ah3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/>
+    </marker>
+    <marker id="ah3g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="518" rx="2"/>
+
+  <!-- input tokens -->
+  <rect class="box" x="230" y="24" width="220" height="36" rx="2"/>
+  <text class="boxtx" x="340" y="47" text-anchor="middle">input tokens</text>
+  <path class="arr" d="M340,60 L340,78" marker-end="url(#ah3)"/>
+
+  <!-- embeddings -->
+  <rect class="box" x="240" y="80" width="200" height="36" rx="2"/>
+  <text class="boxtx" x="340" y="103" text-anchor="middle">embeddings + position</text>
+  <path class="arr" d="M340,116 L340,136" marker-end="url(#ah3)"/>
+
+  <!-- decoder block panel -->
+  <rect class="panel" x="150" y="138" width="380" height="246" rx="3"/>
+  <text class="ey" x="172" y="166">DECODER BLOCK</text>
+  <!-- sublayer A -->
+  <rect class="sub" x="190" y="182" width="300" height="44" rx="2"/>
+  <text class="boxtx" x="340" y="209" text-anchor="middle">RMSNorm → Self-attention → ⊕</text>
+  <path class="arr" d="M340,226 L340,244" marker-end="url(#ah3)"/>
+  <!-- sublayer B -->
+  <rect class="sub" x="190" y="246" width="300" height="44" rx="2"/>
+  <text class="boxtx" x="340" y="273" text-anchor="middle">RMSNorm → MLP → ⊕</text>
+  <!-- repeat loop -->
+  <path class="loop" d="M178,300 C150,300 150,182 176,182" marker-end="url(#ah3g)"/>
+  <text class="ey" x="120" y="248" transform="rotate(-90 120 248)">× N LAYERS</text>
+  <text class="cap" x="190" y="328">⊕ = residual add</text>
+  <text class="cap" x="190" y="348">input added back to output</text>
+  <path class="arr" d="M340,384 L340,404" marker-end="url(#ah3)"/>
+
+  <!-- final norm -->
+  <rect class="box" x="250" y="406" width="180" height="36" rx="2"/>
+  <text class="boxtx" x="340" y="429" text-anchor="middle">final norm</text>
+  <path class="arr" d="M340,442 L340,462" marker-end="url(#ah3g)"/>
+
+  <!-- logits -->
+  <rect class="out" x="170" y="464" width="340" height="40" rx="2"/>
+  <text class="boxtx" x="340" y="489" text-anchor="middle">logits → next-token distribution</text>
+</svg>
