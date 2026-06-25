@@ -1,10 +1,11 @@
 ---
 title: "Decode Process Deep Dive"
 summary: "A practical walk through one decode step, from resident KV reads through attention, sampling, batching decisions, and latency attribution."
-category: "Inference internals"
+category: "Inference"
 status: Outline
 published: 2026-06-12
 tags:
+  - inference-internals
   - Decode
   - KV cache
   - Attention

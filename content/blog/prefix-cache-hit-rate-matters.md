@@ -1,10 +1,11 @@
 ---
 title: "Why Prefix Cache Hit Rate Is the First Number to Check"
 summary: "Before tuning batch size or concurrency, the KV prefix cache hit rate tells you whether you are even in the right problem space. This post walks through what the metric captures, why it compounds across requests, and how to read it before touching any other serving parameter."
-category: "Inference internals"
+category: "Inference"
 status: Published
 published: 2026-06-18
 tags:
+  - inference-internals
   - Prefix cache
   - KV cache
   - SGLang

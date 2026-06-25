@@ -10,7 +10,7 @@ import {
 const validPost = {
   title: "Why Prefix Cache Hit Rate Is the First Number to Check",
   summary: "A short summary of the post.",
-  category: "Inference internals",
+  category: "Inference",
   status: "Published",
   published: "2026-06-18",
 };
@@ -41,6 +41,13 @@ describe("blog post frontmatter schema", () => {
 
   test("rejects an unknown status", () => {
     expect(blogPostSchema.safeParse({ ...validPost, status: "Live" }).success).toBe(false);
+  });
+
+  test("rejects a Category outside the closed enum", () => {
+    expect(blogPostSchema.safeParse({ ...validPost, category: "Inference internals" }).success).toBe(
+      false,
+    );
+    expect(blogPostSchema.safeParse({ ...validPost, category: "Inference" }).success).toBe(true);
   });
 });
 

@@ -1,10 +1,11 @@
 ---
 title: "Continuous Batching Changes What Throughput Means"
 summary: "Static batching reports a number that rarely survives contact with real traffic. Continuous batching reshapes the GPU's work queue request by request, so the throughput you measure depends entirely on how arrivals overlap. This post explains why the headline tokens/sec is the wrong thing to optimize in isolation."
-category: "Inference internals"
+category: "Inference"
 status: Published
 published: 2026-06-20
 tags:
+  - inference-internals
   - Continuous batching
   - Scheduler
   - Throughput

@@ -1,10 +1,11 @@
 ---
 title: "Sizing Admission Queues Without Guessing"
 summary: "A work-in-progress note on picking an admission queue depth from measured queue-delay curves instead of round numbers."
-category: "Serving infrastructure"
+category: "Inference"
 status: Drafting
 published: 2026-06-21
 tags:
+  - serving-infrastructure
   - Admission control
   - Queueing
 ---

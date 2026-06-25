@@ -111,7 +111,7 @@ describe("blog production build output", () => {
     expect(html).toContain(`property="og:url" content="https://tonylee.bio/blog/${RICH.slug}/"`);
     expect(html).toContain('property="article:published_time" content="2026-06-21T00:00:00.000Z"');
     expect(html).toContain('property="article:modified_time" content="2026-06-22T00:00:00.000Z"');
-    expect(html).toContain('property="article:section" content="Inference internals"');
+    expect(html).toContain('property="article:section" content="Inference"');
     expect(html).toContain('property="article:tag"');
     expect(html).toContain("twitter:card");
     // og:image resolved from `cover` to an absolute, same-origin URL.

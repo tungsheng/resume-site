@@ -1,10 +1,11 @@
 ---
 title: "SGLang Architecture Deep Dive: Request Lifecycle, Scheduler, and Prefix Cache"
 summary: "A source-backed map of how requests move through an SGLang serving path, where scheduling choices happen, and how prefix reuse changes the shape of prefill work."
-category: "Serving architecture"
+category: "Inference"
 status: Outline
 published: 2026-06-12
 tags:
+  - serving-architecture
   - SGLang
   - Scheduler
   - Prefix cache
