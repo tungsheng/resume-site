@@ -5,7 +5,7 @@ export const publicResumeData: ResumeData = {
     name: "Tony Lee",
     badges: [
       "Staff Software Engineer (Full-Stack)",
-      "Transitioning to ML Inference Infrastructure",
+      "Transitioning to ML Inference Engineering",
     ],
     contacts: {
       email: "tungsheng@gmail.com",
@@ -13,7 +13,7 @@ export const publicResumeData: ResumeData = {
       website: "tonylee.bio",
     },
     summary:
-      "Staff-level full-stack software engineer with 10+ years shipping production frontend, backend, and APIs and leading architecture across cross-regional teams — Angular-to-React modernization, CI/CD and test automation, and measurable performance work. Now transitioning into ML infrastructure and inference through self-directed, reproducible labs: AWS/EKS/Terraform GPU serving with vLLM, autoscaling and admission control, and CUDA/Triton benchmarking — measured honestly, negative results included.",
+      "Staff-level full-stack software engineer with 10+ years shipping production frontend, backend, and APIs and leading architecture across cross-regional teams — Angular-to-React modernization, CI/CD and test automation, and measurable performance work. Now transitioning into ML inference engineering through self-directed, reproducible labs: vLLM GPU serving on AWS/EKS, autoscaling and admission control, KV-cache and quantization tradeoffs, and CUDA/Triton kernel benchmarking — measured honestly, negative results included.",
   },
   skills: {
     "Professional (Production Experience)": [
@@ -51,8 +51,8 @@ export const publicResumeData: ResumeData = {
     ],
   },
   projects: {
-    title: "ML Infrastructure — Self-Directed (2025–Present)",
-    note: "Self-funded, reproducible labs built to learn ML infrastructure in the open — documented with methodology and negative results, not just wins.",
+    title: "ML Inference — Self-Directed (2025–Present)",
+    note: "Self-funded, reproducible labs built to learn ML inference in the open — GPU serving and kernel work documented with methodology and negative results, not just wins.",
     items: [
       {
         title: "GPU Inference Decision Lab (AWS EKS + Karpenter + vLLM)",

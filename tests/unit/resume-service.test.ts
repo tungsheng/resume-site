@@ -7,9 +7,9 @@ describe("Resume Service", () => {
   test("publicResumeData contains the checked-in public resume", () => {
     expect(publicResumeData.header.name).toBe("Tony Lee");
     // Honest repositioning: lead with the paid full-stack identity, frame ML
-    // infra/inference as an explicit self-directed transition (not a job title).
+    // inference as an explicit self-directed transition (the goal, not a job title).
     expect(publicResumeData.header.badges).toContain("Staff Software Engineer (Full-Stack)");
-    expect(publicResumeData.header.badges).toContain("Transitioning to ML Inference Infrastructure");
+    expect(publicResumeData.header.badges).toContain("Transitioning to ML Inference Engineering");
     expect(publicResumeData.header.badges).not.toContain("ML Inference Performance Engineering");
     expect(publicResumeData.header.contacts.website).toBe("tonylee.bio");
     // Skills split into two buckets: Professional (paid) vs Self-Directed / Lab (unpaid).
@@ -30,7 +30,7 @@ describe("Resume Service", () => {
     expect(allSkills).not.toContain("Kernel Fusion");
     expect(allSkills).not.toContain("GPU Profiling");
     // Labs are a clearly-labeled self-directed section, with an honesty note.
-    expect(publicResumeData.projects?.title).toBe("ML Infrastructure — Self-Directed (2025–Present)");
+    expect(publicResumeData.projects?.title).toBe("ML Inference — Self-Directed (2025–Present)");
     expect(publicResumeData.projects?.note).toContain("negative results");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
     expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(2);

@@ -8,16 +8,18 @@ WHY: the resume asserted an IDENTITY ("ML Inference Performance Engineer") two
 steps removed from the paid track record. All cloud/infra/inference (AWS,
 Terraform, EKS, vLLM, CUDA/Triton) is SIDE-PROJECT work, not paid. Reframed as a
 Staff-level full-stack engineer making an evidenced, self-directed TRANSITION.
+TARGET ROLE = ML INFERENCE ENGINEER (per user follow-up) — NOT "infrastructure".
+Infra (AWS/EKS/Terraform) stays as supporting lab evidence, not the destination.
 
 CHANGES (data-driven; renderers + tests updated to match):
   * Header badges: "ML Inference Performance Engineering / GPU Serving Systems /
     CUDA/Triton Optimization" -> "Staff Software Engineer (Full-Stack)" +
-    "Transitioning to ML Inference Infrastructure". Added website tonylee.bio to
+    "Transitioning to ML Inference Engineering". Added website tonylee.bio to
     contacts (new optional ResumeData.header.contacts.website; rendered web+PDF).
   * Summary: leads with 10+ yrs shipped full-stack + cross-regional architecture
     leadership, then frames ML/cloud as self-directed + honest (negative results).
   * Structure flip: Experience now leads ("Professional Experience"); the labs
-    follow as a clearly-labeled section "ML Infrastructure — Self-Directed
+    follow as a clearly-labeled section "ML Inference — Self-Directed
     (2025-Present)" with an italic honesty note (new optional projects.note;
     rendered web+PDF). Reordered in BOTH renderers (resume.astro left column +
     document.tsx right column) — section order is hardcoded, not data-driven.
