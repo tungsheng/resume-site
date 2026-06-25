@@ -19,6 +19,7 @@ export function buildResumeViewModel(data: ResumeData) {
   }));
 
   const projectsTitle = data.projects?.title.trim() || "Projects";
+  const projectsNote = data.projects?.note?.trim() || "";
   const projects = data.projects?.items ?? [];
 
   const education = data.education.map(({ degree, school, startDate, endDate }) => ({
@@ -41,6 +42,7 @@ export function buildResumeViewModel(data: ResumeData) {
     summary,
     skills,
     projectsTitle,
+    projectsNote,
     projects,
     education,
     experience,

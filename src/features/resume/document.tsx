@@ -92,6 +92,9 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
   const projectsSection = view.projects.length > 0 ? (
     <section className="section">
       <h2 className="section-title">{view.projectsTitle}</h2>
+      {view.projectsNote ? (
+        <p className="project-note">{view.projectsNote}</p>
+      ) : null}
       <div className="project-list">
         {view.projects.map((project, index) => (
           <div key={`${project.title}-${index}`} className="project-item">
@@ -151,8 +154,21 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
             <h1 className="name">{view.header.name}</h1>
           </div>
 
-          {view.header.contacts.email || view.header.contacts.linkedin ? (
+          {view.header.contacts.email ||
+          view.header.contacts.linkedin ||
+          view.header.contacts.website ? (
             <div className="contact-info">
+              {view.header.contacts.website ? (
+                <div className="contact-row">
+                  <a
+                    className="contact-link"
+                    href={`https://${view.header.contacts.website.replace(/^https?:\/\//, "")}`}
+                  >
+                    {view.header.contacts.website.replace(/^https?:\/\//, "")}
+                  </a>
+                </div>
+              ) : null}
+
               {view.header.contacts.email ? (
                 <div className="contact-row">
                   <a
@@ -197,8 +213,8 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
         </div>
 
         <div className="right-column">
-          {projectsSection}
           {experienceSection}
+          {projectsSection}
         </div>
       </div>
     </article>

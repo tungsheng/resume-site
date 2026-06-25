@@ -102,7 +102,8 @@ describe("ResumeView", () => {
     expect(summaryIndex).toBeLessThan(skillsIndex);
     expect(skillsIndex).toBeLessThan(educationIndex);
     expect(educationIndex).toBeLessThan(mainStart);
-    expect(projectsIndex).toBeGreaterThan(mainStart);
-    expect(projectsIndex).toBeLessThan(experienceIndex);
+    // Repositioning: lead with Experience (shipped work), labeled labs after.
+    expect(experienceIndex).toBeGreaterThan(mainStart);
+    expect(experienceIndex).toBeLessThan(projectsIndex);
   });
 });

@@ -18,6 +18,12 @@ const linkedinHref = contacts.linkedin
     : `https://linkedin.com/in/${contacts.linkedin}`
   : null;
 
+const websiteHref = contacts.website
+  ? contacts.website.startsWith("http")
+    ? contacts.website
+    : `https://${contacts.website}`
+  : null;
+
 const sectionLabel =
   "border-b border-surface-border pb-2.5 font-mono text-[0.76rem] font-semibold uppercase tracking-[0.14em] text-ink";
 const entry = "border-b border-surface-border py-5 first:pt-0 last:border-b-0";
@@ -67,9 +73,18 @@ const dateMeta = "shrink-0 font-mono text-[0.72rem] uppercase tracking-[0.08em] 
     </div>
 
     {
-      (contacts.email || linkedinHref) && (
+      (contacts.email || linkedinHref || websiteHref) && (
         <address class="flex flex-col gap-2 border-l border-surface-border pl-5 not-italic md:self-center">
           <span class="eyebrow mb-0.5">Contact</span>
+          {websiteHref && (
+            <a
+              href={websiteHref}
+              class="link-external font-mono text-[0.82rem] text-muted transition-colors hover:text-ink"
+              style="overflow-wrap:anywhere"
+            >
+              {contacts.website}
+            </a>
+          )}
           {contacts.email && (
             <a
               href={`mailto:${contacts.email}`}
@@ -109,16 +124,22 @@ const dateMeta = "shrink-0 font-mono text-[0.72rem] uppercase tracking-[0.08em] 
       }
 
       {
-        view.projects.length > 0 && (
+        view.experience.length > 0 && (
           <section>
-            <h2 class={sectionLabel}>{view.projectsTitle}</h2>
+            <h2 class={sectionLabel}>Professional Experience</h2>
             <div class="mt-1">
-              {view.projects.map((project) => (
+              {view.experience.map((exp) => (
                 <div class={entry}>
-                  <p class={subtitle}>{project.title}</p>
-                  {project.highlights.length > 0 && (
-                    <ul class="mt-3 grid gap-2">
-                      {project.highlights.map((item) => (
+                  <div class="flex flex-col justify-between gap-1 sm:flex-row sm:items-baseline">
+                    <div>
+                      <p class={subtitle}>{exp.title}</p>
+                      <p class="text-[0.92rem] text-muted">{exp.company}</p>
+                    </div>
+                    <p class={dateMeta}>{exp.dateRange}</p>
+                  </div>
+                  {exp.highlights.length > 0 && (
+                    <ul class="mt-3.5 grid gap-2">
+                      {exp.highlights.map((item) => (
                         <li class="grid grid-cols-[0.9rem_minmax(0,1fr)] gap-2 text-[0.92rem] leading-relaxed text-muted">
                           <span class="font-mono text-go-green-dark" aria-hidden="true">&mdash;</span>
                           <span>{item}</span>
@@ -134,22 +155,21 @@ const dateMeta = "shrink-0 font-mono text-[0.72rem] uppercase tracking-[0.08em] 
       }
 
       {
-        view.experience.length > 0 && (
+        view.projects.length > 0 && (
           <section>
-            <h2 class={sectionLabel}>Experience</h2>
+            <h2 class={sectionLabel}>{view.projectsTitle}</h2>
+            {view.projectsNote && (
+              <p class="mt-3 max-w-[46rem] text-[0.9rem] italic leading-relaxed text-faint">
+                {view.projectsNote}
+              </p>
+            )}
             <div class="mt-1">
-              {view.experience.map((exp) => (
+              {view.projects.map((project) => (
                 <div class={entry}>
-                  <div class="flex flex-col justify-between gap-1 sm:flex-row sm:items-baseline">
-                    <div>
-                      <p class={subtitle}>{exp.title}</p>
-                      <p class="text-[0.92rem] text-muted">{exp.company}</p>
-                    </div>
-                    <p class={dateMeta}>{exp.dateRange}</p>
-                  </div>
-                  {exp.highlights.length > 0 && (
-                    <ul class="mt-3.5 grid gap-2">
-                      {exp.highlights.map((item) => (
+                  <p class={subtitle}>{project.title}</p>
+                  {project.highlights.length > 0 && (
+                    <ul class="mt-3 grid gap-2">
+                      {project.highlights.map((item) => (
                         <li class="grid grid-cols-[0.9rem_minmax(0,1fr)] gap-2 text-[0.92rem] leading-relaxed text-muted">
                           <span class="font-mono text-go-green-dark" aria-hidden="true">&mdash;</span>
                           <span>{item}</span>

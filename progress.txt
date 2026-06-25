@@ -2,6 +2,49 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+RESUME HONEST REPOSITIONING (2026-06-25) — branch feat/resume-honest-repositioning
+#############################################################################
+WHY: the resume asserted an IDENTITY ("ML Inference Performance Engineer") two
+steps removed from the paid track record. All cloud/infra/inference (AWS,
+Terraform, EKS, vLLM, CUDA/Triton) is SIDE-PROJECT work, not paid. Reframed as a
+Staff-level full-stack engineer making an evidenced, self-directed TRANSITION.
+
+CHANGES (data-driven; renderers + tests updated to match):
+  * Header badges: "ML Inference Performance Engineering / GPU Serving Systems /
+    CUDA/Triton Optimization" -> "Staff Software Engineer (Full-Stack)" +
+    "Transitioning to ML Inference Infrastructure". Added website tonylee.bio to
+    contacts (new optional ResumeData.header.contacts.website; rendered web+PDF).
+  * Summary: leads with 10+ yrs shipped full-stack + cross-regional architecture
+    leadership, then frames ML/cloud as self-directed + honest (negative results).
+  * Structure flip: Experience now leads ("Professional Experience"); the labs
+    follow as a clearly-labeled section "ML Infrastructure — Self-Directed
+    (2025-Present)" with an italic honesty note (new optional projects.note;
+    rendered web+PDF). Reordered in BOTH renderers (resume.astro left column +
+    document.tsx right column) — section order is hardcoded, not data-driven.
+  * Skills split into TWO buckets: "Professional (Production Experience)" vs
+    "Self-Directed / Lab" — every infra/GPU overclaim now sits under a header
+    that says exactly what it is. Dropped deep-mechanism specialties "Kernel
+    Fusion" + "GPU Profiling" from Skills (user: can't defend cold in a 45-min
+    deep-dive). Added React/Cypress/CI-CD/perf to Professional (already evidenced
+    by the experience bullets).
+  * Lab bullets tightened: lead with capability, few signal figures, KEEP the
+    rejected/below-baseline clauses (negative results = the credibility signal).
+    CUDA item cut 3 bullets -> 2 (dropped the dense RMSNorm/decode-replay logs).
+  * Site framing aligned (the 2nd open item): home hero PAGE_TITLE/HOME_ROLE/
+    HOME_LEDE (index.astro) + footer tagline (BaseLayout) now match the
+    Staff-full-stack / transitioning positioning.
+
+CONSTRAINT HIT + FIXED: my first cut used 6 prefixed skill rows -> PDF overflowed
+  one Letter page at natural scale (1199px > 1056px; pdf-rendering integration
+  test). Collapsing to the 2 buckets the proposal actually asked for restored
+  natural-scale one-page fit.
+
+VERIFIED: typecheck clean; 45 unit pass; full build = 33 pages + valid one-page
+  resume.pdf; RUN_INTEGRATION_TESTS=1 pdf-rendering 2/2 (natural scale = 1);
+  previewed dist/ — /resume header+contacts+ordering+labs note+2-bucket skills,
+  home title/role/lede/footer, 0 console errors.
+
+#############################################################################
 CURRENT STATUS (2026-06-24)
 #############################################################################
 DONE + MERGED to main:
