@@ -2,7 +2,7 @@
 title: "The KV Cache Is the Real Batch-Size Ceiling"
 summary: "It is tempting to size a serving deployment by how many requests the GPU can compute in parallel. In practice the limit shows up earlier and somewhere else: the KV cache. Every concurrent sequence reserves memory that grows with its length, and once that pool is exhausted the scheduler stops admitting work no matter how much compute is idle."
 category: "Inference"
-status: Published
+status: Drafting
 published: 2026-06-21
 updated: 2026-06-22
 cover: /assets/blog/kv-cache-is-the-batch-size-ceiling/kv-cache-layout.svg
