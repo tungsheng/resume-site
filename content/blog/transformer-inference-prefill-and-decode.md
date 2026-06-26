@@ -17,17 +17,17 @@ related:
 
 Ask "how fast is this model?" and you'll get a number. Ask which half of the request that number describes and the conversation usually stalls. That's because a transformer serving a request does two genuinely different kinds of work — reading the prompt and writing the reply — and they have opposite bottlenecks. Almost every confusing result in inference performance comes from quietly averaging the two together.
 
-This post builds the mental model the rest of my inference writing leans on. No benchmarks here, just the shapes: why the prompt is cheap per token, why generation is expensive per token, and why that asymmetry flips most serving intuitions.
+This post builds the mental model the rest of my inference writing leans on — no benchmarks, just the shapes: why the prompt is cheap per token, why generation is expensive per token, and why that asymmetry flips most serving intuitions.
 
-I came to this from the full-stack side, not from ML research. I got curious about what actually happens between an API call and the tokens streaming back, started taking notes — and these are those notes, cleaned up. If you already think in requests and responses, that turns out to be a good way in.
+I should say where I'm coming from. I'm a full-stack engineer by trade — years of thinking in requests, responses, and the plumbing in between. Inference pulled me in sideways: I just wanted to know what *actually* happens between an API call and the tokens that come streaming back, and that one question refused to let go. The deeper I dug, the more the inside looked like its own small world — with rules that quietly break the serving instincts I'd spent a career building, which is exactly what hooked me. I've been learning it the way I learn anything: taking it apart until it stops feeling like magic. These are those notes, cleaned up — the explanation I wish someone had handed me on day one. If you already think in requests and responses, that's your way in.
 
 ## The life of one request
 
 It helps to start where a full-stack engineer naturally does: with the request. A model call looks like any other API call — text in, text out — but the middle is strange enough that the familiar request/response picture quietly breaks. Here is the whole path.
 
-**The text becomes numbers.** A model never sees characters; it sees integers. The first step, **tokenization**, splits the prompt into tokens — common words, word-pieces, punctuation — and maps each to an ID from a fixed vocabulary.
+**The text becomes numbers.** A model never sees characters; it sees integers. The first step, **tokenization**, splits the prompt into tokens — common words, word-pieces, punctuation — and maps each to an ID from a fixed vocabulary (Figure 1).
 
-![Tokenization splits prompt text into tokens and maps each to an integer ID; the model only ever sees the IDs, and detokenization runs the map in reverse to turn generated IDs back into text](/assets/blog/transformer-inference-prefill-and-decode/tokenization.svg)
+![Figure 1 — Tokenization: prompt text becomes tokens, then integer IDs. The model only ever sees the IDs.](/assets/blog/transformer-inference-prefill-and-decode/tokenization.svg)
 
 Those token IDs are the model's real input. They run through the **forward pass** — the prefill and decode work that is the rest of this post — and out comes one new token ID at a time, each **detokenized** back into text.
 
@@ -41,9 +41,9 @@ Before splitting the work into phases, it helps to picture what a single pass th
 
 Each block does two things, in order. First a **self-attention** sublayer, where the token looks back at every earlier token and pulls in whatever is relevant. Then a **feed-forward network** (an MLP), where it does per-token reasoning on what it just gathered. Both sublayers are wrapped the same way: normalize the input, run the sublayer, then **add the result back** to the input — the residual connection that lets information skip straight down the stack. The same block shape repeats N times; only the learned weights differ between layers.
 
-At the very bottom, one final normalization and a projection turn the last vector into **logits** — a score for every token in the vocabulary — which become a probability distribution over what comes next.
+At the very bottom, one final normalization and a projection turn the last vector into **logits** — a score for every token in the vocabulary — which become a probability distribution over what comes next (Figure 2).
 
-![Anatomy of a transformer forward pass: tokens become embeddings, flow through N identical decoder blocks (each a normalized self-attention sublayer and a normalized MLP sublayer, both wrapped in a residual add), then a final norm projects to a next-token distribution](/assets/blog/transformer-inference-prefill-and-decode/transformer-forward-pass.svg)
+![Figure 2 — A transformer forward pass: embeddings flow through N identical decoder layers to a next-token distribution.](/assets/blog/transformer-inference-prefill-and-decode/transformer-forward-pass.svg)
 
 The detail that matters for everything below: **one forward pass predicts exactly one next token.** That's it. The model doesn't write a sentence in a single shot; it writes one token, and to write the next one it runs the whole stack again with that token appended. Generating a reply is just this loop, turned hundreds of times.
 
@@ -55,9 +55,9 @@ When a request arrives, the model first has to *read* the prompt and then *write
 
 **Prefill** handles the prompt. Every prompt token is known up front, so they all go through the stack *together*, in parallel, in a single forward pass. To the GPU this is one big, dense matrix multiply over thousands of positions at once — exactly the dense, arithmetic-heavy work its compute units are built for. Prefill is **compute-bound**: the limiter is how many FLOPs the chip can do.
 
-**Decode** handles generation. Here you're stuck with autoregression: token N+1 depends on token N, so you cannot compute them in parallel — you have to produce one, append it, and run the model again. Each step is a forward pass over a *single* new position. The matrices are tiny, and you do it once per output token.
+**Decode** handles generation. Here you're stuck with autoregression: token N+1 depends on token N, so you cannot compute them in parallel — you have to produce one, append it, and run the model again. Each step is a forward pass over a *single* new position. The matrices are tiny, and you do it once per output token (Figure 3).
 
-![Prefill runs the whole prompt through one parallel forward pass and is compute-bound; decode generates one token per pass in an autoregressive loop and is memory-bound](/assets/blog/transformer-inference-prefill-and-decode/prefill-vs-decode.svg)
+![Figure 3 — Prefill runs the whole prompt through one parallel pass (compute-bound); decode generates one token per pass in a loop (memory-bound).](/assets/blog/transformer-inference-prefill-and-decode/prefill-vs-decode.svg)
 
 The asymmetry is the whole story. Prefill might process several thousand tokens in one pass; decode processes one token, then another, then another. Same model, opposite shapes of work — and, as it turns out, opposite bottlenecks.
 
@@ -71,9 +71,9 @@ Decode has an obvious problem: attention at step N needs the keys and values of 
 
 It's worth noticing *which* part of the block needs this history. The MLP sublayer only ever looks at the current token — it has no memory. It's **attention** that reaches back across the whole sequence. So the KV cache is really an *attention* cache: the running price of letting every new token see the entire past.
 
-The cache makes decode tractable, but it also defines decode's cost. It grows by one entry per generated token — times every layer, times every attention head — and each new step has to *read the whole thing* to attend over all prior tokens.
+The cache makes decode tractable, but it also defines decode's cost. It grows by one entry per generated token — times every layer, times every attention head — and each new step has to *read the whole thing* to attend over all prior tokens (Figure 4).
 
-![The KV cache grows by one entry per generated token, and each decode step re-reads the entire cache, so reads scale with sequence length](/assets/blog/transformer-inference-prefill-and-decode/kv-cache-growth.svg)
+![Figure 4 — The KV cache grows by one entry per token, and every decode step re-reads all of it.](/assets/blog/transformer-inference-prefill-and-decode/kv-cache-growth.svg)
 
 Add it up and a decode step does very little arithmetic but moves a lot of memory. The compute units sit mostly idle while memory bandwidth — shuttling that growing cache in and out — sets the pace. That's the definition of **memory-bound**, and it's the exact opposite of prefill.
 
