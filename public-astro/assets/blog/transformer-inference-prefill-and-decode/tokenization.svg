@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 320" role="img"
+     aria-label="Tokenization turns prompt text into a sequence of tokens, then maps each token to an integer ID from a fixed vocabulary. The model only ever sees these IDs; detokenization runs the map in reverse to turn generated IDs back into text for the reply.">
+  <style>
+    .bg   { fill:#ffffff; stroke:#e6e6e6; }
+    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .txt  { fill:#ffffff; stroke:#14171a; }
+    .tok  { fill:#f4f6f5; stroke:#14171a; }
+    .id   { fill:#dff6ee; stroke:#006b40; }
+    .tx   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .cap  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .arrg { stroke:#006b40; stroke-width:1.5; fill:none; }
+  </style>
+  <defs>
+    <marker id="atk" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="318" rx="2"/>
+  <text class="ey" x="40" y="30">TOKENIZATION</text>
+
+  <!-- prompt text -->
+  <rect class="txt" x="160" y="40" width="360" height="40" rx="2"/>
+  <text class="tx" x="340" y="65" text-anchor="middle">"The cat sat on the mat"</text>
+  <path class="arrg" d="M340,80 L340,112" marker-end="url(#atk)"/>
+  <text class="ey" x="356" y="100">SPLIT</text>
+
+  <!-- tokens -->
+  <g>
+    <rect class="tok" x="40"  y="118" width="90" height="34" rx="2"/>
+    <rect class="tok" x="142" y="118" width="90" height="34" rx="2"/>
+    <rect class="tok" x="244" y="118" width="90" height="34" rx="2"/>
+    <rect class="tok" x="346" y="118" width="90" height="34" rx="2"/>
+    <rect class="tok" x="448" y="118" width="90" height="34" rx="2"/>
+    <rect class="tok" x="550" y="118" width="90" height="34" rx="2"/>
+    <text class="tx" x="85"  y="140" text-anchor="middle">The</text>
+    <text class="tx" x="187" y="140" text-anchor="middle">cat</text>
+    <text class="tx" x="289" y="140" text-anchor="middle">sat</text>
+    <text class="tx" x="391" y="140" text-anchor="middle">on</text>
+    <text class="tx" x="493" y="140" text-anchor="middle">the</text>
+    <text class="tx" x="595" y="140" text-anchor="middle">mat</text>
+  </g>
+  <path class="arrg" d="M340,152 L340,184" marker-end="url(#atk)"/>
+  <text class="ey" x="356" y="172">MAP → IDS</text>
+
+  <!-- token IDs -->
+  <g>
+    <rect class="id" x="40"  y="190" width="90" height="34" rx="2"/>
+    <rect class="id" x="142" y="190" width="90" height="34" rx="2"/>
+    <rect class="id" x="244" y="190" width="90" height="34" rx="2"/>
+    <rect class="id" x="346" y="190" width="90" height="34" rx="2"/>
+    <rect class="id" x="448" y="190" width="90" height="34" rx="2"/>
+    <rect class="id" x="550" y="190" width="90" height="34" rx="2"/>
+    <text class="tx" x="85"  y="212" text-anchor="middle">1820</text>
+    <text class="tx" x="187" y="212" text-anchor="middle">5650</text>
+    <text class="tx" x="289" y="212" text-anchor="middle">3332</text>
+    <text class="tx" x="391" y="212" text-anchor="middle">319</text>
+    <text class="tx" x="493" y="212" text-anchor="middle">262</text>
+    <text class="tx" x="595" y="212" text-anchor="middle">2603</text>
+  </g>
+
+  <text class="cap" x="40" y="262">The model only ever sees the integer IDs (rare words split into word-pieces).</text>
+  <text class="cap" x="40" y="284">Detokenizing runs the same map in reverse (IDs → text) to build the reply.</text>
+</svg>

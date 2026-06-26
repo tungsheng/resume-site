@@ -19,6 +19,22 @@ Ask "how fast is this model?" and you'll get a number. Ask which half of the req
 
 This post builds the mental model the rest of my inference writing leans on. No benchmarks here, just the shapes: why the prompt is cheap per token, why generation is expensive per token, and why that asymmetry flips most serving intuitions.
 
+I came to this from the full-stack side, not from ML research. I got curious about what actually happens between an API call and the tokens streaming back, started taking notes — and these are those notes, cleaned up. If you already think in requests and responses, that turns out to be a good way in.
+
+## The life of one request
+
+It helps to start where a full-stack engineer naturally does: with the request. A model call looks like any other API call — text in, text out — but the middle is strange enough that the familiar request/response picture quietly breaks. Here is the whole path.
+
+**The text becomes numbers.** A model never sees characters; it sees integers. The first step, **tokenization**, splits the prompt into tokens — common words, word-pieces, punctuation — and maps each to an ID from a fixed vocabulary.
+
+![Tokenization splits prompt text into tokens and maps each to an integer ID; the model only ever sees the IDs, and detokenization runs the map in reverse to turn generated IDs back into text](/assets/blog/transformer-inference-prefill-and-decode/tokenization.svg)
+
+Those token IDs are the model's real input. They run through the **forward pass** — the prefill and decode work that is the rest of this post — and out comes one new token ID at a time, each **detokenized** back into text.
+
+**Then the reply has to reach the client.** Because the response is produced one token at a time across hundreds of steps, the model hands you a choice. You can buffer the whole answer and return it in a single response — simple, but the caller waits, watching nothing, for seconds. Or you can **stream** each token as it lands, over a long-lived connection (Server-Sent Events or chunked HTTP), so text appears as it is written. Streaming is why chat feels alive, and it exists *because* generation is incremental: the same autoregressive loop that makes decode slow is exactly what makes token-by-token streaming both possible and worth the plumbing.
+
+So the path of one request is: tokenize → prefill → decode loop → detokenize → stream out. The two ends are ordinary serving work. The strange, interesting part is the middle — which is where the rest of this post lives.
+
 ## The forward pass, in one breath
 
 Before splitting the work into phases, it helps to picture what a single pass through the model actually does. A token comes in as text; the model turns it into a vector — an **embedding** — that also carries its position in the sequence. That vector then flows through a stack of **identical decoder blocks**.
