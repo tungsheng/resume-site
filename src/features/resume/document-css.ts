@@ -63,20 +63,29 @@ body {
   flex: 1;
   min-width: 0;
   display: grid;
-  row-gap: 5px;
+  row-gap: 8px;
 }
 
-/* Full-width tagline below the name/contacts row — one clean accent line rather
-   than a dense two-line block crowding the name. */
+/* Tagline sits directly under the name as a single accent line, so the name and
+   its positioning statement read as one block on the left while the contact rows
+   balance it on the right (rather than the tagline drifting down to the rule). */
 .resume-document .header-subtitle {
-  margin: 12px 0 0;
+  margin: 0;
+  display: grid;
+  row-gap: 3px;
   font-size: 7.5pt;
   text-transform: uppercase;
   letter-spacing: 0.7px;
   color: var(--resume-accent-dark);
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.35;
   font-family: var(--ui-font);
+}
+
+/* Each role statement on its own clean line — no dangling separator, and the
+   stacked pair balances the height of the three contact rows opposite. */
+.resume-document .header-subtitle-line {
+  display: block;
 }
 
 .resume-document .name {
