@@ -61,7 +61,7 @@
   <text class="toktx" x="510" y="216" text-anchor="middle">on</text>
   <!-- autoregressive loop back -->
   <path class="arr" d="M550,212 C628,212 628,78 558,78" marker-end="url(#ah)"/>
-  <text class="ey" x="600" y="148" transform="rotate(90 600 148)">APPEND · REPEAT</text>
+  <text class="ey" x="620" y="145" text-anchor="middle" transform="rotate(-90 620 145)">APPEND · REPEAT</text>
   <text class="cap" x="364" y="282">One new token per pass,</text>
   <text class="cap" x="364" y="300">fed back in —</text>
   <text class="cap strong" x="364" y="318" style="fill:#14171a;font-weight:600">memory-bound.</text>

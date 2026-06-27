@@ -1,65 +1,71 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 320" role="img"
-     aria-label="The KV cache grows by one entry per generated token, and each new decode step must read the entire cache, so decode is limited by memory bandwidth rather than compute">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 366" role="img"
+     aria-label="The KV cache as it grows over decode steps. After each decode step the cache is a row of per-token entries: step 1 holds one entry, step 2 holds two, and so on. Each step appends exactly one new entry (highlighted) and keeps all the earlier ones, and every step must read the entire row — so the work scales with sequence length and decode is limited by memory bandwidth, not compute.">
   <style>
-    .bg   { fill:#ffffff; stroke:#e6e6e6; }
-    .hair { stroke:#e6e6e6; stroke-width:1; }
-    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .cap  { font:400 13px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .axis { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .kv   { fill:#dff6ee; stroke:#006b40; }
-    .arr  { stroke:#006b40; stroke-width:1.5; fill:none; stroke-dasharray:4 3; }
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .lbl   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .cell  { fill:#f4f6f5; stroke:#b9c4bf; }
+    .new   { fill:#dff6ee; stroke:#006b40; stroke-width:1.5; }
+    .cn    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .cnn   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .cap   { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .read  { stroke:#006b40; stroke-width:1.2; fill:none; }
+    .down  { stroke:#b9c4bf; stroke-width:1.2; fill:none; }
   </style>
   <defs>
-    <marker id="ah2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/>
-    </marker>
+    <marker id="rd" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="dn" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#b9c4bf"/></marker>
   </defs>
 
-  <rect class="bg" x="1" y="1" width="678" height="318" rx="2"/>
-  <text class="ey" x="26" y="40">KV CACHE — ONE ENTRY ADDED PER TOKEN</text>
+  <rect class="bg" x="1" y="1" width="678" height="364" rx="2"/>
+  <text class="ey" x="34" y="32">KV CACHE — ONE ENTRY APPENDED PER TOKEN</text>
 
-  <!-- baseline -->
-  <line class="hair" x1="26" y1="250" x2="654" y2="250"/>
+  <!-- step 1: 1 entry -->
+  <text class="lbl" x="34" y="80">step 1</text>
+  <rect class="new"  x="120" y="62" width="56" height="30" rx="2"/>
+  <text class="cnn"  x="148" y="81" text-anchor="middle">1</text>
+  <path class="down" d="M148,94 L148,104" marker-end="url(#dn)"/>
 
-  <!-- six steps, stack grows by one block each step (block h=22, gap=4, baseline=248 up) -->
-  <!-- t1: 1 -->
-  <rect class="kv" x="40"  y="226" width="76" height="22" rx="2"/>
-  <!-- t2: 2 -->
-  <rect class="kv" x="140" y="226" width="76" height="22" rx="2"/>
-  <rect class="kv" x="140" y="200" width="76" height="22" rx="2"/>
-  <!-- t3: 3 -->
-  <rect class="kv" x="240" y="226" width="76" height="22" rx="2"/>
-  <rect class="kv" x="240" y="200" width="76" height="22" rx="2"/>
-  <rect class="kv" x="240" y="174" width="76" height="22" rx="2"/>
-  <!-- t4: 4 -->
-  <rect class="kv" x="340" y="226" width="76" height="22" rx="2"/>
-  <rect class="kv" x="340" y="200" width="76" height="22" rx="2"/>
-  <rect class="kv" x="340" y="174" width="76" height="22" rx="2"/>
-  <rect class="kv" x="340" y="148" width="76" height="22" rx="2"/>
-  <!-- t5: 5 -->
-  <rect class="kv" x="440" y="226" width="76" height="22" rx="2"/>
-  <rect class="kv" x="440" y="200" width="76" height="22" rx="2"/>
-  <rect class="kv" x="440" y="174" width="76" height="22" rx="2"/>
-  <rect class="kv" x="440" y="148" width="76" height="22" rx="2"/>
-  <rect class="kv" x="440" y="122" width="76" height="22" rx="2"/>
-  <!-- t6: 6 -->
-  <rect class="kv" x="540" y="226" width="76" height="22" rx="2"/>
-  <rect class="kv" x="540" y="200" width="76" height="22" rx="2"/>
-  <rect class="kv" x="540" y="174" width="76" height="22" rx="2"/>
-  <rect class="kv" x="540" y="148" width="76" height="22" rx="2"/>
-  <rect class="kv" x="540" y="122" width="76" height="22" rx="2"/>
-  <rect class="kv" x="540" y="96"  width="76" height="22" rx="2"/>
+  <!-- step 2: 2 entries -->
+  <text class="lbl" x="34" y="124">step 2</text>
+  <rect class="cell" x="120" y="106" width="56" height="30" rx="2"/>
+  <text class="cn"   x="148" y="125" text-anchor="middle">1</text>
+  <rect class="new"  x="182" y="106" width="56" height="30" rx="2"/>
+  <text class="cnn"  x="210" y="125" text-anchor="middle">2</text>
+  <path class="down" d="M210,138 L210,148" marker-end="url(#dn)"/>
 
-  <!-- growth trend -->
-  <path class="arr" d="M60,224 L600,98" marker-end="url(#ah2)"/>
+  <!-- step 3: 3 entries -->
+  <text class="lbl" x="34" y="168">step 3</text>
+  <rect class="cell" x="120" y="150" width="56" height="30" rx="2"/>
+  <text class="cn"   x="148" y="169" text-anchor="middle">1</text>
+  <rect class="cell" x="182" y="150" width="56" height="30" rx="2"/>
+  <text class="cn"   x="210" y="169" text-anchor="middle">2</text>
+  <rect class="new"  x="244" y="150" width="56" height="30" rx="2"/>
+  <text class="cnn"  x="272" y="169" text-anchor="middle">3</text>
+  <path class="down" d="M272,182 L272,192" marker-end="url(#dn)"/>
 
-  <!-- step labels -->
-  <text class="axis" x="78"  y="268" text-anchor="middle">t1</text>
-  <text class="axis" x="178" y="268" text-anchor="middle">t2</text>
-  <text class="axis" x="278" y="268" text-anchor="middle">t3</text>
-  <text class="axis" x="378" y="268" text-anchor="middle">t4</text>
-  <text class="axis" x="478" y="268" text-anchor="middle">t5</text>
-  <text class="axis" x="578" y="268" text-anchor="middle">t6</text>
+  <!-- step 4: 4 entries, with a read-all bracket -->
+  <text class="lbl" x="34" y="212">step 4</text>
+  <rect class="cell" x="120" y="194" width="56" height="30" rx="2"/>
+  <text class="cn"   x="148" y="213" text-anchor="middle">1</text>
+  <rect class="cell" x="182" y="194" width="56" height="30" rx="2"/>
+  <text class="cn"   x="210" y="213" text-anchor="middle">2</text>
+  <rect class="cell" x="244" y="194" width="56" height="30" rx="2"/>
+  <text class="cn"   x="272" y="213" text-anchor="middle">3</text>
+  <rect class="new"  x="306" y="194" width="56" height="30" rx="2"/>
+  <text class="cnn"  x="334" y="213" text-anchor="middle">4</text>
+  <!-- read-all span over step 4 -->
+  <path class="read" d="M120,240 L362,240" marker-end="url(#rd)"/>
+  <path class="read" d="M120,240 L120,234"/>
+  <text class="cnn" x="372" y="244">read in full, every step</text>
 
-  <text class="cap" x="26" y="298">Each step re-reads the whole cache — reads scale with length, so bandwidth (not FLOPs) is the limit.</text>
+  <!-- legend -->
+  <rect class="new"  x="120" y="280" width="20" height="16" rx="2"/>
+  <text class="cap"  x="148" y="293">appended this step</text>
+  <rect class="cell" x="320" y="280" width="20" height="16" rx="2"/>
+  <text class="cap"  x="348" y="293">already cached</text>
+
+  <!-- caption -->
+  <text class="cap" x="34" y="330">The row grows by one entry per token, and every step re-reads all of it —</text>
+  <text class="cap" x="34" y="348">so memory bandwidth, not compute, sets the pace.</text>
 </svg>

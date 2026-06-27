@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 506" role="img"
+     aria-label="A transformer forward pass: tokens become embeddings, then flow through a stack of N identical decoder layers (layer 1, layer 2, and so on to layer N), each layer's output feeding the next. A zoom callout shows that one layer contains a normalized self-attention sublayer and a normalized MLP sublayer, each wrapped in a residual add. After the stack, a final norm projects to a next-token distribution.">
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .box   { fill:#ffffff; stroke:#14171a; }
+    .layer { fill:#f4f6f5; stroke:#14171a; }
+    .panel { fill:#ffffff; stroke:#006b40; }
+    .sub   { fill:#f4f6f5; stroke:#14171a; }
+    .out   { fill:#dff6ee; stroke:#006b40; }
+    .tx    { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .cap   { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .dots  { font:700 20px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .arr   { stroke:#14171a; stroke-width:1.5; fill:none; }
+    .arrg  { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .zoom  { stroke:#006b40; stroke-width:1; fill:none; stroke-dasharray:3 3; }
+    .brace { stroke:#006b40; stroke-width:1.5; fill:none; }
+  </style>
+  <defs>
+    <marker id="ai" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="718" height="504" rx="2"/>
+
+  <text class="ey" x="40" y="34">TRANSFORMER FORWARD PASS</text>
+
+  <g transform="translate(0,38)">
+  <!-- ===== left spine ===== -->
+  <rect class="box" x="110" y="22" width="170" height="34" rx="2"/>
+  <text class="tx" x="195" y="44" text-anchor="middle">input tokens</text>
+  <path class="arr" d="M195,56 L195,74" marker-end="url(#ai)"/>
+
+  <rect class="box" x="100" y="76" width="190" height="34" rx="2"/>
+  <text class="tx" x="195" y="98" text-anchor="middle">embeddings + position</text>
+  <path class="arr" d="M195,110 L195,130" marker-end="url(#ai)"/>
+
+  <!-- layer stack: N sequential, identical decoder layers -->
+  <rect class="layer" x="120" y="134" width="150" height="32" rx="2"/>
+  <text class="tx" x="195" y="154" text-anchor="middle">layer 1</text>
+  <path class="arr" d="M195,166 L195,180" marker-end="url(#ai)"/>
+  <rect class="layer" x="120" y="182" width="150" height="32" rx="2"/>
+  <text class="tx" x="195" y="202" text-anchor="middle">layer 2</text>
+  <text class="dots" x="195" y="236" text-anchor="middle">⋮</text>
+  <path class="arr" d="M195,214 L195,226" marker-end="url(#ai)"/>
+  <path class="arr" d="M195,240 L195,250" marker-end="url(#ai)"/>
+  <rect class="layer" x="120" y="252" width="150" height="32" rx="2"/>
+  <text class="tx" x="195" y="272" text-anchor="middle">layer N</text>
+  <path class="arr" d="M195,284 L195,300" marker-end="url(#ai)"/>
+
+  <!-- left brace spanning the stack: × N -->
+  <path class="brace" d="M104,134 C96,134 96,209 88,209 C96,209 96,284 104,284"/>
+  <text class="ey" x="78" y="213" text-anchor="middle" transform="rotate(-90 78 213)">× N LAYERS</text>
+
+  <rect class="box" x="110" y="302" width="170" height="34" rx="2"/>
+  <text class="tx" x="195" y="324" text-anchor="middle">final norm</text>
+  <path class="arrg" d="M195,336 L195,356" marker-end="url(#ag)"/>
+
+  <rect class="out" x="72" y="358" width="246" height="40" rx="2"/>
+  <text class="tx" x="195" y="383" text-anchor="middle">logits → next token</text>
+
+  <!-- ===== zoom callout: inside one layer ===== -->
+  <!-- funnel from layer 2 to the detail panel -->
+  <path class="zoom" d="M270,182 L400,150"/>
+  <path class="zoom" d="M270,214 L400,322"/>
+
+  <rect class="panel" x="400" y="150" width="300" height="172" rx="3"/>
+  <text class="ey" x="420" y="176">INSIDE ONE LAYER</text>
+  <rect class="sub" x="420" y="188" width="260" height="42" rx="2"/>
+  <text class="tx" x="550" y="214" text-anchor="middle">RMSNorm → Self-attention → ⊕</text>
+  <path class="arr" d="M550,230 L550,244" marker-end="url(#ai)"/>
+  <rect class="sub" x="420" y="246" width="260" height="42" rx="2"/>
+  <text class="tx" x="550" y="272" text-anchor="middle">RMSNorm → MLP → ⊕</text>
+  <text class="cap" x="420" y="310">⊕ = residual add (input added back)</text>
+
+  <!-- bottom note -->
+  <text class="cap" x="40" y="438">Every layer has the same shape; only the weights differ. Each output feeds the next layer.</text>
+  </g>
+</svg>

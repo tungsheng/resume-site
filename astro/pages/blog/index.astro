@@ -38,6 +38,11 @@ const LEDE =
         {posts.map((post) => (
           <article class="grid gap-3 border-b border-surface-border py-8 md:grid-cols-[minmax(0,9rem)_minmax(0,1fr)] md:gap-10">
             <div class="flex flex-row flex-wrap gap-x-4 gap-y-1 md:flex-col md:gap-2">
+              {import.meta.env.DEV && post.data.status !== "Published" && (
+                <span class="eyebrow self-start rounded-sm border border-warning-warm/40 bg-warning-soft px-1.5 py-px text-warning-warm">
+                  {post.data.status}
+                </span>
+              )}
               <span class="eyebrow text-go-green-dark">{post.data.category}</span>
               <time datetime={post.iso} class="eyebrow tabular text-faint">{post.iso}</time>
               <span class="eyebrow text-faint">{post.minutes} min</span>
