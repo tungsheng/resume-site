@@ -66,7 +66,6 @@ function ResumeBulletList({
 
 export function ResumeDocument({ data }: ResumeDocumentProps) {
   const view = buildResumeViewModel(data);
-  const headlineText = view.header.badges.join(" • ");
 
   const summarySection = view.summary ? (
     <section className="section">
@@ -152,6 +151,15 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
         <div className="header-content">
           <div className="header-left">
             <h1 className="name">{view.header.name}</h1>
+            {view.header.badges.length > 0 ? (
+              <p className="header-subtitle">
+                {view.header.badges.map((badge) => (
+                  <span key={badge} className="header-subtitle-line">
+                    {badge}
+                  </span>
+                ))}
+              </p>
+            ) : null}
           </div>
 
           {view.header.contacts.email ||
@@ -199,8 +207,6 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
             </div>
           ) : null}
         </div>
-
-        {headlineText ? <p className="header-subtitle">{headlineText}</p> : null}
 
         <div className="header-divider" />
       </header>

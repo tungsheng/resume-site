@@ -7,9 +7,8 @@ describe("Resume Service", () => {
   test("publicResumeData contains the checked-in public resume", () => {
     expect(publicResumeData.header.name).toBe("Tony Lee");
     // Honest repositioning: lead with the paid full-stack identity, frame ML
-    // inference as an explicit self-directed transition (the goal, not a job title).
-    expect(publicResumeData.header.badges).toContain("Staff Software Engineer (Full-Stack)");
-    expect(publicResumeData.header.badges).toContain("Transitioning to ML Inference Engineering");
+    // inference as an explicit transition (the goal, not a job title) via the arrow.
+    expect(publicResumeData.header.badges).toContain("Staff Full-Stack Engineer → ML Inference");
     expect(publicResumeData.header.badges).not.toContain("ML Inference Performance Engineering");
     expect(publicResumeData.header.contacts.website).toBe("tonylee.bio");
     // Skills split into two buckets: Professional (paid) vs Self-Directed / Lab (unpaid).
