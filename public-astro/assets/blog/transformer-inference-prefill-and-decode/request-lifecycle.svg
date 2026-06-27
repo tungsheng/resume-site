@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 280" role="img"
+     aria-label="The life of one request: a client sends a prompt to the server, which tokenizes it into IDs, runs prefill over the whole prompt, loops decode to generate one token per pass, detokenizes each token back to text, and streams the tokens back to the client. Tokenize, detokenize, and stream are ordinary serving work; prefill and decode are the engine.">
+  <style>
+    .bg     { fill:#ffffff; stroke:#e6e6e6; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .cap    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .sub    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .client { fill:#ffffff; stroke:#14171a; }
+    .clitx  { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .neu    { fill:#f4f6f5; stroke:#14171a; }
+    .neutx  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .eng    { fill:#dff6ee; stroke:#006b40; }
+    .engtx  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .srv    { fill:none; stroke:#cfe6db; stroke-width:1; stroke-dasharray:4 4; }
+    .arr    { stroke:#006b40; stroke-width:1.5; fill:none; }
+  </style>
+  <defs>
+    <marker id="al" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="278" rx="2"/>
+  <text class="ey" x="20" y="28">LIFE OF A REQUEST</text>
+
+  <!-- server container -->
+  <rect class="srv" x="164" y="64" width="468" height="128" rx="3"/>
+  <text class="ey" x="174" y="82" style="fill:#9bbdb0">SERVER · GPU</text>
+
+  <!-- client -->
+  <rect class="client" x="20" y="100" width="80" height="56" rx="2"/>
+  <text class="clitx" x="60" y="132" text-anchor="middle">CLIENT</text>
+
+  <!-- request in -->
+  <path class="arr" d="M100,128 L176,128" marker-end="url(#al)"/>
+  <text class="ey" x="138" y="120" text-anchor="middle">PROMPT</text>
+
+  <!-- stages -->
+  <rect class="neu" x="178" y="104" width="92" height="48" rx="2"/>
+  <text class="neutx" x="224" y="132" text-anchor="middle">TOKENIZE</text>
+
+  <path class="arr" d="M270,128 L292,128" marker-end="url(#al)"/>
+
+  <rect class="eng" x="294" y="104" width="92" height="48" rx="2"/>
+  <text class="engtx" x="340" y="132" text-anchor="middle">PREFILL</text>
+  <text class="sub"   x="340" y="170" text-anchor="middle">reads prompt</text>
+
+  <path class="arr" d="M386,128 L408,128" marker-end="url(#al)"/>
+
+  <rect class="eng" x="410" y="104" width="92" height="48" rx="2"/>
+  <text class="engtx" x="456" y="132" text-anchor="middle">DECODE</text>
+  <text class="sub"   x="456" y="170" text-anchor="middle">writes reply</text>
+  <!-- decode loop -->
+  <path class="arr" d="M482,104 C496,78 416,78 430,104" marker-end="url(#al)"/>
+  <text class="ey" x="456" y="76" text-anchor="middle">PER TOKEN</text>
+
+  <path class="arr" d="M502,128 L524,128" marker-end="url(#al)"/>
+
+  <rect class="neu" x="526" y="104" width="92" height="48" rx="2"/>
+  <text class="neutx" x="572" y="132" text-anchor="middle">DETOKENIZE</text>
+
+  <!-- stream back to client -->
+  <path class="arr" d="M572,152 L572,224 L60,224 L60,156" marker-end="url(#al)"/>
+  <text class="ey" x="316" y="218" text-anchor="middle">STREAM TOKENS</text>
+
+  <!-- caption -->
+  <text class="cap" x="20" y="256">Gray ends are ordinary serving; the green middle — prefill, decode — is the engine.</text>
+</svg>
