@@ -3,10 +3,7 @@ import type { ResumeData } from "../../types";
 export const publicResumeData: ResumeData = {
   header: {
     name: "Tony Lee",
-    badges: [
-      "Staff Software Engineer (Full-Stack)",
-      "Transitioning to ML Inference Engineering",
-    ],
+    badges: ["Staff Full-Stack Engineer → ML Inference"],
     contacts: {
       email: "tungsheng@gmail.com",
       linkedin: "tonyslee8",
