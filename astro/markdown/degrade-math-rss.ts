@@ -16,10 +16,13 @@ const ANNOTATION = /<annotation encoding="application\/x-tex">([\s\S]*?)<\/annot
 const DISPLAY_OPEN = '<span class="katex-display">';
 const INLINE_OPEN = '<span class="katex">';
 
-// Sätteri JSX-escapes a literal `{` in plugin-injected markup (`{` → `{'{'}`, then
-// smartPunctuation curls the quotes), so the TeX in KaTeX's `<annotation>` arrives
-// here escaped. Reverse it to recover readable source — see the quirk note in
-// mdast-katex-math.ts. Each brace maps to a 5-char `{<quote><brace><quote>}` run.
+// Defensive fallback. The KaTeX plugins (mdast-katex-math.ts + hast-katex-math.ts)
+// now inject the rendered markup as a verbatim raw node, so the `<annotation>` TeX
+// reaches this path clean and the unescape below is a no-op on current output. It
+// stays as cheap insurance: Sätteri historically JSX-escaped a literal `{` in
+// re-parsed plugin markup (`{` → `{'{'}`, then smartPunctuation curled the quotes),
+// so if that injection regresses, the feed still degrades to readable source. Each
+// brace maps to a 5-char `{<quote><brace><quote>}` run.
 const BRACE_ESCAPES: [string, string][] = [
   ["{‘{’}", "{"], // curly-quoted open brace
   ["{‘}’}", "}"], // curly-quoted close brace

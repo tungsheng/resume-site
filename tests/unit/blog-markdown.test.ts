@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { buildAdmonition } from "../../astro/markdown/mdast-admonitions";
 import { figureForParagraph, withImgAttrs } from "../../astro/markdown/hast-blog-images";
-import { renderMath } from "../../astro/markdown/mdast-katex-math";
+import { renderMath, katexPlaceholder } from "../../astro/markdown/mdast-katex-math";
+import { expandKatexPlaceholders } from "../../astro/markdown/hast-katex-math";
 import { hasMathDelimiter } from "../../astro/markdown/detect-math";
 import { degradeMathToTeX } from "../../astro/markdown/degrade-math-rss";
 
@@ -131,6 +132,45 @@ describe("katex-math (mdast)", () => {
     let html = "";
     expect(() => (html = renderMath("\\frac{", false))).not.toThrow();
     expect(html.length).toBeGreaterThan(0);
+  });
+});
+
+// ADR-0006: the mdast plugin stashes KaTeX HTML and emits a placeholder comment;
+// the hast plugin swaps it back as a verbatim raw node, so `{ raw }`'s Markdown
+// re-parse never touches the `<annotation>` TeX (which would eat `\!` and
+// JSX-escape `{`). The placeholder/expand pair is asserted here; the full swap is
+// exercised end-to-end in tests/integration/blog-build.test.ts.
+describe("katex placeholder round-trip (ADR-0006)", () => {
+  test("placeholder is brace- and backslash-free so the Markdown re-parse can't mangle it", () => {
+    const p = katexPlaceholder(7);
+    expect(p).toBe("<!--katex:7-->");
+    expect(p).not.toContain("{");
+    expect(p).not.toContain("\\");
+  });
+
+  test("expands each placeholder to its stashed HTML, verbatim", () => {
+    const stash = ["<span class=\"katex\">A</span>", "<span class=\"katex\">B</span>"];
+    const value = `before ${katexPlaceholder(0)} between ${katexPlaceholder(1)} after`;
+    expect(expandKatexPlaceholders(value, stash)).toBe(
+      'before <span class="katex">A</span> between <span class="katex">B</span> after',
+    );
+  });
+
+  test("preserves brace-and-backslash-heavy TeX in the swapped-in HTML", () => {
+    // The whole point: `\mathrm{Attention}` with `\!` must survive byte-for-byte.
+    const tex = '\\mathrm{Attention}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right)';
+    const stash = [`<annotation encoding="application/x-tex">${tex}</annotation>`];
+    const out = expandKatexPlaceholders(katexPlaceholder(0), stash);
+    expect(out).toContain(tex);
+  });
+
+  test("leaves an unknown index untouched (visible regression, not a silent drop)", () => {
+    expect(expandKatexPlaceholders(katexPlaceholder(3), [])).toBe("<!--katex:3-->");
+  });
+
+  test("returns a no-placeholder string unchanged", () => {
+    const html = '<span class="katex">already expanded</span>';
+    expect(expandKatexPlaceholders(html, ["x"])).toBe(html);
   });
 });
 
