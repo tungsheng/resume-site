@@ -196,3 +196,91 @@ describe("blog production build output", () => {
     }
   });
 });
+
+// #32 / ADR-0006: build-time KaTeX math. The capability is opt-in per post and
+// the launch ships no math Post, so a Drafting fixture (math-rendering-smoke)
+// carries inline + display math and the `\$` escape. It can only render in a
+// dev-inclusive build (drafts get a page when import.meta.env.PROD is false), so
+// this suite runs its own build — the render helper itself is unit-tested in
+// tests/unit/blog-markdown.test.ts. Runs after the production-build suite above;
+// Bun completes a describe before the next one's beforeAll, so the rebuild that
+// clobbers dist/ is safe.
+describe("build-time KaTeX math output (ADR-0006)", () => {
+  const MATH_SLUG = "math-rendering-smoke";
+  let mathHtml = "";
+
+  beforeAll(async () => {
+    if (!RUN) return;
+    // NODE_ENV=development keeps import.meta.env.PROD false, so Drafting Posts get
+    // a page — the only way to render the math fixture, which never publishes.
+    await $`bunx astro build`.env({ ...process.env, NODE_ENV: "development" }).quiet();
+    mathHtml = await Bun.file(`dist/blog/${MATH_SLUG}/index.html`).text();
+  });
+
+  itIf("renders inline and display math to static KaTeX markup", () => {
+    expect(mathHtml).toContain('class="katex"'); // inline + display both wrap in .katex
+    expect(mathHtml).toContain("katex-display"); // $$…$$ becomes a display block
+    expect(mathHtml).toContain("<math"); // htmlAndMathml: MathML rides along (a11y)
+    // No unrendered math leaks through: the mdast plugin must consume the math
+    // before the hast/Shiki phase, so no `language-math` code block survives.
+    expect(mathHtml).not.toContain("language-math");
+    expect(mathHtml).not.toContain("math-display");
+  });
+
+  itIf("keeps a literal escaped dollar (\\$) as plain text, not a math span", () => {
+    expect(mathHtml).toContain("$5");
+  });
+
+  // ADR-0006: the on-page MathML `<annotation>` carries the raw TeX byte-for-byte
+  // (copy-as-LaTeX / MathML-source consumers). The plugins inject KaTeX's HTML as a
+  // verbatim raw node so Sätteri's `{ raw }` Markdown re-parse never mangles it —
+  // no eaten `\!`, no JSX-escaped `{` (`{‘{’}`). Guards the fix end-to-end.
+  itIf("keeps the on-page <annotation> TeX byte-clean (no eaten \\! or escaped braces)", () => {
+    expect(mathHtml).toContain(
+      '<annotation encoding="application/x-tex">\\mathrm{Attention}(Q, K, V) = \\mathrm{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right) V</annotation>',
+    );
+    expect(mathHtml).not.toContain("{‘{’}"); // no leftover JSX brace-escaping
+    expect(mathHtml).not.toContain("<!--katex:"); // every placeholder was swapped
+  });
+
+  itIf("ships zero client JavaScript on a math page (KaTeX is build-time only)", () => {
+    expect(mathHtml).not.toContain("<script");
+  });
+
+  // #33 / ADR-0006 decision 3: the self-hosted stylesheet links only on math
+  // Posts; non-math Posts and portfolio pages stay CSS-clean.
+  itIf("links the KaTeX stylesheet on a math Post", () => {
+    expect(mathHtml).toContain('href="/katex/katex.min.css"');
+  });
+
+  itIf("links NO KaTeX stylesheet on a non-math Post or a portfolio page", async () => {
+    // The launch Post (Published, no math) and the home page must stay clean.
+    const launchHtml = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
+    const homeHtml = await Bun.file("dist/index.html").text();
+    const projectsHtml = await Bun.file("dist/projects/index.html").text();
+    for (const html of [launchHtml, homeHtml, projectsHtml]) {
+      expect(html).not.toContain("katex.min.css");
+    }
+  });
+
+  // #33: the vendored stylesheet and WOFF2 fonts ship to dist/ (self-hosted,
+  // CSP-clean — font-src 'self'). The CSS references fonts/ relatively, so it
+  // sits alongside its fonts under /katex/.
+  itIf("ships the vendored KaTeX CSS and WOFF2 fonts to dist/", async () => {
+    expect(await Bun.file("dist/katex/katex.min.css").exists()).toBe(true);
+    expect(await Bun.file("dist/katex/fonts/KaTeX_Main-Regular.woff2").exists()).toBe(true);
+    expect(await Bun.file("dist/katex/fonts/KaTeX_Math-Italic.woff2").exists()).toBe(true);
+  });
+
+  // #34 / ADR-0006 decision 4: the feed (no KaTeX stylesheet) degrades math to
+  // raw TeX. The math fixture is Drafting, so it appears only in this dev feed.
+  itIf("degrades math to raw TeX in the RSS feed, not CSS-less KaTeX markup", async () => {
+    const rss = await Bun.file("dist/rss.xml").text();
+    expect(rss).toContain("$E = mc^2$"); // inline math, degraded to readable source
+    expect(rss).toContain("\\mathrm{Attention}(Q, K, V)"); // display TeX, braces un-escaped
+    expect(rss).not.toContain('class="katex"'); // no glyph-soup KaTeX HTML…
+    expect(rss).not.toContain("katex-mathml"); // …and no orphaned MathML
+    expect(rss).not.toContain("{‘{’}"); // …and no leftover JSX brace-escaping
+    expect(rss).toContain('<rss version="2.0"'); // still a valid feed
+  });
+});
