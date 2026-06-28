@@ -234,4 +234,29 @@ describe("build-time KaTeX math output (ADR-0006)", () => {
   itIf("ships zero client JavaScript on a math page (KaTeX is build-time only)", () => {
     expect(mathHtml).not.toContain("<script");
   });
+
+  // #33 / ADR-0006 decision 3: the self-hosted stylesheet links only on math
+  // Posts; non-math Posts and portfolio pages stay CSS-clean.
+  itIf("links the KaTeX stylesheet on a math Post", () => {
+    expect(mathHtml).toContain('href="/katex/katex.min.css"');
+  });
+
+  itIf("links NO KaTeX stylesheet on a non-math Post or a portfolio page", async () => {
+    // The launch Post (Published, no math) and the home page must stay clean.
+    const launchHtml = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
+    const homeHtml = await Bun.file("dist/index.html").text();
+    const projectsHtml = await Bun.file("dist/projects/index.html").text();
+    for (const html of [launchHtml, homeHtml, projectsHtml]) {
+      expect(html).not.toContain("katex.min.css");
+    }
+  });
+
+  // #33: the vendored stylesheet and WOFF2 fonts ship to dist/ (self-hosted,
+  // CSP-clean — font-src 'self'). The CSS references fonts/ relatively, so it
+  // sits alongside its fonts under /katex/.
+  itIf("ships the vendored KaTeX CSS and WOFF2 fonts to dist/", async () => {
+    expect(await Bun.file("dist/katex/katex.min.css").exists()).toBe(true);
+    expect(await Bun.file("dist/katex/fonts/KaTeX_Main-Regular.woff2").exists()).toBe(true);
+    expect(await Bun.file("dist/katex/fonts/KaTeX_Math-Italic.woff2").exists()).toBe(true);
+  });
 });

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { buildAdmonition } from "../../astro/markdown/mdast-admonitions";
 import { figureForParagraph, withImgAttrs } from "../../astro/markdown/hast-blog-images";
 import { renderMath } from "../../astro/markdown/mdast-katex-math";
+import { hasMathDelimiter } from "../../astro/markdown/detect-math";
 
 // Issue #6 / ADR-0004 (#16): the two in-repo Markdown transforms are unit-tested
 // directly against minimal mdast/hast nodes so the mapping is asserted without a
@@ -130,5 +131,29 @@ describe("katex-math (mdast)", () => {
     let rawHtml = "";
     expect(() => ({ rawHtml } = renderMath("\\frac{", false))).not.toThrow();
     expect(rawHtml.length).toBeGreaterThan(0);
+  });
+});
+
+// #33 / ADR-0006: the KaTeX stylesheet is linked only when a Post's source
+// carries math, detected pre-render by scanning the raw markdown (no frontmatter
+// flag). The scan must agree with what the renderer treats as math, so `$` inside
+// code and escaped `\$` must NOT count.
+describe("hasMathDelimiter (math stylesheet auto-link, #33)", () => {
+  test("detects inline and display math in prose", () => {
+    expect(hasMathDelimiter("normalizes as $\\sum_i a_i = 1$ here")).toBe(true);
+    expect(hasMathDelimiter("block:\n\n$$\n\\int_0^1 x\\,dx\n$$\n")).toBe(true);
+  });
+
+  test("returns false for prose with no math", () => {
+    expect(hasMathDelimiter("# Title\n\nJust ordinary prose, no formulae.")).toBe(false);
+  });
+
+  test("ignores a `$` inside inline code or fenced code blocks", () => {
+    expect(hasMathDelimiter("run `echo $HOME` then `echo $PATH`")).toBe(false);
+    expect(hasMathDelimiter("```sh\nA=$1\nB=$2\necho $A $B\n```")).toBe(false);
+  });
+
+  test("ignores escaped literal dollars (`\\$`)", () => {
+    expect(hasMathDelimiter("it costs \\$5, up from \\$3 last year")).toBe(false);
   });
 });

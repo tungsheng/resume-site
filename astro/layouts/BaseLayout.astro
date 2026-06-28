@@ -21,6 +21,11 @@ interface Props {
   modifiedTime?: Date;
   tags?: string[];
   section?: string;
+  // Link the self-hosted KaTeX stylesheet (#33 / ADR-0006). Off by default so
+  // non-math pages stay CSS-clean; blog/[slug].astro sets it only when the Post
+  // source carries math (detected pre-render). Fonts are browser-lazy, so only a
+  // real math page fetches the WOFF2.
+  mathStylesheet?: boolean;
 }
 
 const {
@@ -34,6 +39,7 @@ const {
   modifiedTime,
   tags = [],
   section,
+  mathStylesheet = false,
 } = Astro.props;
 
 const SITE_NAME = "Tony Lee";
@@ -104,6 +110,12 @@ const isArticle = ogType === "article";
     <meta name="twitter:title" content={title} />
     {description && <meta name="twitter:description" content={description} />}
     {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    {/* Self-hosted KaTeX styles, linked only on math Posts (#33 / ADR-0006).
+        CSP-clean: the inline span styles ride style-src 'unsafe-inline' and the
+        WOFF2 fonts satisfy font-src 'self'. The CSS references fonts/ relatively,
+        so it sits alongside its fonts under /katex/. */}
+    {mathStylesheet && <link rel="stylesheet" href="/katex/katex.min.css" />}
   </head>
   <body class="flex min-h-screen flex-col font-sans text-ink antialiased">
     <header class="sticky top-0 z-20 border-b border-surface-border bg-paper">
