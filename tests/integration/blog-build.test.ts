@@ -196,3 +196,42 @@ describe("blog production build output", () => {
     }
   });
 });
+
+// #32 / ADR-0006: build-time KaTeX math. The capability is opt-in per post and
+// the launch ships no math Post, so a Drafting fixture (math-rendering-smoke)
+// carries inline + display math and the `\$` escape. It can only render in a
+// dev-inclusive build (drafts get a page when import.meta.env.PROD is false), so
+// this suite runs its own build — the render helper itself is unit-tested in
+// tests/unit/blog-markdown.test.ts. Runs after the production-build suite above;
+// Bun completes a describe before the next one's beforeAll, so the rebuild that
+// clobbers dist/ is safe.
+describe("build-time KaTeX math output (ADR-0006)", () => {
+  const MATH_SLUG = "math-rendering-smoke";
+  let mathHtml = "";
+
+  beforeAll(async () => {
+    if (!RUN) return;
+    // NODE_ENV=development keeps import.meta.env.PROD false, so Drafting Posts get
+    // a page — the only way to render the math fixture, which never publishes.
+    await $`bunx astro build`.env({ ...process.env, NODE_ENV: "development" }).quiet();
+    mathHtml = await Bun.file(`dist/blog/${MATH_SLUG}/index.html`).text();
+  });
+
+  itIf("renders inline and display math to static KaTeX markup", () => {
+    expect(mathHtml).toContain('class="katex"'); // inline + display both wrap in .katex
+    expect(mathHtml).toContain("katex-display"); // $$…$$ becomes a display block
+    expect(mathHtml).toContain("<math"); // htmlAndMathml: MathML rides along (a11y)
+    // No unrendered math leaks through: the mdast plugin must consume the math
+    // before the hast/Shiki phase, so no `language-math` code block survives.
+    expect(mathHtml).not.toContain("language-math");
+    expect(mathHtml).not.toContain("math-display");
+  });
+
+  itIf("keeps a literal escaped dollar (\\$) as plain text, not a math span", () => {
+    expect(mathHtml).toContain("$5");
+  });
+
+  itIf("ships zero client JavaScript on a math page (KaTeX is build-time only)", () => {
+    expect(mathHtml).not.toContain("<script");
+  });
+});

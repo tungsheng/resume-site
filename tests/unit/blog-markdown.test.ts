@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { buildAdmonition } from "../../astro/markdown/mdast-admonitions";
 import { figureForParagraph, withImgAttrs } from "../../astro/markdown/hast-blog-images";
+import { renderMath } from "../../astro/markdown/mdast-katex-math";
 
 // Issue #6 / ADR-0004 (#16): the two in-repo Markdown transforms are unit-tested
 // directly against minimal mdast/hast nodes so the mapping is asserted without a
@@ -101,5 +102,33 @@ describe("blog-images (hast)", () => {
     expect(out.properties?.decoding).toBe("async");
     // Sätteri passes readonly nodes — the original must be untouched.
     expect(original.properties?.loading).toBeUndefined();
+  });
+});
+
+// #32 / ADR-0006: build-time KaTeX. The plugin renders `inlineMath`/`math` mdast
+// nodes to KaTeX HTML at the mdast level via the `{ rawHtml }` escape hatch.
+// KaTeX output is deterministic, so the render helper is asserted directly here
+// (the full pipeline — Sätteri parse + Shiki coexistence + zero-JS — is exercised
+// in tests/integration/blog-build.test.ts).
+describe("katex-math (mdast)", () => {
+  test("renders inline math to a KaTeX span with MathML, not display mode", () => {
+    const { rawHtml } = renderMath("E = mc^2", false);
+    expect(rawHtml).toContain('class="katex"');
+    expect(rawHtml).toContain("<math"); // htmlAndMathml: MathML for screen readers
+    expect(rawHtml).toContain("annotation"); // the raw-TeX annotation rides along
+    expect(rawHtml).not.toContain("katex-display");
+  });
+
+  test("renders display math as a block with the katex-display wrapper", () => {
+    const { rawHtml } = renderMath("\\int_0^1 x^2 \\, dx", true);
+    expect(rawHtml).toContain("katex-display");
+    expect(rawHtml).toContain('display="block"');
+  });
+
+  test("does not throw on a malformed formula (throwOnError: false)", () => {
+    // A bad formula renders in red inline rather than failing the build.
+    let rawHtml = "";
+    expect(() => ({ rawHtml } = renderMath("\\frac{", false))).not.toThrow();
+    expect(rawHtml.length).toBeGreaterThan(0);
   });
 });
