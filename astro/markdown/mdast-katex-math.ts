@@ -1,9 +1,8 @@
 // Build-time math rendering (ADR-0006): KaTeX on Astro 7's Sätteri pipeline.
 // With `features.math` on, Sätteri parses `$…$`/`$$…$$` and emits `inlineMath`
 // and `math` mdast nodes (mirroring remark-math) whose `.value` holds the raw
-// TeX. This plugin renders that TeX to static HTML+MathML with KaTeX and injects
-// it via Sätteri's `{ raw }` escape hatch. Build-time only — no client KaTeX — so
-// zero-JS (ADR-0003) holds.
+// TeX. This plugin renders that TeX to static HTML+MathML with KaTeX at build
+// time — no client KaTeX, so zero-JS (ADR-0003) holds.
 //
 // Why mdast, not hast: display math converts to a `<pre><code class="language-
 // math">` block, which Astro's Shiki highlighter then claims (re-wrapping it as
@@ -11,15 +10,27 @@
 // runs. Consuming the math nodes here — before the hast/Shiki phase — sidesteps
 // that entirely.
 //
-// Known quirk — the MathML `<annotation>` TeX: Sätteri serializes plugin-injected
-// content through its MDX-aware path, which JSX-escapes a literal `{` (→ `{'{'}`,
-// then smartPunctuation curls the quotes). This corrupts only the invisible
-// LaTeX-source `<annotation>` inside the MathML; the visible render and the
-// presentation MathML (`<mi>`/`<mo>`, what screen readers actually read) are both
-// correct. No raw/hast injection shape avoids it without dropping MathML (which
-// the ADR keeps for a11y). The RSS feed needs clean source, so degrade-math-rss
-// reverses this escape there (#34). Kept in-repo as a pure render helper + a thin
-// Sätteri wrapper, mirroring mdast-admonitions.ts, so it is unit-testable.
+// Why NOT inject the KaTeX HTML directly via `{ raw }`: Sätteri's `{ raw }`
+// escape hatch *re-parses* its string as Markdown, which mangles KaTeX's MathML
+// `<annotation encoding="application/x-tex">` (the copy-as-LaTeX / MathML-source
+// payload) two ways: (1) backslash-escapes like `\!` are eaten by the Markdown
+// parser (`\!` → `!`), and (2) a literal `{` is JSX-escaped to `{'{'}` at
+// serialize time (smartPunctuation then curls the quotes → `{‘{’}`). Plain prose
+// braces are untouched — only re-parsed plugin output is. `{ rawHtml }`,
+// `{ type:'html' }`, and `data.hChildren` injections all routed through the same
+// serializer and corrupted identically.
+//
+// The fix (Path B): don't hand KaTeX's HTML to a re-parser at all. Stash each
+// rendered fragment in the document-scoped `ctx.data` bag and inject a brace-
+// and-backslash-free placeholder comment `<!--katex:N-->` instead. The companion
+// hast plugin (hast-katex-math.ts) swaps every placeholder for a verbatim hast
+// `raw` node, so KaTeX's markup reaches the serializer untouched and the
+// annotation TeX is byte-identical to KaTeX's output — clean on-page and in the
+// RSS feed. The comment survives the Markdown re-parse as a single `raw` node
+// and, for display math, is not a code block, so Shiki never claims it.
+//
+// Kept in-repo as a pure render helper + a thin Sätteri wrapper, mirroring
+// mdast-admonitions.ts, so it is unit-testable.
 
 import { defineMdastPlugin } from "satteri";
 import katex from "katex";
@@ -27,6 +38,16 @@ import katex from "katex";
 // Minimal structural mdast type — `inlineMath`/`math` are MdastLiteral nodes, so
 // the raw TeX is on `.value`.
 type MathLiteral = { value?: string };
+
+// Document-scoped handoff between this plugin and hast-katex-math.ts. `ctx.data`
+// is a fresh bag per compile, so the `__katex` array and its indices reset per
+// document; the hast plugin looks up by the index baked into each placeholder,
+// not by visit order. Kept in sync with the reader in hast-katex-math.ts.
+type KatexData = { __katex?: string[] };
+
+// Placeholder comment swapped back to verbatim KaTeX HTML in the hast phase.
+// Brace- and backslash-free so the Markdown re-parse of `{ raw }` can't touch it.
+export const katexPlaceholder = (id: number): string => `<!--katex:${id}-->`;
 
 // Render one TeX string to KaTeX's HTML+MathML markup (htmlAndMathml is KaTeX's
 // default — MathML rides along for screen readers, ADR-0006 decision 4).
@@ -36,11 +57,17 @@ export function renderMath(tex: string, displayMode: boolean): string {
   return katex.renderToString(tex, { displayMode, throwOnError: false });
 }
 
-// Thin Sätteri wrapper: dispatch each math node to the pure renderer. `inlineMath`
+// Render, stash the HTML on the document bag, and return its placeholder comment.
+function injectMath(data: KatexData, tex: string, displayMode: boolean): { raw: string } {
+  const stash = (data.__katex ??= []);
+  const id = stash.push(renderMath(tex, displayMode)) - 1;
+  return { raw: katexPlaceholder(id) };
+}
+
+// Thin Sätteri wrapper: dispatch each math node to the renderer + stash. `inlineMath`
 // is `$…$` (rendered inline), `math` is `$$…$$` (rendered as a display block).
-// `{ raw }` injects the markup at the mdast phase, ahead of the hast/Shiki step.
 export default defineMdastPlugin({
   name: "katex-math",
-  inlineMath: (node) => ({ raw: renderMath((node as MathLiteral).value ?? "", false) }),
-  math: (node) => ({ raw: renderMath((node as MathLiteral).value ?? "", true) }),
+  inlineMath: (node, ctx) => injectMath(ctx.data as KatexData, (node as MathLiteral).value ?? "", false),
+  math: (node, ctx) => injectMath(ctx.data as KatexData, (node as MathLiteral).value ?? "", true),
 });

@@ -231,6 +231,18 @@ describe("build-time KaTeX math output (ADR-0006)", () => {
     expect(mathHtml).toContain("$5");
   });
 
+  // ADR-0006: the on-page MathML `<annotation>` carries the raw TeX byte-for-byte
+  // (copy-as-LaTeX / MathML-source consumers). The plugins inject KaTeX's HTML as a
+  // verbatim raw node so Sätteri's `{ raw }` Markdown re-parse never mangles it —
+  // no eaten `\!`, no JSX-escaped `{` (`{‘{’}`). Guards the fix end-to-end.
+  itIf("keeps the on-page <annotation> TeX byte-clean (no eaten \\! or escaped braces)", () => {
+    expect(mathHtml).toContain(
+      '<annotation encoding="application/x-tex">\\mathrm{Attention}(Q, K, V) = \\mathrm{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right) V</annotation>',
+    );
+    expect(mathHtml).not.toContain("{‘{’}"); // no leftover JSX brace-escaping
+    expect(mathHtml).not.toContain("<!--katex:"); // every placeholder was swapped
+  });
+
   itIf("ships zero client JavaScript on a math page (KaTeX is build-time only)", () => {
     expect(mathHtml).not.toContain("<script");
   });

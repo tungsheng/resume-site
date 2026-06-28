@@ -6,6 +6,7 @@ import { satteri } from "@astrojs/markdown-satteri";
 import mdastAdmonitions from "./astro/markdown/mdast-admonitions.ts";
 import mdastKatexMath from "./astro/markdown/mdast-katex-math.ts";
 import hastBlogImages from "./astro/markdown/hast-blog-images.ts";
+import hastKatexMath from "./astro/markdown/hast-katex-math.ts";
 
 // NOTE: ADR-0003 — the site is migrating to Astro zero-JS static output.
 // During the migration the new Astro tree lives under ./astro so it does not
@@ -52,18 +53,21 @@ export default defineConfig({
     // enabled here for parity with Astro 6's smartypants (ADR-0004 decision 6).
     // In-repo transforms run as Sätteri plugins (ADR-0004 decision 3):
     // admonition callouts and build-time KaTeX math (#32 / ADR-0006) via
-    // mdastPlugins; blog-image figures + lazy/async attrs via hastPlugins.
-    // @astrojs/markdown-remark is intentionally NOT installed — these are native
-    // Sätteri plugins.
+    // mdastPlugins; blog-image figures + lazy/async attrs and the KaTeX
+    // placeholder swap via hastPlugins. @astrojs/markdown-remark is intentionally
+    // NOT installed — these are native Sätteri plugins.
     //
     // ADR-0006: features.math makes `$…$`/`$$…$$` significant pipeline-wide
     // (single-dollar inline stays on, the remark-math default — a literal dollar
     // in prose is escaped `\$`); mdast-katex-math renders the parsed math nodes to
     // static HTML+MathML at build time, keeping the zero-JS guarantee (ADR-0003).
+    // It stashes the markup and emits a placeholder so KaTeX's HTML never hits a
+    // re-parser; hast-katex-math swaps each placeholder back in as a verbatim raw
+    // node (so the `<annotation>` TeX stays byte-clean — see mdast-katex-math.ts).
     processor: satteri({
       features: { gfm: true, smartPunctuation: true, math: true },
       mdastPlugins: [mdastAdmonitions, mdastKatexMath],
-      hastPlugins: [hastBlogImages],
+      hastPlugins: [hastBlogImages, hastKatexMath],
     }),
   },
 });
