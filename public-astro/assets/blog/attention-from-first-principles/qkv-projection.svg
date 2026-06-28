@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 580" role="img"
+     aria-label="How a token becomes a query, key, and value, in three steps. Step 1, token embedding: a token such as cat is looked up as a vector of d_model numbers — its embedding — and one such vector per token, stacked, forms the matrix X of shape seq by d_model. Step 2, projection: X is multiplied by a learned weight matrix W of shape d_model by d_head, a matrix multiply whose shared inner dimension d_model must match, producing an output of shape seq by d_head. Step 3, three roles: three different learned matrices Wq, Wk, Wv project the same X into three vectors per token. The query is what this token is looking for and is not cached, since it is used only at this token's own step. The key is what this token offers to others, and the value is what it passes on if matched; both the key and value are cached, because every later token reuses them.">
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .step  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
+    .note  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .mtx   { fill:#f4f6f5; stroke:#14171a; }
+    .gl    { stroke:#c4ccc8; stroke-width:1; }
+    .sym   { font:600 22px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .lab   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .dim   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .dmg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .tok   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .chip  { fill:#ffffff; stroke:#14171a; }
+    .chiptx{ font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .plain { fill:#ffffff; stroke:#14171a; }
+    .cache { fill:#dff6ee; stroke:#006b40; }
+    .big   { font:700 20px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .bigg  { font:700 20px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .role  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .roleg { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .sub   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .desc  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .pillc { fill:#dff6ee; stroke:#006b40; }
+    .pilln { fill:#ffffff; stroke:#aab2ae; }
+    .pilltc{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .pilltn{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .arr   { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .brace { stroke:#006b40; stroke-width:1.5; fill:none; }
+  </style>
+  <defs>
+    <marker id="qa" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="578" rx="2"/>
+  <text class="ey" x="34" y="32">QUERY · KEY · VALUE PROJECTION</text>
+
+  <!-- ===== STEP 1: token embedding ===== -->
+  <text class="step" x="34" y="60">STEP 1 — TOKEN EMBEDDING</text>
+  <text class="note" x="34" y="80">Each token is looked up as a vector — its embedding. One vector per token.</text>
+
+  <rect class="chip" x="70" y="98" width="56" height="30" rx="2"/>
+  <text class="chiptx" x="98" y="118" text-anchor="middle">cat</text>
+  <path class="arr" d="M128,113 L170,113" marker-end="url(#qa)"/>
+  <text class="dim" x="149" y="106" text-anchor="middle">embed</text>
+
+  <rect class="mtx" x="178" y="98" width="160" height="30" rx="2"/>
+  <line class="gl" x1="198" y1="98" x2="198" y2="128"/><line class="gl" x1="218" y1="98" x2="218" y2="128"/><line class="gl" x1="238" y1="98" x2="238" y2="128"/><line class="gl" x1="258" y1="98" x2="258" y2="128"/><line class="gl" x1="278" y1="98" x2="278" y2="128"/><line class="gl" x1="298" y1="98" x2="298" y2="128"/><line class="gl" x1="318" y1="98" x2="318" y2="128"/>
+  <text class="dim" x="258" y="146" text-anchor="middle">d_model numbers</text>
+  <text class="dim" x="356" y="117" text-anchor="start">= one row of X</text>
+
+  <line x1="34" y1="168" x2="646" y2="168" stroke="#eef0f0" stroke-width="1"/>
+
+  <!-- ===== STEP 2: projection (matmul) ===== -->
+  <text class="step" x="34" y="194">STEP 2 — PROJECT WITH A LEARNED WEIGHT</text>
+  <text class="note" x="34" y="214">Multiply the embeddings X by a learned weight matrix W:</text>
+
+  <!-- X -->
+  <rect class="mtx" x="70" y="234" width="92" height="88" rx="2"/>
+  <line class="gl" x1="70" y1="249" x2="162" y2="249"/><line class="gl" x1="70" y1="263" x2="162" y2="263"/><line class="gl" x1="70" y1="278" x2="162" y2="278"/><line class="gl" x1="70" y1="293" x2="162" y2="293"/><line class="gl" x1="70" y1="307" x2="162" y2="307"/>
+  <line class="gl" x1="93" y1="234" x2="93" y2="322"/><line class="gl" x1="116" y1="234" x2="116" y2="322"/><line class="gl" x1="139" y1="234" x2="139" y2="322"/>
+  <text class="tok" x="64" y="245" text-anchor="end">The</text>
+  <text class="tok" x="64" y="259" text-anchor="end">cat</text>
+  <text class="tok" x="64" y="274" text-anchor="end">sat</text>
+  <text class="tok" x="64" y="289" text-anchor="end">it</text>
+  <text class="tok" x="64" y="303" text-anchor="end">was</text>
+  <text class="tok" x="64" y="318" text-anchor="end">tired</text>
+  <text class="lab" x="116" y="228" text-anchor="middle">X</text>
+  <text class="dim" x="116" y="340" text-anchor="middle">seq × <tspan class="dmg">d_model</tspan></text>
+
+  <text class="sym" x="179" y="288" text-anchor="middle">·</text>
+
+  <!-- W -->
+  <rect class="mtx" x="196" y="234" width="84" height="88" rx="2"/>
+  <line class="gl" x1="196" y1="256" x2="280" y2="256"/><line class="gl" x1="196" y1="278" x2="280" y2="278"/><line class="gl" x1="196" y1="300" x2="280" y2="300"/>
+  <line class="gl" x1="224" y1="234" x2="224" y2="322"/><line class="gl" x1="252" y1="234" x2="252" y2="322"/>
+  <text class="lab" x="238" y="228" text-anchor="middle">W</text>
+  <text class="dim" x="238" y="340" text-anchor="middle"><tspan class="dmg">d_model</tspan> × d_head</text>
+
+  <text class="sym" x="298" y="288" text-anchor="middle">=</text>
+
+  <!-- output -->
+  <rect class="mtx" x="316" y="234" width="84" height="88" rx="2"/>
+  <line class="gl" x1="316" y1="249" x2="400" y2="249"/><line class="gl" x1="316" y1="263" x2="400" y2="263"/><line class="gl" x1="316" y1="278" x2="400" y2="278"/><line class="gl" x1="316" y1="293" x2="400" y2="293"/><line class="gl" x1="316" y1="307" x2="400" y2="307"/>
+  <line class="gl" x1="344" y1="234" x2="344" y2="322"/><line class="gl" x1="372" y1="234" x2="372" y2="322"/>
+  <text class="lab" x="358" y="228" text-anchor="middle">output</text>
+  <text class="dim" x="358" y="340" text-anchor="middle">seq × d_head</text>
+
+  <text class="dmg" x="432" y="266" text-anchor="start">inner dim</text>
+  <text class="dmg" x="432" y="282" text-anchor="start">d_model</text>
+  <text class="dmg" x="432" y="298" text-anchor="start">must match →</text>
+
+  <line x1="34" y1="362" x2="646" y2="362" stroke="#eef0f0" stroke-width="1"/>
+
+  <!-- ===== STEP 3: three roles ===== -->
+  <text class="step" x="34" y="388">STEP 3 — THREE WEIGHTS, THREE ROLES</text>
+  <text class="note" x="34" y="408">Wq, Wk, Wv project the same X three ways — one role per matrix:</text>
+
+  <!-- Q row -->
+  <rect class="plain" x="34" y="420" width="32" height="32" rx="2"/>
+  <text class="big"  x="50" y="443" text-anchor="middle">Q</text>
+  <text class="roleg" x="80" y="441" text-anchor="start" fill="#14171a">query</text>
+  <text class="desc" x="142" y="441" text-anchor="start">— what this token is looking for</text>
+  <rect class="pilln" x="540" y="425" width="106" height="22" rx="11"/>
+  <text class="pilltn" x="593" y="440" text-anchor="middle">not cached</text>
+
+  <!-- K row -->
+  <rect class="cache" x="34" y="462" width="32" height="32" rx="2"/>
+  <text class="bigg" x="50" y="485" text-anchor="middle">K</text>
+  <text class="roleg" x="80" y="483" text-anchor="start">key</text>
+  <text class="desc" x="142" y="483" text-anchor="start">— what this token offers to others</text>
+  <rect class="pillc" x="566" y="467" width="80" height="22" rx="11"/>
+  <text class="pilltc" x="606" y="482" text-anchor="middle">cached</text>
+
+  <!-- V row -->
+  <rect class="cache" x="34" y="504" width="32" height="32" rx="2"/>
+  <text class="bigg" x="50" y="527" text-anchor="middle">V</text>
+  <text class="roleg" x="80" y="525" text-anchor="start">value</text>
+  <text class="desc" x="142" y="525" text-anchor="start">— what this token passes on if matched</text>
+  <rect class="pillc" x="566" y="509" width="80" height="22" rx="11"/>
+  <text class="pilltc" x="606" y="524" text-anchor="middle">cached</text>
+
+  <text class="note" x="34" y="562">K and V are reused by every later token, so they're cached; Q is needed only now.</text>
+</svg>

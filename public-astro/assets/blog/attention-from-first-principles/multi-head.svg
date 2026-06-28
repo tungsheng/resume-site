@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 410" role="img"
+     aria-label="Multi-head attention runs h independent attention computations in parallel, each with its own query, key, and value in its own subspace. Every head keeps its own K and V, which are written to the cache. The head outputs are concatenated and mixed by a learned matrix Wo into the block output. A panel on the right gives the cache cost: number of layers times number of heads times two times sequence length times d_head, because the whole block also repeats once per layer down the stack.">
+  <style>
+    .bg     { fill:#ffffff; stroke:#e6e6e6; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .head   { fill:#ffffff; stroke:#14171a; }
+    .htitle { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#5c6670; }
+    .attn   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .chip   { fill:#dff6ee; stroke:#006b40; }
+    .chiptx { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .bar    { fill:#f4f6f5; stroke:#14171a; }
+    .bartx  { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .wo     { fill:#ffffff; stroke:#006b40; }
+    .wotx   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .out    { fill:#dff6ee; stroke:#006b40; }
+    .ell    { font:600 18px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .arr    { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .panel  { fill:#fafbfb; stroke:#cfe6db; }
+    .ptitle { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
+    .ptx    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .pem    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .pform  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .cap    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+  </style>
+  <defs>
+    <marker id="ma" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="408" rx="2"/>
+  <text class="ey" x="34" y="32">MULTI-HEAD ATTENTION</text>
+
+  <!-- head 1 -->
+  <rect class="head" x="34" y="60" width="124" height="84" rx="2"/>
+  <text class="htitle" x="46" y="80">HEAD 1</text>
+  <text class="attn"   x="96" y="104" text-anchor="middle">attn(Q,K,V)</text>
+  <rect class="chip" x="46" y="116" width="100" height="18" rx="2"/>
+  <text class="chiptx" x="96" y="129" text-anchor="middle">K,V cached</text>
+
+  <!-- head 2 -->
+  <rect class="head" x="170" y="60" width="124" height="84" rx="2"/>
+  <text class="htitle" x="182" y="80">HEAD 2</text>
+  <text class="attn"   x="232" y="104" text-anchor="middle">attn(Q,K,V)</text>
+  <rect class="chip" x="182" y="116" width="100" height="18" rx="2"/>
+  <text class="chiptx" x="232" y="129" text-anchor="middle">K,V cached</text>
+
+  <!-- ellipsis -->
+  <text class="ell" x="312" y="108" text-anchor="middle">···</text>
+
+  <!-- head h -->
+  <rect class="head" x="330" y="60" width="124" height="84" rx="2"/>
+  <text class="htitle" x="342" y="80">HEAD h</text>
+  <text class="attn"   x="392" y="104" text-anchor="middle">attn(Q,K,V)</text>
+  <rect class="chip" x="342" y="116" width="100" height="18" rx="2"/>
+  <text class="chiptx" x="392" y="129" text-anchor="middle">K,V cached</text>
+
+  <!-- arrows down to concat -->
+  <path class="arr" d="M96,144 L96,186" marker-end="url(#ma)"/>
+  <path class="arr" d="M232,144 L232,186" marker-end="url(#ma)"/>
+  <path class="arr" d="M392,144 L392,186" marker-end="url(#ma)"/>
+
+  <!-- concat bar -->
+  <rect class="bar" x="34" y="188" width="420" height="34" rx="2"/>
+  <text class="bartx" x="244" y="210" text-anchor="middle">concat the h head outputs</text>
+
+  <!-- arrow to Wo -->
+  <path class="arr" d="M244,222 L244,250" marker-end="url(#ma)"/>
+  <rect class="wo" x="174" y="252" width="140" height="38" rx="2"/>
+  <text class="wotx" x="244" y="276" text-anchor="middle">× Wo</text>
+
+  <!-- arrow to output -->
+  <path class="arr" d="M244,290 L244,318" marker-end="url(#ma)"/>
+  <rect class="out" x="194" y="320" width="100" height="34" rx="2"/>
+  <text class="bartx" x="244" y="342" text-anchor="middle">output</text>
+
+  <!-- cost panel -->
+  <rect class="panel" x="478" y="60" width="170" height="294" rx="2"/>
+  <text class="ptitle" x="494" y="84">WHAT IT COSTS</text>
+  <text class="ptx" x="494" y="112">each head keeps</text>
+  <text class="ptx" x="494" y="129">its own K and V</text>
+  <text class="pem" x="494" y="153">→ × num_heads</text>
+  <text class="ptx" x="494" y="183">and the block</text>
+  <text class="ptx" x="494" y="200">repeats down</text>
+  <text class="ptx" x="494" y="217">the stack</text>
+  <text class="pem" x="494" y="241">→ × num_layers</text>
+  <line x1="494" y1="262" x2="632" y2="262" stroke="#cfe6db" stroke-width="1"/>
+  <text class="pform" x="494" y="288">cache =</text>
+  <text class="pform" x="494" y="306">layers × heads</text>
+  <text class="pform" x="494" y="323">× 2 × seq</text>
+  <text class="pform" x="494" y="340">× d_head</text>
+
+  <!-- caption -->
+  <text class="cap" x="34" y="380">h heads attend in parallel, each in its own subspace; their outputs are then</text>
+  <text class="cap" x="34" y="398">concatenated and mixed by Wo into the block's output.</text>
+</svg>
