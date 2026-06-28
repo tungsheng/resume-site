@@ -34,7 +34,7 @@ astro/                     Astro source (configured as srcDir)
   layouts/                 BaseLayout and shared shells
   content/                 content-collection schema + selectors (blog)
   content.config.ts        Astro content collections config
-  markdown/                Sätteri AST plugins (admonitions, blog images)
+  markdown/                Sätteri AST plugins (admonitions, blog images, KaTeX math)
   styles/                  global.css (Tailwind entry)
 public-astro/              static assets served as-is (configured as publicDir)
 src/
@@ -118,6 +118,26 @@ To replace the public resume:
 
 1. Update `src/features/resume/data.ts`.
 2. Run `bun run build:pdf` (or `bun run dev`) and review `/resume`.
+
+## Math in Blog Posts
+
+Blog posts can use LaTeX math, rendered to static HTML by KaTeX **at build time**
+— no client-side JavaScript (see `docs/adr/0006-build-time-katex-math.md`).
+
+- **Delimiters:** `$…$` for inline math, `$$…$$` for a display block.
+- **Single-dollar math is significant in every post.** Write a literal dollar in
+  prose as `\$` (e.g. `it costs \$5`). An accidental math span needs *two*
+  unescaped `$` on one line, and a mis-render is glaring in the dev preview.
+- **Opt-in, no flag.** A post "uses math" simply by containing a delimiter —
+  there is no `math: true` frontmatter. The KaTeX stylesheet is auto-linked only
+  on posts whose source contains math (detected pre-render), so non-math posts
+  and every portfolio page stay CSS-clean. The CSS + WOFF2 fonts are self-hosted
+  under `public-astro/katex/`.
+- **Bad formulas fail soft.** An invalid formula renders in red inline (KaTeX's
+  `throwOnError: false`) rather than breaking the build — catch it in preview.
+- **RSS shows source, by design.** Feeds carry no KaTeX stylesheet, so the feed
+  degrades each formula to its raw TeX (`<code>$…$</code>`) instead of unstyled
+  glyph soup. This is the accepted fallback; on-page rendering is unaffected.
 
 ## Testing Focus
 
