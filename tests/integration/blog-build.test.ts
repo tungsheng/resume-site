@@ -259,4 +259,16 @@ describe("build-time KaTeX math output (ADR-0006)", () => {
     expect(await Bun.file("dist/katex/fonts/KaTeX_Main-Regular.woff2").exists()).toBe(true);
     expect(await Bun.file("dist/katex/fonts/KaTeX_Math-Italic.woff2").exists()).toBe(true);
   });
+
+  // #34 / ADR-0006 decision 4: the feed (no KaTeX stylesheet) degrades math to
+  // raw TeX. The math fixture is Drafting, so it appears only in this dev feed.
+  itIf("degrades math to raw TeX in the RSS feed, not CSS-less KaTeX markup", async () => {
+    const rss = await Bun.file("dist/rss.xml").text();
+    expect(rss).toContain("$E = mc^2$"); // inline math, degraded to readable source
+    expect(rss).toContain("\\mathrm{Attention}(Q, K, V)"); // display TeX, braces un-escaped
+    expect(rss).not.toContain('class="katex"'); // no glyph-soup KaTeX HTML…
+    expect(rss).not.toContain("katex-mathml"); // …and no orphaned MathML
+    expect(rss).not.toContain("{‘{’}"); // …and no leftover JSX brace-escaping
+    expect(rss).toContain('<rss version="2.0"'); // still a valid feed
+  });
 });

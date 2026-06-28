@@ -4,6 +4,7 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { render } from "astro:content";
 import { sortByPublishedDesc } from "../content/blog-schema";
 import { getVisiblePosts } from "../content/posts";
+import { degradeMathToTeX } from "../markdown/degrade-math-rss";
 
 // Full-content RSS 2.0 feed at /rss.xml (#9). Published Posts only, newest-first
 // — the exact same visibility + ordering as the /blog index (isPostVisible +
@@ -27,13 +28,16 @@ export async function GET(context: APIContext) {
     posts.map(async (post) => {
       const { Content } = await render(post);
       const body = await container.renderToString(Content);
+      // Degrade math to raw TeX (#34 / ADR-0006): the feed has no KaTeX
+      // stylesheet, so rendered formulas would be a glyph jumble — show readable
+      // source instead. Then absolutize asset/link URLs for off-site readers.
       return {
         title: post.data.title,
         description: post.data.summary,
         pubDate: post.data.published,
         link: `/blog/${post.id}/`,
         categories: post.data.tags,
-        content: absolutizeUrls(body, site),
+        content: absolutizeUrls(degradeMathToTeX(body), site),
       };
     }),
   );
