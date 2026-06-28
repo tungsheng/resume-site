@@ -8,6 +8,7 @@ import {
   shouldShowToc,
 } from "../../content/blog-schema";
 import { resolveRelatedLinks } from "../../content/related-links";
+import { hasMathDelimiter } from "../../markdown/detect-math";
 
 // Prerender a Post at /blog/<slug>. Visibility by Status (ADR-0003 §8): in a
 // production build only Published Posts get a page; `astro dev` renders all
@@ -22,6 +23,11 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
 const minutes = readingTimeMinutes(post.body ?? "");
+
+// Link the KaTeX stylesheet only when this Post's source carries math (#33 /
+// ADR-0006). Scanning the raw body pre-render keeps the link in lockstep with
+// what the math plugin renders — no frontmatter flag to forget.
+const mathStylesheet = hasMathDelimiter(post.body ?? "");
 
 // Dates are authored as plain calendar days — ISO (YYYY-MM-DD) for the techie
 // tabular meta line; slice the UTC ISO string directly to avoid an off-by-one.
@@ -51,6 +57,7 @@ const relatedLinks = resolveRelatedLinks(post.data.related);
   modifiedTime={updatedLabel ? updated : undefined}
   tags={post.data.tags}
   section={post.data.category}
+  mathStylesheet={mathStylesheet}
   breadcrumbs={[
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog" },

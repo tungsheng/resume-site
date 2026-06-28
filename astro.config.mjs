@@ -4,6 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { satteri } from "@astrojs/markdown-satteri";
 import mdastAdmonitions from "./astro/markdown/mdast-admonitions.ts";
+import mdastKatexMath from "./astro/markdown/mdast-katex-math.ts";
 import hastBlogImages from "./astro/markdown/hast-blog-images.ts";
 
 // NOTE: ADR-0003 — the site is migrating to Astro zero-JS static output.
@@ -50,12 +51,18 @@ export default defineConfig({
     // Sätteri GFM (incl. tables) is on by default; smartPunctuation is opt-in,
     // enabled here for parity with Astro 6's smartypants (ADR-0004 decision 6).
     // In-repo transforms run as Sätteri plugins (ADR-0004 decision 3):
-    // admonition callouts via mdastPlugins (#16); blog-image figures + lazy/
-    // async attrs via hastPlugins (#17). @astrojs/markdown-remark is
-    // intentionally NOT installed — these are native Sätteri plugins.
+    // admonition callouts and build-time KaTeX math (#32 / ADR-0006) via
+    // mdastPlugins; blog-image figures + lazy/async attrs via hastPlugins.
+    // @astrojs/markdown-remark is intentionally NOT installed — these are native
+    // Sätteri plugins.
+    //
+    // ADR-0006: features.math makes `$…$`/`$$…$$` significant pipeline-wide
+    // (single-dollar inline stays on, the remark-math default — a literal dollar
+    // in prose is escaped `\$`); mdast-katex-math renders the parsed math nodes to
+    // static HTML+MathML at build time, keeping the zero-JS guarantee (ADR-0003).
     processor: satteri({
-      features: { gfm: true, smartPunctuation: true },
-      mdastPlugins: [mdastAdmonitions],
+      features: { gfm: true, smartPunctuation: true, math: true },
+      mdastPlugins: [mdastAdmonitions, mdastKatexMath],
       hastPlugins: [hastBlogImages],
     }),
   },
