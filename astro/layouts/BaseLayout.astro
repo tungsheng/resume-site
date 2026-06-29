@@ -120,14 +120,16 @@ const isArticle = ogType === "article";
   <body class="flex min-h-screen flex-col font-sans text-ink antialiased">
     <header class="sticky top-0 z-20 border-b border-surface-border bg-paper">
       <div class="mx-auto flex w-full max-w-[75rem] items-center gap-6 px-4 py-3 sm:px-6">
-        <!-- Brand: the original "T│L" monospace monogram (ported from the
-             pre-Astro header), restyled Swiss — ink glyphs, go-green divider. -->
+        <!-- Brand: the "T│L" monospace monogram (ported from the pre-Astro
+             header), restyled Swiss — ink glyphs with a drawn go-green bar as the
+             divider (matches favicon.svg, which the thin │ glyph rendered too
+             faintly at small sizes). -->
         <a
           href="/"
           aria-label="Tony Lee home"
           class="mr-auto font-mono text-[1.35rem] font-semibold leading-none tracking-[-0.03em] text-ink"
         >
-          <span aria-hidden="true">T<span class="text-go-green">│</span>L</span>
+          <span aria-hidden="true">T<span class="mx-[0.115em] inline-block h-[0.69em] w-[0.154em] rounded-full bg-go-green align-baseline"></span>L</span>
         </a>
 
         <!-- Desktop nav -->
