@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 410" role="img"
-     aria-label="Multi-head attention runs h independent attention computations in parallel, each with its own query, key, and value in its own subspace. Every head keeps its own K and V, which are written to the cache. The head outputs are concatenated and mixed by a learned matrix Wo into the block output. A panel on the right gives the cache cost: number of layers times number of heads times two times sequence length times d_head, because the whole block also repeats once per layer down the stack.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 426" role="img"
+     aria-label="Multi-head attention. A token vector of width d_model is split into h heads, each d_head wide, each with its own query, key, and value. Every head runs attention in parallel and caches its own K and V. The head outputs are concatenated back into a d_model-wide vector and mixed by a learned matrix Wo to form the block output, which repeats once per layer down the stack. The cost panel shows what each token adds to the cache — times 2 for K and V, times d_head for the vector width, times num_heads per head, times num_layers per layer, times bytes per number — then times seq_len tokens for the cache of one whole sequence.">
   <style>
     .bg     { fill:#ffffff; stroke:#e6e6e6; }
     .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
@@ -10,85 +10,102 @@
     .chiptx { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
     .bar    { fill:#f4f6f5; stroke:#14171a; }
     .bartx  { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .sub    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
     .wo     { fill:#ffffff; stroke:#006b40; }
     .wotx   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
     .out    { fill:#dff6ee; stroke:#006b40; }
     .ell    { font:600 18px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
     .arr    { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .side   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
     .panel  { fill:#fafbfb; stroke:#cfe6db; }
     .ptitle { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
     .ptx    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .pem    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .pform  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .fac    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .facem  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .rea    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .pform  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
     .cap    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
   </style>
   <defs>
     <marker id="ma" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
   </defs>
 
-  <rect class="bg" x="1" y="1" width="678" height="408" rx="2"/>
+  <rect class="bg" x="1" y="1" width="678" height="424" rx="2"/>
   <text class="ey" x="34" y="32">MULTI-HEAD ATTENTION</text>
 
+  <!-- input: one token vector, split across heads -->
+  <rect class="bar" x="34" y="44" width="420" height="32" rx="2"/>
+  <text class="bartx" x="244" y="60" text-anchor="middle">token vector · d_model wide</text>
+  <text class="sub"   x="244" y="73" text-anchor="middle">split across h heads — d_head wide each</text>
+
+  <!-- split arrows down to each head -->
+  <path class="arr" d="M96,76 L96,99"  marker-end="url(#ma)"/>
+  <path class="arr" d="M232,76 L232,99" marker-end="url(#ma)"/>
+  <path class="arr" d="M392,76 L392,99" marker-end="url(#ma)"/>
+
   <!-- head 1 -->
-  <rect class="head" x="34" y="60" width="124" height="84" rx="2"/>
-  <text class="htitle" x="46" y="80">HEAD 1</text>
-  <text class="attn"   x="96" y="104" text-anchor="middle">attn(Q,K,V)</text>
-  <rect class="chip" x="46" y="116" width="100" height="18" rx="2"/>
-  <text class="chiptx" x="96" y="129" text-anchor="middle">K,V cached</text>
+  <rect class="head" x="34" y="100" width="124" height="84" rx="2"/>
+  <text class="htitle" x="46" y="120">HEAD 1</text>
+  <text class="attn"   x="96" y="146" text-anchor="middle">attn(Q₁,K₁,V₁)</text>
+  <rect class="chip" x="46" y="156" width="100" height="18" rx="2"/>
+  <text class="chiptx" x="96" y="169" text-anchor="middle">K₁,V₁ → cache</text>
 
   <!-- head 2 -->
-  <rect class="head" x="170" y="60" width="124" height="84" rx="2"/>
-  <text class="htitle" x="182" y="80">HEAD 2</text>
-  <text class="attn"   x="232" y="104" text-anchor="middle">attn(Q,K,V)</text>
-  <rect class="chip" x="182" y="116" width="100" height="18" rx="2"/>
-  <text class="chiptx" x="232" y="129" text-anchor="middle">K,V cached</text>
+  <rect class="head" x="170" y="100" width="124" height="84" rx="2"/>
+  <text class="htitle" x="182" y="120">HEAD 2</text>
+  <text class="attn"   x="232" y="146" text-anchor="middle">attn(Q₂,K₂,V₂)</text>
+  <rect class="chip" x="182" y="156" width="100" height="18" rx="2"/>
+  <text class="chiptx" x="232" y="169" text-anchor="middle">K₂,V₂ → cache</text>
 
   <!-- ellipsis -->
-  <text class="ell" x="312" y="108" text-anchor="middle">···</text>
+  <text class="ell" x="312" y="150" text-anchor="middle">···</text>
 
   <!-- head h -->
-  <rect class="head" x="330" y="60" width="124" height="84" rx="2"/>
-  <text class="htitle" x="342" y="80">HEAD h</text>
-  <text class="attn"   x="392" y="104" text-anchor="middle">attn(Q,K,V)</text>
-  <rect class="chip" x="342" y="116" width="100" height="18" rx="2"/>
-  <text class="chiptx" x="392" y="129" text-anchor="middle">K,V cached</text>
+  <rect class="head" x="330" y="100" width="124" height="84" rx="2"/>
+  <text class="htitle" x="342" y="120">HEAD h</text>
+  <text class="attn"   x="392" y="146" text-anchor="middle">attn(Qₕ,Kₕ,Vₕ)</text>
+  <rect class="chip" x="342" y="156" width="100" height="18" rx="2"/>
+  <text class="chiptx" x="392" y="169" text-anchor="middle">Kₕ,Vₕ → cache</text>
 
   <!-- arrows down to concat -->
-  <path class="arr" d="M96,144 L96,186" marker-end="url(#ma)"/>
-  <path class="arr" d="M232,144 L232,186" marker-end="url(#ma)"/>
-  <path class="arr" d="M392,144 L392,186" marker-end="url(#ma)"/>
+  <path class="arr" d="M96,184 L96,210"  marker-end="url(#ma)"/>
+  <path class="arr" d="M232,184 L232,210" marker-end="url(#ma)"/>
+  <path class="arr" d="M392,184 L392,210" marker-end="url(#ma)"/>
 
   <!-- concat bar -->
-  <rect class="bar" x="34" y="188" width="420" height="34" rx="2"/>
-  <text class="bartx" x="244" y="210" text-anchor="middle">concat the h head outputs</text>
+  <rect class="bar" x="34" y="212" width="420" height="32" rx="2"/>
+  <text class="bartx" x="244" y="233" text-anchor="middle">concat the h heads → back to d_model</text>
 
   <!-- arrow to Wo -->
-  <path class="arr" d="M244,222 L244,250" marker-end="url(#ma)"/>
-  <rect class="wo" x="174" y="252" width="140" height="38" rx="2"/>
-  <text class="wotx" x="244" y="276" text-anchor="middle">× Wo</text>
+  <path class="arr" d="M244,244 L244,270" marker-end="url(#ma)"/>
+  <rect class="wo" x="174" y="272" width="140" height="36" rx="2"/>
+  <text class="wotx" x="244" y="295" text-anchor="middle">× Wo</text>
+  <text class="side" x="324" y="295">← mixes the h heads</text>
 
   <!-- arrow to output -->
-  <path class="arr" d="M244,290 L244,318" marker-end="url(#ma)"/>
-  <rect class="out" x="194" y="320" width="100" height="34" rx="2"/>
-  <text class="bartx" x="244" y="342" text-anchor="middle">output</text>
+  <path class="arr" d="M244,308 L244,334" marker-end="url(#ma)"/>
+  <rect class="out" x="194" y="336" width="100" height="32" rx="2"/>
+  <text class="bartx" x="244" y="357" text-anchor="middle">output</text>
+  <text class="side" x="304" y="357">← repeats × num_layers</text>
 
-  <!-- cost panel -->
-  <rect class="panel" x="478" y="60" width="170" height="294" rx="2"/>
-  <text class="ptitle" x="494" y="84">WHAT IT COSTS</text>
-  <text class="ptx" x="494" y="112">each head keeps</text>
-  <text class="ptx" x="494" y="129">its own K and V</text>
-  <text class="pem" x="494" y="153">→ × num_heads</text>
-  <text class="ptx" x="494" y="183">and the block</text>
-  <text class="ptx" x="494" y="200">repeats down</text>
-  <text class="ptx" x="494" y="217">the stack</text>
-  <text class="pem" x="494" y="241">→ × num_layers</text>
-  <line x1="494" y1="262" x2="632" y2="262" stroke="#cfe6db" stroke-width="1"/>
-  <text class="pform" x="494" y="288">cache =</text>
-  <text class="pform" x="494" y="306">layers × heads</text>
-  <text class="pform" x="494" y="323">× 2 × seq</text>
-  <text class="pform" x="494" y="340">× d_head</text>
+  <!-- cost panel: per-token cost, then × seq_len = per-sequence cache -->
+  <rect class="panel" x="478" y="100" width="180" height="268" rx="2"/>
+  <text class="ptitle" x="492" y="124">WHAT IT COSTS</text>
+  <text class="ptx" x="492" y="146">each token adds</text>
+  <text class="ptx" x="492" y="161">to the cache:</text>
+
+  <text class="fac"   x="492" y="185">× 2</text>          <text class="rea" x="590" y="185">K and V</text>
+  <text class="fac"   x="492" y="205">× d_head</text>     <text class="rea" x="590" y="205">width</text>
+  <text class="facem" x="492" y="225">× num_heads</text>  <text class="rea" x="590" y="225">per head</text>
+  <text class="facem" x="492" y="245">× num_layers</text> <text class="rea" x="590" y="245">per layer</text>
+  <text class="fac"   x="492" y="265">× bytes</text>      <text class="rea" x="590" y="265">fp16 = 2</text>
+
+  <line x1="492" y1="282" x2="646" y2="282" stroke="#cfe6db" stroke-width="1"/>
+  <text class="facem" x="492" y="305">× seq_len</text>    <text class="rea" x="590" y="305">tokens</text>
+  <text class="pform" x="492" y="332">= cache, one</text>
+  <text class="pform" x="492" y="349">whole sequence</text>
 
   <!-- caption -->
-  <text class="cap" x="34" y="380">h heads attend in parallel, each in its own subspace; their outputs are then</text>
-  <text class="cap" x="34" y="398">concatenated and mixed by Wo into the block's output.</text>
+  <text class="cap" x="34" y="396">h heads attend in parallel, each in its own d_head-wide subspace. Concat rejoins them</text>
+  <text class="cap" x="34" y="414">into d_model; Wo mixes them into the output. The block repeats once per layer.</text>
 </svg>
