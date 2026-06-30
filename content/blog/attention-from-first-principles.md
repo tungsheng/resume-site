@@ -2,8 +2,8 @@
 title: "Attention, from First Principles"
 summary: "Attention is the one operation that lets a token look back at the whole sequence — and it is also where the KV cache comes from. This post derives scaled dot-product attention from the ground up, then watches the cache, and the memory wall from the last post, fall straight out of the math. The first of two; the next is about making it cheap."
 category: "Inference"
-status: Drafting
-published: 2026-06-28
+status: Published
+published: 2026-06-29
 tags:
   - attention
   - self-attention
