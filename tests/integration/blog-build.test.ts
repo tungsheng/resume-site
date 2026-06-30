@@ -197,23 +197,21 @@ describe("blog production build output", () => {
   });
 });
 
-// #32 / ADR-0006: build-time KaTeX math. The capability is opt-in per post and
-// the launch ships no math Post, so a Drafting fixture (math-rendering-smoke)
-// carries inline + display math and the `\$` escape. It can only render in a
-// dev-inclusive build (drafts get a page when import.meta.env.PROD is false), so
-// this suite runs its own build — the render helper itself is unit-tested in
-// tests/unit/blog-markdown.test.ts. Runs after the production-build suite above;
-// Bun completes a describe before the next one's beforeAll, so the rebuild that
-// clobbers dist/ is safe.
+// #32 / ADR-0006: build-time KaTeX math. The published attention post carries
+// inline + display math, so it is the math target here. The render helper is
+// unit-tested in tests/unit/blog-markdown.test.ts (the `\$` escaped-dollar
+// convention is covered there too). This suite runs its own build, after the
+// production-build suite above; Bun completes a describe before the next one's
+// beforeAll, so the rebuild that clobbers dist/ is safe.
 describe("build-time KaTeX math output (ADR-0006)", () => {
-  const MATH_SLUG = "math-rendering-smoke";
+  const MATH_SLUG = "attention-from-first-principles";
   let mathHtml = "";
 
   beforeAll(async () => {
     if (!RUN) return;
-    // NODE_ENV=development keeps import.meta.env.PROD false, so Drafting Posts get
-    // a page — the only way to render the math fixture, which never publishes.
-    await $`bunx astro build`.env({ ...process.env, NODE_ENV: "development" }).quiet();
+    // The math target is a Published Post, so a normal production build renders it
+    // (and this is the markup that actually ships).
+    await $`bunx astro build`.env({ ...process.env, NODE_ENV: "production" }).quiet();
     mathHtml = await Bun.file(`dist/blog/${MATH_SLUG}/index.html`).text();
   });
 
@@ -227,17 +225,13 @@ describe("build-time KaTeX math output (ADR-0006)", () => {
     expect(mathHtml).not.toContain("math-display");
   });
 
-  itIf("keeps a literal escaped dollar (\\$) as plain text, not a math span", () => {
-    expect(mathHtml).toContain("$5");
-  });
-
   // ADR-0006: the on-page MathML `<annotation>` carries the raw TeX byte-for-byte
   // (copy-as-LaTeX / MathML-source consumers). The plugins inject KaTeX's HTML as a
   // verbatim raw node so Sätteri's `{ raw }` Markdown re-parse never mangles it —
   // no eaten `\!`, no JSX-escaped `{` (`{‘{’}`). Guards the fix end-to-end.
   itIf("keeps the on-page <annotation> TeX byte-clean (no eaten \\! or escaped braces)", () => {
     expect(mathHtml).toContain(
-      '<annotation encoding="application/x-tex">\\mathrm{Attention}(Q, K, V) = \\mathrm{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right) V</annotation>',
+      '<annotation encoding="application/x-tex">\\mathrm{Attention}(Q, K, V) = \\mathrm{softmax}\\!\\left(\\frac{Q K^\\top}{\\sqrt{d_\\text{head}}}\\right) V</annotation>',
     );
     expect(mathHtml).not.toContain("{‘{’}"); // no leftover JSX brace-escaping
     expect(mathHtml).not.toContain("<!--katex:"); // every placeholder was swapped
@@ -273,10 +267,10 @@ describe("build-time KaTeX math output (ADR-0006)", () => {
   });
 
   // #34 / ADR-0006 decision 4: the feed (no KaTeX stylesheet) degrades math to
-  // raw TeX. The math fixture is Drafting, so it appears only in this dev feed.
+  // raw TeX. The published attention post carries the math in this feed.
   itIf("degrades math to raw TeX in the RSS feed, not CSS-less KaTeX markup", async () => {
     const rss = await Bun.file("dist/rss.xml").text();
-    expect(rss).toContain("$E = mc^2$"); // inline math, degraded to readable source
+    expect(rss).toContain("$Q = X W_q$"); // inline math, degraded to readable source
     expect(rss).toContain("\\mathrm{Attention}(Q, K, V)"); // display TeX, braces un-escaped
     expect(rss).not.toContain('class="katex"'); // no glyph-soup KaTeX HTML…
     expect(rss).not.toContain("katex-mathml"); // …and no orphaned MathML
