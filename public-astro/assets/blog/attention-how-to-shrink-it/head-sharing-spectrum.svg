@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 268" role="img"
+     aria-label="The head-sharing spectrum, four panels left to right. A legend marks the two box types: white Q boxes are query heads, green KV boxes are cached keys and values. Every panel has the same top row of four query heads, because the query heads stay many and diverse; what changes is the cached K/V below them. Panel one, multi-head attention: each of the four query heads has its own key-value pair, so four are cached — the baseline. Panel two, grouped-query attention: the four query heads share two key-value pairs, so two are cached, with near-baseline quality. Panel three, multi-query attention: all four query heads share a single key-value pair, so one is cached, at some quality cost. Panel four, multi-head latent attention: the keys and values are replaced by one compressed latent that reconstructs them per head — smaller than grouped-query, slightly larger than multi-query, at quality that matches or beats multi-head. Queries stay many; only what is cached shrinks: four, two, one, then a single latent.">
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .pnl   { fill:#fafbfb; stroke:#e6e6e6; }
+    .ttl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .tag   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#7a847f; }
+    .qbox  { fill:#ffffff; stroke:#14171a; }
+    .qtx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .kv    { fill:#dff6ee; stroke:#006b40; }
+    .kvtx  { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .lat   { fill:#006b40; stroke:#006b40; }
+    .lattx { font:700 10px 'JetBrains Mono',ui-monospace,monospace; fill:#ffffff; }
+    .link  { stroke:#9bbfb0; stroke-width:1; fill:none; }
+    .cnt   { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .qual  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .leg   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+  </style>
+
+  <rect class="bg" x="1" y="1" width="678" height="266" rx="2"/>
+  <text class="ey" x="34" y="30">THE HEAD-SHARING SPECTRUM</text>
+
+  <!-- legend, top right -->
+  <rect class="qbox" x="450" y="18" width="22" height="16" rx="2"/><text class="qtx" x="461" y="30" text-anchor="middle">Q</text>
+  <text class="leg" x="478" y="30">query head</text>
+  <rect class="kv" x="558" y="18" width="22" height="16" rx="2"/><text class="kvtx" x="569" y="30" text-anchor="middle">KV</text>
+  <text class="leg" x="586" y="30">cached K/V</text>
+
+  <!-- ===================== PANEL 1 — MHA ===================== -->
+  <rect class="pnl" x="34" y="44" width="144" height="204" rx="3"/>
+  <text class="ttl" x="106" y="64" text-anchor="middle">MHA</text>
+  <text class="tag" x="106" y="78" text-anchor="middle">multi-head</text>
+  <rect class="qbox" x="53"  y="92" width="22" height="22" rx="2"/><text class="qtx" x="64"  y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="81"  y="92" width="22" height="22" rx="2"/><text class="qtx" x="92"  y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="109" y="92" width="22" height="22" rx="2"/><text class="qtx" x="120" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="137" y="92" width="22" height="22" rx="2"/><text class="qtx" x="148" y="107" text-anchor="middle">Q</text>
+  <path class="link" d="M64,114 L64,156"/><path class="link" d="M92,114 L92,156"/><path class="link" d="M120,114 L120,156"/><path class="link" d="M148,114 L148,156"/>
+  <rect class="kv" x="53"  y="158" width="22" height="22" rx="2"/><text class="kvtx" x="64"  y="173" text-anchor="middle">KV</text>
+  <rect class="kv" x="81"  y="158" width="22" height="22" rx="2"/><text class="kvtx" x="92"  y="173" text-anchor="middle">KV</text>
+  <rect class="kv" x="109" y="158" width="22" height="22" rx="2"/><text class="kvtx" x="120" y="173" text-anchor="middle">KV</text>
+  <rect class="kv" x="137" y="158" width="22" height="22" rx="2"/><text class="kvtx" x="148" y="173" text-anchor="middle">KV</text>
+  <text class="cnt"  x="106" y="208" text-anchor="middle">4 cached</text>
+  <text class="qual" x="106" y="226" text-anchor="middle">baseline</text>
+
+  <!-- ===================== PANEL 2 — GQA ===================== -->
+  <rect class="pnl" x="190" y="44" width="144" height="204" rx="3"/>
+  <text class="ttl" x="262" y="64" text-anchor="middle">GQA</text>
+  <text class="tag" x="262" y="78" text-anchor="middle">grouped-query</text>
+  <rect class="qbox" x="209" y="92" width="22" height="22" rx="2"/><text class="qtx" x="220" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="237" y="92" width="22" height="22" rx="2"/><text class="qtx" x="248" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="265" y="92" width="22" height="22" rx="2"/><text class="qtx" x="276" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="293" y="92" width="22" height="22" rx="2"/><text class="qtx" x="304" y="107" text-anchor="middle">Q</text>
+  <path class="link" d="M220,114 L234,156"/><path class="link" d="M248,114 L234,156"/>
+  <path class="link" d="M276,114 L290,156"/><path class="link" d="M304,114 L290,156"/>
+  <rect class="kv" x="223" y="158" width="22" height="22" rx="2"/><text class="kvtx" x="234" y="173" text-anchor="middle">KV</text>
+  <rect class="kv" x="279" y="158" width="22" height="22" rx="2"/><text class="kvtx" x="290" y="173" text-anchor="middle">KV</text>
+  <text class="cnt"  x="262" y="208" text-anchor="middle">2 cached</text>
+  <text class="qual" x="262" y="226" text-anchor="middle">≈ baseline</text>
+
+  <!-- ===================== PANEL 3 — MQA ===================== -->
+  <rect class="pnl" x="346" y="44" width="144" height="204" rx="3"/>
+  <text class="ttl" x="418" y="64" text-anchor="middle">MQA</text>
+  <text class="tag" x="418" y="78" text-anchor="middle">multi-query</text>
+  <rect class="qbox" x="365" y="92" width="22" height="22" rx="2"/><text class="qtx" x="376" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="393" y="92" width="22" height="22" rx="2"/><text class="qtx" x="404" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="421" y="92" width="22" height="22" rx="2"/><text class="qtx" x="432" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="449" y="92" width="22" height="22" rx="2"/><text class="qtx" x="460" y="107" text-anchor="middle">Q</text>
+  <path class="link" d="M376,114 L418,156"/><path class="link" d="M404,114 L418,156"/><path class="link" d="M432,114 L418,156"/><path class="link" d="M460,114 L418,156"/>
+  <rect class="kv" x="407" y="158" width="22" height="22" rx="2"/><text class="kvtx" x="418" y="173" text-anchor="middle">KV</text>
+  <text class="cnt"  x="418" y="208" text-anchor="middle">1 cached</text>
+  <text class="qual" x="418" y="226" text-anchor="middle">quality cost</text>
+
+  <!-- ===================== PANEL 4 — MLA ===================== -->
+  <rect class="pnl" x="502" y="44" width="144" height="204" rx="3"/>
+  <text class="ttl" x="574" y="64" text-anchor="middle">MLA</text>
+  <text class="tag" x="574" y="78" text-anchor="middle">latent</text>
+  <rect class="qbox" x="521" y="92" width="22" height="22" rx="2"/><text class="qtx" x="532" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="549" y="92" width="22" height="22" rx="2"/><text class="qtx" x="560" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="577" y="92" width="22" height="22" rx="2"/><text class="qtx" x="588" y="107" text-anchor="middle">Q</text>
+  <rect class="qbox" x="605" y="92" width="22" height="22" rx="2"/><text class="qtx" x="616" y="107" text-anchor="middle">Q</text>
+  <path class="link" d="M532,114 L574,156"/><path class="link" d="M560,114 L574,156"/><path class="link" d="M588,114 L574,156"/><path class="link" d="M616,114 L574,156"/>
+  <rect class="lat" x="538" y="158" width="72" height="22" rx="2"/><text class="lattx" x="574" y="173" text-anchor="middle">latent</text>
+  <text class="cnt"  x="574" y="208" text-anchor="middle">1 latent</text>
+  <text class="qual" x="574" y="226" text-anchor="middle">≥ baseline</text>
+
+</svg>

@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 362" role="img"
+     aria-label="Multi-head latent attention. A token's hidden state of width d_model is sent down two paths. The main path multiplies it by a down-projection weight to produce a small compressed latent vector c-KV of dimension d_c, here 512, one per token. A second decoupled path multiplies it by another weight and applies RoPE to produce one small positional key k-R of dimension d_h-R, here 64, shared by all heads. Both vectors land inside a single green container labelled: the entire KV cache — nothing else is stored. At attention time the keys and values are rebuilt per head by up-projection matrices, with the shared RoPE key concatenated onto every rebuilt key; because those matrices are fixed they absorb into the query and output projections, so the full keys and values never hit the cache. A side panel compares sizes per token per layer as two bars on the same scale: full multi-head attention caches 2 times 128 heads times 128 dims, 32,768 numbers; MLA caches 512 plus 64, 576 numbers — about 57 times smaller, using DeepSeek-V2 dimensions.">
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .bar   { fill:#f4f6f5; stroke:#14171a; }
+    .bartx { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .sub   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .proj  { fill:#ffffff; stroke:#14171a; }
+    .projtx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .projst{ font:600 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#5c6670; }
+    .cbox  { fill:#f4faf7; stroke:#006b40; }
+    .cboxlab{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .cache { fill:#dff6ee; stroke:#006b40; }
+    .cachetx{ font:700 14px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .cachest{ font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .recon { fill:#fafbfb; stroke:#aab2ae; stroke-dasharray:4 3; }
+    .recontx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .reconst{ font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .arr   { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .arrg  { stroke:#aab2ae; stroke-width:1.5; fill:none; stroke-dasharray:4 3; }
+    .panel { fill:#fafbfb; stroke:#cfe6db; }
+    .ptitle{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:.5px; fill:#006b40; }
+    .pk    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .pv    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .pr    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .pform { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+  </style>
+  <defs>
+    <marker id="la" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="lg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#aab2ae"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="360" rx="2"/>
+  <text class="ey" x="34" y="32">MULTI-HEAD LATENT ATTENTION</text>
+
+  <!-- token hidden state -->
+  <rect class="bar" x="34" y="44" width="420" height="32" rx="2"/>
+  <text class="bartx" x="244" y="60" text-anchor="middle">token hidden state · d_model wide</text>
+  <text class="sub"   x="244" y="73" text-anchor="middle">sent down two paths</text>
+
+  <!-- split arrows -->
+  <path class="arr" d="M150,76 L150,99" marker-end="url(#la)"/>
+  <path class="arr" d="M338,76 L338,99" marker-end="url(#la)"/>
+
+  <!-- projection boxes -->
+  <rect class="proj" x="70" y="100" width="160" height="42" rx="2"/>
+  <text class="projst" x="150" y="116" text-anchor="middle">DOWN-PROJECT</text>
+  <text class="projtx" x="150" y="133" text-anchor="middle">× W_DKV</text>
+
+  <rect class="proj" x="258" y="100" width="160" height="42" rx="2"/>
+  <text class="projst" x="338" y="116" text-anchor="middle">DECOUPLE ROPE</text>
+  <text class="projtx" x="338" y="133" text-anchor="middle">× W_KR → RoPE</text>
+
+  <path class="arr" d="M150,142 L150,162" marker-end="url(#la)"/>
+  <path class="arr" d="M338,142 L338,162" marker-end="url(#la)"/>
+
+  <!-- the KV cache: one container, two vectors, nothing else -->
+  <rect class="cbox" x="58" y="166" width="372" height="84" rx="3"/>
+  <rect class="cache" x="70" y="174" width="160" height="52" rx="2"/>
+  <text class="cachetx" x="150" y="192" text-anchor="middle">c_KV</text>
+  <text class="cachest" x="150" y="208" text-anchor="middle">latent · d_c = 512</text>
+  <text class="cachest" x="150" y="222" text-anchor="middle">one per token</text>
+  <rect class="cache" x="258" y="174" width="160" height="52" rx="2"/>
+  <text class="cachetx" x="338" y="192" text-anchor="middle">k_R</text>
+  <text class="cachest" x="338" y="208" text-anchor="middle">RoPE key · d_h_R = 64</text>
+  <text class="cachest" x="338" y="222" text-anchor="middle">shared by all heads</text>
+  <text class="cboxlab" x="244" y="244" text-anchor="middle">the entire KV cache — nothing else is stored</text>
+
+  <!-- reconstruction (de-emphasized) -->
+  <path class="arrg" d="M110,250 L110,283" marker-end="url(#lg)"/>
+  <path class="arrg" d="M378,250 L378,283" marker-end="url(#lg)"/>
+  <text class="reconst" x="370" y="270" text-anchor="end">concat to every K</text>
+  <rect class="recon" x="34" y="284" width="420" height="58" rx="2"/>
+  <text class="recontx" x="244" y="306" text-anchor="middle">at attention time: × W_UK, W_UV → rebuild K, V per head</text>
+  <text class="reconst" x="244" y="324" text-anchor="middle">they absorb into W_q / W_o — full K, V never hit the cache</text>
+
+  <!-- what's cached panel: two bars, same scale -->
+  <rect class="panel" x="478" y="100" width="168" height="242" rx="2"/>
+  <text class="ptitle" x="492" y="124">PER TOKEN, PER LAYER</text>
+
+  <text class="pk" x="492" y="152">full MHA</text><text class="pk" x="632" y="152" text-anchor="end">32,768</text>
+  <rect x="492" y="160" width="140" height="10" rx="1" fill="#d7dedb"/>
+  <text class="pr" x="492" y="186">= 2 × 128 × 128</text>
+
+  <text class="pv" x="492" y="214">MLA</text><text class="pv" x="632" y="214" text-anchor="end">576</text>
+  <rect x="492" y="222" width="3" height="10" rx="1" fill="#006b40"/>
+  <text class="pr" x="492" y="248">= 512 c_KV + 64 k_R</text>
+
+  <line x1="492" y1="266" x2="632" y2="266" stroke="#cfe6db" stroke-width="1"/>
+  <text class="pform" x="492" y="292">≈ 57× smaller</text>
+  <text class="pr"    x="492" y="312">(DeepSeek-V2 dims)</text>
+
+</svg>
