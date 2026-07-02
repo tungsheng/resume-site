@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 268" role="img"
-     aria-label="The head-sharing spectrum, four panels left to right. A legend marks the two box types: white Q boxes are query heads, green KV boxes are cached keys and values. Every panel has the same top row of four query heads, because the query heads stay many and diverse; what changes is the cached K/V below them. Panel one, multi-head attention: each of the four query heads has its own key-value pair, so four are cached — the baseline. Panel two, grouped-query attention: the four query heads share two key-value pairs, so two are cached, with near-baseline quality. Panel three, multi-query attention: all four query heads share a single key-value pair, so one is cached, at some quality cost. Panel four, multi-head latent attention: the keys and values are replaced by one compressed latent that reconstructs them per head — smaller than grouped-query, slightly larger than multi-query, at quality that matches or beats multi-head. Queries stay many; only what is cached shrinks: four, two, one, then a single latent.">
+     aria-label="Share it, or compress it: four panels left to right. A legend marks the two box types: white Q boxes are query heads, green KV boxes are cached keys and values. Every panel has the same top row of four query heads, because the query heads stay many and diverse; what changes is the cached K/V below them. Panel one, multi-head attention: each of the four query heads has its own key-value pair, so four are cached — the baseline. Panel two, grouped-query attention: the four query heads share two key-value pairs, so two are cached, with near-baseline quality. Panel three, multi-query attention: all four query heads share a single key-value pair, so one is cached, at some quality cost. Panel four, multi-head latent attention: the keys and values are replaced by one compressed latent that reconstructs them per head — smaller than grouped-query, slightly larger than multi-query, at quality that matches or beats multi-head. Queries stay many; only what is cached shrinks: four, two, one, then a single latent.">
   <style>
     .bg    { fill:#ffffff; stroke:#e6e6e6; }
     .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
@@ -19,7 +19,7 @@
   </style>
 
   <rect class="bg" x="1" y="1" width="678" height="266" rx="2"/>
-  <text class="ey" x="34" y="30">THE HEAD-SHARING SPECTRUM</text>
+  <text class="ey" x="34" y="30">SHARE IT, OR COMPRESS IT</text>
 
   <!-- legend, top right -->
   <rect class="qbox" x="450" y="18" width="22" height="16" rx="2"/><text class="qtx" x="461" y="30" text-anchor="middle">Q</text>
