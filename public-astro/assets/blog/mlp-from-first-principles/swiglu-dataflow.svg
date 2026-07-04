@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 446" role="img"
+     aria-label="SwiGLU dataflow for one token through Llama 2 70B's feed-forward block, drawn left to right. A thin input vector x, 8,192 wide, splits into two parallel paths. The top gate path multiplies by W_gate, an 8,192 by 28,672 matrix holding 234.9 million parameters, producing a 28,672-wide vector; a SiLU node squashes those match scores into a soft open-or-closed gate, mostly near zero. The bottom path multiplies the same x by W_up — same shape, another 234.9 million parameters — producing a second 28,672-wide vector carrying the content. The two meet at an elementwise multiply: the gate path decides how much, the content path decides what. The gated vector passes through W_down, 28,672 by 8,192, which writes back an activation-weighted sum of its 28,672 output directions, yielding an 8,192-wide output added to the residual stream at a plus node. The intermediate vectors are drawn about 3.5 times wider than the input, matching the dimensions. Footer badges total the block — three 8,192 by 28,672 matrices, 704.6 million parameters per layer — and note there is no KV cache: the block is position-wise.">
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .stg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
+    .vec   { fill:#f4f6f5; stroke:#14171a; }
+    .vecg  { fill:#dff6ee; stroke:#006b40; }
+    .vlab  { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .vname { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .mat   { fill:#ffffff; stroke:#14171a; }
+    .mattx { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .matst { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .matp  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .ann   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .nlab  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .arr   { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .arrk  { stroke:#14171a; stroke-width:1.5; fill:none; }
+    .arrm  { stroke:#14171a; stroke-width:2; fill:none; }
+    .arrx  { stroke:#006b40; stroke-width:2; fill:none; }
+    .res   { stroke:#aab2ae; stroke-width:1.5; fill:none; stroke-dasharray:5 4; }
+    .node  { fill:#ffffff; stroke:#14171a; stroke-width:1.5; }
+    .nodeg { fill:#ffffff; stroke:#006b40; stroke-width:1.5; }
+    .curve { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .bdg   { fill:#dff6ee; stroke:#006b40; }
+    .bdgtx { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .bdgd  { fill:#ffffff; stroke:#aab2ae; stroke-dasharray:5 4; }
+    .bdgdtx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+  </style>
+  <defs>
+    <marker id="ag"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="ak"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
+    <marker id="agr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#aab2ae"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="444" rx="2"/>
+  <text class="ey" x="34" y="30">ONE TOKEN THROUGH THE SWIGLU FFN</text>
+
+  <!-- stage verbs -->
+  <text class="stg" x="146" y="58" text-anchor="middle">MATCH</text>
+  <text class="stg" x="324" y="58" text-anchor="middle">GATE</text>
+  <text class="stg" x="452" y="58" text-anchor="middle">WRITE BACK</text>
+
+  <!-- residual stream: x carried around the block into + -->
+  <path class="res" d="M49,208 L49,44 L600,44 L600,213" marker-end="url(#agr)"/>
+  <text class="ann" x="420" y="40" text-anchor="middle">residual stream</text>
+
+  <!-- input vector x -->
+  <rect class="vec" x="42" y="210" width="14" height="40" rx="2"/>
+  <text class="vname" x="49" y="267" text-anchor="middle">x</text>
+  <text class="vlab" x="49" y="281" text-anchor="middle">8,192</text>
+
+  <!-- split into two paths -->
+  <path class="arr"  d="M56,230 L74,230 L74,150 L92,150" marker-end="url(#ag)"/>
+  <path class="arrk" d="M74,230 L74,310 L92,310" marker-end="url(#ak)"/>
+
+  <!-- W_gate -->
+  <rect class="mat" x="96" y="123" width="100" height="54" rx="2"/>
+  <text class="mattx" x="146" y="141" text-anchor="middle">W_gate</text>
+  <text class="matst" x="146" y="156" text-anchor="middle">8,192 × 28,672</text>
+  <text class="matp"  x="146" y="169" text-anchor="middle">234.9M params</text>
+
+  <!-- W_up -->
+  <rect class="mat" x="96" y="283" width="100" height="54" rx="2"/>
+  <text class="mattx" x="146" y="301" text-anchor="middle">W_up</text>
+  <text class="matst" x="146" y="316" text-anchor="middle">8,192 × 28,672</text>
+  <text class="matp"  x="146" y="329" text-anchor="middle">234.9M params</text>
+
+  <!-- intermediate vectors, ~3.5x taller than x -->
+  <path class="arr"  d="M196,150 L219,150" marker-end="url(#ag)"/>
+  <path class="arrk" d="M196,310 L219,310" marker-end="url(#ak)"/>
+
+  <rect class="vecg" x="224" y="80" width="14" height="140" rx="2"/>
+  <text class="vlab" x="231" y="72" text-anchor="middle">28,672</text>
+
+  <rect class="vec" x="224" y="240" width="14" height="140" rx="2"/>
+  <text class="vlab" x="231" y="394" text-anchor="middle">28,672 · content</text>
+
+  <!-- SiLU node on the gate path -->
+  <path class="arr" d="M238,150 L273,150" marker-end="url(#ag)"/>
+  <circle class="nodeg" cx="296" cy="150" r="18"/>
+  <path class="curve" d="M284,158 C293,158 294,157 297,152 C300,147 302,142 308,141"/>
+  <text class="nlab" x="296" y="182" text-anchor="middle">SiLU</text>
+  <text class="anng" x="340" y="100" text-anchor="middle">match scores → soft gate</text>
+  <text class="anng" x="340" y="113" text-anchor="middle">(mostly ~0)</text>
+
+  <!-- paths meet at elementwise multiply -->
+  <path class="arr"  d="M314,150 L352,150 L352,216" marker-end="url(#ag)"/>
+  <path class="arrk" d="M238,310 L352,310 L352,244" marker-end="url(#ak)"/>
+  <circle class="node" cx="352" cy="230" r="11"/>
+  <circle cx="352" cy="230" r="3.5" fill="#14171a"/>
+
+  <!-- W_down -->
+  <path class="arrm" d="M365,230 L391,230" marker-end="url(#ak)"/>
+  <rect class="mat" x="396" y="203" width="112" height="54" rx="2"/>
+  <text class="mattx" x="452" y="221" text-anchor="middle">W_down</text>
+  <text class="matst" x="452" y="236" text-anchor="middle">28,672 × 8,192</text>
+  <text class="matp"  x="452" y="249" text-anchor="middle">234.9M params</text>
+  <text class="ann" x="460" y="277" text-anchor="middle">write back: activation-weighted</text>
+  <text class="ann" x="460" y="290" text-anchor="middle">sum of 28,672 output directions</text>
+
+  <!-- output vector -->
+  <path class="arrm" d="M508,230 L531,230" marker-end="url(#ak)"/>
+  <rect class="vec" x="536" y="210" width="14" height="40" rx="2"/>
+  <text class="vlab" x="543" y="200" text-anchor="middle">FFN(x)</text>
+  <text class="vlab" x="543" y="263" text-anchor="middle">8,192</text>
+
+  <!-- add back into the residual stream -->
+  <path class="arrm" d="M550,230 L585,230" marker-end="url(#ak)"/>
+  <circle class="nodeg" cx="600" cy="230" r="12"/>
+  <line x1="594" y1="230" x2="606" y2="230" stroke="#006b40" stroke-width="2"/>
+  <line x1="600" y1="224" x2="600" y2="236" stroke="#006b40" stroke-width="2"/>
+  <path class="arrx" d="M612,230 L650,230" marker-end="url(#ag)"/>
+
+  <!-- footer badges -->
+  <rect class="bdg" x="34" y="404" width="364" height="28" rx="3"/>
+  <text class="bdgtx" x="216" y="422" text-anchor="middle">total 3 × 8,192 × 28,672 = 704.6M params per layer</text>
+  <rect class="bdgd" x="412" y="404" width="234" height="28" rx="3"/>
+  <text class="bdgdtx" x="529" y="422" text-anchor="middle">no KV cache — position-wise</text>
+</svg>

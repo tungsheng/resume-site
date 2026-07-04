@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 372" role="img"
+     aria-label="Mixing versus transforming, in three numbered panels read left to right. Panel 1, one attention step: three value vectors v1, v2, v3 are points in the plane and their convex hull is lightly shaded; the attention output, 0.7 times v1 plus 0.2 times v2 plus 0.1 times v3, lands strictly inside the hull — softmax weights are non-negative and sum to one, so the output stays inside the hull of its inputs. Panel 2, stacked attention with no MLP: a sequence of hulls shrinks step by step — a large triangle at layer 0, then smaller and smaller triangles, converging to a single point at layer L. This is rank-1 collapse, token uniformity, at a doubly exponential 3^L rate — Dong et al., ICML 2021. Panel 3, the MLP escapes: a single token x sits inside a shaded hull, and a curved green arrow labeled FFN — the operation is per-token and nonlinear — pushes it to a new point MLP(x) clearly outside the hull: new features, not an average. Footer takeaway: attention moves information; the MLP transforms it.">
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .pnl   { fill:#fafbfb; stroke:#e6e6e6; }
+    .badge { fill:#006b40; }
+    .bnum  { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#ffffff; }
+    .ttl   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .tag   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .hull  { fill:#f0eee9; stroke:#d8d3c8; stroke-width:1; }
+    .pt    { fill:#14171a; }
+    .ptx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .link  { stroke:#9bbfb0; stroke-width:1; fill:none; }
+    .fml   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .lbl   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .col   { stroke:#14171a; stroke-width:1.2; fill:none; }
+    .step  { font:400 14px 'JetBrains Mono',ui-monospace,monospace; fill:#aab2ae; }
+    .mlp   { stroke:#006b40; stroke-width:2; fill:none; }
+    .gpt   { fill:#006b40; }
+    .gtx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .trafA { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .trafB { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+  </style>
+  <defs>
+    <marker id="ih" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
+    <marker id="ig" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="370" rx="2"/>
+  <text class="ey" x="34" y="30">MIX → COLLAPSE → ESCAPE</text>
+
+  <!-- ============ PANEL 1 — one attention step ============ -->
+  <rect class="pnl" x="34" y="48" width="192" height="270" rx="3"/>
+  <circle class="badge" cx="52" cy="70" r="9"/><text class="bnum" x="52" y="74" text-anchor="middle">1</text>
+  <text class="ttl" x="68" y="74">One attention step</text>
+  <text class="tag" x="130" y="92" text-anchor="middle">one step = weighted average</text>
+
+  <polygon class="hull" points="58,200 128,108 204,186"/>
+  <path class="link" d="M58,200 L87,180"/>
+  <path class="link" d="M128,108 L87,180"/>
+  <path class="link" d="M204,186 L87,180"/>
+  <circle class="pt" cx="58"  cy="200" r="3.5"/><text class="ptx" x="58"  y="214" text-anchor="middle">v₁</text>
+  <circle class="pt" cx="128" cy="108" r="3.5"/><text class="ptx" x="128" y="100" text-anchor="middle">v₂</text>
+  <circle class="pt" cx="204" cy="186" r="3.5"/><text class="ptx" x="204" y="200" text-anchor="middle">v₃</text>
+  <circle class="pt" cx="87" cy="180" r="4.5"/>
+  <text class="ptx" x="98" y="176">attn out</text>
+
+  <text class="fml"  x="130" y="238" text-anchor="middle">attn out =</text>
+  <text class="fml"  x="130" y="254" text-anchor="middle">0.7·v₁ + 0.2·v₂ + 0.1·v₃</text>
+  <text class="note" x="130" y="276" text-anchor="middle">weights ≥ 0, sum to 1</text>
+  <text class="note" x="130" y="292" text-anchor="middle">→ stays inside the hull</text>
+
+  <text class="step" x="235" y="188" text-anchor="middle">→</text>
+
+  <!-- ============ PANEL 2 — the collapse ============ -->
+  <rect class="pnl" x="244" y="48" width="192" height="270" rx="3"/>
+  <circle class="badge" cx="262" cy="70" r="9"/><text class="bnum" x="262" y="74" text-anchor="middle">2</text>
+  <text class="ttl" x="278" y="74">Stacked, no MLP</text>
+  <text class="tag" x="340" y="92" text-anchor="middle">hulls shrink layer by layer</text>
+
+  <polygon class="hull" points="256,182 281,120 306,176"/>
+  <path class="col" d="M310,151 L318,151" marker-end="url(#ih)"/>
+  <polygon class="hull" points="322,170 339,129 356,166"/>
+  <path class="col" d="M360,151 L368,151" marker-end="url(#ih)"/>
+  <polygon class="hull" points="372,164 383,136 394,161"/>
+  <path class="col" d="M398,151 L406,151" marker-end="url(#ih)"/>
+  <circle class="pt" cx="412" cy="151" r="4"/>
+  <text class="lbl" x="281" y="200" text-anchor="middle">layer 0</text>
+  <text class="lbl" x="412" y="200" text-anchor="middle">layer L</text>
+
+  <text class="trafA" x="340" y="238" text-anchor="middle">rank-1 collapse</text>
+  <text class="lbl"   x="340" y="254" text-anchor="middle">“token uniformity”</text>
+  <text class="note"  x="340" y="276" text-anchor="middle">doubly exponential 3^L</text>
+  <text class="note"  x="340" y="292" text-anchor="middle">Dong et al., ICML 2021</text>
+
+  <text class="step" x="445" y="188" text-anchor="middle">→</text>
+
+  <!-- ============ PANEL 3 — the MLP escape ============ -->
+  <rect class="pnl" x="454" y="48" width="192" height="270" rx="3"/>
+  <circle class="badge" cx="472" cy="70" r="9"/><text class="bnum" x="472" y="74" text-anchor="middle">3</text>
+  <text class="ttl" x="488" y="74">The MLP escapes</text>
+  <text class="tag" x="550" y="92" text-anchor="middle">per-token nonlinearity</text>
+
+  <polygon class="hull" points="466,208 516,134 586,200"/>
+  <text class="lbl" x="544" y="200" text-anchor="middle">the hull</text>
+  <circle class="pt" cx="506" cy="180" r="4.5"/>
+  <text class="ptx" x="516" y="184">x</text>
+
+  <path class="mlp" d="M512,172 C534,132 562,116 602,126" marker-end="url(#ig)"/>
+  <text class="gtx" x="546" y="112" text-anchor="middle">FFN</text>
+  <circle class="gpt" cx="612" cy="130" r="5"/>
+  <text class="gtx" x="610" y="114" text-anchor="middle">MLP(x)</text>
+  <text class="note" x="592" y="156" text-anchor="middle">outside the hull</text>
+
+  <text class="trafB" x="550" y="238" text-anchor="middle">new features,</text>
+  <text class="trafB" x="550" y="254" text-anchor="middle">not an average</text>
+  <text class="note"  x="550" y="276" text-anchor="middle">position-wise:</text>
+  <text class="note"  x="550" y="292" text-anchor="middle">no other tokens involved</text>
+
+  <!-- ============ footer takeaway ============ -->
+  <line x1="34" y1="330" x2="646" y2="330" stroke="#e6e6e6" stroke-width="1"/>
+  <text class="trafB" x="340" y="352" text-anchor="middle">attention moves information; the MLP transforms it</text>
+</svg>
