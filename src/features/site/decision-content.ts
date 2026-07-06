@@ -1,8 +1,8 @@
 import {
   CUDA_KERNEL_DECISIONS_PATH,
   CUDA_KERNEL_EXPERIMENTS_PATH,
-  DECISIONS_PATH,
   GPU_INFERENCE_DECISIONS_PATH,
+  WORK_PATH,
   GPU_INFERENCE_EXPERIMENTS_PATH,
 } from "./content";
 import { experimentCatalogContent } from "./experiment-catalog-content";
@@ -249,8 +249,9 @@ export const decisionRecords: DecisionRecord[] = [
   },
 ];
 
+// Decisions render as a section on the consolidated project page.
 export function decisionProjectPath(projectId: ProjectId): string {
-  return `${DECISIONS_PATH}/${projectId}`;
+  return `${WORK_PATH}/${projectId}#decisions`;
 }
 
 export function getDecisionProjectSummary(projectId: ProjectId): DecisionProjectSummary {

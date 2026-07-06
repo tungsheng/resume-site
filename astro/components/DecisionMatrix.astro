@@ -1,0 +1,91 @@
+---
+import {
+  getDecisionDomains,
+  getDecisionExperimentTitle,
+  getDecisionRecordsByProject,
+  experimentDetailPath,
+  type ProjectId,
+} from "@site";
+import { unifyDecisionStatus, unifiedStatusStyle } from "./status";
+
+// Domain-grouped decision matrix, rendered as a section of the consolidated
+// project page (Plan A). Extracted from the former /decisions/<project> route;
+// statuses display on the unified 3-value scale (see status.ts) with the
+// finer-grained call kept in each record's copy.
+interface Props {
+  projectId: ProjectId;
+  sectionTitle: string;
+}
+const { projectId, sectionTitle } = Astro.props;
+
+const decisions = getDecisionRecordsByProject(projectId);
+const domains = getDecisionDomains(projectId);
+
+const grid = "grid gap-px border border-surface-border bg-surface-border";
+const cell = "bg-paper p-4 grid content-start";
+const warnBlock = "border-l-2 border-l-warning-warm/70 pl-3";
+---
+
+<section class="mt-12 scroll-mt-24 md:mt-16" id="decisions">
+  <p class="eyebrow mb-2">Decisions</p>
+  <h2 class="h-section-title">{sectionTitle}</h2>
+  <p class="mt-2.5 max-w-[52rem] text-[0.97rem] leading-relaxed text-muted">
+    Each decision is grouped by domain and links back to the experiments that produced the
+    evidence.
+  </p>
+
+  <div class="mt-6 grid gap-10">
+    {
+      domains.map((domain) => {
+        const domainDecisions = decisions.filter((d) => d.domain === domain);
+        return (
+          <section>
+            <div class="mb-3 flex items-baseline gap-3 border-b border-ink/15 pb-2">
+              <span class="eyebrow">Domain</span>
+              <h3 class="text-[1.15rem] font-semibold tracking-[-0.01em] text-ink">{domain}</h3>
+            </div>
+            <div class={`${grid} lg:grid-cols-2`}>
+              {domainDecisions.map((decision) => {
+                const unified = unifyDecisionStatus(decision.status);
+                return (
+                  <section class={`${cell} gap-2.5`}>
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                      <h4 class="text-[1.05rem] font-semibold text-ink" style="overflow-wrap:anywhere">
+                        {decision.title}
+                      </h4>
+                      <span class="eyebrow shrink-0" style={unifiedStatusStyle(unified)}>
+                        {unified}
+                      </span>
+                    </div>
+                    <p class="text-[0.92rem] font-bold text-ink">{decision.call}</p>
+                    <p class="text-[0.92rem] leading-relaxed text-muted">{decision.evidence}</p>
+                    {decision.nextEvidence && (
+                      <div class={warnBlock}>
+                        <p class="eyebrow mb-0.5" style="color:#8a4413">
+                          Next evidence
+                        </p>
+                        <p class="text-[0.9rem] leading-relaxed text-muted">{decision.nextEvidence}</p>
+                      </div>
+                    )}
+                    {decision.experimentSlugs.length > 0 && (
+                      <div
+                        class="mt-0.5 flex flex-wrap gap-x-5 gap-y-1.5"
+                        aria-label={`${decision.title} related experiments`}
+                      >
+                        {decision.experimentSlugs.map((slug) => (
+                          <a href={experimentDetailPath(slug)} class="cta text-ink hover:text-go-green-dark">
+                            {getDecisionExperimentTitle(slug)}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })
+    }
+  </div>
+</section>

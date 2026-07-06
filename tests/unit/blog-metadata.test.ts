@@ -44,14 +44,14 @@ describe("resolveRelatedLinks (#7)", () => {
     });
 
     const project = links.find((l) => l.kind === "Project");
-    expect(project?.href).toBe("/projects/gpu-inference-lab");
+    expect(project?.href).toBe("/work/gpu-inference-lab");
     expect(project?.label.length).toBeGreaterThan(0);
 
     const experiment = links.find((l) => l.kind === "Experiment");
     expect(experiment?.href).toBe("/experiments/kv-cache");
 
     const decision = links.find((l) => l.kind === "Decision");
-    expect(decision?.href).toBe("/decisions/gpu-inference-lab");
+    expect(decision?.href).toBe("/work/gpu-inference-lab#decisions");
     expect(decision?.label).toContain("decisions");
   });
 

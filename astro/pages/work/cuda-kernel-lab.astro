@@ -1,18 +1,23 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import DecisionMatrix from "../../components/DecisionMatrix.astro";
+import ExperimentTable from "../../components/ExperimentTable.astro";
 import {
-  CUDA_KERNEL_DECISIONS_PATH,
-  CUDA_KERNEL_EXPERIMENTS_PATH,
   cudaKernelProjectContent,
+  getDecisionProjectSummary,
+  getDecisionRecordsByProject,
   getProjectById,
 } from "@site";
+import { unifyResultTone, unifiedStatusStyle } from "../../components/status";
 
-// Swiss-minimal redesign — CUDA Kernel Lab project detail (ADR-0005 / #21).
-// Panels/cards become hairline spec-sheet grids, rounded-pill chips become mono
-// labels, tone chips become tone-colored mono labels, and filled buttons become
-// .cta links. Presentation only — the typed data module is reused unchanged.
+// Consolidated project case study (Plan A): overview → method → headline
+// results → decisions → experiment table, one page instead of the former
+// project / experiments-catalog / decisions triple. Typed data modules reused
+// unchanged.
 const content = cudaKernelProjectContent;
 const project = getProjectById("cuda-kernel-lab");
+const decisionSummary = getDecisionProjectSummary("cuda-kernel-lab");
+const decisionCount = getDecisionRecordsByProject("cuda-kernel-lab").length;
 
 const repo = content.repositoryUrl;
 const reportLinks = [
@@ -22,18 +27,6 @@ const reportLinks = [
   { label: "Profiler reports", href: `${repo}/tree/main/profiling/reports/2026-05-21-strategy-next` },
 ];
 
-// Status tone -> text color, applied to a monospace label (no pill). Restrained
-// but keeps the supported/measured/caveated semantics.
-const TONE: Record<string, string> = {
-  success: "#006b40",
-  warning: "#8a4413",
-  info: "#276f89",
-  error: "#b3261e",
-  neutral: "#5c6670",
-};
-const toneLabel = (tone = "neutral") => `color:${TONE[tone] ?? TONE.neutral}`;
-
-// Hairline spec-sheet grid: 1px gaps over a border-colored bg with white cells.
 const grid = "mt-5 grid gap-px border border-surface-border bg-surface-border";
 const cell = "bg-paper p-4 grid content-start";
 ---
@@ -41,15 +34,14 @@ const cell = "bg-paper p-4 grid content-start";
 <BaseLayout
   title={`${content.title} | Tony Lee`}
   description={content.lede}
-  activeNav="projects"
+  activeNav="work"
   breadcrumbs={[
     { label: "Home", href: "/" },
     { label: "Work", href: "/work" },
-    { label: "Projects", href: "/projects" },
     { label: content.title },
   ]}
 >
-  <!-- Detail header -->
+  <!-- Header: result first, then the lede. -->
   <section
     class="grid gap-6 border-b border-surface-border pb-9 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.44fr)] lg:gap-12"
   >
@@ -57,15 +49,18 @@ const cell = "bg-paper p-4 grid content-start";
       <h1 class="text-balance font-semibold leading-[1.04] tracking-[-0.02em] text-[clamp(1.9rem,4.5vw,3rem)]">
         {content.title}
       </h1>
+      <p class="text-[1.02rem] font-semibold leading-relaxed text-ink md:text-[1.12rem]">
+        {project.result}
+      </p>
       <p class="text-[1.02rem] leading-relaxed text-muted md:text-[1.12rem]">{content.lede}</p>
       <div class="mt-1 flex flex-wrap items-center gap-x-7 gap-y-3">
-        <a href={CUDA_KERNEL_EXPERIMENTS_PATH} class="cta group text-go-green-dark hover:text-ink">
-          View experiments
-          <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+        <a href="#decisions" class="cta group text-go-green-dark hover:text-ink">
+          Decisions
+          <span aria-hidden="true" class="transition-transform group-hover:translate-y-0.5">&darr;</span>
         </a>
-        <a href={CUDA_KERNEL_DECISIONS_PATH} class="cta group text-ink hover:text-go-green-dark">
-          View decisions
-          <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+        <a href="#experiments" class="cta group text-ink hover:text-go-green-dark">
+          Experiments
+          <span aria-hidden="true" class="transition-transform group-hover:translate-y-0.5">&darr;</span>
         </a>
         <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">
           GitHub
@@ -73,12 +68,11 @@ const cell = "bg-paper p-4 grid content-start";
       </div>
     </div>
     <div class="flex flex-col gap-3 border-l border-surface-border pl-5 lg:self-end">
-      <div class="flex flex-wrap gap-x-4 gap-y-1">
+      <div class="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col lg:gap-1.5">
         <span class="eyebrow">{project.layer}</span>
-        <span class="eyebrow text-go-green-dark">{project.status}</span>
         <span class="eyebrow text-faint">{project.experimentCount} experiments</span>
+        <span class="eyebrow text-faint">{decisionCount} decisions</span>
       </div>
-      <p class="text-[0.92rem] leading-relaxed text-muted">{project.result}</p>
     </div>
   </section>
 
@@ -101,7 +95,7 @@ const cell = "bg-paper p-4 grid content-start";
 
   <!-- Optimization loop -->
   <section class="mt-12 md:mt-16">
-    <p class="eyebrow mb-2">Workflow</p>
+    <p class="eyebrow mb-2">Method</p>
     <h2 class="h-section-title">Optimization loop</h2>
     <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">
       Every kernel claim moves through the same loop: profile first, isolate the bottleneck, change
@@ -121,9 +115,9 @@ const cell = "bg-paper p-4 grid content-start";
     </div>
   </section>
 
-  <!-- Benchmark readout -->
+  <!-- Headline results -->
   <section class="mt-12 md:mt-16">
-    <p class="eyebrow mb-2">A10G/H200 evidence</p>
+    <p class="eyebrow mb-2">Headline results</p>
     <h2 class="h-section-title">Benchmark readout</h2>
     <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">
       The selected runs show where custom kernels are useful, where profiler counters explain the
@@ -131,28 +125,27 @@ const cell = "bg-paper p-4 grid content-start";
     </p>
     <div class={`${grid} md:grid-cols-2 min-[1536px]:grid-cols-4`} aria-label="CUDA benchmark readout">
       {
-        content.results.map((item) => (
-          <div class={`${cell} grid-rows-[auto_minmax(0,1fr)_auto] gap-2`}>
-            <p class="eyebrow">{item.title}</p>
-            <div class="grid content-start gap-1">
-              <p class="text-sm font-bold text-ink">{item.call}</p>
-              <p class="text-[0.92rem] leading-relaxed text-muted">{item.proof}</p>
+        content.results.map((item) => {
+          const unified = unifyResultTone(item.tone);
+          return (
+            <div class={`${cell} grid-rows-[auto_minmax(0,1fr)_auto] gap-2`}>
+              <p class="eyebrow">{item.title}</p>
+              <div class="grid content-start gap-1">
+                <p class="text-sm font-bold text-ink">{item.call}</p>
+                <p class="text-[0.92rem] leading-relaxed text-muted">{item.proof}</p>
+              </div>
+              <span
+                class="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.1em]"
+                style={unifiedStatusStyle(unified)}
+              >
+                {unified}
+              </span>
             </div>
-            <span
-              class="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.1em]"
-              style={toneLabel(item.tone)}
-            >
-              {item.statusLabel}
-            </span>
-          </div>
-        ))
+          );
+        })
       }
     </div>
     <div class="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3">
-      <a href={CUDA_KERNEL_EXPERIMENTS_PATH} class="cta group text-go-green-dark hover:text-ink">
-        Kernel experiments
-        <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
-      </a>
       {
         reportLinks.map((link) => (
           <a href={link.href} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">
@@ -162,4 +155,10 @@ const cell = "bg-paper p-4 grid content-start";
       }
     </div>
   </section>
+
+  <!-- Decisions -->
+  <DecisionMatrix projectId="cuda-kernel-lab" sectionTitle={decisionSummary.sectionTitle} />
+
+  <!-- Experiments -->
+  <ExperimentTable projectId="cuda-kernel-lab" />
 </BaseLayout>

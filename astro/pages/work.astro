@@ -1,31 +1,20 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { PROJECTS_PATH, EXPERIMENTS_PATH, DECISIONS_PATH } from "@site";
+import { projectPortfolioContent, getDecisionRecordsByProject } from "@site";
 
-// Work hub — minimal switchboard collapsing Projects / Experiments / Decisions
-// under one nav slot (Home / Work / Blog / Resume). Presentation only; the three
-// sections keep their own routes and pages, this just frames them together.
+// Work index (Plan A consolidation): /work lists the projects directly — no
+// Projects/Experiments/Decisions switchboard. Each block leads with the result
+// (house lead-with-result style), keeps the evidence bullets, and carries one
+// primary CTA into the consolidated project page. Data modules reused unchanged.
 const PAGE_TITLE = "Work | Tony Lee";
 const LEDE =
-  "Three views of the same body of inference-performance engineering: what I built, the evidence behind it, and the calls it produced.";
+  "Evidence-backed GPU systems work across serving infrastructure and kernel optimization. " +
+  "Each project page carries the story, the architecture calls, and the measured runs behind them.";
 
-const sections = [
-  {
-    label: "Projects",
-    href: PROJECTS_PATH,
-    body: "The GPU labs themselves — what I built, the architecture, and the result.",
-  },
-  {
-    label: "Experiments",
-    href: EXPERIMENTS_PATH,
-    body: "The measured runs behind the work — the evidence archive for each call.",
-  },
-  {
-    label: "Decisions",
-    href: DECISIONS_PATH,
-    body: "Architecture calls derived from the measurements, each tied back to its evidence.",
-  },
-];
+const projects = projectPortfolioContent.projects.map((project) => ({
+  ...project,
+  decisionCount: getDecisionRecordsByProject(project.id).length,
+}));
 ---
 
 <BaseLayout
@@ -43,33 +32,57 @@ const sections = [
       <h1
         class="text-balance font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.25rem)]"
       >
-        The labs, the evidence, the calls
+        Measured GPU systems work
       </h1>
       <p class="text-[1.05rem] leading-relaxed text-muted md:text-[1.15rem]">{LEDE}</p>
     </div>
   </section>
 
-  <!-- Switchboard -->
+  <!-- Project blocks -->
   <section>
     {
-      sections.map((section, i) => (
-        <article class="grid gap-3 border-b border-surface-border py-8 md:grid-cols-[minmax(0,4rem)_minmax(0,1fr)] md:gap-10">
-          <span class="section-index text-[0.72rem] tabular" aria-hidden="true">
-            {String(i + 1).padStart(2, "0")}
-          </span>
-          <div class="grid gap-2">
-            <h2 class="text-[1.4rem] font-semibold leading-tight tracking-[-0.01em] md:text-[1.6rem]">
-              <a href={section.href} class="transition-colors hover:text-go-green-dark">
-                {section.label}
+      projects.map((project) => (
+        <article class="grid gap-4 border-b border-surface-border py-9 md:grid-cols-[minmax(0,8rem)_minmax(0,1fr)] md:gap-10">
+          <div class="flex flex-row flex-wrap gap-x-4 gap-y-1 md:flex-col md:gap-2">
+            <span class="eyebrow">{project.layer}</span>
+            <span class="eyebrow text-faint">{project.experimentCount} experiments</span>
+            <span class="eyebrow text-faint">{project.decisionCount} decisions</span>
+          </div>
+
+          <div class="grid gap-3">
+            <h2 class="text-[1.4rem] font-semibold leading-tight tracking-[-0.01em] md:text-[1.7rem]">
+              <a href={project.path} class="transition-colors hover:text-go-green-dark">
+                {project.title}
               </a>
             </h2>
-            <p class="max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{section.body}</p>
-            <div class="mt-1">
-              <a href={section.href} class="cta group text-go-green-dark hover:text-ink">
-                View {section.label.toLowerCase()}
+            <p class="text-[0.97rem] font-semibold text-ink">{project.result}</p>
+            <p class="max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{project.summary}</p>
+
+            <ul class="mt-1 grid gap-2">
+              {project.evidence.map((item) => (
+                <li class="grid grid-cols-[0.9rem_minmax(0,1fr)] gap-2 text-[0.92rem] leading-normal text-muted">
+                  <span class="font-mono text-go-green-dark" aria-hidden="true">
+                    &mdash;
+                  </span>
+                  <span class="max-w-[44rem]">{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div class="mt-3 flex flex-wrap items-center gap-x-7 gap-y-3">
+              <a href={project.path} class="cta group text-go-green-dark hover:text-ink">
+                View project
                 <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">
                   &rarr;
                 </span>
+              </a>
+              <a
+                href={project.repositoryUrl}
+                target="_blank"
+                rel="noreferrer"
+                class="cta link-external text-ink hover:text-go-green-dark"
+              >
+                GitHub
               </a>
             </div>
           </div>

@@ -1,0 +1,156 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DecisionMatrix from "../../components/DecisionMatrix.astro";
+import EvidenceMatrix from "../../components/EvidenceMatrix.astro";
+import ExperimentTable from "../../components/ExperimentTable.astro";
+import {
+  getDecisionProjectSummary,
+  getDecisionRecordsByProject,
+  projectContent,
+  getProjectById,
+} from "@site";
+import { unifyResultTone, unifiedStatusStyle } from "../../components/status";
+
+// Consolidated project case study (Plan A): overview → headline results →
+// decisions → experiment table, one page instead of the former project /
+// experiments-catalog / decisions triple. The deep lab-usage and serving-
+// workflow sections moved off-page — the GitHub repo carries the runbook.
+// Typed data modules reused unchanged.
+const project = getProjectById("gpu-inference-lab");
+const c = projectContent;
+const decisionSummary = getDecisionProjectSummary("gpu-inference-lab");
+const decisionCount = getDecisionRecordsByProject("gpu-inference-lab").length;
+
+const grid = "mt-5 grid gap-px border border-surface-border bg-surface-border";
+const cell = "bg-paper p-4 grid content-start";
+---
+
+<BaseLayout
+  title={`${c.title} | Tony Lee`}
+  description={c.lede}
+  activeNav="work"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Work", href: "/work" },
+    { label: c.title },
+  ]}
+>
+  <!-- Header: result first, then the lede. -->
+  <section
+    class="grid gap-6 border-b border-surface-border pb-9 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.44fr)] lg:gap-12"
+  >
+    <div class="flex max-w-[52rem] flex-col gap-5">
+      <h1 class="text-balance font-semibold leading-[1.04] tracking-[-0.02em] text-[clamp(1.9rem,4.5vw,3rem)]">
+        {c.title}
+      </h1>
+      <p class="text-[1.02rem] font-semibold leading-relaxed text-ink md:text-[1.12rem]">
+        {project.result}
+      </p>
+      <p class="text-[1.02rem] leading-relaxed text-muted md:text-[1.12rem]">{c.lede}</p>
+      <div class="mt-1 flex flex-wrap items-center gap-x-7 gap-y-3">
+        <a href="#decisions" class="cta group text-go-green-dark hover:text-ink">
+          Decisions
+          <span aria-hidden="true" class="transition-transform group-hover:translate-y-0.5">&darr;</span>
+        </a>
+        <a href="#experiments" class="cta group text-ink hover:text-go-green-dark">
+          Experiments
+          <span aria-hidden="true" class="transition-transform group-hover:translate-y-0.5">&darr;</span>
+        </a>
+        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">
+          GitHub
+        </a>
+      </div>
+    </div>
+    <div class="flex flex-col gap-3 border-l border-surface-border pl-5 lg:self-end">
+      <div class="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col lg:gap-1.5">
+        <span class="eyebrow">{project.layer}</span>
+        <span class="eyebrow text-faint">{project.experimentCount} experiments</span>
+        <span class="eyebrow text-faint">{decisionCount} decisions</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- At a glance -->
+  <section class="mt-12 md:mt-16">
+    <h2 class="h-section-title">At a glance</h2>
+    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{c.overviewSummary}</p>
+    <div class={`${grid} sm:grid-cols-2 lg:grid-cols-3`}>
+      {
+        c.overviewFacts.map((fact) => (
+          <div class={`${cell} gap-1.5`}>
+            <p class="eyebrow">{fact.label}</p>
+            <p class="text-[1.05rem] font-semibold leading-snug text-ink">{fact.value}</p>
+            <p class="text-[0.92rem] leading-relaxed text-muted">{fact.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Headline results -->
+  <section class="mt-12 md:mt-16">
+    <p class="eyebrow mb-2">Headline results</p>
+    <h2 class="h-section-title">{c.evidence.title}</h2>
+    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{c.evidence.lead}</p>
+    <div class={`${grid} md:grid-cols-2 xl:grid-cols-4`} aria-label="Architecture readout">
+      {
+        c.evidence.items.map((item) => {
+          const unified = unifyResultTone(item.tone);
+          return (
+            <div class={`${cell} grid-rows-[auto_minmax(0,1fr)_auto] gap-2`}>
+              <p class="eyebrow">{item.title}</p>
+              <div class="grid content-start gap-1.5">
+                <p class="text-sm font-bold text-ink">{item.call}</p>
+                <p class="text-[0.92rem] leading-relaxed text-muted">{item.proof}</p>
+              </div>
+              <span
+                class="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.1em]"
+                style={unifiedStatusStyle(unified)}
+              >
+                {unified}
+              </span>
+            </div>
+          );
+        })
+      }
+    </div>
+    <div class="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3">
+      {c.evidence.links.map((link) => (
+        <a href={link.href} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">
+          {link.label}
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Decisions -->
+  <DecisionMatrix projectId="gpu-inference-lab" sectionTitle={decisionSummary.sectionTitle} />
+
+  <!-- Decision evidence visuals -->
+  {
+    c.validation.evidenceVisuals.length > 0 && (
+      <section class="mt-12 md:mt-16">
+        <p class="eyebrow mb-2">Evidence visuals</p>
+        <h2 class="h-section-title">Decision evidence visuals</h2>
+        <p class="mt-2.5 max-w-[52rem] text-[0.97rem] leading-relaxed text-muted">
+          Local visuals recreate the key proof points without depending on the lab repository at
+          runtime.
+        </p>
+        <div class="mt-5 grid gap-px border border-surface-border bg-surface-border lg:grid-cols-2">
+          {c.validation.evidenceVisuals.map((visual) => (
+            <EvidenceMatrix
+              title={visual.title}
+              takeaway={visual.takeaway}
+              sourceLabel={visual.sourceLabel}
+              columns={visual.columns}
+              rows={visual.rows}
+            />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Experiments -->
+  <ExperimentTable projectId="gpu-inference-lab" />
+</BaseLayout>

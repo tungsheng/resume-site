@@ -1,8 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import CommandCodeBlock from "./CommandCodeBlock.astro";
+import { unifyDecisionStatus, unifiedStatusStyle } from "./status";
 import {
-  EXPERIMENTS_PATH,
   experimentSourceLink,
   type ExperimentCatalogItem,
   decisionProjectPath,
@@ -10,14 +10,15 @@ import {
   getProjectById,
 } from "@site";
 
-// Detail view (/experiments/<slug>) — faithful port of ExperimentDetailRoute.
-// Rendered by experiments/[entry].astro when the segment is an experiment slug.
+// Detail view (/experiments/<slug>) — the evidence-archive leaf page. Rendered
+// by experiments/[slug].astro; navigation points back at the experiment table
+// section of the consolidated project page (Plan A).
 interface Props {
   experiment: ExperimentCatalogItem;
 }
 const { experiment } = Astro.props;
 const project = getProjectById(experiment.projectId);
-const catalogPath = `${EXPERIMENTS_PATH}/${project.id}`;
+const catalogPath = `${project.path}#experiments`;
 
 // ---- helpers (ported from src/features/experiments/page.tsx) ----
 function formatCount(value: number, singular: string, plural = `${singular}s`): string {
@@ -112,12 +113,11 @@ const tableCols = "md:grid-cols-[minmax(7rem,0.9fr)_minmax(10rem,1fr)_repeat(3,m
 <BaseLayout
   title={`${experiment.title} | Tony Lee`}
   description={experiment.summary}
-  activeNav="experiments"
+  activeNav="work"
   breadcrumbs={[
     { label: "Home", href: "/" },
     { label: "Work", href: "/work" },
-    { label: "Experiments", href: EXPERIMENTS_PATH },
-    { label: project.title, href: catalogPath },
+    { label: project.title, href: project.path },
     { label: experiment.title },
   ]}
 >
@@ -129,7 +129,7 @@ const tableCols = "md:grid-cols-[minmax(7rem,0.9fr)_minmax(10rem,1fr)_repeat(3,m
       <div class="mt-1 flex flex-wrap items-center gap-x-7 gap-y-3">
         <a href={catalogPath} class="cta group text-go-green-dark hover:text-ink">
           <span aria-hidden="true" class="transition-transform group-hover:-translate-x-1">&larr;</span>
-          Experiment catalog
+          All {project.title} experiments
         </a>
         <a href={experimentSourceLink(experiment.projectId, experiment.sourcePath)} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">Source</a>
       </div>
@@ -285,7 +285,9 @@ const tableCols = "md:grid-cols-[minmax(7rem,0.9fr)_minmax(10rem,1fr)_repeat(3,m
           {relatedDecisions.map((decision) => (
             <section class={`${cell} gap-2`}>
               <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                <span class="eyebrow text-go-green-dark">{decision.status}</span>
+                <span class="eyebrow" style={unifiedStatusStyle(unifyDecisionStatus(decision.status))}>
+                  {unifyDecisionStatus(decision.status)}
+                </span>
                 <span class="eyebrow text-faint">{decision.domain}</span>
               </div>
               <h3 class="text-[1.05rem] font-semibold text-ink">{decision.title}</h3>
