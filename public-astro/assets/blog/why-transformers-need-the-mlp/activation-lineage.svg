@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 400" role="img"
-     aria-label="The activation lineage, in two panels plus a timeline. Left panel: three pointwise curves on one shared axis from x equals minus 4 to plus 4. ReLU, the original 2017 Transformer choice, is a hard-cornered gray line: exactly zero for every negative input — a dead zero-gradient region, annotated as such — then a straight ramp up. GELU, from 2016 and adopted by GPT and BERT, and SiLU, also written Swish or x times sigmoid of x, track ReLU closely but bend the corner smooth, keeping a small nonzero response and gradient below zero; SiLU shows its characteristic dip to about minus 0.28 near x equals minus 1.3 before rising. Right panel: SwiGLU, Shazeer 2020, is not a curve at all but a block diagram — the token x is projected twice, SiLU of x times W gate forms a soft mask that multiplies x times W up elementwise, and W down writes the product back into the residual stream. The gate path decides how much; the up path carries the content. A timeline underneath runs 2016 to 2017 to 2020, and the bottom row gives Shazeer's parameter-matched heldout log-perplexity: ReLU 1.677, SwiGLU 1.636, GEGLU 1.633 — the gate wins, modestly and nearly for free.">
+     aria-label="The activation lineage, in two panels plus a timeline. Left panel: three pointwise curves on one shared axis from x equals minus 4 to plus 4. ReLU, the original 2017 Transformer choice, is a hard-cornered gray line: exactly zero for every negative input — a dead zero-gradient region, annotated as such — then a straight ramp up. GELU, from 2016 and adopted by GPT and BERT, and SiLU, also written Swish or x times sigmoid of x, track ReLU closely but bend the corner smooth, keeping a small nonzero response and gradient below zero; SiLU shows its characteristic dip to about minus 0.28 near x equals minus 1.3 before rising. Right panel: SwiGLU, Shazeer 2020, is not a curve at all but a block diagram — the token x is projected twice, SiLU of x times W gate forms a soft mask that multiplies x times W up elementwise, and W down writes the product back into the residual stream. The gate path decides how much; the up path carries the content, and a side note marks that the gate slot is swappable — GELU there instead gives GEGLU, Gemma's choice. A timeline underneath runs the transformer adoption story: ReLU in the 2017 Transformer, GELU adopted by GPT and BERT in 2018, SwiGLU from 2020. The bottom row gives Shazeer's parameter-matched heldout log-perplexity: ReLU 1.677, SwiGLU 1.636, GEGLU 1.633 — the gate wins, modestly and nearly for free.">
   <style>
     .bg    { fill:#ffffff; stroke:#e6e6e6; }
     .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
@@ -35,7 +35,7 @@
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="398" rx="2"/>
-  <text class="ey" x="34" y="30">THE ACTIVATION LINEAGE — FROM KINK TO GATE</text>
+  <text class="ey" x="34" y="30">THE ACTIVATION LINEAGE — FROM RELU TO GATE</text>
 
   <!-- ================= LEFT: the pointwise curves ================= -->
   <rect class="pnl" x="34" y="44" width="306" height="240" rx="3"/>
@@ -107,6 +107,10 @@
   <!-- content path -->
   <text class="note" x="570" y="174">the content</text>
 
+  <!-- GEGLU variant note: the gate slot is swappable -->
+  <text class="note" x="410" y="213" text-anchor="middle">GELU gate instead</text>
+  <text class="note" x="410" y="225" text-anchor="middle">= GEGLU (Gemma)</text>
+
   <!-- elementwise multiply -->
   <path class="gflow" d="M436,188 L488,207" marker-end="url(#mg)"/>
   <path class="flow" d="M562,152 L511,206" marker-end="url(#mi)"/>
@@ -118,23 +122,23 @@
   <path class="flow" d="M499,225 L499,235" marker-end="url(#mi)"/>
   <rect class="box" x="453" y="238" width="92" height="22" rx="2"/>
   <text class="boxtx" x="499" y="253" text-anchor="middle">W_down</text>
-  <path class="flow" d="M499,260 L499,270" marker-end="url(#mi)"/>
-  <text class="note" x="499" y="281" text-anchor="middle">back into the residual stream</text>
+  <path class="flow" d="M499,260 L499,267" marker-end="url(#mi)"/>
+  <text class="note" x="499" y="278" text-anchor="middle">back into the residual stream</text>
 
   <!-- ================= BOTTOM: timeline + scores ================= -->
   <line x1="34" y1="294" x2="646" y2="294" stroke="#eef0f0" stroke-width="1"/>
 
-  <text class="tl" x="140" y="312" text-anchor="middle">2016 · GELU / SiLU</text>
-  <path class="gflow" d="M207,308 L250,308" marker-end="url(#mg)"/>
-  <text class="tl" x="340" y="312" text-anchor="middle">2017 · ReLU (Transformer)</text>
-  <path class="gflow" d="M430,308 L489,308" marker-end="url(#mg)"/>
-  <text class="tl" x="540" y="312" text-anchor="middle">2020 · SwiGLU</text>
+  <text class="tl" x="161" y="312" text-anchor="middle">2017 · ReLU (Transformer)</text>
+  <path class="gflow" d="M254,308 L294,308" marker-end="url(#mg)"/>
+  <text class="tl" x="380" y="312" text-anchor="middle">2018 · GELU (GPT, BERT)</text>
+  <path class="gflow" d="M466,308 L506,308" marker-end="url(#mg)"/>
+  <text class="tl" x="559" y="312" text-anchor="middle">2020 · SwiGLU</text>
 
   <text class="note" x="340" y="338" text-anchor="middle">Shazeer 2020 — parameter-matched heldout log-perplexity · lower is better</text>
-  <text class="scr"  x="210" y="360" text-anchor="middle">ReLU 1.677</text>
-  <text class="sep"  x="275" y="360" text-anchor="middle">·</text>
-  <text class="scrw" x="348" y="360" text-anchor="middle">SwiGLU 1.636</text>
-  <text class="sep"  x="420" y="360" text-anchor="middle">·</text>
-  <text class="scrw" x="490" y="360" text-anchor="middle">GEGLU 1.633</text>
+  <text class="scr"  x="198" y="360" text-anchor="middle">ReLU 1.677</text>
+  <text class="sep"  x="263" y="360" text-anchor="middle">·</text>
+  <text class="scrw" x="336" y="360" text-anchor="middle">SwiGLU 1.636</text>
+  <text class="sep"  x="408" y="360" text-anchor="middle">·</text>
+  <text class="scrw" x="478" y="360" text-anchor="middle">GEGLU 1.633</text>
   <text class="note" x="340" y="382" text-anchor="middle">the gate wins, modestly and nearly for free — “we attribute their success… to divine benevolence”</text>
 </svg>
