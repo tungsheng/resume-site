@@ -3,9 +3,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { projectPortfolioContent, getDecisionRecordsByProject } from "@site";
 
 // Work index (Plan A consolidation): /work lists the projects directly — no
-// Projects/Experiments/Decisions switchboard. Each block leads with the result
-// (house lead-with-result style), keeps the evidence bullets, and carries one
-// primary CTA into the consolidated project page. Data modules reused unchanged.
+// Projects/Experiments/Decisions switchboard. Each block is the teaser: what
+// the project is (summary), the numbers (evidence bullets), one primary CTA.
+// The bold result sentence leads the project page hero instead, so no sentence
+// renders in both places. Data modules reused unchanged.
 const PAGE_TITLE = "Work | Tony Lee";
 const LEDE =
   "Evidence-backed GPU systems work across serving infrastructure and kernel optimization. " +
@@ -55,7 +56,6 @@ const projects = projectPortfolioContent.projects.map((project) => ({
                 {project.title}
               </a>
             </h2>
-            <p class="text-[0.97rem] font-semibold text-ink">{project.result}</p>
             <p class="max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{project.summary}</p>
 
             <ul class="mt-1 grid gap-2">

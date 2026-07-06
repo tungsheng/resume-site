@@ -6,8 +6,6 @@ import type { DecisionStatus, ExperimentReadinessTone } from "@site";
 // read at a glance, and the nuance stays in each record's call/evidence copy.
 export type UnifiedStatus = "Supported" | "Rejected" | "In progress";
 
-export const UNIFIED_STATUS_ORDER: UnifiedStatus[] = ["Supported", "In progress", "Rejected"];
-
 const UNIFIED_COLOR: Record<UnifiedStatus, string> = {
   Supported: "#006b40",
   Rejected: "#b3261e",
@@ -30,20 +28,6 @@ const READINESS_TO_UNIFIED: Record<ExperimentReadinessTone, UnifiedStatus> = {
   pending: "In progress",
   blocked: "In progress",
 };
-
-// Result-readout cards in the project content modules carry presentation tones
-// (success/warning/info/error) rather than a status enum.
-const RESULT_TONE_TO_UNIFIED: Record<string, UnifiedStatus> = {
-  success: "Supported",
-  error: "Rejected",
-  warning: "In progress",
-  info: "In progress",
-  neutral: "In progress",
-};
-
-export function unifyResultTone(tone: string): UnifiedStatus {
-  return RESULT_TONE_TO_UNIFIED[tone] ?? "In progress";
-}
 
 export function unifyDecisionStatus(status: DecisionStatus): UnifiedStatus {
   return DECISION_TO_UNIFIED[status];

@@ -2,11 +2,10 @@
 import { experimentCatalogContent, experimentDetailPath, type ProjectId } from "@site";
 import { unifyReadinessTone, unifiedStatusStyle } from "./status";
 
-// Per-project experiment table, rendered as a section of the consolidated
-// project page (Plan A). Trimmed from the former /experiments/<project>
-// catalog: three content columns plus the details link, unified status labels,
-// no facts strip — the full run shape, commands, and evidence stay on the
-// /experiments/<slug> leaf pages.
+// Per-project experiment table — the evidence-archive index section of the
+// consolidated project page. Three columns only: the experiment, its unified
+// status, and the details link. Purpose copy, run shape, commands, and result
+// evidence all live on the /experiments/<slug> leaf pages.
 interface Props {
   projectId: ProjectId;
 }
@@ -14,59 +13,48 @@ const { projectId } = Astro.props;
 
 const experiments = experimentCatalogContent.experiments.filter((e) => e.projectId === projectId);
 
-const fieldLabel = "eyebrow mb-1 md:hidden";
-const rowCols = "md:grid-cols-[minmax(14rem,1fr)_minmax(14rem,1.2fr)_minmax(7rem,0.5fr)_6rem]";
+const rowCols = "grid-cols-[minmax(0,1fr)_minmax(6.5rem,8rem)_4.5rem]";
 ---
 
 <section class="mt-12 scroll-mt-24 md:mt-16" id="experiments">
   <p class="eyebrow mb-2">Evidence archive</p>
   <h2 class="h-section-title">Experiments</h2>
   <p class="mt-2.5 max-w-[52rem] text-[0.97rem] leading-relaxed text-muted">
-    The measured runs behind the decisions. Each detail page keeps the run shape, commands, and
+    The measured runs behind the decisions — each detail page keeps the run shape, commands, and
     result evidence.
   </p>
 
   <div class="mt-6">
-    <div class={`hidden gap-5 border-b border-ink/15 pb-2.5 md:grid ${rowCols}`} aria-hidden="true">
-      {["Experiment", "Purpose", "Status", "Details"].map((h) => <span class="eyebrow">{h}</span>)}
+    <div class={`grid gap-5 border-b border-ink/15 pb-2.5 ${rowCols}`} aria-hidden="true">
+      {["Experiment", "Status", "Details"].map((h) => <span class="eyebrow">{h}</span>)}
     </div>
 
     {
       experiments.map((exp) => {
         const unified = unifyReadinessTone(exp.readiness.primary.tone);
         return (
-          <section class={`grid gap-3 border-b border-surface-border py-5 md:items-baseline md:gap-5 ${rowCols}`}>
+          <a
+            href={experimentDetailPath(exp.slug)}
+            class={`group grid items-baseline gap-5 border-b border-surface-border py-4 ${rowCols}`}
+          >
             <div class="min-w-0">
-              <span class={fieldLabel}>Experiment</span>
-              <p class="eyebrow mb-1">{exp.category}</p>
-              <p class="text-[0.95rem] font-semibold text-ink">{exp.title}</p>
+              <p class="eyebrow mb-0.5">{exp.category}</p>
+              <p class="text-[0.95rem] font-semibold text-ink transition-colors group-hover:text-go-green-dark">
+                {exp.title}
+              </p>
             </div>
 
-            <div class="min-w-0">
-              <span class={fieldLabel}>Purpose</span>
-              <p class="text-[0.92rem] leading-relaxed text-muted">{exp.cardSummary}</p>
-            </div>
+            <span
+              class="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.08em]"
+              style={unifiedStatusStyle(unified)}
+            >
+              {unified}
+            </span>
 
-            <div class="min-w-0">
-              <span class={fieldLabel}>Status</span>
-              <span
-                class="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.08em]"
-                style={unifiedStatusStyle(unified)}
-              >
-                {unified}
-              </span>
-            </div>
-
-            <div class="min-w-0 md:justify-self-end">
-              <span class={fieldLabel}>Details</span>
-              <a href={experimentDetailPath(exp.slug)} class="cta group text-ink hover:text-go-green-dark">
-                Details
-                <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">
-                  &rarr;
-                </span>
-              </a>
-            </div>
-          </section>
+            <span class="cta justify-self-end text-ink group-hover:text-go-green-dark">
+              <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+            </span>
+          </a>
         );
       })
     }

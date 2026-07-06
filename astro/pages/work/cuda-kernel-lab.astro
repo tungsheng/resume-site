@@ -8,24 +8,20 @@ import {
   getDecisionRecordsByProject,
   getProjectById,
 } from "@site";
-import { unifyResultTone, unifiedStatusStyle } from "../../components/status";
 
-// Consolidated project case study (Plan A): overview → method → headline
-// results → decisions → experiment table, one page instead of the former
-// project / experiments-catalog / decisions triple. Typed data modules reused
-// unchanged.
+// Consolidated project case study, redundancy-cut edition: hero (result first,
+// device facts in the sidebar) → method strip → decisions → experiment table.
+// The former "At a glance" and "Benchmark readout" sections restated the
+// decision records and are gone; per-step evidence lines in the method strip
+// previewed the decisions and are not rendered. Data modules unchanged.
 const content = cudaKernelProjectContent;
 const project = getProjectById("cuda-kernel-lab");
 const decisionSummary = getDecisionProjectSummary("cuda-kernel-lab");
 const decisionCount = getDecisionRecordsByProject("cuda-kernel-lab").length;
 
-const repo = content.repositoryUrl;
-const reportLinks = [
-  { label: "Strategy report", href: `${repo}/blob/main/experiments/reports/aws-ec2/2026-05-21-strategy-next.md` },
-  { label: "Decode replay report", href: `${repo}/blob/main/experiments/reports/aws-ec2/2026-05-22-round12-kv-active-views.md` },
-  { label: "H200 report", href: `${repo}/blob/main/experiments/reports/runpod/20260526-h200-persistent-waves-073234.md` },
-  { label: "Profiler reports", href: `${repo}/tree/main/profiling/reports/2026-05-21-strategy-next` },
-];
+// Sidebar facts: the device facts that appear nowhere else on the page.
+const HERO_FACT_LABELS = ["Device", "Correctness"];
+const heroFacts = content.overviewFacts.filter((f) => HERO_FACT_LABELS.includes(f.label));
 
 const grid = "mt-5 grid gap-px border border-surface-border bg-surface-border";
 const cell = "bg-paper p-4 grid content-start";
@@ -41,7 +37,7 @@ const cell = "bg-paper p-4 grid content-start";
     { label: content.title },
   ]}
 >
-  <!-- Header: result first, then the lede. -->
+  <!-- Hero: the result, then straight to the record. -->
   <section
     class="grid gap-6 border-b border-surface-border pb-9 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.44fr)] lg:gap-12"
   >
@@ -52,7 +48,6 @@ const cell = "bg-paper p-4 grid content-start";
       <p class="text-[1.02rem] font-semibold leading-relaxed text-ink md:text-[1.12rem]">
         {project.result}
       </p>
-      <p class="text-[1.02rem] leading-relaxed text-muted md:text-[1.12rem]">{content.lede}</p>
       <div class="mt-1 flex flex-wrap items-center gap-x-7 gap-y-3">
         <a href="#decisions" class="cta group text-go-green-dark hover:text-ink">
           Decisions
@@ -67,39 +62,28 @@ const cell = "bg-paper p-4 grid content-start";
         </a>
       </div>
     </div>
-    <div class="flex flex-col gap-3 border-l border-surface-border pl-5 lg:self-end">
-      <div class="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col lg:gap-1.5">
+    <dl class="grid content-end gap-2 border-l border-surface-border pl-5 text-[0.85rem]">
+      <div class="flex flex-wrap gap-x-4 gap-y-1">
         <span class="eyebrow">{project.layer}</span>
-        <span class="eyebrow text-faint">{project.experimentCount} experiments</span>
-        <span class="eyebrow text-faint">{decisionCount} decisions</span>
+        <span class="eyebrow text-faint">{project.experimentCount} experiments &middot; {decisionCount} decisions</span>
       </div>
-    </div>
-  </section>
-
-  <!-- At a glance -->
-  <section class="mt-12 md:mt-16">
-    <h2 class="h-section-title">At a glance</h2>
-    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{content.overviewSummary}</p>
-    <div class={`${grid} sm:grid-cols-2 lg:grid-cols-3`}>
       {
-        content.overviewFacts.map((fact) => (
-          <div class={`${cell} gap-1.5`}>
-            <p class="eyebrow">{fact.label}</p>
-            <p class="text-[1.05rem] font-semibold leading-snug text-ink">{fact.value}</p>
-            <p class="text-[0.92rem] leading-relaxed text-muted">{fact.body}</p>
+        heroFacts.map((fact) => (
+          <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-2">
+            <dt class="eyebrow">{fact.label}</dt>
+            <dd class="font-semibold text-ink">{fact.value}</dd>
           </div>
         ))
       }
-    </div>
+    </dl>
   </section>
 
-  <!-- Optimization loop -->
+  <!-- Method: the loop every claim moves through. -->
   <section class="mt-12 md:mt-16">
     <p class="eyebrow mb-2">Method</p>
     <h2 class="h-section-title">Optimization loop</h2>
     <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">
-      Every kernel claim moves through the same loop: profile first, isolate the bottleneck, change
-      only that path, then re-profile before calling it a win.
+      Every kernel claim moves through the same loop before it becomes a decision.
     </p>
     <div class={`${grid} md:grid-cols-2 min-[1536px]:grid-cols-4`}>
       {
@@ -108,55 +92,13 @@ const cell = "bg-paper p-4 grid content-start";
             <span class="section-index text-[0.72rem] tabular">{step.step}</span>
             <p class="eyebrow">{step.title}</p>
             <p class="text-[0.92rem] leading-relaxed text-muted">{step.body}</p>
-            <p class="mt-1 text-[0.92rem] font-semibold text-ink">{step.evidence}</p>
           </div>
         ))
       }
     </div>
   </section>
 
-  <!-- Headline results -->
-  <section class="mt-12 md:mt-16">
-    <p class="eyebrow mb-2">Headline results</p>
-    <h2 class="h-section-title">Benchmark readout</h2>
-    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">
-      The selected runs show where custom kernels are useful, where profiler counters explain the
-      result, and where newer H200 matmul tuning remains measured but caveated.
-    </p>
-    <div class={`${grid} md:grid-cols-2 min-[1536px]:grid-cols-4`} aria-label="CUDA benchmark readout">
-      {
-        content.results.map((item) => {
-          const unified = unifyResultTone(item.tone);
-          return (
-            <div class={`${cell} grid-rows-[auto_minmax(0,1fr)_auto] gap-2`}>
-              <p class="eyebrow">{item.title}</p>
-              <div class="grid content-start gap-1">
-                <p class="text-sm font-bold text-ink">{item.call}</p>
-                <p class="text-[0.92rem] leading-relaxed text-muted">{item.proof}</p>
-              </div>
-              <span
-                class="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.1em]"
-                style={unifiedStatusStyle(unified)}
-              >
-                {unified}
-              </span>
-            </div>
-          );
-        })
-      }
-    </div>
-    <div class="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3">
-      {
-        reportLinks.map((link) => (
-          <a href={link.href} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">
-            {link.label}
-          </a>
-        ))
-      }
-    </div>
-  </section>
-
-  <!-- Decisions -->
+  <!-- Decisions: the results section. -->
   <DecisionMatrix projectId="cuda-kernel-lab" sectionTitle={decisionSummary.sectionTitle} />
 
   <!-- Experiments -->

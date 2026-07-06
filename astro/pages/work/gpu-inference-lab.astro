@@ -3,26 +3,25 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import DecisionMatrix from "../../components/DecisionMatrix.astro";
 import EvidenceMatrix from "../../components/EvidenceMatrix.astro";
 import ExperimentTable from "../../components/ExperimentTable.astro";
-import {
-  getDecisionProjectSummary,
-  getDecisionRecordsByProject,
-  projectContent,
-  getProjectById,
-} from "@site";
-import { unifyResultTone, unifiedStatusStyle } from "../../components/status";
+import { getDecisionProjectSummary, getDecisionRecordsByProject, projectContent, getProjectById } from "@site";
 
-// Consolidated project case study (Plan A): overview → headline results →
-// decisions → experiment table, one page instead of the former project /
-// experiments-catalog / decisions triple. The deep lab-usage and serving-
-// workflow sections moved off-page — the GitHub repo carries the runbook.
-// Typed data modules reused unchanged.
+// Consolidated project case study, redundancy-cut edition: hero (result first,
+// platform facts in the sidebar) → decisions → one evidence visual →
+// experiment table. The former "At a glance" and "Architecture readout"
+// sections restated the decision records and are gone; the lede stays as the
+// meta description. Typed data modules unchanged — display selects from them.
 const project = getProjectById("gpu-inference-lab");
 const c = projectContent;
 const decisionSummary = getDecisionProjectSummary("gpu-inference-lab");
 const decisionCount = getDecisionRecordsByProject("gpu-inference-lab").length;
 
-const grid = "mt-5 grid gap-px border border-surface-border bg-surface-border";
-const cell = "bg-paper p-4 grid content-start";
+// Sidebar facts: the platform facts that appear nowhere else on the page.
+const HERO_FACT_LABELS = ["Platform", "Scale signal", "Baseline"];
+const heroFacts = c.overviewFacts.filter((f) => HERO_FACT_LABELS.includes(f.label));
+
+// One visual earns its keep: queue attribution is the only table whose numbers
+// are not already quoted in a decision row.
+const queueVisual = c.validation.evidenceVisuals.find((v) => v.title === "Queue attribution");
 ---
 
 <BaseLayout
@@ -35,7 +34,7 @@ const cell = "bg-paper p-4 grid content-start";
     { label: c.title },
   ]}
 >
-  <!-- Header: result first, then the lede. -->
+  <!-- Hero: the result, then straight to the record. -->
   <section
     class="grid gap-6 border-b border-surface-border pb-9 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.44fr)] lg:gap-12"
   >
@@ -46,7 +45,6 @@ const cell = "bg-paper p-4 grid content-start";
       <p class="text-[1.02rem] font-semibold leading-relaxed text-ink md:text-[1.12rem]">
         {project.result}
       </p>
-      <p class="text-[1.02rem] leading-relaxed text-muted md:text-[1.12rem]">{c.lede}</p>
       <div class="mt-1 flex flex-wrap items-center gap-x-7 gap-y-3">
         <a href="#decisions" class="cta group text-go-green-dark hover:text-ink">
           Decisions
@@ -61,91 +59,39 @@ const cell = "bg-paper p-4 grid content-start";
         </a>
       </div>
     </div>
-    <div class="flex flex-col gap-3 border-l border-surface-border pl-5 lg:self-end">
-      <div class="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col lg:gap-1.5">
+    <dl class="grid content-end gap-2 border-l border-surface-border pl-5 text-[0.85rem]">
+      <div class="flex flex-wrap gap-x-4 gap-y-1">
         <span class="eyebrow">{project.layer}</span>
-        <span class="eyebrow text-faint">{project.experimentCount} experiments</span>
-        <span class="eyebrow text-faint">{decisionCount} decisions</span>
+        <span class="eyebrow text-faint">{project.experimentCount} experiments &middot; {decisionCount} decisions</span>
       </div>
-    </div>
-  </section>
-
-  <!-- At a glance -->
-  <section class="mt-12 md:mt-16">
-    <h2 class="h-section-title">At a glance</h2>
-    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{c.overviewSummary}</p>
-    <div class={`${grid} sm:grid-cols-2 lg:grid-cols-3`}>
       {
-        c.overviewFacts.map((fact) => (
-          <div class={`${cell} gap-1.5`}>
-            <p class="eyebrow">{fact.label}</p>
-            <p class="text-[1.05rem] font-semibold leading-snug text-ink">{fact.value}</p>
-            <p class="text-[0.92rem] leading-relaxed text-muted">{fact.body}</p>
+        heroFacts.map((fact) => (
+          <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-2">
+            <dt class="eyebrow">{fact.label}</dt>
+            <dd class="font-semibold text-ink">{fact.value}</dd>
           </div>
         ))
       }
-    </div>
+    </dl>
   </section>
 
-  <!-- Headline results -->
-  <section class="mt-12 md:mt-16">
-    <p class="eyebrow mb-2">Headline results</p>
-    <h2 class="h-section-title">{c.evidence.title}</h2>
-    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{c.evidence.lead}</p>
-    <div class={`${grid} md:grid-cols-2 xl:grid-cols-4`} aria-label="Architecture readout">
-      {
-        c.evidence.items.map((item) => {
-          const unified = unifyResultTone(item.tone);
-          return (
-            <div class={`${cell} grid-rows-[auto_minmax(0,1fr)_auto] gap-2`}>
-              <p class="eyebrow">{item.title}</p>
-              <div class="grid content-start gap-1.5">
-                <p class="text-sm font-bold text-ink">{item.call}</p>
-                <p class="text-[0.92rem] leading-relaxed text-muted">{item.proof}</p>
-              </div>
-              <span
-                class="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.1em]"
-                style={unifiedStatusStyle(unified)}
-              >
-                {unified}
-              </span>
-            </div>
-          );
-        })
-      }
-    </div>
-    <div class="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3">
-      {c.evidence.links.map((link) => (
-        <a href={link.href} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">
-          {link.label}
-        </a>
-      ))}
-    </div>
-  </section>
-
-  <!-- Decisions -->
+  <!-- Decisions: the results section. -->
   <DecisionMatrix projectId="gpu-inference-lab" sectionTitle={decisionSummary.sectionTitle} />
 
-  <!-- Decision evidence visuals -->
+  <!-- One evidence visual: latency attribution, not restated in any decision row. -->
   {
-    c.validation.evidenceVisuals.length > 0 && (
+    queueVisual && (
       <section class="mt-12 md:mt-16">
-        <p class="eyebrow mb-2">Evidence visuals</p>
-        <h2 class="h-section-title">Decision evidence visuals</h2>
-        <p class="mt-2.5 max-w-[52rem] text-[0.97rem] leading-relaxed text-muted">
-          Local visuals recreate the key proof points without depending on the lab repository at
-          runtime.
-        </p>
-        <div class="mt-5 grid gap-px border border-surface-border bg-surface-border lg:grid-cols-2">
-          {c.validation.evidenceVisuals.map((visual) => (
-            <EvidenceMatrix
-              title={visual.title}
-              takeaway={visual.takeaway}
-              sourceLabel={visual.sourceLabel}
-              columns={visual.columns}
-              rows={visual.rows}
-            />
-          ))}
+        <p class="eyebrow mb-2">Evidence visual</p>
+        <h2 class="h-section-title">Where the latency lives</h2>
+        <div class="mt-5 grid border border-surface-border bg-surface-border lg:max-w-[52rem]">
+          <EvidenceMatrix
+            title={queueVisual.title}
+            takeaway={queueVisual.takeaway}
+            sourceLabel={queueVisual.sourceLabel}
+            columns={queueVisual.columns}
+            rows={queueVisual.rows}
+          />
         </div>
       </section>
     )

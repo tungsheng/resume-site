@@ -8,10 +8,10 @@ import {
 } from "@site";
 import { unifyDecisionStatus, unifiedStatusStyle } from "./status";
 
-// Domain-grouped decision matrix, rendered as a section of the consolidated
-// project page (Plan A). Extracted from the former /decisions/<project> route;
-// statuses display on the unified 3-value scale (see status.ts) with the
-// finer-grained call kept in each record's copy.
+// Domain-grouped decision list — the single results section of the
+// consolidated project page. Compact rows, not cards: status, the call, the
+// evidence in one muted line, then experiment links. The record `title` is a
+// paraphrase of the call, so it is not rendered.
 interface Props {
   projectId: ProjectId;
   sectionTitle: string;
@@ -20,56 +20,42 @@ const { projectId, sectionTitle } = Astro.props;
 
 const decisions = getDecisionRecordsByProject(projectId);
 const domains = getDecisionDomains(projectId);
-
-const grid = "grid gap-px border border-surface-border bg-surface-border";
-const cell = "bg-paper p-4 grid content-start";
-const warnBlock = "border-l-2 border-l-warning-warm/70 pl-3";
 ---
 
 <section class="mt-12 scroll-mt-24 md:mt-16" id="decisions">
   <p class="eyebrow mb-2">Decisions</p>
   <h2 class="h-section-title">{sectionTitle}</h2>
-  <p class="mt-2.5 max-w-[52rem] text-[0.97rem] leading-relaxed text-muted">
-    Each decision is grouped by domain and links back to the experiments that produced the
-    evidence.
-  </p>
 
-  <div class="mt-6 grid gap-10">
+  <div class="mt-6 grid gap-8">
     {
       domains.map((domain) => {
         const domainDecisions = decisions.filter((d) => d.domain === domain);
         return (
           <section>
-            <div class="mb-3 flex items-baseline gap-3 border-b border-ink/15 pb-2">
-              <span class="eyebrow">Domain</span>
-              <h3 class="text-[1.15rem] font-semibold tracking-[-0.01em] text-ink">{domain}</h3>
-            </div>
-            <div class={`${grid} lg:grid-cols-2`}>
-              {domainDecisions.map((decision) => {
-                const unified = unifyDecisionStatus(decision.status);
-                return (
-                  <section class={`${cell} gap-2.5`}>
-                    <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                      <h4 class="text-[1.05rem] font-semibold text-ink" style="overflow-wrap:anywhere">
-                        {decision.title}
-                      </h4>
-                      <span class="eyebrow shrink-0" style={unifiedStatusStyle(unified)}>
-                        {unified}
-                      </span>
-                    </div>
-                    <p class="text-[0.92rem] font-bold text-ink">{decision.call}</p>
-                    <p class="text-[0.92rem] leading-relaxed text-muted">{decision.evidence}</p>
-                    {decision.nextEvidence && (
-                      <div class={warnBlock}>
-                        <p class="eyebrow mb-0.5" style="color:#8a4413">
-                          Next evidence
-                        </p>
-                        <p class="text-[0.9rem] leading-relaxed text-muted">{decision.nextEvidence}</p>
-                      </div>
-                    )}
+            <h3 class="border-b border-ink/15 pb-2 text-[1.05rem] font-semibold tracking-[-0.01em] text-ink">
+              {domain}
+            </h3>
+            {domainDecisions.map((decision) => {
+              const unified = unifyDecisionStatus(decision.status);
+              return (
+                <div class="grid gap-1.5 border-b border-surface-border py-4 md:grid-cols-[7rem_minmax(0,1fr)] md:gap-5">
+                  <span
+                    class="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.1em] md:pt-0.5"
+                    style={unifiedStatusStyle(unified)}
+                  >
+                    {unified}
+                  </span>
+                  <div class="grid max-w-[52rem] gap-1">
+                    <p class="text-[0.95rem] font-semibold leading-relaxed text-ink">{decision.call}</p>
+                    <p class="text-[0.92rem] leading-relaxed text-muted">
+                      {decision.evidence}
+                      {decision.nextEvidence && (
+                        <span class="text-faint"> Next: {decision.nextEvidence}</span>
+                      )}
+                    </p>
                     {decision.experimentSlugs.length > 0 && (
                       <div
-                        class="mt-0.5 flex flex-wrap gap-x-5 gap-y-1.5"
+                        class="mt-1 flex flex-wrap gap-x-5 gap-y-1.5"
                         aria-label={`${decision.title} related experiments`}
                       >
                         {decision.experimentSlugs.map((slug) => (
@@ -79,10 +65,10 @@ const warnBlock = "border-l-2 border-l-warning-warm/70 pl-3";
                         ))}
                       </div>
                     )}
-                  </section>
-                );
-              })}
-            </div>
+                  </div>
+                </div>
+              );
+            })}
           </section>
         );
       })
