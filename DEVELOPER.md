@@ -40,7 +40,7 @@ public-astro/              static assets served as-is (configured as publicDir)
 src/
   features/
     resume/                typed resume data + shared document + PDF render
-    site/                  portfolio content model (projects/decisions/experiments)
+    site/                  work-section content model (projects, decisions, experiment catalog)
   services/
     pdf.ts                 generic HTML -> PDF service (puppeteer-core)
 scripts/
@@ -66,17 +66,24 @@ layout (and the eventual `srcDir` flip is a one-line config change):
 | `@resume/*`  | `src/features/resume/*`           |
 | `@services/*`| `src/services/*`                  |
 
-Pages and components import the portfolio content model from the `@site` barrel;
+Pages and components import the work-section content model from the `@site` barrel;
 the resume pipeline and PDF service use `@resume/*` and `@services/*`.
 
 ## Pages
 
 - `/` — intro and flagship-project highlight
-- `/projects`, `/projects/gpu-inference-lab`, `/projects/cuda-kernel-lab`
-- `/experiments`, `/experiments/<slug>`
-- `/decisions`, `/decisions/<project>`
+- `/work` — work index listing the projects
+- `/work/gpu-inference-lab`, `/work/cuda-kernel-lab` — consolidated case-study
+  pages with `#decisions` / `#experiments` sections
+- `/experiments/<slug>` — 16 evidence leaf pages (see
+  `docs/adr/0007-work-section-consolidation.md`)
 - `/blog`, `/blog/<slug>` (Markdown content collection), `/rss.xml`
 - `/resume` — screen resume; the downloadable PDF is built at `public-astro/resume.pdf`
+
+The retired `/projects*`, `/decisions*`, and `/experiments`-index routes serve
+real 301s via `public-astro/_redirects` (Cloudflare Pages), with meta-refresh
+stubs from the `redirects` map in `astro.config.mjs` as the fallback for local
+preview and non-CF hosts.
 
 ## Resume Content Flow
 
