@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 442" role="img"
-     aria-label="Mixture-of-Experts as a mechanism, two panels side by side. Both panels keep the same grayed-out attention sub-block on top, labeled unchanged — MoE swaps only the FFN below it. Left, a dense layer: the token drops from attention into one big 704.6M-parameter SwiGLU FFN — three 8,192 by 28,672 matrices — and back to the residual stream; every token pays full price. Right, an MoE layer in DeepSeek-V3's shape, read top to bottom as three numbered steps. The token enters a router — one learned matrix — while an always-on lane branches left, bypassing the router, into the 1 shared expert that every token runs. Step 1, the router scores the token against all 256 routed experts, drawn as a compact strip of small SwiGLU FFNs of hidden width 2,048 with a score bar over each one. Step 2, keep the top 8: the eight highest bars and their experts turn green; the other 248 sit light gray — unpicked, their weights never read for this token. Step 3, run and sum: only the 8 green experts and the shared expert run; their outputs converge on a plus node, summed weighted by the router scores, and the result returns to the residual stream. The badge reads 671B parameters total, 37B active per token — capacity decoupled from per-token bytes. Closing note: MoE replicates the FFN, not attention — the FFN is position-wise, so per-token routing just works.">
+     aria-label="Mixture-of-Experts as a mechanism, two panels side by side. Both panels keep the same grayed-out attention sub-block on top, labeled unchanged — MoE swaps only the MLP below it. Left, a dense layer: the token drops from attention into one big 704.6M-parameter SwiGLU MLP — three 8,192 by 28,672 matrices — and back to the residual stream; every token pays full price. Right, an MoE layer in DeepSeek-V3's shape, read top to bottom as three numbered steps. The token enters a router — one learned matrix — while an always-on lane branches left, bypassing the router, into the 1 shared expert that every token runs. Step 1, the router scores the token against all 256 routed experts, drawn as a compact strip of small SwiGLU MLPs of hidden width 2,048 with a score bar over each one. Step 2, keep the top 8: the eight highest bars and their experts turn green; the other 248 sit light gray — unpicked, their weights never read for this token. Step 3, run and sum: only the 8 green experts and the shared expert run; their outputs converge on a plus node, summed weighted by the router scores, and the result returns to the residual stream. The badge reads 671B parameters total, 37B active per token — capacity decoupled from per-token bytes. Closing note: MoE replicates the MLP, not attention — the MLP is position-wise, so per-token routing just works.">
   <style>
     .bg     { fill:#ffffff; stroke:#e6e6e6; }
     .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
@@ -51,7 +51,7 @@
   <text class="op" x="143" y="134">token</text>
 
   <rect class="ffn" x="48" y="160" width="174" height="140" rx="3"/>
-  <text class="ffntl" x="135" y="216" text-anchor="middle">one big SwiGLU FFN</text>
+  <text class="ffntl" x="135" y="216" text-anchor="middle">one big SwiGLU MLP</text>
   <text class="bw" x="135" y="236" text-anchor="middle">704.6M parameters</text>
   <text class="bw" x="135" y="252" text-anchor="middle">3 matrices · 8,192 × 28,672</text>
 
@@ -194,6 +194,6 @@
 
   <text class="trafB" x="480" y="394" text-anchor="middle">671B total · 37B active per token</text>
 
-  <text class="note" x="340" y="424" text-anchor="middle">MoE replicates the FFN, not attention — position-wise means per-token routing just works</text>
+  <text class="note" x="340" y="424" text-anchor="middle">MoE replicates the MLP, not attention — position-wise means per-token routing just works</text>
 
 </svg>
