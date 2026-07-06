@@ -1,0 +1,77 @@
+---
+import {
+  getDecisionDomains,
+  getDecisionExperimentTitle,
+  getDecisionRecordsByProject,
+  experimentDetailPath,
+  type ProjectId,
+} from "@site";
+import { unifyDecisionStatus, unifiedStatusStyle } from "./status";
+
+// Domain-grouped decision list — the single results section of the
+// consolidated project page. Compact rows, not cards: status, the call, the
+// evidence in one muted line, then experiment links. The record `title` is a
+// paraphrase of the call, so it is not rendered.
+interface Props {
+  projectId: ProjectId;
+  sectionTitle: string;
+}
+const { projectId, sectionTitle } = Astro.props;
+
+const decisions = getDecisionRecordsByProject(projectId);
+const domains = getDecisionDomains(projectId);
+---
+
+<section class="mt-12 scroll-mt-24 md:mt-16" id="decisions">
+  <p class="eyebrow mb-2">Decisions</p>
+  <h2 class="h-section-title">{sectionTitle}</h2>
+
+  <div class="mt-6 grid gap-8">
+    {
+      domains.map((domain) => {
+        const domainDecisions = decisions.filter((d) => d.domain === domain);
+        return (
+          <section>
+            <h3 class="border-b border-ink/15 pb-2 text-[1.05rem] font-semibold tracking-[-0.01em] text-ink">
+              {domain}
+            </h3>
+            {domainDecisions.map((decision) => {
+              const unified = unifyDecisionStatus(decision.status);
+              return (
+                <div class="grid gap-1.5 border-b border-surface-border py-4 md:grid-cols-[7rem_minmax(0,1fr)] md:gap-5">
+                  <span
+                    class="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.1em] md:pt-0.5"
+                    style={unifiedStatusStyle(unified)}
+                  >
+                    {unified}
+                  </span>
+                  <div class="grid max-w-[52rem] gap-1">
+                    <p class="text-[0.95rem] font-semibold leading-relaxed text-ink">{decision.call}</p>
+                    <p class="text-[0.92rem] leading-relaxed text-muted">
+                      {decision.evidence}
+                      {decision.nextEvidence && (
+                        <span class="text-faint"> Next: {decision.nextEvidence}</span>
+                      )}
+                    </p>
+                    {decision.experimentSlugs.length > 0 && (
+                      <div
+                        class="mt-1 flex flex-wrap gap-x-5 gap-y-1.5"
+                        aria-label={`${decision.title} related experiments`}
+                      >
+                        {decision.experimentSlugs.map((slug) => (
+                          <a href={experimentDetailPath(slug)} class="cta text-ink hover:text-go-green-dark">
+                            {getDecisionExperimentTitle(slug)}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+        );
+      })
+    }
+  </div>
+</section>

@@ -1,0 +1,106 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DecisionMatrix from "../../components/DecisionMatrix.astro";
+import ExperimentTable from "../../components/ExperimentTable.astro";
+import {
+  cudaKernelProjectContent,
+  getDecisionProjectSummary,
+  getDecisionRecordsByProject,
+  getProjectById,
+} from "@site";
+
+// Consolidated project case study, redundancy-cut edition: hero (result first,
+// device facts in the sidebar) → method strip → decisions → experiment table.
+// The former "At a glance" and "Benchmark readout" sections restated the
+// decision records and are gone; per-step evidence lines in the method strip
+// previewed the decisions and are not rendered. Data modules unchanged.
+const content = cudaKernelProjectContent;
+const project = getProjectById("cuda-kernel-lab");
+const decisionSummary = getDecisionProjectSummary("cuda-kernel-lab");
+const decisionCount = getDecisionRecordsByProject("cuda-kernel-lab").length;
+
+// Sidebar facts: the device facts that appear nowhere else on the page.
+const HERO_FACT_LABELS = ["Device", "Correctness"];
+const heroFacts = content.overviewFacts.filter((f) => HERO_FACT_LABELS.includes(f.label));
+
+const grid = "mt-5 grid gap-px border border-surface-border bg-surface-border";
+const cell = "bg-paper p-4 grid content-start";
+---
+
+<BaseLayout
+  title={`${content.title} | Tony Lee`}
+  description={content.lede}
+  activeNav="work"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Work", href: "/work" },
+    { label: content.title },
+  ]}
+>
+  <!-- Hero: the result, then straight to the record. -->
+  <section
+    class="grid gap-6 border-b border-surface-border pb-9 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.44fr)] lg:gap-12"
+  >
+    <div class="flex max-w-[52rem] flex-col gap-5">
+      <h1 class="text-balance font-semibold leading-[1.04] tracking-[-0.02em] text-[clamp(1.9rem,4.5vw,3rem)]">
+        {content.title}
+      </h1>
+      <p class="text-[1.02rem] font-semibold leading-relaxed text-ink md:text-[1.12rem]">
+        {project.result}
+      </p>
+      <div class="mt-1 flex flex-wrap items-center gap-x-7 gap-y-3">
+        <a href="#decisions" class="cta group text-go-green-dark hover:text-ink">
+          Decisions
+          <span aria-hidden="true" class="transition-transform group-hover:translate-y-0.5">&darr;</span>
+        </a>
+        <a href="#experiments" class="cta group text-ink hover:text-go-green-dark">
+          Experiments
+          <span aria-hidden="true" class="transition-transform group-hover:translate-y-0.5">&darr;</span>
+        </a>
+        <a href={project.repositoryUrl} target="_blank" rel="noreferrer" class="cta link-external text-ink hover:text-go-green-dark">
+          GitHub
+        </a>
+      </div>
+    </div>
+    <dl class="grid content-end gap-2 border-l border-surface-border pl-5 text-[0.85rem]">
+      <div class="flex flex-wrap gap-x-4 gap-y-1">
+        <span class="eyebrow">{project.layer}</span>
+        <span class="eyebrow text-faint">{project.experimentCount} experiments &middot; {decisionCount} decisions</span>
+      </div>
+      {
+        heroFacts.map((fact) => (
+          <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-2">
+            <dt class="eyebrow">{fact.label}</dt>
+            <dd class="font-semibold text-ink">{fact.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <!-- Method: the loop every claim moves through. -->
+  <section class="mt-12 md:mt-16">
+    <p class="eyebrow mb-2">Method</p>
+    <h2 class="h-section-title">Optimization loop</h2>
+    <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">
+      Every kernel claim moves through the same loop before it becomes a decision.
+    </p>
+    <div class={`${grid} md:grid-cols-2 min-[1536px]:grid-cols-4`}>
+      {
+        content.optimizationLoop.map((step) => (
+          <div class={`${cell} gap-2`}>
+            <span class="section-index text-[0.72rem] tabular">{step.step}</span>
+            <p class="eyebrow">{step.title}</p>
+            <p class="text-[0.92rem] leading-relaxed text-muted">{step.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Decisions: the results section. -->
+  <DecisionMatrix projectId="cuda-kernel-lab" sectionTitle={decisionSummary.sectionTitle} />
+
+  <!-- Experiments -->
+  <ExperimentTable projectId="cuda-kernel-lab" />
+</BaseLayout>

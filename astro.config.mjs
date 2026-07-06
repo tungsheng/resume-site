@@ -8,6 +8,25 @@ import mdastKatexMath from "./astro/markdown/mdast-katex-math.ts";
 import hastBlogImages from "./astro/markdown/hast-blog-images.ts";
 import hastKatexMath from "./astro/markdown/hast-katex-math.ts";
 
+// Legacy paths. The /project/* pair predates Astro; the /projects, /experiments
+// and /decisions trees were the pre-consolidation work-section IA (Plan A):
+// indexes collapse into /work, project / catalog / decision pages collapse into
+// the consolidated /work/<project> pages. /experiments/<slug> leaf pages
+// survive unchanged, so only the two per-project catalog URLs redirect here.
+const redirects = {
+  "/project/cloud-inference-platform": "/work/gpu-inference-lab",
+  "/project/cloud-inference-platform/validation": "/work/gpu-inference-lab",
+  "/projects": "/work",
+  "/projects/gpu-inference-lab": "/work/gpu-inference-lab",
+  "/projects/cuda-kernel-lab": "/work/cuda-kernel-lab",
+  "/experiments": "/work",
+  "/experiments/gpu-inference-lab": "/work/gpu-inference-lab",
+  "/experiments/cuda-kernel-lab": "/work/cuda-kernel-lab",
+  "/decisions": "/work",
+  "/decisions/gpu-inference-lab": "/work/gpu-inference-lab",
+  "/decisions/cuda-kernel-lab": "/work/cuda-kernel-lab",
+};
+
 // NOTE: ADR-0003 — the site is migrating to Astro zero-JS static output.
 // During the migration the new Astro tree lives under ./astro so it does not
 // collide with the existing Bun/React app in ./src. Once every page is ported
@@ -23,21 +42,14 @@ export default defineConfig({
   // generated pages. Flips back to ./public once the Bun app is removed (#12).
   publicDir: "./public-astro",
   output: "static",
-  // Legacy paths from the pre-Astro site (the Notes prototype never shipped, but
-  // these portfolio paths did). The /validation redirect targets the decisions
-  // detail route, added with that slice.
-  redirects: {
-    "/project/cloud-inference-platform": "/projects/gpu-inference-lab",
-    "/project/cloud-inference-platform/validation": "/decisions/gpu-inference-lab",
-  },
+  redirects,
   // Whole-site sitemap (#9): @astrojs/sitemap walks every built page and emits
   // sitemap-index.xml + sitemap-0.xml. Drafts never reach the build in prod
   // (getStaticPaths excludes them), so they can't appear here. Filter out the
-  // legacy redirect stubs so the sitemap lists only canonical URLs.
+  // redirect stubs so the sitemap lists only canonical URLs.
   integrations: [
     sitemap({
-      filter: (page) =>
-        !page.includes("/project/cloud-inference-platform"),
+      filter: (page) => !(new URL(page).pathname.replace(/\/$/, "") in redirects),
     }),
   ],
   vite: {

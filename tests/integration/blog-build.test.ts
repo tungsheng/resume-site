@@ -108,7 +108,7 @@ describe("blog production build output", () => {
     expect(html).toContain('class="post-toc"'); // 5 headings ≥ threshold
     expect(html).toContain("On this page");
     expect(html).toContain('class="post-related"');
-    expect(html).toContain('href="/projects/gpu-inference-lab"');
+    expect(html).toContain('href="/work/gpu-inference-lab"');
     expect(html).toContain('href="/experiments/prefill-decode"');
   });
 
@@ -158,14 +158,18 @@ describe("blog production build output", () => {
   itIf("emits a sitemap covering public pages and Published Posts", async () => {
     expect(await Bun.file("dist/sitemap-index.xml").exists()).toBe(true);
     const sitemap = await Bun.file("dist/sitemap-0.xml").text();
-    for (const path of ["/", "/blog/", "/projects/", "/experiments/", "/decisions/", "/resume/"]) {
+    for (const path of ["/", "/blog/", "/work/", "/work/gpu-inference-lab/", "/resume/"]) {
       expect(sitemap).toContain(`<loc>https://tonylee.bio${path}</loc>`);
     }
     for (const post of PUBLISHED) {
       expect(sitemap).toContain(`<loc>https://tonylee.bio/blog/${post.slug}/</loc>`);
     }
     for (const post of [...DRAFTS, ...OUTLINE]) expect(sitemap).not.toContain(post.slug);
-    expect(sitemap).not.toContain("/project/cloud-inference-platform"); // redirect stub filtered
+    // Redirect stubs are filtered — legacy paths and the pre-consolidation IA.
+    expect(sitemap).not.toContain("/project/cloud-inference-platform");
+    for (const stub of ["/projects/", "/decisions/", "/experiments/</loc>"]) {
+      expect(sitemap).not.toContain(`<loc>https://tonylee.bio${stub}`);
+    }
   });
 
   // Issue #9: robots points crawlers at the sitemap.
@@ -258,8 +262,8 @@ describe("build-time KaTeX math output (ADR-0006)", () => {
     // The launch Post (Published, no math) and the home page must stay clean.
     const launchHtml = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
     const homeHtml = await Bun.file("dist/index.html").text();
-    const projectsHtml = await Bun.file("dist/projects/index.html").text();
-    for (const html of [launchHtml, homeHtml, projectsHtml]) {
+    const workHtml = await Bun.file("dist/work/index.html").text();
+    for (const html of [launchHtml, homeHtml, workHtml]) {
       expect(html).not.toContain("katex.min.css");
     }
   });

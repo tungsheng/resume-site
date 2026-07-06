@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 
-type NavKey = "home" | "work" | "projects" | "experiments" | "decisions" | "blog" | "resume";
+type NavKey = "home" | "work" | "blog" | "resume";
 
 interface Crumb {
   label: string;
@@ -44,9 +44,6 @@ const {
 
 const SITE_NAME = "Tony Lee";
 
-// Projects, Experiments, and Decisions live under the Work hub (/work), so the
-// top-level nav is four items. Those section pages still pass their own
-// activeNav key; WORK_KEYS maps them onto the single "Work" nav item.
 const navItems: { key: NavKey; label: string; href: string }[] = [
   { key: "home", label: "Home", href: "/" },
   { key: "work", label: "Work", href: "/work" },
@@ -54,10 +51,8 @@ const navItems: { key: NavKey; label: string; href: string }[] = [
   { key: "resume", label: "Resume", href: "/resume" },
 ];
 
-const WORK_KEYS: NavKey[] = ["work", "projects", "experiments", "decisions"];
 function isNavActive(key: NavKey): boolean {
-  if (!activeNav) return false;
-  return key === "work" ? WORK_KEYS.includes(activeNav) : key === activeNav;
+  return key === activeNav;
 }
 
 // Swiss/mono nav (ADR-0005): uppercase letter-spaced monospace links; the active

@@ -1,4 +1,3 @@
-import { GPU_INFERENCE_DECISIONS_PATH } from "./content";
 import type { ProjectId } from "./projects-content";
 
 const GPU_INFERENCE_REPO_BASE = "https://github.com/tungsheng/gpu-inference-lab/blob/main";
@@ -100,8 +99,6 @@ export type ExperimentCatalogItem = {
   status: ExperimentStatus;
   readiness: ExperimentReadiness;
   question: string;
-  cardSummary: string;
-  metricFocus: string[];
   summary: string;
   whyItMatters: string;
   runner: string;
@@ -140,12 +137,6 @@ export const experimentCatalogContent = {
     "Project-linked experiments that turn GPU serving and kernel questions into evidence-backed decisions.",
   statusNote:
     "Rows show the current proof, focus area, and decisions that still need stronger evidence.",
-  platformValidation: {
-    status: "GPU inference evidence",
-    question:
-      "Admission, cold start, active-pressure HPA, FP8 KV cache, and Blackwell FP4 readiness remain in the GPU Inference Lab decision record.",
-    href: GPU_INFERENCE_DECISIONS_PATH,
-  },
   conceptLead:
     "Each experiment starts with one serving question and ends with a result, rejection, or bounded gap.",
   conceptSteps: [
@@ -191,8 +182,6 @@ export const experimentCatalogContent = {
       },
       question:
         "How does longer prompt context change concurrency and throughput?",
-      cardSummary: "Full delivery can hide queueing.",
-      metricFocus: ["Concurrency", "KV memory", "Tail latency"],
       summary:
         "Compares prompt lengths, sweeps the 8192/300 knee, then tests whether scheduler caps fix it.",
       whyItMatters:
@@ -520,8 +509,6 @@ export const experimentCatalogContent = {
       },
       question:
         "How do prompt-heavy and decode-heavy requests change TTFT and inter-token timing?",
-      cardSummary: "Streaming timing by request shape.",
-      metricFocus: ["TTFT", "Inter-token latency", "Throughput"],
       summary:
         "Uses a streaming client to separate time to first token from inter-token latency across prompt-heavy and decode-heavy shapes.",
       whyItMatters:
@@ -752,8 +739,6 @@ export const experimentCatalogContent = {
       },
       question:
         "How do vLLM scheduler limits trade throughput for p95/p99 latency?",
-      cardSummary: "Scheduler limits versus tail latency.",
-      metricFocus: ["Batching", "p99 latency", "Tokens/sec"],
       summary:
         "Compares constrained, limited, and default vLLM scheduler settings under steady and burst small-request traffic.",
       whyItMatters:
@@ -957,8 +942,6 @@ export const experimentCatalogContent = {
       },
       question:
         "How do steady, burst, uneven-size, and spike-to-zero traffic patterns affect GPU occupancy?",
-      cardSummary: "Same profile, different traffic outcome.",
-      metricFocus: ["Delivery", "Tail latency", "Active concurrency"],
       summary:
         "Runs steady, burst, uneven-size, and spike-to-zero traffic against the same default profile.",
       whyItMatters:
@@ -1129,8 +1112,6 @@ export const experimentCatalogContent = {
       },
       question:
         "How much traffic must be buffered while GPU capacity and model readiness catch up?",
-      cardSummary: "Scale-from-zero timing and queue policy.",
-      metricFocus: ["Scale-from-zero", "Queue policy", "Dropped work"],
       summary:
         "Compares direct and bounded-queue client policies during burst and spike-to-zero traffic while GPU capacity and model readiness catch up.",
       whyItMatters:
@@ -1329,8 +1310,6 @@ export const experimentCatalogContent = {
       },
       question:
         "How much cheaper does the same GPU become when concurrency and batching produce more successful work?",
-      cardSummary: "Cheap only counts when useful work passes.",
-      metricFocus: ["Cost/request", "Cost/token", "SLO pass"],
       summary:
         "Compares naive and optimized serving profiles with cost tied to successful requests and generated tokens.",
       whyItMatters:
@@ -1493,8 +1472,6 @@ export const experimentCatalogContent = {
       },
       question:
         "Does SmoothQuant improve NVFP4 W4A4 accuracy recovery enough to justify its memory, latency, throughput, and cost tradeoffs?",
-      cardSummary: "BF16 vs NVFP4 vs SmoothQuant.",
-      metricFocus: ["Accuracy recovery", "Memory", "Build cost"],
       summary:
         "Defines a Blackwell FP4 comparison for BF16, plain NVFP4, and SmoothQuant, with latency, throughput, accuracy, memory, serving cost, and build cost tracked separately.",
       whyItMatters:
@@ -1586,8 +1563,6 @@ export const experimentCatalogContent = {
       },
       question:
         "Do simple Triton copy, scale, and vector_add kernels beat the optimized PyTorch memory path on A10G?",
-      cardSummary: "PyTorch still wins simple memory traffic.",
-      metricFocus: ["GB/s", "p50 latency", "Correctness"],
       summary:
         "Compares PyTorch and Triton memory primitives across copy, scale, vector_add, and reduction_sum rows.",
       whyItMatters:
@@ -1733,8 +1708,6 @@ export const experimentCatalogContent = {
       },
       question:
         "Does an iterative Triton reduction or a two-pass Triton reduction perform better for a 16M-element float32 sum?",
-      cardSummary: "Two Triton reduction strategies trail PyTorch.",
-      metricFocus: ["Reduction latency", "GB/s", "Strategy tradeoff"],
       summary:
         "Keeps shape, dtype, device, and block size fixed while comparing iterative and two-pass reduction strategies.",
       whyItMatters:
@@ -1829,8 +1802,6 @@ export const experimentCatalogContent = {
       },
       question:
         "How much does a fused Triton RMSNorm or LayerNorm kernel move latency versus the PyTorch baseline?",
-      cardSummary: "RMSNorm fusion stays strong across the shape sweep.",
-      metricFocus: ["Speedup", "DRAM throughput", "Occupancy"],
       summary:
         "Compares PyTorch and Triton fused normalization kernels, then checks whether the RMSNorm fp16 win holds across hidden-size shapes.",
       whyItMatters:
@@ -1978,8 +1949,6 @@ export const experimentCatalogContent = {
       },
       question:
         "Does fusing SwiGLU elementwise activation remove enough intermediate traffic to beat PyTorch?",
-      cardSummary: "Fused SwiGLU is a clean 3x-class win.",
-      metricFocus: ["Speedup", "GB/s", "p95 latency"],
       summary:
         "Compares PyTorch and fused Triton SwiGLU at 4096x4096 across float16 and float32.",
       whyItMatters:
@@ -2070,8 +2039,6 @@ export const experimentCatalogContent = {
       },
       question:
         "Does the current Triton fused row-softmax kernel beat PyTorch for 4096x1024 rows?",
-      cardSummary: "Current Triton softmax trails PyTorch.",
-      metricFocus: ["p50 latency", "Noise", "GB/s"],
       summary:
         "Compares PyTorch and Triton row-softmax at 4096x1024 for float16 and float32.",
       whyItMatters:
@@ -2162,8 +2129,6 @@ export const experimentCatalogContent = {
       },
       question:
         "Which Triton tile and launch configuration gets closest to the PyTorch/cuBLAS matmul baseline?",
-      cardSummary: "Best Triton tile is measured but still below cuBLAS.",
-      metricFocus: ["TFLOP/s", "Tensor Core use", "Occupancy"],
       summary:
         "Compares focused float16 tile shapes, warp counts, pipeline stages, and Tensor Core profiler counters for 1024x1024x1024 matmul.",
       whyItMatters:
@@ -2270,8 +2235,6 @@ export const experimentCatalogContent = {
       },
       question:
         "Which Triton tiled-dot and persistent-wave schedules get closest to the PyTorch/cuBLAS H200 matmul baseline for LLM-shaped GEMMs?",
-      cardSummary: "Standard tiled-dot closes most of the H200 gap, but persistent waves are not a win yet.",
-      metricFocus: ["TFLOP/s", "Triton/Torch %", "Persistent waves"],
       summary:
         "Compares H200 PyTorch/cuBLAS against repeated Triton tiled-dot candidates, then tests whether persistent resident-program waves improve the focused 512x11008x4096 shape.",
       whyItMatters:
@@ -2470,8 +2433,6 @@ export const experimentCatalogContent = {
       },
       question:
         "How far can resident-KV same-stream piecewise CUDA Graph replay reduce dynamic decode-step latency before a custom attention kernel?",
-      cardSummary: "Resident-KV graph replay is now measured and caveated.",
-      metricFocus: ["p50 latency", "p95 tail", "Padding", "Correctness"],
       summary:
         "Tracks a synthetic decode step where fused pre/post regions replay as CUDA Graphs around SDPA attention with head-major resident KV views.",
       whyItMatters:
@@ -2659,8 +2620,6 @@ export const experimentCatalogContent = {
       },
       question:
         "Do Nsight Compute counters confirm or challenge the benchmark interpretation for memory, fusion, reduction, and matmul kernels?",
-      cardSummary: "Profiler counters now explain the strongest win and active gaps.",
-      metricFocus: ["DRAM throughput", "Occupancy", "Tensor Core use"],
       summary:
         "Tracks compact profiler summaries that explain why memory primitives trail, why RMSNorm is credible, and why matmul still needs tuning.",
       whyItMatters:

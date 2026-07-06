@@ -1,0 +1,19 @@
+---
+import ExperimentDetail from "../../components/ExperimentDetail.astro";
+import { experimentCatalogContent } from "@site";
+
+// Evidence-archive leaf routes (/experiments/<slug>). The per-project catalog
+// pages that used to share this path level moved into the consolidated project
+// pages (Plan A); the old /experiments/<projectId> URLs redirect from
+// astro.config.mjs.
+export function getStaticPaths() {
+  return experimentCatalogContent.experiments.map((experiment) => ({
+    params: { slug: experiment.slug },
+    props: { experiment },
+  }));
+}
+
+const { experiment } = Astro.props;
+---
+
+<ExperimentDetail experiment={experiment} />

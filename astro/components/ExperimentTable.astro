@@ -1,0 +1,62 @@
+---
+import { experimentCatalogContent, experimentDetailPath, type ProjectId } from "@site";
+import { unifyReadinessTone, unifiedStatusStyle } from "./status";
+
+// Per-project experiment table — the evidence-archive index section of the
+// consolidated project page. Three columns only: the experiment, its unified
+// status, and the details link. Purpose copy, run shape, commands, and result
+// evidence all live on the /experiments/<slug> leaf pages.
+interface Props {
+  projectId: ProjectId;
+}
+const { projectId } = Astro.props;
+
+const experiments = experimentCatalogContent.experiments.filter((e) => e.projectId === projectId);
+
+const rowCols = "grid-cols-[minmax(0,1fr)_minmax(6.5rem,8rem)_4.5rem]";
+---
+
+<section class="mt-12 scroll-mt-24 md:mt-16" id="experiments">
+  <p class="eyebrow mb-2">Evidence archive</p>
+  <h2 class="h-section-title">Experiments</h2>
+  <p class="mt-2.5 max-w-[52rem] text-[0.97rem] leading-relaxed text-muted">
+    The measured runs behind the decisions — each detail page keeps the run shape, commands, and
+    result evidence.
+  </p>
+
+  <div class="mt-6">
+    <div class={`grid gap-5 border-b border-ink/15 pb-2.5 ${rowCols}`} aria-hidden="true">
+      {["Experiment", "Status", "Details"].map((h) => <span class="eyebrow">{h}</span>)}
+    </div>
+
+    {
+      experiments.map((exp) => {
+        const unified = unifyReadinessTone(exp.readiness.primary.tone);
+        return (
+          <a
+            href={experimentDetailPath(exp.slug)}
+            class={`group grid items-baseline gap-5 border-b border-surface-border py-4 ${rowCols}`}
+          >
+            <div class="min-w-0">
+              <p class="eyebrow mb-0.5">{exp.category}</p>
+              <p class="text-[0.95rem] font-semibold text-ink transition-colors group-hover:text-go-green-dark">
+                {exp.title}
+              </p>
+            </div>
+
+            <span
+              class="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.08em]"
+              style={unifiedStatusStyle(unified)}
+            >
+              {unified}
+            </span>
+
+            <span class="cta justify-self-end text-ink group-hover:text-go-green-dark">
+              <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+            </span>
+          </a>
+        );
+      })
+    }
+  </div>
+</section>
