@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 400" role="img"
+     aria-label="The activation lineage, in two panels plus a timeline. Left panel: three pointwise curves on one shared axis from x equals minus 4 to plus 4. ReLU, the original 2017 Transformer choice, is a hard-cornered gray line: exactly zero for every negative input — a dead zero-gradient region, annotated as such — then a straight ramp up. GELU, from 2016 and adopted by GPT and BERT, and SiLU, also written Swish or x times sigmoid of x, track ReLU closely but bend the corner smooth, keeping a small nonzero response and gradient below zero; SiLU shows its characteristic dip to about minus 0.28 near x equals minus 1.3 before rising. Right panel: SwiGLU, Shazeer 2020, is not a curve at all but a block diagram — the token x is projected twice, SiLU of x times W gate forms a soft mask that multiplies x times W up elementwise, and W down writes the product back into the residual stream. The gate path decides how much; the up path carries the content, and a side note marks that the gate slot is swappable — GELU there instead gives GEGLU, Gemma's choice. A timeline underneath runs the transformer adoption story: ReLU in the 2017 Transformer, GELU adopted by GPT and BERT in 2018, SwiGLU from 2020. The bottom row gives Shazeer's parameter-matched heldout log-perplexity: ReLU 1.677, SwiGLU 1.636, GEGLU 1.633 — the gate wins, modestly and nearly for free.">
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .pnl   { fill:#fafbfb; stroke:#e6e6e6; }
+    .ttl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .tag   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#7a847f; }
+    .axis  { stroke:#aab2ae; stroke-width:1; fill:none; }
+    .axlab { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .relu  { stroke:#8a938e; stroke-width:1.5; fill:none; }
+    .gelu  { stroke:#3d454d; stroke-width:1.5; fill:none; }
+    .silu  { stroke:#006b40; stroke-width:2; fill:none; }
+    .dead  { fill:#f0eee9; }
+    .leg   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .gnote { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .ptr   { stroke:#aab2ae; stroke-width:1; fill:none; }
+    .box   { fill:#ffffff; stroke:#14171a; }
+    .boxtx { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .gate  { fill:#dff6ee; stroke:#006b40; }
+    .gatetx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .mul   { fill:#006b40; stroke:#006b40; }
+    .multx { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#ffffff; }
+    .flow  { stroke:#14171a; stroke-width:1.5; fill:none; }
+    .gflow { stroke:#006b40; stroke-width:2; fill:none; }
+    .tl    { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .scr   { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .scrw  { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .sep   { font:400 13px 'JetBrains Mono',ui-monospace,monospace; fill:#aab2ae; }
+  </style>
+  <defs>
+    <marker id="mi" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
+    <marker id="mg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="398" rx="2"/>
+  <text class="ey" x="34" y="30">THE ACTIVATION LINEAGE — FROM RELU TO GATE</text>
+
+  <!-- ================= LEFT: the pointwise curves ================= -->
+  <rect class="pnl" x="34" y="44" width="306" height="240" rx="3"/>
+  <text class="ttl" x="187" y="64" text-anchor="middle">The curves — pointwise f(x)</text>
+  <text class="tag" x="187" y="78" text-anchor="middle">one scalar in, one scalar out</text>
+
+  <!-- dead-zone band under ReLU's flat half -->
+  <rect class="dead" x="58" y="224" width="132" height="8"/>
+
+  <!-- x-axis, x in [-4, 4] -->
+  <line class="axis" x1="54" y1="228" x2="326" y2="228"/>
+  <line class="axis" x1="58"  y1="228" x2="58"  y2="232"/>
+  <line class="axis" x1="124" y1="228" x2="124" y2="232"/>
+  <line class="axis" x1="190" y1="228" x2="190" y2="232"/>
+  <line class="axis" x1="256" y1="228" x2="256" y2="232"/>
+  <line class="axis" x1="322" y1="228" x2="322" y2="232"/>
+  <text class="axlab" x="58"  y="245" text-anchor="middle">−4</text>
+  <text class="axlab" x="190" y="245" text-anchor="middle">0</text>
+  <text class="axlab" x="322" y="245" text-anchor="middle">4</text>
+
+  <!-- ReLU: max(0, x) -->
+  <path class="relu" d="M58,228 L190,228 L322,96"/>
+  <!-- GELU: x·Φ(x) -->
+  <path class="gelu" d="M58,228 L91,228.1 L124,229.5 L140.5,231.3 L157,233.2 L173.5,233.1 L181.8,231.3 L190,228 L198.2,223.1 L206.5,216.6 L214.8,208.9 L223,200.2 L239.5,181.8 L256,163.5 L272.5,146 L289,129.1 L305.5,112.5 L322,96"/>
+  <!-- SiLU: x·σ(x) -->
+  <path class="silu" d="M58,230.4 L91,232.7 L124,235.9 L140.5,237 L147.8,237.2 L157,236.9 L173.5,234.2 L181.8,231.6 L190,228 L198.2,223.4 L206.5,217.7 L214.8,211.2 L223,203.9 L239.5,187.5 L256,169.9 L272.5,151.7 L289,133.7 L305.5,115.9 L322,98.4"/>
+
+  <!-- legend, in the empty upper-left of the plot -->
+  <line class="relu" x1="62" y1="98.5"  x2="76" y2="98.5"/>
+  <text class="leg" x="82" y="102">ReLU — 2017 Transformer</text>
+  <line class="gelu" x1="62" y1="114.5" x2="76" y2="114.5"/>
+  <text class="leg" x="82" y="118">GELU — 2016 · GPT, BERT</text>
+  <line class="silu" x1="62" y1="130.5" x2="76" y2="130.5"/>
+  <text class="leg" x="82" y="134">SiLU / Swish — x·σ(x)</text>
+
+  <!-- ReLU dead zone annotation -->
+  <line class="ptr" x1="105" y1="248" x2="115" y2="234"/>
+  <text class="note" x="105" y="260" text-anchor="middle">ReLU dead zone —</text>
+  <text class="note" x="105" y="272" text-anchor="middle">gradient 0 for x &lt; 0</text>
+
+  <!-- SiLU dip annotation -->
+  <line class="ptr" x1="150" y1="241" x2="192" y2="254"/>
+  <text class="gnote" x="196" y="260">SiLU dips ≈ −0.28</text>
+  <text class="gnote" x="196" y="272">near x ≈ −1.3</text>
+
+  <!-- ================= RIGHT: SwiGLU is a gate ================= -->
+  <rect class="pnl" x="352" y="44" width="294" height="240" rx="3"/>
+  <text class="ttl" x="499" y="64" text-anchor="middle">SwiGLU — a data-dependent gate</text>
+  <text class="tag" x="499" y="78" text-anchor="middle">SiLU(xW_gate) ⊙ xW_up → W_down</text>
+
+  <!-- token x -->
+  <rect class="box" x="487" y="90" width="24" height="20" rx="2"/>
+  <text class="boxtx" x="499" y="104" text-anchor="middle">x</text>
+  <path class="flow" d="M492,110 L440,126" marker-end="url(#mi)"/>
+  <path class="flow" d="M506,110 L558,126" marker-end="url(#mi)"/>
+
+  <!-- two projections -->
+  <rect class="box" x="390" y="130" width="92" height="22" rx="2"/>
+  <text class="boxtx" x="436" y="145" text-anchor="middle">x·W_gate</text>
+  <rect class="box" x="516" y="130" width="92" height="22" rx="2"/>
+  <text class="boxtx" x="562" y="145" text-anchor="middle">x·W_up</text>
+
+  <!-- gate path: SiLU -->
+  <path class="flow" d="M436,152 L436,163" marker-end="url(#mi)"/>
+  <text class="note" x="428" y="161" text-anchor="end">how much</text>
+  <rect class="gate" x="398" y="166" width="76" height="22" rx="2"/>
+  <text class="gatetx" x="436" y="181" text-anchor="middle">SiLU(·)</text>
+
+  <!-- content path -->
+  <text class="note" x="570" y="174">the content</text>
+
+  <!-- GEGLU variant note: the gate slot is swappable -->
+  <text class="note" x="410" y="213" text-anchor="middle">GELU gate instead</text>
+  <text class="note" x="410" y="225" text-anchor="middle">= GEGLU (Gemma)</text>
+
+  <!-- elementwise multiply -->
+  <path class="gflow" d="M436,188 L488,207" marker-end="url(#mg)"/>
+  <path class="flow" d="M562,152 L511,206" marker-end="url(#mi)"/>
+  <circle class="mul" cx="499" cy="214" r="11"/>
+  <text class="multx" x="499" y="219" text-anchor="middle">⊙</text>
+  <text class="note" x="516" y="218">elementwise</text>
+
+  <!-- write back -->
+  <path class="flow" d="M499,225 L499,235" marker-end="url(#mi)"/>
+  <rect class="box" x="453" y="238" width="92" height="22" rx="2"/>
+  <text class="boxtx" x="499" y="253" text-anchor="middle">W_down</text>
+  <path class="flow" d="M499,260 L499,267" marker-end="url(#mi)"/>
+  <text class="note" x="499" y="278" text-anchor="middle">back into the residual stream</text>
+
+  <!-- ================= BOTTOM: timeline + scores ================= -->
+  <line x1="34" y1="294" x2="646" y2="294" stroke="#eef0f0" stroke-width="1"/>
+
+  <text class="tl" x="161" y="312" text-anchor="middle">2017 · ReLU (Transformer)</text>
+  <path class="gflow" d="M254,308 L294,308" marker-end="url(#mg)"/>
+  <text class="tl" x="380" y="312" text-anchor="middle">2018 · GELU (GPT, BERT)</text>
+  <path class="gflow" d="M466,308 L506,308" marker-end="url(#mg)"/>
+  <text class="tl" x="559" y="312" text-anchor="middle">2020 · SwiGLU</text>
+
+  <text class="note" x="340" y="338" text-anchor="middle">Shazeer 2020 — parameter-matched heldout log-perplexity · lower is better</text>
+  <text class="scr"  x="198" y="360" text-anchor="middle">ReLU 1.677</text>
+  <text class="sep"  x="263" y="360" text-anchor="middle">·</text>
+  <text class="scrw" x="336" y="360" text-anchor="middle">SwiGLU 1.636</text>
+  <text class="sep"  x="408" y="360" text-anchor="middle">·</text>
+  <text class="scrw" x="478" y="360" text-anchor="middle">GEGLU 1.633</text>
+  <text class="note" x="340" y="382" text-anchor="middle">the gate wins, modestly and nearly for free — “we attribute their success… to divine benevolence”</text>
+</svg>

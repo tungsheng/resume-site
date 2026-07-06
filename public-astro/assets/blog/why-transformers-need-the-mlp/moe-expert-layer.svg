@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 442" role="img"
+     aria-label="Mixture-of-Experts as a mechanism, two panels side by side. Both panels keep the same grayed-out attention sub-block on top, labeled unchanged — MoE swaps only the MLP below it. Left, a dense layer: the token drops from attention into one big 704.6M-parameter SwiGLU MLP — three 8,192 by 28,672 matrices — and back to the residual stream; every token pays full price. Right, an MoE layer in DeepSeek-V3's shape, read top to bottom as three numbered steps. The token enters a router — one learned matrix — while an always-on lane branches left, bypassing the router, into the 1 shared expert that every token runs. Step 1, the router scores the token against all 256 routed experts, drawn as a compact strip of small SwiGLU MLPs of hidden width 2,048 with a score bar over each one. Step 2, keep the top 8: the eight highest bars and their experts turn green; the other 248 sit light gray — unpicked, their weights never read for this token. Step 3, run and sum: only the 8 green experts and the shared expert run; their outputs converge on a plus node, summed weighted by the router scores, and the result returns to the residual stream. The badge reads 671B parameters total, 37B active per token — capacity decoupled from per-token bytes. Closing note: MoE replicates the MLP, not attention — the MLP is position-wise, so per-token routing just works.">
+  <style>
+    .bg     { fill:#ffffff; stroke:#e6e6e6; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .ptl    { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .att    { fill:#f4f5f5; stroke:#d3d8d6; }
+    .attx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#98a29c; }
+    .arr    { stroke:#14171a; stroke-width:2; fill:none; }
+    .garr   { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .fan    { stroke:#006b40; stroke-width:1.2; fill:none; }
+    .ffn    { fill:#f0eee9; stroke:#14171a; stroke-width:1.5; }
+    .ffntl  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .chip   { fill:#ffffff; stroke:#14171a; }
+    .chiptx { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .chipst { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .exi    { fill:#f2f3f3; stroke:#c6cdc9; stroke-width:.75; }
+    .exa    { fill:#dff6ee; stroke:#006b40; stroke-width:1.25; }
+    .bri    { fill:#d7dedb; }
+    .bra    { fill:#006b40; }
+    .shr    { fill:#006b40; stroke:#006b40; }
+    .shrtx  { font:700 10px 'JetBrains Mono',ui-monospace,monospace; fill:#ffffff; }
+    .shrst  { font:600 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#c7ead9; }
+    .mrg    { fill:#ffffff; stroke:#006b40; stroke-width:1.5; }
+    .mrgtx  { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .op     { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .gop    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .stC    { fill:#006b40; }
+    .stN    { font:700 9px 'JetBrains Mono',ui-monospace,monospace; fill:#ffffff; }
+    .stT    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .bw     { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .trafA  { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .trafB  { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .note   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+  </style>
+  <defs>
+    <marker id="ai" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="440" rx="2"/>
+  <text class="ey" x="34" y="30">CAPACITY, DECOUPLED FROM PER-TOKEN BYTES</text>
+
+  <!-- ================= LEFT: dense layer ================= -->
+  <text class="ptl" x="135" y="58" text-anchor="middle">Dense layer</text>
+
+  <rect class="att" x="48" y="72" width="174" height="34" rx="3"/>
+  <text class="attx" x="135" y="93" text-anchor="middle">attention — unchanged</text>
+
+  <path class="arr" d="M135,106 L135,155" marker-end="url(#ai)"/>
+  <text class="op" x="143" y="134">token</text>
+
+  <rect class="ffn" x="48" y="160" width="174" height="140" rx="3"/>
+  <text class="ffntl" x="135" y="216" text-anchor="middle">one big SwiGLU MLP</text>
+  <text class="bw" x="135" y="236" text-anchor="middle">704.6M parameters</text>
+  <text class="bw" x="135" y="252" text-anchor="middle">3 matrices · 8,192 × 28,672</text>
+
+  <path class="arr" d="M135,300 L135,356" marker-end="url(#ai)"/>
+  <text class="op" x="135" y="370" text-anchor="middle">residual stream</text>
+
+  <text class="trafA" x="135" y="394" text-anchor="middle">every token pays full price</text>
+
+  <!-- divider -->
+  <line x1="258" y1="48" x2="258" y2="404" stroke="#eef0f0" stroke-width="1"/>
+
+  <!-- ================= RIGHT: MoE layer ================= -->
+  <text class="ptl" x="480" y="58" text-anchor="middle">MoE layer (DeepSeek-V3 shape)</text>
+
+  <rect class="att" x="320" y="72" width="320" height="34" rx="3"/>
+  <text class="attx" x="480" y="93" text-anchor="middle">attention — unchanged</text>
+
+  <!-- token into router; always-on branch to the shared expert -->
+  <path class="garr" d="M480,106 L480,138" marker-end="url(#ag)"/>
+  <text class="gop" x="488" y="134">token</text>
+  <path class="garr" d="M480,124 L301,124 L301,218" marker-end="url(#ag)"/>
+  <text class="gop" x="390" y="117" text-anchor="middle">bypasses the router</text>
+
+  <!-- router -->
+  <rect class="chip" x="420" y="142" width="120" height="38" rx="2"/>
+  <text class="chiptx" x="480" y="159" text-anchor="middle">router</text>
+  <text class="chipst" x="480" y="173" text-anchor="middle">one learned matrix</text>
+
+  <!-- step 1 -->
+  <circle class="stC" cx="554" cy="160" r="7"/>
+  <text class="stN" x="554" y="163.5" text-anchor="middle">1</text>
+  <text class="stT" x="566" y="164">score all 256</text>
+
+  <path class="garr" d="M480,180 L480,194" marker-end="url(#ag)"/>
+
+  <!-- expert array caption -->
+  <text class="bw" x="480" y="210" text-anchor="middle">256 routed experts · small SwiGLUs, hidden width 2,048</text>
+
+  <!-- step 2 line: keep top-8 / rest never read -->
+  <circle class="stC" cx="344" cy="220" r="7"/>
+  <text class="stN" x="344" y="223.5" text-anchor="middle">2</text>
+  <text class="stT" x="356" y="224">keep top-8</text>
+  <text class="bw" x="635" y="224" text-anchor="end">248 unpicked — weights never read</text>
+
+  <!-- score bars (one per expert; top-8 green) -->
+  <rect class="bri" x="337" y="250" width="7" height="4"/>
+  <rect class="bri" x="346" y="247" width="7" height="7"/>
+  <rect class="bra" x="355" y="232" width="7" height="22"/>
+  <rect class="bri" x="364" y="249" width="7" height="5"/>
+  <rect class="bri" x="373" y="251" width="7" height="3"/>
+  <rect class="bra" x="382" y="235" width="7" height="19"/>
+  <rect class="bri" x="391" y="248" width="7" height="6"/>
+  <rect class="bri" x="400" y="250" width="7" height="4"/>
+  <rect class="bri" x="409" y="246" width="7" height="8"/>
+  <rect class="bra" x="418" y="230" width="7" height="24"/>
+  <rect class="bri" x="427" y="249" width="7" height="5"/>
+  <rect class="bri" x="436" y="247" width="7" height="7"/>
+  <rect class="bra" x="445" y="236" width="7" height="18"/>
+  <rect class="bri" x="454" y="250" width="7" height="4"/>
+  <rect class="bri" x="463" y="248" width="7" height="6"/>
+  <rect class="bri" x="472" y="245" width="7" height="9"/>
+  <rect class="bra" x="481" y="233" width="7" height="21"/>
+  <rect class="bri" x="490" y="251" width="7" height="3"/>
+  <rect class="bri" x="499" y="249" width="7" height="5"/>
+  <rect class="bri" x="508" y="246" width="7" height="8"/>
+  <rect class="bra" x="517" y="231" width="7" height="23"/>
+  <rect class="bri" x="526" y="248" width="7" height="6"/>
+  <rect class="bri" x="535" y="250" width="7" height="4"/>
+  <rect class="bri" x="544" y="247" width="7" height="7"/>
+  <rect class="bra" x="553" y="237" width="7" height="17"/>
+  <rect class="bri" x="562" y="249" width="7" height="5"/>
+  <rect class="bri" x="571" y="246" width="7" height="8"/>
+  <rect class="bri" x="580" y="251" width="7" height="3"/>
+  <rect class="bri" x="589" y="248" width="7" height="6"/>
+  <rect class="bra" x="598" y="234" width="7" height="20"/>
+  <rect class="bri" x="607" y="250" width="7" height="4"/>
+  <rect class="bri" x="616" y="247" width="7" height="7"/>
+
+  <!-- expert strip (256 experts, compact; top-8 green, rest inert) -->
+  <rect class="exi" x="337" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="346" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exa" x="355" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="364" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="373" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exa" x="382" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="391" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="400" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="409" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exa" x="418" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="427" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="436" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exa" x="445" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="454" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="463" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="472" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exa" x="481" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="490" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="499" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="508" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exa" x="517" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="526" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="535" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="544" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exa" x="553" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="562" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="571" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="580" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="589" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exa" x="598" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="607" y="256" width="7" height="14" rx="1.5"/>
+  <rect class="exi" x="616" y="256" width="7" height="14" rx="1.5"/>
+
+  <!-- shared expert, always on -->
+  <rect class="shr" x="272" y="222" width="58" height="54" rx="2"/>
+  <text class="shrtx" x="301" y="241" text-anchor="middle">shared</text>
+  <text class="shrtx" x="301" y="254" text-anchor="middle">expert</text>
+  <text class="shrst" x="301" y="268" text-anchor="middle">always on</text>
+
+  <!-- step 3: the 8 picked experts run; outputs fan into the weighted sum -->
+  <line class="fan" x1="358.5" y1="270" x2="480" y2="312"/>
+  <line class="fan" x1="385.5" y1="270" x2="480" y2="312"/>
+  <line class="fan" x1="421.5" y1="270" x2="480" y2="312"/>
+  <line class="fan" x1="448.5" y1="270" x2="480" y2="312"/>
+  <line class="fan" x1="484.5" y1="270" x2="480" y2="312"/>
+  <line class="fan" x1="520.5" y1="270" x2="480" y2="312"/>
+  <line class="fan" x1="556.5" y1="270" x2="480" y2="312"/>
+  <line class="fan" x1="601.5" y1="270" x2="480" y2="312"/>
+  <path class="garr" d="M301,276 L301,314 L466,314" marker-end="url(#ag)"/>
+
+  <circle class="mrg" cx="480" cy="314" r="9"/>
+  <text class="mrgtx" x="480" y="318" text-anchor="middle">+</text>
+
+  <circle class="stC" cx="504" cy="317" r="7"/>
+  <text class="stN" x="504" y="320.5" text-anchor="middle">3</text>
+  <text class="stT" x="516" y="313">run + sum outputs,</text>
+  <text class="stT" x="516" y="326">weighted by scores</text>
+
+  <path class="garr" d="M480,323 L480,356" marker-end="url(#ag)"/>
+  <text class="op" x="480" y="370" text-anchor="middle">residual stream</text>
+
+  <text class="trafB" x="480" y="394" text-anchor="middle">671B total · 37B active per token</text>
+
+  <text class="note" x="340" y="424" text-anchor="middle">MoE replicates the MLP, not attention — position-wise means per-token routing just works</text>
+
+</svg>

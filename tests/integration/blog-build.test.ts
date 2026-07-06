@@ -7,15 +7,22 @@ import { $ } from "bun";
 const RUN = process.env.RUN_INTEGRATION_TESTS === "1";
 const itIf = RUN ? test : test.skip;
 
-// Launch content (#29): a single Post is Published; everything else was demoted
-// to Drafting/Outline for the blog launch, so the production build ships exactly
-// one Post. The custom Sätteri transforms (admonition callouts #16, figure/lazy
-// images #17) plus GFM tables and Shiki are exercised at the node level in the
-// unit suite (tests/unit/blog-markdown.test.ts); here we assert they survive a
-// real build and land in dist/ for the one Post that publishes.
+// Every Published Post ships in the production build, newest first. The custom
+// Sätteri transforms (admonition callouts #16, figure/lazy images #17) plus GFM
+// tables and Shiki are exercised at the node level in the unit suite
+// (tests/unit/blog-markdown.test.ts); here we assert they survive a real build
+// and land in dist/. Keep this list newest-first — LATEST below slices it.
 const PUBLISHED = [
+  { slug: "why-transformers-need-the-mlp", title: "MLP: Why Transformers Need the Multilayer Perceptron" },
+  { slug: "attention-how-to-shrink-it", title: "Attention, and How to Shrink It" },
+  { slug: "attention-from-first-principles", title: "Attention, from First Principles" },
   { slug: "transformer-inference-prefill-and-decode", title: "LLM Inference: The Life of a Request" },
 ];
+
+// The home "Latest writing" slice (#10) shows only the newest LATEST_COUNT (3,
+// astro/pages/index.astro) Posts; older Published Posts live on /blog/ only.
+const LATEST = PUBLISHED.slice(0, 3);
+const OLDER_PUBLISHED = PUBLISHED.slice(3);
 
 // status: Drafting — dev-only, excluded from a production build entirely.
 const DRAFTS = [
@@ -172,10 +179,10 @@ describe("blog production build output", () => {
   itIf("bakes a 'Latest writing' section into the home page", async () => {
     const html = await Bun.file("dist/index.html").text();
     expect(html).toContain("Latest writing");
-    for (const post of PUBLISHED) {
+    for (const post of LATEST) {
       expect(html).toContain(`href="/blog/${post.slug}"`);
     }
-    for (const post of [...DRAFTS, ...OUTLINE]) {
+    for (const post of [...OLDER_PUBLISHED, ...DRAFTS, ...OUTLINE]) {
       expect(html).not.toContain(post.title);
       expect(html).not.toContain(`/blog/${post.slug}`);
     }
