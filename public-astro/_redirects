@@ -1,0 +1,19 @@
+# Cloudflare Pages server-side redirects (real 301s for crawlers). These mirror
+# the `redirects` map in astro.config.mjs; the Astro-built meta-refresh stubs
+# stay as a fallback for local preview and non-CF hosts, but Pages evaluates
+# this file before static assets so the stubs are unreachable in production.
+# Specific rules first — the trailing splats catch stale deep links without
+# touching the live /experiments/<slug> evidence pages.
+/project/cloud-inference-platform/validation /work/gpu-inference-lab 301
+/project/cloud-inference-platform /work/gpu-inference-lab 301
+/projects/gpu-inference-lab /work/gpu-inference-lab 301
+/projects/cuda-kernel-lab /work/cuda-kernel-lab 301
+/projects/* /work 301
+/projects /work 301
+/experiments/gpu-inference-lab /work/gpu-inference-lab 301
+/experiments/cuda-kernel-lab /work/cuda-kernel-lab 301
+/experiments /work 301
+/decisions/gpu-inference-lab /work/gpu-inference-lab 301
+/decisions/cuda-kernel-lab /work/cuda-kernel-lab 301
+/decisions/* /work 301
+/decisions /work 301
