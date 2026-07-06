@@ -2,8 +2,8 @@
 title: "MLP: Why Transformers Need the Multilayer Perceptron"
 summary: "In a Llama 2 70B layer the attention projections hold 151M parameters and the MLP next to them holds 704.6M — 82% of the layer, roughly 80% of the model, and most of the bytes decode streams for every token. This post builds the block the attention posts walked past: two matmuls and a gate, why the transformer collapses without it, and where the frontier is taking it."
 category: "Inference"
-status: Drafting
-published: 2026-07-03
+status: Published
+published: 2026-07-04
 tags:
   - transformer
   - mlp
