@@ -2,6 +2,32 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+BLOG POST: SCHEDULING — CONTINUOUS BATCHING + PAGED ATTENTION (2026-07-07)
+branch feat/scheduling-batching
+#############################################################################
+Next series post started (Tony's ask; backlog item 3, second-pass scheduling
+depth). Working title "Scheduling: How Continuous Batching and Paged Attention
+Fill a GPU" — Tony retitles. File content/blog/
+scheduling-continuous-batching-paged-attention.md, status: Drafting,
+published: 2026-07-07, ~2,700 words prose, 6 H2s, 1 KaTeX expr, one [!NOTE]
+(selective batching), 3 figures (series idiom, qlmanage-verified):
+static-vs-continuous.svg / kv-fragmentation.svg / block-table.svg in
+public-astro/assets/blog/scheduling-continuous-batching-paged-attention/.
+Arc: Orca 36.9x + vLLM 20.4-38.2%->96.3% lead -> iteration-level scheduling
+(selective batching NOTE, continuous-batching name drift) -> KV-memory ceiling
+(OPT-13B 800 KB/token, 3 waste kinds) -> PagedAttention (block table, 2-4x,
+20-26% kernel cost, CoW sharing -> prefix caching/RadixAttention, preemption
+recompute-default) -> chunked prefill (Sarathi-Serve generation stalls /
+stall-free schedules; vLLM V1 token-budget scheduler) -> frontier (vAttention,
+Jenga, FlashInfer, DistServe/Mooncake/Dynamo disaggregation) -> close.
+Research: 2 web agents 2026-07-07, notes w/ exact quotes + do-not-cite lists
+in session scratchpad (research-scheduling-batching.md,
+research-paged-attention.md). All single-lab numbers hedged author-reported.
+Draft added to the integration DRAFTS fixture (prod-build exclusion asserted).
+VERIFIED: dev render 200 (post + 3 figs), 1 KaTeX/0 errors, 3 <figure>, unit
+62/62, integration 22/22 (full prod build). Flip status on Tony's word.
+
+#############################################################################
 RESUME HONEST REPOSITIONING (2026-06-25) — branch feat/resume-honest-repositioning
 #############################################################################
 WHY: the resume asserted an IDENTITY ("ML Inference Performance Engineer") two
