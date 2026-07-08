@@ -2,8 +2,8 @@
 title: "MoE: How the Mixture of Experts Routes a Token"
 summary: "The router in DeepSeek-V3 is a 7,168 × 256 matrix — 1.8M parameters picking 8 of 256 experts for every token, in a layer of 11.3B. This post covers what the MLP post's one MoE paragraph skipped: how the router works, what the sparsity buys, and the recipe the mid-2026 frontier — DeepSeek-V4, GLM-5.2, Kimi K2.6 — converged on."
 category: "Inference"
-status: Drafting
-published: 2026-07-06
+status: Published
+published: 2026-07-07
 tags:
   - moe
   - mixture-of-experts
