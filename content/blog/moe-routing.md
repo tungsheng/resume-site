@@ -23,7 +23,7 @@ The previous post, on the multilayer perceptron (MLP), ended with the MoE layer 
 2. **Select** — keep the top 8 of score + bias.
 3. **Gate** — renormalize the winners' raw scores.
 4. **Combine** — experts, shared expert, and the token, summed.
-5. **Rebalance** — nudge the bias, outside the optimizer.
+5. **Rebalance** (training only) — nudge the bias, outside the optimizer.
 
 Steps 1–4 are **token-choice** routing — each token picks its experts. Step 5 keeps it from collapsing, and getting that step down to one line took the field from 2017 to 2024.
 
@@ -79,9 +79,9 @@ The shared expert in that sum is DeepSeekMoE's second move: one FFN kept always 
 
 ![Figure 1 — The router, to scale, in steps 1–4 of the recipe: score, select, gate, combine. The proportions are the point — a 1.8M-parameter matrix making a hard choice over an 11.3B-parameter layer, hard in both directions: an unpicked expert contributes nothing forward and receives no gradient backward.](/assets/blog/moe-routing/router-one-matmul.svg)
 
-### 5 — Rebalance
+### 5 — Rebalance (training only)
 
-DeepSeek-V3 balances 256 experts with a number the optimizer never updates: after each training step, overloaded experts get their bias nudged down by $\gamma$ and underloaded experts up, with $\gamma = 0.001$. No gradient — a feedback loop shifting selection toward underloaded experts, running beside the optimizer.
+DeepSeek-V3 balances 256 experts with a number the optimizer never updates: after each training step, overloaded experts get their bias nudged down by $\gamma$ and underloaded experts up, with $\gamma = 0.001$. No gradient — a feedback loop shifting selection toward underloaded experts, running beside the optimizer. The loop is training-only: at inference, selection runs on the frozen $b_i$.
 
 **Why the step exists.** Left alone, the router self-reinforces: a picked expert gets gradient updates and improves; an improved expert scores higher and gets picked more; the unpicked majority never learns and never recovers. The literature calls the end state **routing collapse** — [OLMoE](https://arxiv.org/abs/2409.02060) reports that without a balancing mechanism, "all tokens in the first layer are assigned to the 6th expert."
 
