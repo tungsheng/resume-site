@@ -13,6 +13,7 @@ const itIf = RUN ? test : test.skip;
 // (tests/unit/blog-markdown.test.ts); here we assert they survive a real build
 // and land in dist/. Keep this list newest-first — LATEST below slices it.
 const PUBLISHED = [
+  { slug: "moe-routing", title: "MoE: How the Mixture of Experts Routes a Token" },
   { slug: "why-transformers-need-the-mlp", title: "MLP: Why Transformers Need the Multilayer Perceptron" },
   { slug: "attention-how-to-shrink-it", title: "Attention, and How to Shrink It" },
   { slug: "attention-from-first-principles", title: "Attention, from First Principles" },
