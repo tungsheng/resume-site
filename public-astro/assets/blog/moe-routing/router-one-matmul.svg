@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 516" role="img"
+     aria-label="DeepSeek-V3's MoE router, drawn to scale as a left-to-right dataflow in four numbered stages: 1 score, 2 select, 3 gate, 4 combine. A slim token vector u_t, 7,168 wide, feeds one matmul against the router matrix W_r — 7,168 by 256, just 1.8 million parameters, 0.016 percent of the layer; column i of W_r is e_i, expert i's centroid, one 7,168-wide vector per expert. The output is a strip of 256 sigmoid scores s_i, drawn as small bars; exactly eight are green, the top-8, the rest gray. A TopK arrow keeps the top 8 of s_i plus a per-expert balance bias b_i — set by the recipe's rebalance step, used only for this comparison — and renormalizes the raw kept scores into gates g_i, drawn as eight green bars sitting over eight routed expert boxes FFN_i that run. To their left, one shared expert FFN^(s) in solid green runs always, fed by a lane that bypasses the router straight from u_t. To their right, a dashed gray stack stands for the 248 unpicked experts whose weights are never read. The eight routed outputs, each weighted by its gate, and the ungated shared output converge on a plus node; their sum joins the token u_t in the residual stream to form the layer output h_t. Footer badges: 396M of 11.3B parameters read per token, and unpicked experts are skipped, not scaled down. The point: a 1.8M-parameter matrix makes a hard choice that controls an 11.3B-parameter layer.">
+  <title>The router, to scale — DeepSeek-V3 MoE router</title>
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .vec   { fill:#f4f6f5; stroke:#14171a; }
+    .vname { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .vlab  { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .mat   { fill:#ffffff; stroke:#14171a; }
+    .mattx { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .matst { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .matp  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .ann   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .op    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .gop   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .arr   { stroke:#14171a; stroke-width:2; fill:none; }
+    .garr  { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .fan   { stroke:#006b40; stroke-width:1.2; fill:none; }
+    .hair  { stroke:#e6e6e6; stroke-width:1; }
+    .bri   { fill:#d7dedb; }
+    .bra   { fill:#006b40; }
+    .exa   { fill:#dff6ee; stroke:#006b40; stroke-width:1.25; }
+    .exd   { fill:#f7f8f8; stroke:#c6cdc9; stroke-width:1; stroke-dasharray:4 3; }
+    .shr   { fill:#006b40; stroke:#006b40; }
+    .shrtx { font:700 10px 'JetBrains Mono',ui-monospace,monospace; fill:#ffffff; }
+    .shrst { font:600 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#c7ead9; }
+    .dtx   { font:600 9px 'JetBrains Mono',ui-monospace,monospace; fill:#98a29c; }
+    .mrg   { fill:#ffffff; stroke:#006b40; stroke-width:1.5; }
+    .mrgtx { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .stT   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .bdg   { fill:#dff6ee; stroke:#006b40; }
+    .bdgtx { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .bdgd  { fill:#ffffff; stroke:#aab2ae; stroke-dasharray:5 4; }
+    .bdgdtx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+  </style>
+  <defs>
+    <marker id="ai" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="514" rx="2"/>
+  <text class="ey" x="34" y="30">THE ROUTER, TO SCALE — DEEPSEEK-V3</text>
+
+  <!-- token vector u_t -->
+  <text class="vname" x="51" y="60" text-anchor="middle">u_t</text>
+  <text class="vlab" x="51" y="73" text-anchor="middle">7,168</text>
+  <rect class="vec" x="44" y="80" width="14" height="76" rx="2"/>
+
+  <!-- one matmul into W_r -->
+  <path class="arr" d="M58,118 L104,118" marker-end="url(#ai)"/>
+  <text class="op" x="175" y="82" text-anchor="middle">1 · score — one matmul</text>
+
+  <rect class="mat" x="110" y="90" width="130" height="58" rx="2"/>
+  <text class="mattx" x="175" y="110" text-anchor="middle">W_r</text>
+  <text class="matst" x="175" y="126" text-anchor="middle">7,168 × 256</text>
+  <text class="matp" x="175" y="140" text-anchor="middle">1.8M params</text>
+  <text class="anng" x="175" y="164" text-anchor="middle">0.016% of the layer</text>
+  <text class="ann" x="175" y="180" text-anchor="middle">column i = e_i, expert i's centroid</text>
+
+  <!-- scores strip: 256 sigmoid scores, top-8 green -->
+  <path class="arr" d="M240,118 L264,118" marker-end="url(#ai)"/>
+  <line class="hair" x1="268" y1="140" x2="578" y2="140"/>
+  <rect class="bri" x="270" y="135" width="7" height="5"/>
+  <rect class="bri" x="279" y="132" width="7" height="8"/>
+  <rect class="bra" x="288" y="118" width="7" height="22"/>
+  <rect class="bri" x="297" y="136" width="7" height="4"/>
+  <rect class="bri" x="306" y="133" width="7" height="7"/>
+  <rect class="bri" x="315" y="137" width="7" height="3"/>
+  <rect class="bra" x="324" y="122" width="7" height="18"/>
+  <rect class="bri" x="333" y="134" width="7" height="6"/>
+  <rect class="bri" x="342" y="136" width="7" height="4"/>
+  <rect class="bri" x="351" y="131" width="7" height="9"/>
+  <rect class="bra" x="360" y="114" width="7" height="26"/>
+  <rect class="bri" x="369" y="135" width="7" height="5"/>
+  <rect class="bri" x="378" y="133" width="7" height="7"/>
+  <rect class="bra" x="387" y="123" width="7" height="17"/>
+  <rect class="bri" x="396" y="136" width="7" height="4"/>
+  <rect class="bri" x="405" y="132" width="7" height="8"/>
+  <rect class="bri" x="414" y="137" width="7" height="3"/>
+  <rect class="bra" x="423" y="116" width="7" height="24"/>
+  <rect class="bri" x="432" y="134" width="7" height="6"/>
+  <rect class="bri" x="441" y="136" width="7" height="4"/>
+  <rect class="bri" x="450" y="132" width="7" height="8"/>
+  <rect class="bra" x="459" y="121" width="7" height="19"/>
+  <rect class="bri" x="468" y="135" width="7" height="5"/>
+  <rect class="bri" x="477" y="133" width="7" height="7"/>
+  <rect class="bri" x="486" y="137" width="7" height="3"/>
+  <rect class="bri" x="495" y="131" width="7" height="9"/>
+  <rect class="bra" x="504" y="119" width="7" height="21"/>
+  <rect class="bri" x="513" y="136" width="7" height="4"/>
+  <rect class="bri" x="522" y="134" width="7" height="6"/>
+  <rect class="bri" x="531" y="132" width="7" height="8"/>
+  <rect class="bra" x="540" y="124" width="7" height="16"/>
+  <rect class="bri" x="549" y="135" width="7" height="5"/>
+  <rect class="bri" x="558" y="133" width="7" height="7"/>
+  <rect class="bri" x="567" y="136" width="7" height="4"/>
+
+  <!-- strip caption + legend -->
+  <text class="ann" x="330" y="164" text-anchor="middle">256 sigmoid scores s_i</text>
+  <rect class="bra" x="460" y="156" width="8" height="8"/>
+  <text class="ann" x="473" y="164">top-8</text>
+  <rect class="bri" x="521" y="156" width="8" height="8"/>
+  <text class="ann" x="534" y="164">the other 248</text>
+
+  <!-- keep top-8, renormalize into gates -->
+  <path class="garr" d="M422,148 L422,240" marker-end="url(#ag)"/>
+  <text class="gop" x="432" y="188">2 · select — keep top-8 of sᵢ + bᵢ</text>
+  <text class="ann" x="432" y="202">bᵢ: balance bias, set by step 5</text>
+  <text class="anng" x="393" y="258" text-anchor="middle">3 · gate — g_i: kept scores renormalized to sum to 1</text>
+
+  <!-- gate bars over the routed experts -->
+  <rect class="bra" x="263" y="273" width="8" height="17"/>
+  <rect class="bra" x="299" y="276" width="8" height="14"/>
+  <rect class="bra" x="335" y="270" width="8" height="20"/>
+  <rect class="bra" x="371" y="278" width="8" height="12"/>
+  <rect class="bra" x="407" y="272" width="8" height="18"/>
+  <rect class="bra" x="443" y="277" width="8" height="13"/>
+  <rect class="bra" x="479" y="275" width="8" height="15"/>
+  <rect class="bra" x="515" y="279" width="8" height="11"/>
+
+  <!-- 8 routed experts (run) -->
+  <rect class="exa" x="252" y="294" width="30" height="48" rx="2"/>
+  <rect class="exa" x="288" y="294" width="30" height="48" rx="2"/>
+  <rect class="exa" x="324" y="294" width="30" height="48" rx="2"/>
+  <rect class="exa" x="360" y="294" width="30" height="48" rx="2"/>
+  <rect class="exa" x="396" y="294" width="30" height="48" rx="2"/>
+  <rect class="exa" x="432" y="294" width="30" height="48" rx="2"/>
+  <rect class="exa" x="468" y="294" width="30" height="48" rx="2"/>
+  <rect class="exa" x="504" y="294" width="30" height="48" rx="2"/>
+
+  <!-- shared expert, always on, bypasses the router -->
+  <path class="garr" d="M51,156 L51,319 L126,319" marker-end="url(#ag)"/>
+  <text class="gop" x="60" y="226">bypasses the router</text>
+  <text class="gop" x="165" y="282" text-anchor="middle">FFN^(s)</text>
+  <rect class="shr" x="130" y="290" width="70" height="58" rx="2"/>
+  <text class="shrtx" x="165" y="311" text-anchor="middle">shared</text>
+  <text class="shrtx" x="165" y="324" text-anchor="middle">expert</text>
+  <text class="shrst" x="165" y="339" text-anchor="middle">always on</text>
+
+  <!-- 248 unpicked experts: weights never read -->
+  <rect class="exd" x="580" y="308" width="52" height="36" rx="2"/>
+  <rect class="exd" x="573" y="301" width="52" height="36" rx="2"/>
+  <rect class="exd" x="566" y="294" width="52" height="36" rx="2"/>
+  <text class="dtx" x="599" y="362" text-anchor="middle">248 experts</text>
+  <text class="dtx" x="599" y="374" text-anchor="middle">weights never read</text>
+
+  <!-- run + weighted sum: outputs collect on a rail, then into + -->
+  <line class="fan" x1="267" y1="342" x2="267" y2="354"/>
+  <line class="fan" x1="303" y1="342" x2="303" y2="354"/>
+  <line class="fan" x1="339" y1="342" x2="339" y2="354"/>
+  <line class="fan" x1="375" y1="342" x2="375" y2="354"/>
+  <line class="fan" x1="411" y1="342" x2="411" y2="354"/>
+  <line class="fan" x1="447" y1="342" x2="447" y2="354"/>
+  <line class="fan" x1="483" y1="342" x2="483" y2="354"/>
+  <line class="fan" x1="519" y1="342" x2="519" y2="354"/>
+  <line class="fan" x1="267" y1="354" x2="519" y2="354"/>
+  <text class="gop" x="290" y="374" text-anchor="middle">8 routed experts FFN_i run</text>
+  <path class="garr" d="M393,354 L393,401" marker-end="url(#ag)"/>
+  <path class="garr" d="M165,348 L165,412 L380,412" marker-end="url(#ag)"/>
+
+  <circle class="mrg" cx="393" cy="412" r="9"/>
+  <text class="mrgtx" x="393" y="416" text-anchor="middle">+</text>
+  <text class="stT" x="410" y="410">4 · combine — 8 outputs × gates g_i,</text>
+  <text class="stT" x="410" y="423">plus the ungated shared output</text>
+
+  <path class="arr" d="M393,421 L393,450" marker-end="url(#ai)"/>
+  <text class="op" x="393" y="464" text-anchor="middle">joins the token u_t in the residual stream as h_t</text>
+
+  <!-- footer badges -->
+  <rect class="bdg" x="34" y="476" width="300" height="28" rx="3"/>
+  <text class="bdgtx" x="184" y="494" text-anchor="middle">396M of 11.3B params read per token</text>
+  <rect class="bdgd" x="348" y="476" width="298" height="28" rx="3"/>
+  <text class="bdgdtx" x="497" y="494" text-anchor="middle">unpicked experts: skipped, not scaled down</text>
+</svg>

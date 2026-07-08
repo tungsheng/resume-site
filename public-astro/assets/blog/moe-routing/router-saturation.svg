@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 432" role="img"
+     aria-label="Router saturation in OLMoE, drawn as a line chart. X-axis: pretraining progress on a log scale with checkpoints at 1, 10, 20 and 40 percent. Y-axis: percentage of top-8 routing decisions that match the final model, 0 to 100. A dashed gray baseline at 12.5 percent marks random assignment (8 of 64 experts). The main green curve, layers 1 through 15, already sits at about 60 percent at the 1 percent checkpoint — OLMoE's label for its ~20B-token, 5,000-step mark — and climbs slowly to about 80 percent by 40 percent of training. A lower gray curve is layer 0, the slow outlier, the depth where DeepSeek-V4 later swapped in hash routing instead of a learned router. Takeaway: assignments freeze almost immediately; the experts spend the other 99 percent of training specializing into a nearly fixed partition. Footnote: redrawn schematically from OLMoE Figure 20, top-8 of 64 experts, intermediate points interpolated.">
+  <title>Router saturation — the partition freezes early (OLMoE)</title>
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .sub   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .axis  { stroke:#14171a; stroke-width:1.2; fill:none; }
+    .grid  { stroke:#f0f0f0; stroke-width:1; }
+    .tick  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .curve { stroke:#006b40; stroke-width:2; fill:none; }
+    .curv0 { stroke:#aab2ae; stroke-width:1.8; fill:none; }
+    .ptg   { fill:#ffffff; stroke:#006b40; stroke-width:1.8; }
+    .pt0   { fill:#ffffff; stroke:#aab2ae; stroke-width:1.6; }
+    .base  { stroke:#5c6670; stroke-width:1.2; fill:none; stroke-dasharray:5 4; }
+    .callo { stroke:#006b40; stroke-width:1.1; fill:none; stroke-dasharray:3 3; }
+    .lblg  { font:600 10.5px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .lbl0  { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .ann2  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .take  { font:600 10.5px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+  </style>
+
+  <rect class="bg" x="1" y="1" width="678" height="430" rx="2"/>
+  <text class="ey" x="34" y="30">ROUTER SATURATION — THE PARTITION FREEZES EARLY</text>
+  <text class="sub" x="34" y="50">% of top-8 routing decisions that already match the final model</text>
+
+  <!-- gridlines -->
+  <line class="grid" x1="70" y1="80"  x2="640" y2="80"/>
+  <line class="grid" x1="70" y1="145" x2="640" y2="145"/>
+  <line class="grid" x1="70" y1="210" x2="640" y2="210"/>
+  <line class="grid" x1="70" y1="275" x2="640" y2="275"/>
+
+  <!-- axes -->
+  <path class="axis" d="M70,80 L70,340 L640,340"/>
+  <text class="tick" x="60" y="344" text-anchor="end">0</text>
+  <text class="tick" x="60" y="279" text-anchor="end">25</text>
+  <text class="tick" x="60" y="214" text-anchor="end">50</text>
+  <text class="tick" x="60" y="149" text-anchor="end">75</text>
+  <text class="tick" x="60" y="84"  text-anchor="end">100%</text>
+
+  <text class="tick" x="100" y="358" text-anchor="middle">1%</text>
+  <text class="tick" x="425" y="358" text-anchor="middle">10%</text>
+  <text class="tick" x="522" y="358" text-anchor="middle">20%</text>
+  <text class="tick" x="620" y="358" text-anchor="middle">40%</text>
+  <text class="tick" x="355" y="376" text-anchor="middle">pretraining progress (log scale)</text>
+
+  <!-- random-assignment baseline -->
+  <line class="base" x1="70" y1="308" x2="640" y2="308"/>
+  <text class="ann2" x="636" y="301" text-anchor="end">random assignment: 12.5% (8 of 64)</text>
+
+  <!-- layer 0: the slow outlier -->
+  <path class="curv0" d="M100,275 C210,258 320,242 425,236 C465,233 490,224 522,215 C557,206 590,201 620,197"/>
+  <circle class="pt0" cx="100" cy="275" r="3"/>
+  <circle class="pt0" cx="425" cy="236" r="3"/>
+  <circle class="pt0" cx="522" cy="215" r="3"/>
+  <circle class="pt0" cx="620" cy="197" r="3"/>
+  <text class="lbl0" x="330" y="263" text-anchor="middle">layer 0 — the slow outlier</text>
+  <text class="ann2" x="622" y="182" text-anchor="end">→ V4 swaps in hash routing at these depths</text>
+
+  <!-- main curve: top-8, layers 1–15 -->
+  <path class="curve" d="M100,184 C210,168 320,157 425,153 C465,151 490,146 522,142 C557,138 590,135 620,132"/>
+  <circle class="ptg" cx="100" cy="184" r="3.4"/>
+  <circle class="ptg" cx="425" cy="153" r="3.4"/>
+  <circle class="ptg" cx="522" cy="142" r="3.4"/>
+  <circle class="ptg" cx="620" cy="132" r="3.4"/>
+  <text class="lblg" x="300" y="141" text-anchor="middle">top-8 routing · layers 1–15</text>
+
+  <!-- callout at the 1% checkpoint -->
+  <line class="callo" x1="100" y1="340" x2="100" y2="188"/>
+  <text class="anng" x="112" y="205">60% of final routing</text>
+  <text class="anng" x="112" y="219">after 1% of training</text>
+  <text class="ann2" x="112" y="233">(the ~20B-token checkpoint)</text>
+
+  <!-- takeaway + footnote -->
+  <text class="take" x="340" y="400" text-anchor="middle">assignments freeze almost immediately — experts specialize within a nearly fixed partition</text>
+  <text class="note" x="340" y="418" text-anchor="middle">redrawn schematically from OLMoE Fig. 20 (arXiv 2409.02060) · top-8 of 64 · points interpolated</text>
+</svg>

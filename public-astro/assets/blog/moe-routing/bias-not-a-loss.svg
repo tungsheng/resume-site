@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 456" role="img"
+     aria-label="DeepSeek-V3's auxiliary-loss-free load balancing, drawn as forward dataflow left to right plus a dashed feedback loop. A token's affinity score s_i equals sigma of u dot e_i splits into two clearly separate paths. The top selection path adds a per-expert bias b_i to the score at a plus node, then feeds a top-8 comparator that picks which experts run — the output is who runs. The bottom gate path carries the raw s_i, bias never added, into a renormalize-over-the-8-selected box, producing the gate g_i — how much each picked expert contributes. A thin arrow passes only the selected set from the comparator down to the renormalizer. The dashed feedback loop runs right to left underneath: a per-expert load counter, measured after each training step, feeds a bias update rule — overloaded experts get b_i decremented by gamma, underloaded get b_i incremented by gamma, with gamma 0.001 — and the updated b_i flows back into the plus node on the selection path only. Annotations: b_i is used for selection only, it never touches the gate; and no gradient — the update runs beside the optimizer, not through it. Footnote: gamma decays to zero for the final 500B tokens, and a tiny sequence-wise safety loss with alpha ten to the minus four is kept.">
+  <title>Balance as feedback, not gradient — DeepSeek-V3's bias-based load balancing</title>
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .stg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
+    .src   { fill:#f4f6f5; stroke:#14171a; }
+    .chip  { fill:#ffffff; stroke:#14171a; }
+    .chiptx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .chipst{ font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .arrg  { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .arrk  { stroke:#14171a; stroke-width:1.5; fill:none; }
+    .thin  { stroke:#aab2ae; stroke-width:1.2; fill:none; }
+    .fb    { stroke:#5c6670; stroke-width:1.4; fill:none; stroke-dasharray:5 4; }
+    .fbbox { fill:#fbfbfa; stroke:#5c6670; stroke-width:1; stroke-dasharray:4 3; }
+    .fbtx  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .fbsub { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .node  { fill:#ffffff; stroke:#006b40; stroke-width:1.5; }
+    .outA  { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .outsub{ font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .lbl   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .lbls  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .bi    { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .ann2  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+  </style>
+  <defs>
+    <marker id="ag"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="ak"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
+    <marker id="af"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5c6670"/></marker>
+    <marker id="agr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#aab2ae"/></marker>
+  </defs>
+
+  <rect class="bg" x="1" y="1" width="678" height="454" rx="2"/>
+  <text class="ey" x="34" y="30">BALANCE AS FEEDBACK, NOT GRADIENT</text>
+
+  <!-- stage labels -->
+  <text class="stg" x="330" y="84" text-anchor="middle">SELECTION</text>
+  <text class="stg" x="330" y="220" text-anchor="middle">GATE</text>
+
+  <!-- source: affinity score -->
+  <rect class="src" x="40" y="163" width="104" height="48" rx="2"/>
+  <text class="chiptx" x="92" y="184" text-anchor="middle">sᵢ = σ(u·eᵢ)</text>
+  <text class="chipst" x="92" y="200" text-anchor="middle">affinity score</text>
+
+  <!-- split: green up to selection, black down to gate -->
+  <path class="arrg" d="M144,187 L168,187 L168,120 L189,120" marker-end="url(#ag)"/>
+  <path class="arrk" d="M168,187 L168,255 L255,255" marker-end="url(#ak)"/>
+  <text class="lbl" x="208" y="247" text-anchor="middle">raw sᵢ</text>
+
+  <!-- selection path: s_i + b_i -->
+  <circle class="node" cx="204" cy="120" r="13"/>
+  <line x1="197" y1="120" x2="211" y2="120" stroke="#006b40" stroke-width="2"/>
+  <line x1="204" y1="113" x2="204" y2="127" stroke="#006b40" stroke-width="2"/>
+  <text class="chiptx" x="204" y="151" text-anchor="middle">sᵢ + bᵢ</text>
+
+  <path class="arrg" d="M217,120 L256,120" marker-end="url(#ag)"/>
+
+  <!-- top-8 comparator -->
+  <rect class="chip" x="262" y="94" width="136" height="52" rx="2"/>
+  <text class="chiptx" x="330" y="116" text-anchor="middle">top-8 comparator</text>
+  <text class="chipst" x="330" y="132" text-anchor="middle">argmax over sᵢ + bᵢ</text>
+
+  <path class="arrg" d="M398,120 L456,120" marker-end="url(#ag)"/>
+  <text class="outA" x="466" y="116">who runs</text>
+  <text class="outsub" x="466" y="132">picks which experts run</text>
+
+  <!-- winner set handoff: the only thing selection passes to the gate -->
+  <path class="thin" d="M290,150 L290,224" marker-end="url(#agr)"/>
+  <text class="lbls" x="282" y="190" text-anchor="end">selected set</text>
+
+  <!-- gate path: renormalize raw scores over winners -->
+  <rect class="chip" x="262" y="229" width="136" height="52" rx="2"/>
+  <text class="chiptx" x="330" y="251" text-anchor="middle">renormalize</text>
+  <text class="chipst" x="330" y="267" text-anchor="middle">over the 8 selected</text>
+
+  <path class="arrk" d="M398,255 L456,255" marker-end="url(#ak)"/>
+  <text class="outA" x="466" y="251">how much</text>
+  <text class="outsub" x="466" y="267">gᵢ scales each expert</text>
+
+  <!-- annotation 1 -->
+  <text class="anng" x="150" y="292" text-anchor="middle">bᵢ is used for selection only —</text>
+  <text class="anng" x="150" y="306" text-anchor="middle">it never touches the gate</text>
+
+  <!-- feedback loop (dashed, right to left) -->
+  <path class="fb" d="M610,120 L652,120 L652,358 L644,358" marker-end="url(#af)"/>
+
+  <rect class="fbbox" x="452" y="330" width="188" height="56" rx="2"/>
+  <text class="fbtx" x="546" y="352" text-anchor="middle">per-expert load counter</text>
+  <text class="fbsub" x="546" y="369" text-anchor="middle">measured after each step</text>
+
+  <path class="fb" d="M452,358 L394,358" marker-end="url(#af)"/>
+
+  <text class="lbls" x="283" y="319" text-anchor="middle">bias update rule</text>
+  <rect class="fbbox" x="176" y="326" width="214" height="64" rx="2"/>
+  <text class="fbtx" x="214" y="347">overloaded:  bᵢ -= γ</text>
+  <text class="fbtx" x="214" y="363">underloaded: bᵢ += γ</text>
+  <text class="fbsub" x="283" y="380" text-anchor="middle">γ = 0.001</text>
+
+  <path class="fb" d="M176,358 L24,358 L24,62 L204,62 L204,109" marker-end="url(#af)"/>
+  <text class="lbls" x="114" y="55" text-anchor="middle">feedback: adjust bᵢ each step</text>
+  <text class="bi" x="215" y="90">bᵢ</text>
+
+  <!-- annotation 2 -->
+  <text class="ann2" x="408" y="410" text-anchor="middle">no gradient: the update runs beside</text>
+  <text class="ann2" x="408" y="424" text-anchor="middle">the optimizer, not through it</text>
+
+  <!-- footnote -->
+  <text class="note" x="340" y="444" text-anchor="middle">γ → 0 for the final 500B tokens · tiny sequence-wise safety loss α = 10<tspan font-size="7" dy="-3">-4</tspan><tspan dy="3"> kept</tspan></text>
+</svg>
