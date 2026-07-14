@@ -32,6 +32,11 @@ reorder of section 1, generation-stalls front-loaded, Fig 3 moved below
 the sharing paragraph, acronym expansions (MLP/TGI/EP). Skipped: "ceiling"
 H2 (Tony's own stub uses it), cross-post callback phrasing. Re-verified:
 4 figs/1 KaTeX/0 errors, unit 62/62, integration 22/22.
+PUBLISHED 2026-07-13 (commit 37aface; published: bumped to 2026-07-13;
+fixture: post -> PUBLISHED[0], attention-how-to-shrink-it rotates off the
+home Latest slice). 84/84 green on prod build; dist preview verified
+(post + figures + home slot 01 + sitemap/RSS). Branch pushed, PR #52
+open to main.
 Arc: Orca 36.9x + vLLM 20.4-38.2%->96.3% lead -> iteration-level scheduling
 (selective batching NOTE, continuous-batching name drift) -> KV-memory ceiling
 (OPT-13B 800 KB/token, 3 waste kinds) -> PagedAttention (block table, 2-4x,
