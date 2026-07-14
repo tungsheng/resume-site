@@ -13,6 +13,7 @@ const itIf = RUN ? test : test.skip;
 // (tests/unit/blog-markdown.test.ts); here we assert they survive a real build
 // and land in dist/. Keep this list newest-first — LATEST below slices it.
 const PUBLISHED = [
+  { slug: "scheduling-continuous-batching-paged-attention", title: "Scheduling: How Continuous Batching and Paged Attention Fill a GPU" },
   { slug: "moe-routing", title: "MoE: How the Mixture of Experts Routes a Token" },
   { slug: "why-transformers-need-the-mlp", title: "MLP: Why Transformers Need the Multilayer Perceptron" },
   { slug: "attention-how-to-shrink-it", title: "Attention, and How to Shrink It" },
@@ -27,7 +28,6 @@ const OLDER_PUBLISHED = PUBLISHED.slice(3);
 
 // status: Drafting — dev-only, excluded from a production build entirely.
 const DRAFTS = [
-  { slug: "scheduling-continuous-batching-paged-attention", title: "Scheduling: How Continuous Batching and Paged Attention Fill a GPU" },
   { slug: "prefix-cache-hit-rate-matters", title: "Why Prefix Cache Hit Rate Is the First Number to Check" },
   { slug: "continuous-batching-throughput", title: "Continuous Batching Changes What Throughput Means" },
   { slug: "kv-cache-is-the-batch-size-ceiling", title: "The KV Cache Is the Real Batch-Size Ceiling" },

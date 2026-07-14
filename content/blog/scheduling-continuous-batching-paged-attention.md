@@ -2,8 +2,8 @@
 title: "Scheduling: How Continuous Batching and Paged Attention Fill a GPU"
 summary: "Orca reported 36.9× the throughput of FasterTransformer at the same latency without touching the model's math; a year later vLLM's profiling found as little as a fifth of KV-cache memory holding actual tokens. Two papers, two mechanisms — re-form the batch every iteration, page the cache in 16-token blocks — and everything else an LLM scheduler does today is policy."
 category: "Inference"
-status: Drafting
-published: 2026-07-07
+status: Published
+published: 2026-07-13
 tags:
   - scheduling
   - continuous-batching
