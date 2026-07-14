@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 516" role="img"
+     aria-label="Chunked prefill in two zones. Top zone, why splitting is legal — the causal mask: the attention matrix of a 12-token prompt cut into three chunks C1, C2, C3 of four tokens each. Rows are queries, columns are keys and values. The lower triangle, including the diagonal, is tinted green as the readable region; the upper triangle is hatched and labeled masked, never read. Chunk boundaries divide the square into thirds both ways. Chunk C2's row band is outlined in green with the annotation: C2's queries read C1, already cached, plus C2 — nothing from C3; same math as one full pass — each token's KV is computed once, and later chunks read it from the cache. Bottom zone, the stall-free schedule — decodes first, the next chunk fills the budget: three iteration rows, each a fixed token budget of eight tokens. In every iteration, four cells marked D come first — one decode token each from running requests — followed by a green block carrying the new request's next prefill chunk: chunk C1 in iteration k, C2 in k plus 1, C3 in k plus 2. A bracket over the rows marks the fixed per-iteration token budget. Annotations: all pending decodes go first, the leftover budget carries the next chunk; and no decode waits on the prompt — time between tokens stays flat, the prefill finishes over three iterations. Footer: Sarathi-Serve, OSDI 2024 — chunked prefills plus stall-free schedules; chunked prefill is on by default in vLLM V1.">
+  <title>Chunked prefill — legal by the causal mask, stall-free by the token budget (Sarathi-Serve, OSDI 2024)</title>
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .zone  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
+    .sub   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .chk   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .blk   { fill:#f4f6f5; stroke:#14171a; }
+    .pre   { fill:#dff6ee; stroke:#006b40; stroke-width:1.25; }
+    .idx   { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .ptx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .msk   { fill:url(#ht); stroke:#c6cdc9; }
+    .grd   { stroke:#5c6670; stroke-width:1; fill:none; }
+    .band  { fill:none; stroke:#006b40; stroke-width:1.75; }
+    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .ann2  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .arrg  { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .lbls  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .lblbg { fill:#ffffff; opacity:0.9; }
+    .brk   { stroke:#5c6670; stroke-width:1; fill:none; }
+  </style>
+  <defs>
+    <pattern id="ht" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0,6 L6,0" stroke="#d8ddda" stroke-width="1"/></pattern>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <!-- ==================================================================
+    COORDINATE ARITHMETIC
+    ZONE A — attention matrix: 12×12 cells of 16px, square x=120..312,
+      y=88..280. Chunk boundaries after cols/rows 4 and 8:
+      x=184,248; y=152,216. Col labels C1/C2/C3 centered at x=152,216,280
+      (y=82); row labels right-anchored at x=112, centers y=124,188,252.
+      Causal staircase (cell r,c allowed iff c≤r): step path below.
+      C2 band outline: 120,152 192×64. Annotation left-anchored x=340,
+      green y=168/182, grey y=204/218; arrow 336,175 → 316,180.
+      Under-matrix axis note y=298 centered on matrix (x=216).
+    ZONE B — schedule rows: budget = 8 tokens × 28px = 224 → x=120..344.
+      Bracket label y=356, bracket y=362 (ticks 358..366).
+      Rows y=368,406,444 (h=28, gap 10); centers 382,420,458.
+      Decode cells x=120,152,184,216 (w=28, gap 4, ends 244);
+      chunk block x=248..344 (w=96). Row labels right-anchored x=112.
+      Right annotations x=360, green y=378/392, grey y=452/466.
+      Cell key y=488 (x=120); footer y=506 centered 340. Canvas 680×516.
+  =================================================================== -->
+
+  <rect class="bg" x="1" y="1" width="678" height="514" rx="2"/>
+  <text class="ey" x="34" y="30">CHUNKED PREFILL — LEGAL BY THE MASK, STALL-FREE BY THE BUDGET</text>
+
+  <!-- ZONE A -->
+  <text class="zone" x="34" y="62">WHY SPLITTING IS LEGAL — THE CAUSAL MASK</text>
+
+  <!-- chunk column labels -->
+  <text class="chk" x="152" y="82" text-anchor="middle">C1</text>
+  <text class="chk" x="216" y="82" text-anchor="middle">C2</text>
+  <text class="chk" x="280" y="82" text-anchor="middle">C3</text>
+  <!-- chunk row labels -->
+  <text class="chk" x="112" y="128" text-anchor="end">C1</text>
+  <text class="chk" x="112" y="192" text-anchor="end">C2</text>
+  <text class="chk" x="112" y="256" text-anchor="end">C3</text>
+
+  <!-- masked base square (hatch), then the causal staircase on top -->
+  <rect class="msk" x="120" y="88" width="192" height="192"/>
+  <path d="M120,88 H136 V104 H152 V120 H168 V136 H184 V152 H200 V168 H216 V184 H232 V200 H248 V216 H264 V232 H280 V248 H296 V264 H312 V280 H120 Z"
+        fill="#dff6ee" stroke="#006b40" stroke-width="1"/>
+
+  <!-- masked-region label (upper-right corner of the matrix) -->
+  <rect class="lblbg" x="248" y="104" width="60" height="26"/>
+  <text class="sub" x="278" y="114" text-anchor="middle">masked —</text>
+  <text class="sub" x="278" y="125" text-anchor="middle">never read</text>
+
+  <!-- chunk boundary lines -->
+  <line class="grd" x1="184" y1="88" x2="184" y2="280"/>
+  <line class="grd" x1="248" y1="88" x2="248" y2="280"/>
+  <line class="grd" x1="120" y1="152" x2="312" y2="152"/>
+  <line class="grd" x1="120" y1="216" x2="312" y2="216"/>
+  <rect x="120" y="88" width="192" height="192" fill="none" stroke="#5c6670" stroke-width="1"/>
+
+  <!-- C2 row band highlight + annotation -->
+  <rect class="band" x="120" y="152" width="192" height="64"/>
+  <path class="arrg" d="M336,175 L318,180" marker-end="url(#ag)"/>
+  <text class="anng" x="340" y="168">C2's queries read C1 (already cached)</text>
+  <text class="anng" x="340" y="182">+ C2 — nothing from C3</text>
+  <text class="ann2" x="340" y="204">same math as one full pass: each token's</text>
+  <text class="ann2" x="340" y="218">KV is computed once — later chunks read</text>
+  <text class="ann2" x="340" y="232">it from the cache</text>
+
+  <!-- axis note -->
+  <text class="sub" x="216" y="298" text-anchor="middle">rows = queries · columns = keys/values a query may read</text>
+
+  <!-- ZONE B -->
+  <text class="zone" x="34" y="338">THE STALL-FREE SCHEDULE — DECODES FIRST, THE NEXT CHUNK FILLS THE BUDGET</text>
+
+  <!-- token-budget bracket -->
+  <text class="lbls" x="232" y="356" text-anchor="middle">token budget — 8 tokens / iteration, fixed</text>
+  <path class="brk" d="M120,366 L120,362 L344,362 L344,366"/>
+
+  <!-- iteration rows -->
+  <text class="chk" x="112" y="386" text-anchor="end">iter k</text>
+  <rect class="blk" x="120" y="368" width="28" height="28"/>
+  <rect class="blk" x="152" y="368" width="28" height="28"/>
+  <rect class="blk" x="184" y="368" width="28" height="28"/>
+  <rect class="blk" x="216" y="368" width="28" height="28"/>
+  <text class="idx" x="134" y="386" text-anchor="middle">D</text>
+  <text class="idx" x="166" y="386" text-anchor="middle">D</text>
+  <text class="idx" x="198" y="386" text-anchor="middle">D</text>
+  <text class="idx" x="230" y="386" text-anchor="middle">D</text>
+  <rect class="pre" x="248" y="368" width="96" height="28"/>
+  <text class="ptx" x="296" y="386" text-anchor="middle">prefill C1</text>
+
+  <text class="chk" x="112" y="424" text-anchor="end">k+1</text>
+  <rect class="blk" x="120" y="406" width="28" height="28"/>
+  <rect class="blk" x="152" y="406" width="28" height="28"/>
+  <rect class="blk" x="184" y="406" width="28" height="28"/>
+  <rect class="blk" x="216" y="406" width="28" height="28"/>
+  <text class="idx" x="134" y="424" text-anchor="middle">D</text>
+  <text class="idx" x="166" y="424" text-anchor="middle">D</text>
+  <text class="idx" x="198" y="424" text-anchor="middle">D</text>
+  <text class="idx" x="230" y="424" text-anchor="middle">D</text>
+  <rect class="pre" x="248" y="406" width="96" height="28"/>
+  <text class="ptx" x="296" y="424" text-anchor="middle">prefill C2</text>
+
+  <text class="chk" x="112" y="462" text-anchor="end">k+2</text>
+  <rect class="blk" x="120" y="444" width="28" height="28"/>
+  <rect class="blk" x="152" y="444" width="28" height="28"/>
+  <rect class="blk" x="184" y="444" width="28" height="28"/>
+  <rect class="blk" x="216" y="444" width="28" height="28"/>
+  <text class="idx" x="134" y="462" text-anchor="middle">D</text>
+  <text class="idx" x="166" y="462" text-anchor="middle">D</text>
+  <text class="idx" x="198" y="462" text-anchor="middle">D</text>
+  <text class="idx" x="230" y="462" text-anchor="middle">D</text>
+  <rect class="pre" x="248" y="444" width="96" height="28"/>
+  <text class="ptx" x="296" y="462" text-anchor="middle">prefill C3</text>
+
+  <!-- right annotations -->
+  <text class="anng" x="360" y="378">all pending decodes go first; the</text>
+  <text class="anng" x="360" y="392">leftover budget carries the next chunk</text>
+  <text class="ann2" x="360" y="452">no decode waits on the prompt — TBT</text>
+  <text class="ann2" x="360" y="466">stays flat; the prefill finishes over 3 iters</text>
+
+  <!-- cell key -->
+  <text class="sub" x="120" y="490">D = one decode token (a running request) · green = the new request's prefill chunk</text>
+
+  <!-- footer -->
+  <text class="note" x="340" y="506" text-anchor="middle">Sarathi-Serve (OSDI '24): chunked prefills + stall-free schedules; chunked prefill is on by default in vLLM V1</text>
+</svg>
