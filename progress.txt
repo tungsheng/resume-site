@@ -2,6 +2,56 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+BLOG POST: SCHEDULING — CONTINUOUS BATCHING + PAGED ATTENTION (2026-07-07)
+branch feat/scheduling-batching
+#############################################################################
+Next series post started (Tony's ask; backlog item 3, second-pass scheduling
+depth). Working title "Scheduling: How Continuous Batching and Paged Attention
+Fill a GPU" — Tony retitles. File content/blog/
+scheduling-continuous-batching-paged-attention.md, status: Drafting,
+published: 2026-07-07, ~2,800 words prose, 6 H2s, 1 KaTeX expr, one [!NOTE]
+(selective batching), 4 figures (series idiom, qlmanage-verified):
+static-vs-continuous.svg / kv-fragmentation.svg / block-table.svg /
+chunked-prefill.svg in
+public-astro/assets/blog/scheduling-continuous-batching-paged-attention/.
+REVIEW PASS (2026-07-13, Tony): intro mechanism/policy line tightened
+("Everything else the scheduler does is policy", commit 9baf3b3); Fig 3
+reworked for prefix-cache clarity (visible token snippets, "B arrives
+later" + prefix-cache-hit annotation, same-tokens=>same-KV=>same-blocks
+chain); chunked-prefill section gained the WHY (causal mask makes
+splitting legal — chunk queries read only cached earlier chunks + selves)
++ new Figure 4 chunked-prefill.svg (causal-mask matrix w/ chunk bands +
+stall-free token-budget schedule rows).
+3-AGENT REVIEW PASS (2026-07-13, accuracy/voice/figures; accuracy agent
+re-verified all claims against primary sources — the 07-07 research notes
+were wiped w/ the old session scratchpad): 19 fixes incl. 1 real error
+(waste taxonomy "may never generate" -> "not yet generated"), summary
+de-attribution + policy-line alignment, 66.3% scoped to beam search,
+SGLang token-granularity distinction, Sarathi-2023 credit, lead-with-result
+reorder of section 1, generation-stalls front-loaded, Fig 3 moved below
+the sharing paragraph, acronym expansions (MLP/TGI/EP). Skipped: "ceiling"
+H2 (Tony's own stub uses it), cross-post callback phrasing. Re-verified:
+4 figs/1 KaTeX/0 errors, unit 62/62, integration 22/22.
+PUBLISHED 2026-07-13 (commit 37aface; published: bumped to 2026-07-13;
+fixture: post -> PUBLISHED[0], attention-how-to-shrink-it rotates off the
+home Latest slice). 84/84 green on prod build; dist preview verified
+(post + figures + home slot 01 + sitemap/RSS). Branch pushed, PR #52
+open to main.
+Arc: Orca 36.9x + vLLM 20.4-38.2%->96.3% lead -> iteration-level scheduling
+(selective batching NOTE, continuous-batching name drift) -> KV-memory ceiling
+(OPT-13B 800 KB/token, 3 waste kinds) -> PagedAttention (block table, 2-4x,
+20-26% kernel cost, CoW sharing -> prefix caching/RadixAttention, preemption
+recompute-default) -> chunked prefill (Sarathi-Serve generation stalls /
+stall-free schedules; vLLM V1 token-budget scheduler) -> frontier (vAttention,
+Jenga, FlashInfer, DistServe/Mooncake/Dynamo disaggregation) -> close.
+Research: 2 web agents 2026-07-07, notes w/ exact quotes + do-not-cite lists
+in session scratchpad (research-scheduling-batching.md,
+research-paged-attention.md). All single-lab numbers hedged author-reported.
+Draft added to the integration DRAFTS fixture (prod-build exclusion asserted).
+VERIFIED: dev render 200 (post + 3 figs), 1 KaTeX/0 errors, 3 <figure>, unit
+62/62, integration 22/22 (full prod build). Flip status on Tony's word.
+
+#############################################################################
 RESUME HONEST REPOSITIONING (2026-06-25) — branch feat/resume-honest-repositioning
 #############################################################################
 WHY: the resume asserted an IDENTITY ("ML Inference Performance Engineer") two

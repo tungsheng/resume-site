@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 452" role="img"
+     aria-label="Where the KV memory goes: two stacked zones compare KV-cache allocation schemes, with facts from the vLLM paper (Kwon et al., SOSP 2023). Top zone, contiguous pre-allocation — one chunk per request, sized to the maximum length of 2,048 tokens. Two full-width request bars: Request A is only about 35 percent actual tokens, Request B about 20 percent; the rest of each bar is a light-grey reservation for future tokens plus a hatched internal-fragmentation region where the reply ended early. A narrow dotted strip between the bars marks external fragmentation, the allocator gaps between chunks. Stat: only 20.4 to 38.2 percent of KV memory holds actual tokens, from the vLLM paper profiling its Orca re-implementations. Bottom zone, paged allocation — fixed 16-token blocks allocated on demand. One request of 125 tokens occupies 8 blocks; the first seven are completely filled and the eighth is mostly filled with a small unfilled tail sliver, annotated as waste at most the last block's tail, 15 tokens or fewer. Physical block IDs beneath the blocks are shuffled, showing blocks are non-contiguous by design. Stat: 96.3 percent of KV memory holds actual tokens. Notes: no reservation — a new block is allocated only when the previous one is full, and uniform block size means no external fragmentation. Footer: freed memory becomes batch slots, giving 2 to 4 times the throughput at the same latency (author-reported).">
+  <title>Where the KV memory goes — contiguous pre-allocation vs paged blocks (vLLM)</title>
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .stg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
+    .sub   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .req   { font:600 9.5px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:0.8px; fill:#14171a; }
+    .lbl   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .ids   { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#aab2ae; }
+    .actual{ fill:#e8f3ee; stroke:#006b40; stroke-width:1.2; }
+    .resv  { fill:#f4f6f5; stroke:#aab2ae; stroke-width:1; }
+    .frag  { fill:url(#hatch); stroke:#aab2ae; stroke-width:1; }
+    .ext   { fill:url(#dots); stroke:#aab2ae; stroke-width:1; }
+    .stat  { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .callo { stroke:#006b40; stroke-width:1.1; fill:none; stroke-dasharray:3 3; }
+    .hr    { stroke:#d7dbd8; stroke-width:1; }
+    .vs    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#aab2ae; }
+    .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+  </style>
+  <defs>
+    <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="6" height="6" fill="#fbfbfa"/>
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#aab2ae" stroke-width="1.2"/>
+    </pattern>
+    <pattern id="dots" width="7" height="7" patternUnits="userSpaceOnUse">
+      <rect width="7" height="7" fill="#fbfbfa"/>
+      <circle cx="3.5" cy="3.5" r="1.1" fill="#aab2ae"/>
+    </pattern>
+    <marker id="cg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+  </defs>
+
+  <!-- COORDINATE ARITHMETIC
+       Both zones share the left edge x=40; the pre-allocation bars span x=40..640 (width 600).
+       Bar A segments (35% / 20% / 45%): 0.35*600=210 -> split at 250; 0.20*600=120 -> 370; 0.45*600=270 -> 640.
+       Bar B segments (20% / 15% / 65%): 0.20*600=120 -> 160; 0.15*600=90 -> 250; 0.65*600=390 -> 640.
+       External-fragmentation strip sits in the 8px gap band between bars: y=118..127.
+       Paged row: 8 blocks, w=54, gap=12 -> 8*54 + 7*12 = 516, so x=40..556; block i left edge = 40 + 66*i.
+       125 tokens = 7 full blocks (112) + 13 in block 8: filled width = 54 * 13/16 ≈ 44px (x=502..546); tail sliver 546..556. -->
+
+  <rect class="bg" x="1" y="1" width="678" height="450" rx="2"/>
+  <text class="ey" x="34" y="30">WHERE THE KV MEMORY GOES</text>
+
+  <!-- ===== TOP ZONE: contiguous pre-allocation ===== -->
+  <text class="stg" x="34" y="58">CONTIGUOUS PRE-ALLOCATION</text>
+  <text class="sub" x="240" y="58">one chunk per request, sized to the maximum length (2,048 tokens)</text>
+
+  <text class="req" x="40" y="80">REQUEST A</text>
+  <text class="lbl" x="640" y="80" text-anchor="end">full-width reservation: 2,048 tokens</text>
+  <rect class="frag"   x="370" y="86" width="270" height="24"/>
+  <rect class="resv"   x="250" y="86" width="120" height="24"/>
+  <rect class="actual" x="40"  y="86" width="210" height="24"/>
+
+  <!-- external fragmentation strip in the gap between the two chunks -->
+  <rect class="ext" x="40" y="118" width="280" height="9"/>
+  <text class="lbl" x="330" y="126">external fragmentation — allocator gaps between chunks</text>
+
+  <text class="req" x="40" y="143">REQUEST B</text>
+  <rect class="frag"   x="250" y="149" width="390" height="24"/>
+  <rect class="resv"   x="160" y="149" width="90"  height="24"/>
+  <rect class="actual" x="40"  y="149" width="120" height="24"/>
+
+  <!-- legend -->
+  <rect class="actual" x="40" y="190" width="14" height="10"/>
+  <text class="lbl" x="60" y="199">actual tokens</text>
+  <rect class="resv" x="150" y="190" width="14" height="10"/>
+  <text class="lbl" x="170" y="199">reserved (future tokens)</text>
+  <rect class="frag" x="326" y="190" width="14" height="10"/>
+  <text class="lbl" x="346" y="199">internal fragmentation (reply ended early)</text>
+
+  <text class="stat" x="40" y="224">20.4%–38.2% of KV memory holds actual tokens</text>
+  <text class="lbl" x="40" y="239">(vLLM paper, profiling its Orca re-implementations)</text>
+
+  <!-- ===== DIVIDER ===== -->
+  <line class="hr" x1="34" y1="256" x2="326" y2="256"/>
+  <text class="vs" x="340" y="259.5" text-anchor="middle">vs</text>
+  <line class="hr" x1="356" y1="256" x2="646" y2="256"/>
+
+  <!-- ===== BOTTOM ZONE: paged allocation ===== -->
+  <text class="stg" x="34" y="284">PAGED ALLOCATION</text>
+  <text class="sub" x="176" y="284">fixed 16-token blocks, allocated on demand</text>
+
+  <text class="req" x="40" y="306">ONE REQUEST — 125 TOKENS → 8 BLOCKS</text>
+  <text class="anng" x="640" y="306" text-anchor="end">waste ≤ the last block's tail (≤ 15 tokens)</text>
+  <path class="callo" d="M551,309 L551,314" marker-end="url(#cg)"/>
+
+  <!-- blocks: left edge = 40 + 66*i, w=54, h=38, y=316..354 -->
+  <rect class="actual" x="40"  y="316" width="54" height="38"/>
+  <rect class="actual" x="106" y="316" width="54" height="38"/>
+  <rect class="actual" x="172" y="316" width="54" height="38"/>
+  <rect class="actual" x="238" y="316" width="54" height="38"/>
+  <rect class="actual" x="304" y="316" width="54" height="38"/>
+  <rect class="actual" x="370" y="316" width="54" height="38"/>
+  <rect class="actual" x="436" y="316" width="54" height="38"/>
+  <!-- 8th block: 13/16 filled, tail sliver hatched like the waste fills above -->
+  <rect fill="url(#hatch)" x="502" y="316" width="54" height="38"/>
+  <rect x="502" y="316" width="44" height="38" fill="#e8f3ee"/>
+  <rect fill="none" stroke="#006b40" stroke-width="1.2" x="502" y="316" width="54" height="38"/>
+  <line x1="546" y1="316" x2="546" y2="354" stroke="#006b40" stroke-width="1" stroke-dasharray="2 2"/>
+
+  <!-- shuffled physical block IDs: non-contiguous by design -->
+  <text class="ids" x="67"  y="368" text-anchor="middle">7</text>
+  <text class="ids" x="133" y="368" text-anchor="middle">2</text>
+  <text class="ids" x="199" y="368" text-anchor="middle">9</text>
+  <text class="ids" x="265" y="368" text-anchor="middle">4</text>
+  <text class="ids" x="331" y="368" text-anchor="middle">13</text>
+  <text class="ids" x="397" y="368" text-anchor="middle">1</text>
+  <text class="ids" x="463" y="368" text-anchor="middle">11</text>
+  <text class="ids" x="529" y="368" text-anchor="middle">6</text>
+  <text class="ids" x="564" y="368">← physical block IDs</text>
+
+  <text class="stat" x="40" y="392">96.3% of KV memory holds actual tokens</text>
+  <text class="lbl" x="40" y="408">no reservation — a new block is allocated only when the previous one is full;</text>
+  <text class="lbl" x="40" y="422">uniform block size ⇒ no external fragmentation</text>
+
+  <!-- footnote -->
+  <text class="note" x="340" y="442" text-anchor="middle">freed memory becomes batch slots: 2–4× throughput at the same latency (author-reported)</text>
+</svg>

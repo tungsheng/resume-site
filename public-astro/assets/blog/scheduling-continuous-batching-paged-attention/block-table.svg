@@ -1,0 +1,219 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 480" role="img"
+     aria-label="The block table in vLLM's PagedAttention, drawn as three columns mapped left to right, with visible token text making the shared prefix concrete. Left column, logical blocks per request, 16 tokens each: request A has logical blocks 0 to 3 in a vertical stack, request B — labeled as arriving later — has logical blocks 0 to 2. Each block shows a snippet of its tokens: both requests' blocks 0 and 1 hold the identical text, You are a helpful assistant. Answer, and are tinted green as the shared prompt prefix; A's blocks 2 and 3 continue with its own request, Translate The cat sat to French, and B's block 2 with a different one, Summarize this doc. Middle column, block tables: each request owns a tiny two-column table mapping logical to physical block indices — A maps 0 to 7, 1 to 1, 2 to 4, 3 to 9; B maps 0 to 7, 1 to 1, 2 to 5. The first two rows of both tables are highlighted green: A and B point at the same physical indices, 7 and 1. Right column, the physical block pool in GPU memory: a four-by-three grid of blocks indexed 0 to 11. Blocks 7 and 1 are tinted green as shared, each carrying a ref = 2 chip; blocks 4 and 9 belong to A alone, block 5 to B alone; the remaining seven blocks are faint and labeled free. Three representative arrows show the mapping: A's table row 0 and B's table row 0 converge in green on physical block 7, and A's table row 2 maps in grey to physical block 4. A green annotation under the pool reads: same tokens, same KV, same physical blocks — 7 and 1, ref-counted. A second green annotation under B's table explains the prefix-cache hit: B's first 32 tokens match A's, their KV is already in the pool, so B's table points at blocks 7 and 1 and their prefill is skipped. A grey annotation notes that B diverges at block 2 and gets its own block 5, and that a write to a shared block copies it first — copy-on-write. A legend distinguishes shared-prefix, private, and free blocks. The footer quotes the paper's mapping: blocks as pages, tokens as bytes, requests as processes — allocation on demand, waste confined to each sequence's last block.">
+  <title>The block table — virtual memory for the KV cache (vLLM, Kwon et al. SOSP 2023)</title>
+  <style>
+    .bg    { fill:#ffffff; stroke:#e6e6e6; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
+    .col   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
+    .sub   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .req   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .blk   { fill:#f4f6f5; stroke:#14171a; }
+    .pre   { fill:#dff6ee; stroke:#006b40; stroke-width:1.25; }
+    .fre   { fill:#fbfbfa; stroke:#c6cdc9; stroke-width:1; stroke-dasharray:4 3; }
+    .idx   { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .idxf  { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#98a29c; }
+    .fret  { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#aab2ae; }
+    .own   { font:600 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .tok   { font:400 8px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .tokg  { font:400 8px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .rfc   { fill:#ffffff; stroke:#006b40; stroke-width:0.9; }
+    .rft   { font:600 8px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .hl    { fill:#dff6ee; }
+    .tfr   { fill:none; stroke:#14171a; }
+    .tin   { stroke:#c6cdc9; stroke-width:1; }
+    .hdr   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .logv  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .phv   { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .phg   { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .thin  { stroke:#aab2ae; stroke-width:1.1; fill:none; }
+    .arrg  { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .arrs  { stroke:#5c6670; stroke-width:1.4; fill:none; }
+    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .anngb { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .ann2  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .lbls  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+  </style>
+  <defs>
+    <marker id="ag"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="af"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5c6670"/></marker>
+    <marker id="agr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#aab2ae"/></marker>
+  </defs>
+
+  <!-- ==================================================================
+    COORDINATE ARITHMETIC
+    Row grid shared by left stacks and middle tables (row h = 26):
+      request A rows: y = 100,126,152,178  → centers 113,139,165,191; text baseline = center+4
+      request B rows: y = 252,278,304      → centers 265,291,317
+    Left stacks: x=44, w=124 (right edge 168); index at x=58 (centered),
+      token snippet 8px left-anchored at x=70 (max ~19 ch ≈ 91px, ends ≤161).
+    Stack→table thin arrows: x 172→226 at each row center.
+    Middle tables: x=230, two 52px cells → logical col center x=256,
+      physical col center x=308, divider x=282, right edge 334.
+      A frame 230,100,104x104; B frame 230,252,104x78.
+    Physical pool: 4 cols × 3 rows, block 42x40, x = 464,514,564,614
+      (h-gap 8, right edge 656), rows y = 100,152,204 (v-gap 12).
+      Block centers cx = x+21 → 485,535,585,635; row centers 120,172,224.
+      Row-major indices: row0 0–3, row1 4–7, row2 8–11.
+      Horizontal routing channels between rows: y=140..152 (mid 146)
+      and y=192..204 (mid 198) — table→pool arrows run inside them.
+    Arrows: A row0 (y113) → block 7 top:  334,113 → 420,113 → 420,146 → 635,146 → 635,151
+            B row0 (y265) → block 7 bottom: 334,265 → 430,265 → 430,198 → 635,198 → 635,193
+            A row2 (y165) → block 4 left edge (464,172): straight 334,165 → 462,171
+    Annotations: green pool note x=560, y=262/276; green prefix-cache-hit
+      note centered x=340, y=352/366; grey CoW note centered x=340, y=388/402.
+    Legend: rects y=414, text y=423. Footer y=446/460. Canvas 680x480.
+  =================================================================== -->
+
+  <rect class="bg" x="1" y="1" width="678" height="478" rx="2"/>
+  <text class="ey" x="34" y="30">THE BLOCK TABLE — VIRTUAL MEMORY FOR THE KV CACHE</text>
+
+  <!-- column labels -->
+  <text class="col" x="106" y="62" text-anchor="middle">LOGICAL BLOCKS</text>
+  <text class="sub" x="106" y="76" text-anchor="middle">(per request · 16 tokens each)</text>
+  <text class="col" x="282" y="62" text-anchor="middle">BLOCK TABLES</text>
+  <text class="sub" x="282" y="76" text-anchor="middle">(logical → physical)</text>
+  <text class="col" x="560" y="62" text-anchor="middle">PHYSICAL BLOCK POOL</text>
+  <text class="sub" x="560" y="76" text-anchor="middle">(GPU memory)</text>
+
+  <!-- LEFT: request A logical blocks 0..3, prefix rows 0-1 tinted, token snippets -->
+  <text class="req" x="44" y="93">Request A</text>
+  <rect class="pre" x="44" y="100" width="124" height="26"/>
+  <rect class="pre" x="44" y="126" width="124" height="26"/>
+  <rect class="blk" x="44" y="152" width="124" height="26"/>
+  <rect class="blk" x="44" y="178" width="124" height="26"/>
+  <text class="idx" x="58" y="117" text-anchor="middle">0</text>
+  <text class="tokg" x="70" y="117">You are a helpful</text>
+  <text class="idx" x="58" y="143" text-anchor="middle">1</text>
+  <text class="tokg" x="70" y="143">assistant. Answer…</text>
+  <text class="idx" x="58" y="169" text-anchor="middle">2</text>
+  <text class="tok" x="70" y="169">Translate "The cat</text>
+  <text class="idx" x="58" y="195" text-anchor="middle">3</text>
+  <text class="tok" x="70" y="195">sat" to French…</text>
+
+  <!-- LEFT: request B logical blocks 0..2 — same first 32 tokens as A -->
+  <text class="req" x="44" y="245">Request B — arrives later</text>
+  <rect class="pre" x="44" y="252" width="124" height="26"/>
+  <rect class="pre" x="44" y="278" width="124" height="26"/>
+  <rect class="blk" x="44" y="304" width="124" height="26"/>
+  <text class="idx" x="58" y="269" text-anchor="middle">0</text>
+  <text class="tokg" x="70" y="269">You are a helpful</text>
+  <text class="idx" x="58" y="295" text-anchor="middle">1</text>
+  <text class="tokg" x="70" y="295">assistant. Answer…</text>
+  <text class="idx" x="58" y="321" text-anchor="middle">2</text>
+  <text class="tok" x="70" y="321">Summarize this doc…</text>
+
+  <!-- stack → table lookups, one thin arrow per row (rows are co-aligned) -->
+  <path class="thin" d="M172,113 L226,113" marker-end="url(#agr)"/>
+  <path class="thin" d="M172,139 L226,139" marker-end="url(#agr)"/>
+  <path class="thin" d="M172,165 L226,165" marker-end="url(#agr)"/>
+  <path class="thin" d="M172,191 L226,191" marker-end="url(#agr)"/>
+  <path class="thin" d="M172,265 L226,265" marker-end="url(#agr)"/>
+  <path class="thin" d="M172,291 L226,291" marker-end="url(#agr)"/>
+  <path class="thin" d="M172,317 L226,317" marker-end="url(#agr)"/>
+
+  <!-- MIDDLE: block table for A (0→7, 1→1, 2→4, 3→9) -->
+  <text class="hdr" x="256" y="93" text-anchor="middle">logical</text>
+  <text class="hdr" x="308" y="93" text-anchor="middle">physical</text>
+  <rect class="hl" x="230" y="100" width="104" height="52"/>
+  <rect class="tfr" x="230" y="100" width="104" height="104"/>
+  <line class="tin" x1="282" y1="100" x2="282" y2="204"/>
+  <line class="tin" x1="230" y1="126" x2="334" y2="126"/>
+  <line class="tin" x1="230" y1="152" x2="334" y2="152"/>
+  <line class="tin" x1="230" y1="178" x2="334" y2="178"/>
+  <text class="logv" x="256" y="117" text-anchor="middle">0</text>
+  <text class="phg"  x="308" y="117" text-anchor="middle">7</text>
+  <text class="logv" x="256" y="143" text-anchor="middle">1</text>
+  <text class="phg"  x="308" y="143" text-anchor="middle">1</text>
+  <text class="logv" x="256" y="169" text-anchor="middle">2</text>
+  <text class="phv"  x="308" y="169" text-anchor="middle">4</text>
+  <text class="logv" x="256" y="195" text-anchor="middle">3</text>
+  <text class="phv"  x="308" y="195" text-anchor="middle">9</text>
+
+  <!-- MIDDLE: block table for B (0→7, 1→1, 2→5) -->
+  <text class="hdr" x="256" y="245" text-anchor="middle">logical</text>
+  <text class="hdr" x="308" y="245" text-anchor="middle">physical</text>
+  <rect class="hl" x="230" y="252" width="104" height="52"/>
+  <rect class="tfr" x="230" y="252" width="104" height="78"/>
+  <line class="tin" x1="282" y1="252" x2="282" y2="330"/>
+  <line class="tin" x1="230" y1="278" x2="334" y2="278"/>
+  <line class="tin" x1="230" y1="304" x2="334" y2="304"/>
+  <text class="logv" x="256" y="269" text-anchor="middle">0</text>
+  <text class="phg"  x="308" y="269" text-anchor="middle">7</text>
+  <text class="logv" x="256" y="295" text-anchor="middle">1</text>
+  <text class="phg"  x="308" y="295" text-anchor="middle">1</text>
+  <text class="logv" x="256" y="321" text-anchor="middle">2</text>
+  <text class="phv"  x="308" y="321" text-anchor="middle">5</text>
+
+  <!-- table → pool: representative arrows only, routed through row channels -->
+  <path class="arrg" d="M334,113 L420,113 L420,146 L635,146 L635,151" marker-end="url(#ag)"/>
+  <path class="arrg" d="M334,265 L430,265 L430,198 L635,198 L635,193" marker-end="url(#ag)"/>
+  <path class="arrs" d="M334,165 L462,171" marker-end="url(#af)"/>
+
+  <!-- RIGHT: physical block pool, 4×3 grid, indices 0..11 row-major -->
+  <!-- row 0: 0 free · 1 shared · 2 free · 3 free -->
+  <rect class="fre" x="464" y="100" width="42" height="40" rx="2"/>
+  <text class="idxf" x="485" y="116" text-anchor="middle">0</text>
+  <text class="fret" x="485" y="131" text-anchor="middle">free</text>
+  <rect class="pre" x="514" y="100" width="42" height="40" rx="2"/>
+  <text class="idx" x="535" y="115" text-anchor="middle">1</text>
+  <rect class="rfc" x="516" y="121" width="38" height="13" rx="2"/>
+  <text class="rft" x="535" y="130.5" text-anchor="middle">ref = 2</text>
+  <rect class="fre" x="564" y="100" width="42" height="40" rx="2"/>
+  <text class="idxf" x="585" y="116" text-anchor="middle">2</text>
+  <text class="fret" x="585" y="131" text-anchor="middle">free</text>
+  <rect class="fre" x="614" y="100" width="42" height="40" rx="2"/>
+  <text class="idxf" x="635" y="116" text-anchor="middle">3</text>
+  <text class="fret" x="635" y="131" text-anchor="middle">free</text>
+  <!-- row 1: 4 A-only · 5 B-only · 6 free · 7 shared -->
+  <rect class="blk" x="464" y="152" width="42" height="40" rx="2"/>
+  <text class="idx" x="485" y="167" text-anchor="middle">4</text>
+  <text class="own" x="485" y="183" text-anchor="middle">A</text>
+  <rect class="blk" x="514" y="152" width="42" height="40" rx="2"/>
+  <text class="idx" x="535" y="167" text-anchor="middle">5</text>
+  <text class="own" x="535" y="183" text-anchor="middle">B</text>
+  <rect class="fre" x="564" y="152" width="42" height="40" rx="2"/>
+  <text class="idxf" x="585" y="168" text-anchor="middle">6</text>
+  <text class="fret" x="585" y="183" text-anchor="middle">free</text>
+  <rect class="pre" x="614" y="152" width="42" height="40" rx="2"/>
+  <text class="idx" x="635" y="167" text-anchor="middle">7</text>
+  <rect class="rfc" x="616" y="173" width="38" height="13" rx="2"/>
+  <text class="rft" x="635" y="182.5" text-anchor="middle">ref = 2</text>
+  <!-- row 2: 8 free · 9 A-only · 10 free · 11 free -->
+  <rect class="fre" x="464" y="204" width="42" height="40" rx="2"/>
+  <text class="idxf" x="485" y="220" text-anchor="middle">8</text>
+  <text class="fret" x="485" y="235" text-anchor="middle">free</text>
+  <rect class="blk" x="514" y="204" width="42" height="40" rx="2"/>
+  <text class="idx" x="535" y="219" text-anchor="middle">9</text>
+  <text class="own" x="535" y="235" text-anchor="middle">A</text>
+  <rect class="fre" x="564" y="204" width="42" height="40" rx="2"/>
+  <text class="idxf" x="585" y="220" text-anchor="middle">10</text>
+  <text class="fret" x="585" y="235" text-anchor="middle">free</text>
+  <rect class="fre" x="614" y="204" width="42" height="40" rx="2"/>
+  <text class="idxf" x="635" y="220" text-anchor="middle">11</text>
+  <text class="fret" x="635" y="235" text-anchor="middle">free</text>
+
+  <!-- annotation: sharing (under the pool) -->
+  <text class="anng" x="560" y="264" text-anchor="middle">same tokens ⇒ same KV ⇒ same</text>
+  <text class="anng" x="560" y="278" text-anchor="middle">physical blocks (7, 1) — ref-counted</text>
+
+  <!-- annotation: the prefix-cache hit (the event, not just the state) -->
+  <text class="anng" x="340" y="352" text-anchor="middle">B's first 32 tokens match A's — their KV is already in the pool,</text>
+  <text class="anngb" x="340" y="366" text-anchor="middle">so B reuses blocks 7 and 1 and their prefill is skipped: a prefix-cache hit</text>
+
+  <!-- annotation: divergence / copy-on-write -->
+  <text class="ann2" x="340" y="388" text-anchor="middle">B diverges at block 2 → its own block 5</text>
+  <text class="ann2" x="340" y="402" text-anchor="middle">(a write to a shared block copies it first — copy-on-write)</text>
+
+  <!-- legend -->
+  <rect class="pre" x="165" y="414" width="11" height="11"/>
+  <text class="lbls" x="182" y="423">shared prefix</text>
+  <rect class="blk" x="295" y="414" width="11" height="11"/>
+  <text class="lbls" x="312" y="423">private to one request</text>
+  <rect class="fre" x="476" y="414" width="11" height="11"/>
+  <text class="lbls" x="493" y="423">free</text>
+
+  <!-- footer -->
+  <text class="note" x="340" y="446" text-anchor="middle">"blocks as pages, tokens as bytes, requests as processes" — Kwon et al., SOSP 2023</text>
+  <text class="note" x="340" y="460" text-anchor="middle">allocation on demand; waste confined to each sequence's last block</text>
+</svg>
