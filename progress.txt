@@ -2,6 +2,37 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+STATIC TAG PAGES + TAGS OVERVIEW (#48) (2026-07-14) — branch feat/adr-0007-0008
+#############################################################################
+ADR-0008 decision 2 implemented — the no-JS canonical tag surface:
+  * astro/pages/blog/tags/[tag].astro — one static page per registered tag
+    with >=1 visible Post (getStaticPaths over selectTagCounts). Visibility
+    = getVisiblePosts (ADR-0003 §8): a tag whose only Posts are drafts gets
+    NO page in prod. Header: eyebrow "Tag" / label h1 / N posts / All-tags
+    backlink.
+  * astro/pages/blog/tags/index.astro — overview, alphabetical (registry
+    order), display label + count per row.
+  * astro/components/PostList.astro — hairline post-list EXTRACTED from
+    blog/index.astro (verbatim markup) and shared by /blog + tag pages so
+    they can't drift. Chips now LINK to /blog/tags/<slug> and render the
+    registry DISPLAY LABEL (was: inert slug spans).
+  * blog/[slug].astro — post detail gains a linked tag-chip row after the
+    body (detail page had NO tag chips before — issue #48 assumed it did).
+  * tag-registry.ts helpers (pure, unit-tested): tagPath, selectPostsWithTag,
+    selectTagCounts (zero-count tags dropped — a topic earns its page with
+    its first Post; #48's "no min-count gate" means no gate BEYOND existence).
+  * Tests: +4 unit (selection/counts/order/path), +4 integration (overview
+    labels+counts, kv-cache page lists exactly its 4 posts, chips linked on
+    index + detail w/ labels, tag pages in sitemap). Sitemap inclusion is
+    automatic (@astrojs/sitemap walks built pages).
+VERIFIED: unit 71/71; integration 26/26 (full prod build); dev-server pass —
+/blog/tags overview (labels+counts), /blog/tags/kv-cache (h1 "KV cache",
+4 posts, exact set), MLP post chips linked w/ labels, console clean. Pages
+ship zero JS (static anchors only) — ADR-0007 default posture holds.
+NEXT: #49 Pagefind search island (facets ride on this vocabulary), then the
+pending push + PR of this branch (now 7 commits ahead of origin/main).
+
+#############################################################################
 BLOG NAVIGATION GROUNDWORK — ADRs, corpus cleanup, TAG REGISTRY (#47)
 (2026-07-13/14) — branch feat/adr-0007-0008
 #############################################################################
