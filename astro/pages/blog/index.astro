@@ -32,6 +32,27 @@ const LEDE =
   </section>
 
   {
+    /* Search island (#49 / ADR-0008 decision 3, sanctioned by ADR-0007: search
+       is impossible without client JS). The entire UI — input included — is
+       injected by PagefindUI at runtime, so with JS disabled nothing dead
+       renders and the page stays the fully-functional static list + tag pages.
+       PROD-only: the /pagefind/ assets are emitted by `pagefind --site dist`
+       after the build and don't exist under `astro dev` (preview via
+       dist-preview). */
+    import.meta.env.PROD && (
+      <>
+        <div id="search" class="mt-8" aria-label="Search posts"></div>
+        <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+        <script is:inline defer src="/pagefind/pagefind-ui.js"></script>
+        {/* External file, not an Astro-processed script: the deployed CSP
+            (public-astro/_headers) is script-src 'self' with no 'unsafe-inline',
+            and Astro inlines bundled scripts this small back into the page. */}
+        <script is:inline defer src="/js/search-init.js"></script>
+      </>
+    )
+  }
+
+  {
     posts.length === 0 ? (
       <p class="mt-10 text-muted">No posts published yet.</p>
     ) : (
@@ -39,3 +60,17 @@ const LEDE =
     )
   }
 </BaseLayout>
+
+<style is:global>
+  /* Theme Pagefind's default UI to the Swiss-minimal tokens (ADR-0005). */
+  #search {
+    --pagefind-ui-primary: var(--color-go-green-dark);
+    --pagefind-ui-text: var(--color-ink);
+    --pagefind-ui-background: transparent;
+    --pagefind-ui-border: var(--color-surface-border);
+    --pagefind-ui-tag: var(--color-surface-border);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 2px;
+    --pagefind-ui-font: inherit;
+  }
+</style>

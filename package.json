@@ -9,7 +9,7 @@
     "astro": "astro",
     "dev": "test -f public-astro/resume.pdf || bun run build:pdf; astro dev",
     "preview": "astro preview",
-    "build": "bun run build:pdf && astro build",
+    "build": "bun run build:pdf && astro build && pagefind --site dist",
     "build:pdf": "bun run scripts/build-resume-pdf.ts",
     "test": "bun run test:unit",
     "test:unit": "bun test tests/unit",
@@ -23,6 +23,7 @@
     "@types/katex": "^0.16.8",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
+    "pagefind": "^1.5.2",
     "typescript": "^5"
   },
   "dependencies": {

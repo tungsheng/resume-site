@@ -54,6 +54,9 @@ describe("blog production build output", () => {
     // would otherwise treat as non-production (import.meta.env.PROD === false),
     // leaving drafts in. NODE_ENV=production makes import.meta.env.PROD true.
     await $`bunx astro build`.env({ ...process.env, NODE_ENV: "production" }).quiet();
+    // #49: the search index is a post-build step (package.json `build` runs
+    // `pagefind --site dist` after `astro build`); mirror it here.
+    await $`bunx pagefind --site dist`.quiet();
     indexHtml = await Bun.file("dist/blog/index.html").text();
   });
 
@@ -200,6 +203,45 @@ describe("blog production build output", () => {
     expect(postHtml).toContain('href="/blog/tags/mlp"');
     expect(postHtml).toContain('href="/blog/tags/swiglu"');
     expect(postHtml).toContain(">SwiGLU</a>");
+  });
+
+  // #49 / ADR-0008 decision 3: Pagefind search, blog-only, built after astro.
+  itIf("emits the Pagefind index and scopes it to Post pages only", async () => {
+    expect(await Bun.file("dist/pagefind/pagefind.js").exists()).toBe(true);
+    expect(await Bun.file("dist/pagefind/pagefind-ui.js").exists()).toBe(true);
+    expect(await Bun.file("dist/pagefind/pagefind-ui.css").exists()).toBe(true);
+    // Blog-only scope: data-pagefind-body appears on Post pages and nowhere
+    // else — when the attribute is present anywhere, Pagefind indexes only
+    // pages that carry it, so this is the whole scoping mechanism.
+    const postHtml = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
+    expect(postHtml).toContain("data-pagefind-body");
+    expect(postHtml).toContain('data-pagefind-filter="category"');
+    expect(postHtml).toContain('data-pagefind-filter="tag"');
+    for (const page of ["dist/index.html", "dist/work/index.html", "dist/blog/index.html"]) {
+      expect(await Bun.file(page).text()).not.toContain("data-pagefind-body");
+    }
+  });
+
+  itIf("mounts the search island on /blog only, injected entirely by JS", async () => {
+    expect(indexHtml).toContain('id="search"');
+    expect(indexHtml).toContain("/pagefind/pagefind-ui.js");
+    // No dead input for no-JS readers: the island div ships empty and the whole
+    // UI is injected at runtime (ADR-0007: static page stays fully functional).
+    expect(indexHtml).not.toContain("<input");
+    // The island is the index page's enhancement — Post pages stay script-free
+    // (the math-page zero-JS test guards this too).
+    const postHtml = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
+    expect(postHtml).not.toContain("pagefind-ui.js");
+  });
+
+  itIf("keeps the island CSP-compliant: external scripts only + wasm allowance", async () => {
+    // The deployed CSP (public-astro/_headers) has no 'unsafe-inline' for
+    // script-src, so every <script> on /blog must carry a src attribute —
+    // an inline initializer would silently die on Cloudflare only.
+    expect(indexHtml).not.toMatch(/<script(?![^>]*\bsrc=)/);
+    // Pagefind's WASM engine needs 'wasm-unsafe-eval' to instantiate.
+    const headers = await Bun.file("dist/_headers").text();
+    expect(headers).toContain("script-src 'self' 'wasm-unsafe-eval'");
   });
 
   itIf("lists tag pages in the sitemap", async () => {
