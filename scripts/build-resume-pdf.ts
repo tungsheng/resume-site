@@ -13,8 +13,7 @@
 // Reuses the existing renderer + puppeteer pipeline unchanged.
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { publicResumeData } from "@resume/data";
-import { renderResumeHtmlDocument } from "@resume/render-static-html";
+import { publicResumeData, renderResumeHtmlDocument } from "@resume";
 import { generatePDF } from "@services/pdf";
 
 export async function buildResumePdf(outDir = "public-astro"): Promise<string> {

@@ -9,10 +9,18 @@ function loadFontDataUrl(filename: string): string {
   return `data:${FONT_MIME_TYPE};base64,${font.toString("base64")}`;
 }
 
-const interRegularDataUrl = loadFontDataUrl("InterVariable.woff2");
-const interItalicDataUrl = loadFontDataUrl("InterVariable-Italic.woff2");
+// Lazy + memoized: importing this module must be side-effect free. The fonts
+// resolve relative to THIS source file, which only works where the module runs
+// un-bundled (the PDF build script / tests). The /resume page imports the
+// @resume facade — and with it this module — into a bundled prerender chunk
+// where `./fonts/` does not exist; reading at module top level made that
+// import itself crash the astro build. Deferring the read means only callers
+// that actually render PDF CSS pay it.
+let fontFaceCss: string | undefined;
 
-export function getResumePdfFontFaceCss(): string {
+function buildFontFaceCss(): string {
+  const interRegularDataUrl = loadFontDataUrl("InterVariable.woff2");
+  const interItalicDataUrl = loadFontDataUrl("InterVariable-Italic.woff2");
   return `
 @font-face {
   font-family: '${RESUME_PDF_FONT_FAMILY}';
@@ -30,4 +38,8 @@ export function getResumePdfFontFaceCss(): string {
   font-display: block;
 }
 `;
+}
+
+export function getResumePdfFontFaceCss(): string {
+  return (fontFaceCss ??= buildFontFaceCss());
 }

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { selectLatest } from "../content/blog-schema";
+import { isoDay } from "../content/post-list";
 import { getVisiblePosts } from "../content/posts";
 
 // Swiss-minimal redesign tracer (ADR-0005 / PRD #20): flush-left grid-led hero
@@ -18,9 +19,6 @@ const ctaLink =
 // Published Posts, no runtime fetch. Drafts are filtered out by getVisiblePosts.
 const LATEST_COUNT = 3;
 const latest = selectLatest(await getVisiblePosts(), LATEST_COUNT);
-// ISO date (YYYY-MM-DD), tabular monospace — the techie metadata treatment.
-// Dates are authored as UTC calendar days, so slice the ISO string directly.
-const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 ---
 
 <BaseLayout title={PAGE_TITLE} description={HOME_LEDE} activeNav="home">
@@ -83,10 +81,10 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
                   </h3>
                 </div>
                 <time
-                  datetime={isoDate(post.data.published)}
+                  datetime={isoDay(post.data.published)}
                   class="col-start-2 mt-2 font-mono text-[0.72rem] tabular text-muted sm:col-start-3 sm:mt-0 sm:text-right"
                 >
-                  {isoDate(post.data.published)}
+                  {isoDay(post.data.published)}
                 </time>
               </a>
             </li>

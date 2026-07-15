@@ -14,29 +14,26 @@
 // rather than the whole node. An unknown index (never happens — the mdast plugin
 // always stashes before emitting) is left as-is so a regression is visible.
 //
-// Pure helper + thin Sätteri wrapper, mirroring the other markdown plugins.
+// Thin Sätteri wrapper over the protocol module (katex-protocol.ts), which owns
+// the placeholder format, the stash shape, and the decode — shared with the
+// mdast plugin so the two halves can't drift apart.
 
 import { defineHastPlugin } from "satteri";
+import {
+  expandKatexPlaceholders,
+  hasKatexPlaceholder,
+  katexStashOf,
+  type KatexStash,
+} from "./katex-protocol";
 
-type KatexData = { __katex?: string[] };
 type RawNode = { type: "raw"; value: string };
-
-const PLACEHOLDER = /<!--katex:(\d+)-->/g;
-
-// Replace every `<!--katex:N-->` in `value` with its stashed KaTeX HTML. Returns
-// the original string unchanged when it holds no (known) placeholder, so callers
-// can skip untouched nodes. Pure.
-export function expandKatexPlaceholders(value: string, stash: readonly string[]): string {
-  return value.replace(PLACEHOLDER, (whole, id) => stash[Number(id)] ?? whole);
-}
 
 export default defineHastPlugin({
   name: "katex-math-expand",
   raw(node, ctx) {
     const value = (node as RawNode).value ?? "";
-    if (!value.includes("<!--katex:")) return undefined;
-    const stash = (ctx.data as KatexData).__katex ?? [];
-    const expanded = expandKatexPlaceholders(value, stash);
+    if (!hasKatexPlaceholder(value)) return undefined;
+    const expanded = expandKatexPlaceholders(value, katexStashOf(ctx.data as KatexStash));
     return expanded === value ? undefined : ({ type: "raw", value: expanded } as never);
   },
 });

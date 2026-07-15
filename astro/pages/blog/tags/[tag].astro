@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import PostList from "../../../components/PostList.astro";
-import { readingTimeMinutes, sortByPublishedDesc } from "../../../content/blog-schema";
+import { toPostListItems } from "../../../content/post-list";
 import { getVisiblePosts } from "../../../content/posts";
 import {
   isRegisteredTag,
@@ -23,14 +23,7 @@ const { tag } = Astro.params;
 if (!isRegisteredTag(tag)) throw new Error(`Unregistered tag route: ${tag}`);
 const label = tagLabel(tag);
 
-const posts = sortByPublishedDesc(selectPostsWithTag(await getVisiblePosts(), tag)).map(
-  (post) => ({
-    slug: post.id,
-    data: post.data,
-    minutes: readingTimeMinutes(post.body ?? ""),
-    iso: post.data.published.toISOString().slice(0, 10),
-  }),
-);
+const posts = toPostListItems(selectPostsWithTag(await getVisiblePosts(), tag));
 
 const DESCRIPTION = `Posts tagged “${label}” — engineering writing on inference serving, scheduler behavior, and GPU kernel paths.`;
 ---

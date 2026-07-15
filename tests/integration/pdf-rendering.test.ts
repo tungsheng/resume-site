@@ -1,6 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { publicResumeData } from "@resume/data";
-import { renderResumeHtmlDocument } from "@resume/render-static-html";
+import { publicResumeData, renderResumeHtmlDocument } from "@resume";
 import {
   calculatePdfScale,
   closePDFBrowser,

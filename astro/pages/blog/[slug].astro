@@ -7,6 +7,7 @@ import {
   selectTocHeadings,
   shouldShowToc,
 } from "../../content/blog-schema";
+import { isoDay, updatedIsoDay } from "../../content/post-list";
 import { resolveRelatedLinks } from "../../content/related-links";
 import { isRegisteredTag, tagLabel, tagPath } from "../../content/tag-registry";
 import { hasMathDelimiter } from "../../markdown/detect-math";
@@ -30,15 +31,10 @@ const minutes = readingTimeMinutes(post.body ?? "");
 // what the math plugin renders — no frontmatter flag to forget.
 const mathStylesheet = hasMathDelimiter(post.body ?? "");
 
-// Dates are authored as plain calendar days — ISO (YYYY-MM-DD) for the techie
-// tabular meta line; slice the UTC ISO string directly to avoid an off-by-one.
-const isoDate = (date: Date) => date.toISOString().slice(0, 10);
-const dateLabel = isoDate(post.data.published);
-
-// "Updated" surfaces only when meaningfully later than the publish date (#7).
+// Dates + the "Updated" rule live in the post-list module (unit-tested there).
+const dateLabel = isoDay(post.data.published);
 const updated = post.data.updated;
-const updatedLabel =
-  updated && updated.getTime() > post.data.published.getTime() ? isoDate(updated) : null;
+const updatedLabel = updatedIsoDay(post.data.published, updated);
 
 // Auto-TOC from H2/H3 headings; shown only past the threshold (#7).
 const toc = selectTocHeadings(headings);

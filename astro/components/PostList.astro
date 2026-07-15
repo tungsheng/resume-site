@@ -1,22 +1,12 @@
 ---
+import type { PostListItem } from "../content/post-list";
 import { isRegisteredTag, tagLabel, tagPath } from "../content/tag-registry";
 
 // Hairline-ruled Post list with the mono meta rail (ADR-0005 / #21), extracted
 // from blog/index.astro so the /blog index and the /blog/tags/[tag] pages (#48)
 // render Posts identically. Tag chips link to their tag pages and show the
-// registry display label (slugs are for URLs and frontmatter only).
-export type PostListItem = {
-  slug: string;
-  data: {
-    title: string;
-    summary: string;
-    category: string;
-    status: string;
-    tags?: string[];
-  };
-  minutes: number;
-  iso: string;
-};
+// registry display label (slugs are for URLs and frontmatter only). The item
+// shape is owned by the post-list module — pages build it with toPostListItems.
 
 interface Props {
   posts: PostListItem[];

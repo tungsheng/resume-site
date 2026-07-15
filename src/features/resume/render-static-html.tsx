@@ -1,6 +1,6 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { ResumeData } from "../../types";
+import type { ResumeData } from "./types";
 import { ResumeDocument } from "./document";
 import { getResumeDocumentCss } from "./document-css";
 

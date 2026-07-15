@@ -1,4 +1,4 @@
-import type { ResumeData } from "../../types";
+import type { ResumeData } from "./types";
 
 function capitalize(value: string): string {
   if (!value) return value;

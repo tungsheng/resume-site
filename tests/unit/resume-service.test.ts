@@ -1,7 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { publicResumeData } from "@resume/data";
-import { renderResumeHtmlDocument } from "@resume/render-static-html";
-import type { ResumeData } from "../../src/types";
+import { publicResumeData, renderResumeHtmlDocument, type ResumeData } from "@resume";
 
 describe("Resume Service", () => {
   test("publicResumeData contains the checked-in public resume", () => {

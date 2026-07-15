@@ -1,18 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostList from "../../components/PostList.astro";
-import { readingTimeMinutes, sortByPublishedDesc } from "../../content/blog-schema";
+import { toPostListItems } from "../../content/post-list";
 import { getVisiblePosts } from "../../content/posts";
 
 // Swiss-minimal redesign — Blog index at /blog (ADR-0005 / #21). The
 // hairline-ruled post list lives in PostList.astro, shared with the
 // /blog/tags/[tag] pages (#48). Visibility by Status (ADR-0003 §8).
-const posts = sortByPublishedDesc(await getVisiblePosts()).map((post) => ({
-  slug: post.id,
-  data: post.data,
-  minutes: readingTimeMinutes(post.body ?? ""),
-  iso: post.data.published.toISOString().slice(0, 10),
-}));
+const posts = toPostListItems(await getVisiblePosts());
 
 const LEDE =
   "Engineering writing on inference serving, scheduler behavior, and GPU kernel paths.";

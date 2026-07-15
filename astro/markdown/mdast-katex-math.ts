@@ -29,25 +29,18 @@
 // RSS feed. The comment survives the Markdown re-parse as a single `raw` node
 // and, for display math, is not a code block, so Shiki never claims it.
 //
-// Kept in-repo as a pure render helper + a thin Sätteri wrapper, mirroring
-// mdast-admonitions.ts, so it is unit-testable.
+// The stash + placeholder handoff is OWNED by katex-protocol.ts — both plugins
+// import it, so the format and the bag shape can't drift apart. This file keeps
+// only the rendering (pure helper + thin Sätteri wrapper, mirroring
+// mdast-admonitions.ts, so it is unit-testable).
 
 import { defineMdastPlugin } from "satteri";
 import katex from "katex";
+import { stashKatexHtml, type KatexStash } from "./katex-protocol";
 
 // Minimal structural mdast type — `inlineMath`/`math` are MdastLiteral nodes, so
 // the raw TeX is on `.value`.
 type MathLiteral = { value?: string };
-
-// Document-scoped handoff between this plugin and hast-katex-math.ts. `ctx.data`
-// is a fresh bag per compile, so the `__katex` array and its indices reset per
-// document; the hast plugin looks up by the index baked into each placeholder,
-// not by visit order. Kept in sync with the reader in hast-katex-math.ts.
-type KatexData = { __katex?: string[] };
-
-// Placeholder comment swapped back to verbatim KaTeX HTML in the hast phase.
-// Brace- and backslash-free so the Markdown re-parse of `{ raw }` can't touch it.
-export const katexPlaceholder = (id: number): string => `<!--katex:${id}-->`;
 
 // Render one TeX string to KaTeX's HTML+MathML markup (htmlAndMathml is KaTeX's
 // default — MathML rides along for screen readers, ADR-0006 decision 4).
@@ -58,16 +51,14 @@ export function renderMath(tex: string, displayMode: boolean): string {
 }
 
 // Render, stash the HTML on the document bag, and return its placeholder comment.
-function injectMath(data: KatexData, tex: string, displayMode: boolean): { raw: string } {
-  const stash = (data.__katex ??= []);
-  const id = stash.push(renderMath(tex, displayMode)) - 1;
-  return { raw: katexPlaceholder(id) };
+function injectMath(data: KatexStash, tex: string, displayMode: boolean): { raw: string } {
+  return { raw: stashKatexHtml(data, renderMath(tex, displayMode)) };
 }
 
 // Thin Sätteri wrapper: dispatch each math node to the renderer + stash. `inlineMath`
 // is `$…$` (rendered inline), `math` is `$$…$$` (rendered as a display block).
 export default defineMdastPlugin({
   name: "katex-math",
-  inlineMath: (node, ctx) => injectMath(ctx.data as KatexData, (node as MathLiteral).value ?? "", false),
-  math: (node, ctx) => injectMath(ctx.data as KatexData, (node as MathLiteral).value ?? "", true),
+  inlineMath: (node, ctx) => injectMath(ctx.data as KatexStash, (node as MathLiteral).value ?? "", false),
+  math: (node, ctx) => injectMath(ctx.data as KatexStash, (node as MathLiteral).value ?? "", true),
 });
