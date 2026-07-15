@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isRegisteredTag } from "./tag-registry";
 
 // Authored frontmatter for a Blog Post (ADR-0001 / CONTEXT.md vocabulary).
 // Shared by the Astro content collection (astro/content.config.ts) and the unit
@@ -18,7 +19,16 @@ export const blogPostSchema = z.object({
   published: z.coerce.date(),
   // optional — richer surfaces (#6/#7/#8) consume these later
   updated: z.coerce.date().optional(),
-  tags: z.array(z.string()).optional(),
+  // Governed vocabulary (ADR-0008 / #47): every tag must be a registered slug,
+  // so a typo or unilateral new spelling fails the build at content-load time.
+  tags: z
+    .array(
+      z.string().refine(isRegisteredTag, {
+        message:
+          "Unregistered tag — use a canonical slug from astro/content/tag-registry.ts, or register the new topic there (ADR-0008)",
+      }),
+    )
+    .optional(),
   cover: z.string().optional(),
   related: z
     .object({
