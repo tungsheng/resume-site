@@ -1,6 +1,6 @@
 # Cloudflare Pages response headers (ADR-0003 §3): security headers move off the
 # Bun server middleware to this file. Ported from addSecurityHeaders() in the old
-# src/index.ts. script-src is 'self' — the search island (#49 / ADR-0007) ships
+# src/index.ts. script-src is 'self' — the search island (#49 / ADR-0008) ships
 # only external same-origin scripts, never inline — plus 'wasm-unsafe-eval',
 # which Pagefind's WebAssembly search engine requires to instantiate.
 # style-src keeps 'unsafe-inline' because Astro may inline small stylesheets.

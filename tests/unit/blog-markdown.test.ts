@@ -1,8 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { buildAdmonition } from "../../astro/markdown/mdast-admonitions";
 import { figureForParagraph, withImgAttrs } from "../../astro/markdown/hast-blog-images";
-import { renderMath, katexPlaceholder } from "../../astro/markdown/mdast-katex-math";
-import { expandKatexPlaceholders } from "../../astro/markdown/hast-katex-math";
+import { renderMath } from "../../astro/markdown/mdast-katex-math";
+import {
+  expandKatexPlaceholders,
+  hasKatexPlaceholder,
+  katexPlaceholder,
+  stashKatexHtml,
+  type KatexStash,
+} from "../../astro/markdown/katex-protocol";
 import { hasMathDelimiter } from "../../astro/markdown/detect-math";
 import { degradeMathToTeX } from "../../astro/markdown/degrade-math-rss";
 
@@ -171,6 +177,20 @@ describe("katex placeholder round-trip (ADR-0006)", () => {
   test("returns a no-placeholder string unchanged", () => {
     const html = '<span class="katex">already expanded</span>';
     expect(expandKatexPlaceholders(html, ["x"])).toBe(html);
+  });
+
+  // The full protocol through the shared stash bag — the seam the mdast and
+  // hast plugins actually cross, previously exercised only by the prod build.
+  test("stash → placeholder → expand round-trips through the document bag", () => {
+    const bag: KatexStash = {};
+    const p0 = stashKatexHtml(bag, '<span class="katex">first</span>');
+    const p1 = stashKatexHtml(bag, '<span class="katex">second</span>');
+    expect([p0, p1]).toEqual(["<!--katex:0-->", "<!--katex:1-->"]);
+    expect(hasKatexPlaceholder(`text ${p1} text`)).toBe(true);
+    expect(hasKatexPlaceholder("no math here")).toBe(false);
+    expect(expandKatexPlaceholders(`${p0} and ${p1}`, bag.__katex ?? [])).toBe(
+      '<span class="katex">first</span> and <span class="katex">second</span>',
+    );
   });
 });
 

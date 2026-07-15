@@ -2738,7 +2738,3 @@ export function experimentSourceLink(projectId: ProjectId, path: string): string
 
   return `${repoBase}/${path}`;
 }
-
-export function getExperimentBySlug(slug: string): ExperimentCatalogItem | undefined {
-  return experimentCatalogContent.experiments.find((item) => item.slug === slug);
-}

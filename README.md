@@ -16,9 +16,9 @@ missing, then starts the Astro dev server.)
 
 ```bash
 bun run dev      # Astro dev server
-bun run build    # build resume PDF + static site into dist/
+bun run build    # build resume PDF + static site + search index into dist/
 bun run check    # typecheck + unit tests
-bun test         # unit tests only
+bun run test     # unit tests only
 ```
 
 ## Docs

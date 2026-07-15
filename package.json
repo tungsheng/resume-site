@@ -3,11 +3,11 @@
   "type": "module",
   "private": true,
   "engines": {
-    "node": ">=22.12.0"
+    "bun": ">=1.3.4"
   },
   "scripts": {
     "astro": "astro",
-    "dev": "test -f public-astro/resume.pdf || bun run build:pdf; astro dev",
+    "dev": "test -f public/resume.pdf || bun run build:pdf; astro dev",
     "preview": "astro preview",
     "build": "bun run build:pdf && astro build && pagefind --site dist",
     "build:pdf": "bun run scripts/build-resume-pdf.ts",

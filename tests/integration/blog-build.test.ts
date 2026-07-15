@@ -173,7 +173,7 @@ describe("blog production build output", () => {
     }
   });
 
-  // #48 / ADR-0008 decision 2: static tag pages are the canonical tag surface.
+  // #48 / ADR-0009 decision 2: static tag pages are the canonical tag surface.
   itIf("builds the /blog/tags overview with display labels and counts", async () => {
     const html = await Bun.file("dist/blog/tags/index.html").text();
     expect(html).toContain('href="/blog/tags/kv-cache"');
@@ -205,7 +205,7 @@ describe("blog production build output", () => {
     expect(postHtml).toContain(">SwiGLU</a>");
   });
 
-  // #49 / ADR-0008 decision 3: Pagefind search, blog-only, built after astro.
+  // #49 / ADR-0009 decision 3: Pagefind search, blog-only, built after astro.
   itIf("emits the Pagefind index and scopes it to Post pages only", async () => {
     expect(await Bun.file("dist/pagefind/pagefind.js").exists()).toBe(true);
     expect(await Bun.file("dist/pagefind/pagefind-ui.js").exists()).toBe(true);
@@ -226,7 +226,7 @@ describe("blog production build output", () => {
     expect(indexHtml).toContain('id="search"');
     expect(indexHtml).toContain("/pagefind/pagefind-ui.js");
     // No dead input for no-JS readers: the island div ships empty and the whole
-    // UI is injected at runtime (ADR-0007: static page stays fully functional).
+    // UI is injected at runtime (ADR-0008: static page stays fully functional).
     expect(indexHtml).not.toContain("<input");
     // The island is the index page's enhancement — Post pages stay script-free
     // (the math-page zero-JS test guards this too).
@@ -235,7 +235,7 @@ describe("blog production build output", () => {
   });
 
   itIf("keeps the island CSP-compliant: external scripts only + wasm allowance", async () => {
-    // The deployed CSP (public-astro/_headers) has no 'unsafe-inline' for
+    // The deployed CSP (public/_headers) has no 'unsafe-inline' for
     // script-src, so every <script> on /blog must carry a src attribute —
     // an inline initializer would silently die on Cloudflare only.
     expect(indexHtml).not.toMatch(/<script(?![^>]*\bsrc=)/);
@@ -289,18 +289,18 @@ describe("blog production build output", () => {
 // #32 / ADR-0006: build-time KaTeX math. The published attention post carries
 // inline + display math, so it is the math target here. The render helper is
 // unit-tested in tests/unit/blog-markdown.test.ts (the `\$` escaped-dollar
-// convention is covered there too). This suite runs its own build, after the
-// production-build suite above; Bun completes a describe before the next one's
-// beforeAll, so the rebuild that clobbers dist/ is safe.
+// convention is covered there too). This suite reuses the production build from
+// the describe above — Bun completes a describe before the next one's beforeAll,
+// so dist/ is already built (and Pagefind doesn't touch the post HTML); a second
+// full `astro build` here would only duplicate the suite's dominant cost.
 describe("build-time KaTeX math output (ADR-0006)", () => {
   const MATH_SLUG = "attention-from-first-principles";
   let mathHtml = "";
 
   beforeAll(async () => {
     if (!RUN) return;
-    // The math target is a Published Post, so a normal production build renders it
-    // (and this is the markup that actually ships).
-    await $`bunx astro build`.env({ ...process.env, NODE_ENV: "production" }).quiet();
+    // The math target is a Published Post, so the production build above rendered
+    // it (and this is the markup that actually ships).
     mathHtml = await Bun.file(`dist/blog/${MATH_SLUG}/index.html`).text();
   });
 

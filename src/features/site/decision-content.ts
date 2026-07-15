@@ -6,7 +6,7 @@ import {
   GPU_INFERENCE_EXPERIMENTS_PATH,
 } from "./content";
 import { experimentCatalogContent } from "./experiment-catalog-content";
-import { getProjectById, type ProjectId } from "./projects-content";
+import { type ProjectId } from "./projects-content";
 
 export type DecisionStatus =
   | "Supported"
@@ -280,8 +280,4 @@ export function getDecisionDomains(projectId: ProjectId): string[] {
 
 export function getDecisionExperimentTitle(slug: string): string {
   return experimentCatalogContent.experiments.find((experiment) => experiment.slug === slug)?.title ?? slug;
-}
-
-export function getDecisionProjectTitle(projectId: ProjectId): string {
-  return getProjectById(projectId).title;
 }

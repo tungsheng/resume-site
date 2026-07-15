@@ -6,7 +6,7 @@ name: pages
 # with the Bun app in a later slice).
 #
 # Required repo secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID.
-# Adjust `projectName` below to the actual Cloudflare Pages project.
+# The Cloudflare Pages project is `resume-site` (hardcoded in both wrangler steps).
 
 on:
   push:

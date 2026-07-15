@@ -4,6 +4,14 @@ globs: "*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json"
 alwaysApply: false
 ---
 
+**Repo-specific caveat (overrides the generic Bun defaults below):** this site
+is built by **Astro 7 on Vite** — `bun run build` runs `astro build` (plus the
+PDF and Pagefind steps), and `@tailwindcss/vite` is wired into
+`astro.config.mjs`. Do NOT replace the Astro/Vite build with `bun build`, and
+ignore the "don't use vite" guidance for this repo's build pipeline. Bun is the
+package manager, script runner, and test runner here; `Bun.serve()`/HTML-imports
+guidance applies only to standalone tooling scripts, never to the site.
+
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`

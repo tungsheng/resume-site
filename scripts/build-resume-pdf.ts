@@ -4,7 +4,7 @@
 // code deploy, so it is generated once at build time instead of per request.
 // This replaces the runtime /api/public-pdf endpoint (removed with the Bun app).
 //
-// It is written into the Astro publicDir (./public-astro) so it is served by
+// It is written into the Astro publicDir (./public) so it is served by
 // BOTH `astro dev` (at /resume.pdf — otherwise the resume page's "Download PDF"
 // link 404s in dev) and `astro build` (which copies publicDir into dist/). Run
 // before `astro build`/`astro dev` via the npm scripts; CI does the same with
@@ -13,11 +13,10 @@
 // Reuses the existing renderer + puppeteer pipeline unchanged.
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { publicResumeData } from "@resume/data";
-import { renderResumeHtmlDocument } from "@resume/render-static-html";
+import { publicResumeData, renderResumeHtmlDocument } from "@resume";
 import { generatePDF } from "@services/pdf";
 
-export async function buildResumePdf(outDir = "public-astro"): Promise<string> {
+export async function buildResumePdf(outDir = "public"): Promise<string> {
   const html = renderResumeHtmlDocument(publicResumeData);
   const pdf = await generatePDF(html);
   await mkdir(outDir, { recursive: true });

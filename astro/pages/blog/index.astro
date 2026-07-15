@@ -1,18 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostList from "../../components/PostList.astro";
-import { readingTimeMinutes, sortByPublishedDesc } from "../../content/blog-schema";
+import { toPostListItems } from "../../content/post-list";
 import { getVisiblePosts } from "../../content/posts";
 
 // Swiss-minimal redesign — Blog index at /blog (ADR-0005 / #21). The
 // hairline-ruled post list lives in PostList.astro, shared with the
 // /blog/tags/[tag] pages (#48). Visibility by Status (ADR-0003 §8).
-const posts = sortByPublishedDesc(await getVisiblePosts()).map((post) => ({
-  slug: post.id,
-  data: post.data,
-  minutes: readingTimeMinutes(post.body ?? ""),
-  iso: post.data.published.toISOString().slice(0, 10),
-}));
+const posts = toPostListItems(await getVisiblePosts());
 
 const LEDE =
   "Engineering writing on inference serving, scheduler behavior, and GPU kernel paths.";
@@ -32,7 +27,7 @@ const LEDE =
   </section>
 
   {
-    /* Search island (#49 / ADR-0008 decision 3, sanctioned by ADR-0007: search
+    /* Search island (#49 / ADR-0009 decision 3, sanctioned by ADR-0008: search
        is impossible without client JS). The entire UI — input included — is
        injected by PagefindUI at runtime, so with JS disabled nothing dead
        renders and the page stays the fully-functional static list + tag pages.
@@ -45,7 +40,7 @@ const LEDE =
         <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
         <script is:inline defer src="/pagefind/pagefind-ui.js"></script>
         {/* External file, not an Astro-processed script: the deployed CSP
-            (public-astro/_headers) is script-src 'self' with no 'unsafe-inline',
+            (public/_headers) is script-src 'self' with no 'unsafe-inline',
             and Astro inlines bundled scripts this small back into the page. */}
         <script is:inline defer src="/js/search-init.js"></script>
       </>

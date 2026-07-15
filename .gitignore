@@ -8,7 +8,7 @@ dist
 *.tgz
 
 # Generated resume PDF (built into publicDir from resume/data.ts by build:pdf)
-public-astro/resume.pdf
+public/resume.pdf
 
 # Astro generated types/cache (not the ./astro source dir)
 .astro/

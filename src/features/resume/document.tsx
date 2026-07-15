@@ -1,5 +1,5 @@
 import React from "react";
-import type { ResumeData } from "../../types";
+import type { ResumeData } from "./types";
 import { buildResumeViewModel } from "./view-model";
 
 interface ResumeDocumentProps {

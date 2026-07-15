@@ -1,4 +1,4 @@
-import type { ResumeData } from "../../types";
+import type { ResumeData } from "./types";
 
 export const publicResumeData: ResumeData = {
   header: {

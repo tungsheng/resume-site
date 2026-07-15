@@ -2,10 +2,96 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+DEEP CLEANUP / AUDIT PASS (2026-07-15) — branch feat/architecture-improvements
+#############################################################################
+3 parallel audit agents (migration leftovers / docs-vs-reality / deps+config
++tests) + tracker check. Applied:
+  * PUBLIC DIR FLIP COMPLETED (ADR-0003 #12's deferred cleanup): the 7 old
+    Bun HTML shells in ./public DELETED (zero references), public-astro/
+    git-mv'd -> public/, publicDir override REMOVED from astro.config (back
+    to default), stale "Bun/React app in ./src" migration comments rewritten
+    (src/ is deliberately-kept shared libs, not an app awaiting removal).
+    Functional refs updated: package.json dev script, build-resume-pdf
+    outDir, .gitignore, CSP comments. ADR-0006/0007 keep their public-astro
+    mentions (historical records).
+  * DEAD EXPORTS deleted (zero importers, grep-verified): EXPERIMENTS_PATH /
+    BLOG_PATH / RESUME_PATH (site/content.ts), getDecisionProjectTitle
+    (decision-content.ts), getExperimentBySlug (experiment-catalog) + the
+    then-unused getProjectById import.
+  * tsconfig: dead @site/* escape-hatch alias removed (zero deep imports —
+    everything crosses the @site barrel).
+  * engines: node>=22.12 -> bun>=1.3.4 (nothing runs on node; CI installs
+    only Bun, pinned 1.3.4).
+  * TEST HYGIENE: resume-service "timeline rail + dots" test rewritten — it
+    asserted ornaments document-css hides (display:none per ADR-0005) plus
+    raw CSS substrings, reaching past renderResumeHtmlDocument's interface.
+    Now asserts visible content, entry count, authored order. blog-build
+    KaTeX describe no longer reruns a full astro build (reuses build #1;
+    suite ~halved).
+  * DOCS SYNCED: DEVELOPER.md (alias table -> @resume facade, resume flow
+    by export name, /blog/tags + search island in Pages, public/ paths,
+    build cmd incl. pagefind, +preview cmd); deployment.md (pipeline step 4
+    incl. pagefind, new "Security Headers & Search" section: wasm-unsafe-eval
+    + external-only init are Cloudflare-only failure modes, test-pinned);
+    README (pagefind mention, bun run test nit); CLAUDE.md (repo caveat: the
+    build is Astro-on-Vite — don't apply bun-build/no-vite defaults);
+    pages.yml stale "Adjust projectName" TODO.
+NOT APPLIED (deliberate): ralph-once.sh (untracked, references missing
+PRD.md — Tony's local tool, his call); progress.txt + skills-lock.json KEEP
+(this log is the working memory of the loop workflow); dep-section resort
+(inert in a static build — every dep verified used); srcDir flip (astro/ ->
+src/ merge) still not worth the churn — documented as deliberate in
+astro.config + DEVELOPER.md.
+TRACKER: clean — only #50 open (ready-for-human), #47-49 auto-closed by #53.
+VERIFIED: unit 80/80; integration 29/29 (single prod build now) incl. CSP
++ pagefind assertions over the flipped public/; dev-server: blog images +
+vendored KaTeX CSS serve from public/, math renders.
+PUSHED + PR #54 OPENED (2026-07-15): whole branch (deepenings + renumber +
+cleanup). Post-merge: confirm _headers/_redirects + search on the live site.
+#############################################################################
+ARCHITECTURE DEEPENING PASS + ADR RENUMBER (2026-07-15)
+branch feat/architecture-improvements (from main post-#53)
+#############################################################################
+/improve-codebase-architecture session (2 Explore agents -> HTML report in
+OS tmp, 6 candidates). Implemented the three STRONG ones (behavior-
+preserving; commit 8281271):
+  1. astro/content/post-list.ts — the Post-list view-model gets a home:
+     toPostListItems / isoDay / updatedIsoDay / type PostListItem. Was
+     copy-pasted across FIVE .astro frontmatter blocks (blog index, tag
+     page, home, detail, + hand-synced type in PostList.astro) where unit
+     tests can't reach. Pages now compose; +9 unit tests incl. the UTC
+     off-by-one guard.
+  2. astro/markdown/katex-protocol.ts — the mdast/hast KaTeX pair's
+     stash+placeholder handoff was one module split across two files
+     (dup'd private type, format hardcoded 3 ways). Protocol module owns
+     stash shape + codec; plugins are thin wrappers; round-trip unit-tested.
+  3. @resume facade (src/features/resume/index.ts, 5 curated exports)
+     replaces the everything-public @resume/* alias; src/types.ts (100%
+     resume-only) moved into features/resume/; all six tree-depth
+     ../../types imports deleted. srcDir flip is now a pure tsconfig edit.
+FIX FOUND BY THE FACADE: pdf-fonts.ts read woff2 at module top level, so
+importing the facade from resume.astro crashed astro build (bundled
+prerender chunk has no ./fonts/). Now lazy + memoized — import is
+side-effect free. Integration caught it; 29/29 after.
+DEFERRED (report cards): blog-schema grab-bag split (partially absorbed
+by post-list), ArticleMeta out of BaseLayout (11->4 props), deep @site
+query surface (static content, low leverage today).
+ADR NUMBERING COLLISION FOUND IN AUDIT: 0007-work-section-consolidation
+landed on main while the blog-nav branch was in flight — two ADR-0007s.
+RENUMBERED HERE: progressive enhancement -> ADR-0008, blog navigation ->
+ADR-0009; every in-repo reference swept (code comments, tests, _headers,
+ADR-0003 status line, this log's earlier entries). PR #53 carries a
+post-merge comment mapping old numbers -> new. Older entries below that
+say ADR-0007/0008 mean today's ADR-0008/0009.
+VERIFIED: unit 80/80; integration 29/29 (prod build incl. puppeteer PDF
+through the facade); dev-server: /blog 6 posts w/ label chips, /resume
+renders via @resume. NEXT: push + PR this branch.
+
+#############################################################################
 PAGEFIND SEARCH ISLAND (#49) (2026-07-14) — branch feat/adr-0007-0008
 #############################################################################
-ADR-0008 decision 3 implemented — the blog's search, and the site's FIRST
-sanctioned JS island (ADR-0007: search is impossible without client JS):
+ADR-0009 decision 3 implemented — the blog's search, and the site's FIRST
+sanctioned JS island (ADR-0008: search is impossible without client JS):
   * pagefind 1.5.2 devDependency; package.json build = build:pdf && astro
     build && pagefind --site dist. Integration beforeAll mirrors the
     pagefind step after its astro build.
@@ -35,7 +121,7 @@ VERIFIED in dist-preview browser: PagefindUI injects input; "PagedAttention"
 -> exactly the scheduling post; "softmax" -> the 4 posts that discuss it;
 Category/Tag facets w/ display labels; console clean.
 PUSHED + PR OPENED (2026-07-15): branch pushed, PR #53 to main — the whole
-ADR-0007/0008 arc (ADRs, corpus cleanup, #47/#48/#49; closes all three on
+ADR-0008/0008 arc (ADRs, corpus cleanup, #47/#48/#49; closes all three on
 merge). Post-merge spot-check: search on the DEPLOYED site (the CSP path
 only exists on Cloudflare). #50 (CF Web Analytics
 beacon) stays ready-for-human. Issue #49 closable on merge.
@@ -43,7 +129,7 @@ beacon) stays ready-for-human. Issue #49 closable on merge.
 #############################################################################
 STATIC TAG PAGES + TAGS OVERVIEW (#48) (2026-07-14) — branch feat/adr-0007-0008
 #############################################################################
-ADR-0008 decision 2 implemented — the no-JS canonical tag surface:
+ADR-0009 decision 2 implemented — the no-JS canonical tag surface:
   * astro/pages/blog/tags/[tag].astro — one static page per registered tag
     with >=1 visible Post (getStaticPaths over selectTagCounts). Visibility
     = getVisiblePosts (ADR-0003 §8): a tag whose only Posts are drafts gets
@@ -67,7 +153,7 @@ ADR-0008 decision 2 implemented — the no-JS canonical tag surface:
 VERIFIED: unit 71/71; integration 26/26 (full prod build); dev-server pass —
 /blog/tags overview (labels+counts), /blog/tags/kv-cache (h1 "KV cache",
 4 posts, exact set), MLP post chips linked w/ labels, console clean. Pages
-ship zero JS (static anchors only) — ADR-0007 default posture holds.
+ship zero JS (static anchors only) — ADR-0008 default posture holds.
 NEXT: #49 Pagefind search island (facets ride on this vocabulary), then the
 pending push + PR of this branch (now 7 commits ahead of origin/main).
 
@@ -77,10 +163,10 @@ BLOG NAVIGATION GROUNDWORK — ADRs, corpus cleanup, TAG REGISTRY (#47)
 #############################################################################
 GRILL SESSION (2026-07-13, Tony): improve blog organization/search/likes on
 Astro 7. Resolved design tree, recorded as:
-  * ADR-0007 — zero-JS becomes DEFAULT not absolute (amends ADR-0003 d7):
+  * ADR-0008 — zero-JS becomes DEFAULT not absolute (amends ADR-0003 d7):
     a feature may ship a progressively-enhanced island only when IMPOSSIBLE
     without JS; static-first with JS disabled stays mandatory.
-  * ADR-0008 — Tags (not Categories, not Series) are the reader's primary
+  * ADR-0009 — Tags (not Categories, not Series) are the reader's primary
     navigation axis; governed tag registry (build-enforced); static tag pages
     (/blog/tags/[slug] + overview, no min-count gate); Pagefind search,
     blog-only, tag/category facets — NO standalone filter island.

@@ -16,8 +16,9 @@ public resume is `src/features/resume/data.ts`.
 
 ```bash
 bun run dev               # Astro dev server (builds the PDF first if missing)
-bun run build             # build:pdf, then astro build -> dist/
-bun run build:pdf         # render the resume PDF into public-astro/resume.pdf
+bun run build             # build:pdf, astro build, then pagefind --site dist -> dist/
+bun run build:pdf         # render the resume PDF into public/resume.pdf
+bun run preview           # serve the built dist/ locally (astro preview)
 bun run check             # typecheck + unit tests
 bun run typecheck         # astro sync + tsc --noEmit
 bun run test:unit         # unit tests
@@ -36,7 +37,7 @@ astro/                     Astro source (configured as srcDir)
   content.config.ts        Astro content collections config
   markdown/                Sätteri AST plugins (admonitions, blog images, KaTeX math)
   styles/                  global.css (Tailwind entry)
-public-astro/              static assets served as-is (configured as publicDir)
+public/                    static assets served as-is (_headers, _redirects, fonts, katex, blog SVGs)
 src/
   features/
     resume/                typed resume data + shared document + PDF render
@@ -50,9 +51,9 @@ tests/
   integration/             PDF rendering integration tests
 ```
 
-`astro.config.mjs` sets `srcDir: "./astro"` and `publicDir: "./public-astro"`
-while the data/services layer still lives under `./src` (migration in progress —
-see `docs/adr/0003-migrate-to-astro-static-site.md`).
+`astro.config.mjs` sets `srcDir: "./astro"`; the shared data/services layer
+lives under `./src` and is reached via the path aliases below (a deliberate
+split kept after the migration — see `docs/adr/0003-migrate-to-astro-static-site.md`).
 
 ## Import Aliases
 
@@ -62,12 +63,11 @@ layout (and the eventual `srcDir` flip is a one-line config change):
 | Alias        | Resolves to                       |
 | ------------ | --------------------------------- |
 | `@site`      | `src/features/site/index.ts` (content facade barrel) |
-| `@site/*`    | `src/features/site/*`             |
-| `@resume/*`  | `src/features/resume/*`           |
+| `@resume`    | `src/features/resume/index.ts` (curated facade — 5 exports; renderer internals stay private) |
 | `@services/*`| `src/services/*`                  |
 
 Pages and components import the work-section content model from the `@site` barrel;
-the resume pipeline and PDF service use `@resume/*` and `@services/*`.
+the resume pipeline and PDF service use the `@resume` facade and `@services/*`.
 
 ## Pages
 
@@ -78,10 +78,13 @@ the resume pipeline and PDF service use `@resume/*` and `@services/*`.
 - `/experiments/<slug>` — 16 evidence leaf pages (see
   `docs/adr/0007-work-section-consolidation.md`)
 - `/blog`, `/blog/<slug>` (Markdown content collection), `/rss.xml`
-- `/resume` — screen resume; the downloadable PDF is built at `public-astro/resume.pdf`
+- `/blog/tags`, `/blog/tags/<tag>` — tags overview + one static page per
+  registered tag; `/blog` also carries a prod-only Pagefind search island (see
+  `docs/adr/0009-blog-navigation-governed-tags-static-pages-pagefind.md`)
+- `/resume` — screen resume; the downloadable PDF is built at `public/resume.pdf`
 
 The retired `/projects*`, `/decisions*`, and `/experiments`-index routes serve
-real 301s via `public-astro/_redirects` (Cloudflare Pages), with meta-refresh
+real 301s via `public/_redirects` (Cloudflare Pages), with meta-refresh
 stubs from the `redirects` map in `astro.config.mjs` as the fallback for local
 preview and non-CF hosts.
 
@@ -90,14 +93,17 @@ preview and non-CF hosts.
 The screen resume (`astro/pages/resume.astro`) and the PDF share the same typed
 data and view model, so the two renderings cannot drift:
 
-1. `@resume/data` exports the checked-in public `ResumeData`.
-2. `@resume/view-model` (`buildResumeViewModel`) prepares display-only fields
-   (date ranges, skill text).
-3. `@resume/document` (`ResumeDocument`) is the shared React document.
-4. `@resume/render-static-html` renders the document to an HTML string with CSS
-   and fonts inlined (`@resume/document-css`, `@resume/pdf-fonts`).
+All four public pieces come from the `@resume` facade; the renderer's internals
+(`document-css.ts`, `pdf-fonts.ts`) are private to `src/features/resume/`.
+
+1. `publicResumeData` (defined in `src/features/resume/data.ts`) is the
+   checked-in public `ResumeData`.
+2. `buildResumeViewModel` prepares display-only fields (date ranges, skill text).
+3. `ResumeDocument` is the shared React document.
+4. `renderResumeHtmlDocument` renders the document to an HTML string with CSS
+   and fonts inlined.
 5. `scripts/build-resume-pdf.ts` hands that HTML to `generatePDF` in
-   `@services/pdf` and writes `public-astro/resume.pdf`.
+   `@services/pdf` and writes `public/resume.pdf`.
 
 ## PDF Service
 
@@ -139,7 +145,7 @@ Blog posts can use LaTeX math, rendered to static HTML by KaTeX **at build time*
   there is no `math: true` frontmatter. The KaTeX stylesheet is auto-linked only
   on posts whose source contains math (detected pre-render), so non-math posts
   and every portfolio page stay CSS-clean. The CSS + WOFF2 fonts are self-hosted
-  under `public-astro/katex/`.
+  under `public/katex/`.
 - **Bad formulas fail soft.** An invalid formula renders in red inline (KaTeX's
   `throwOnError: false`) rather than breaking the build — catch it in preview.
 - **RSS shows source, by design.** Feeds carry no KaTeX stylesheet, so the feed
