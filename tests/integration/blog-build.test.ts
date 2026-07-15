@@ -27,19 +27,13 @@ const LATEST = PUBLISHED.slice(0, 3);
 const OLDER_PUBLISHED = PUBLISHED.slice(3);
 
 // status: Drafting — dev-only, excluded from a production build entirely.
-const DRAFTS = [
-  { slug: "prefix-cache-hit-rate-matters", title: "Why Prefix Cache Hit Rate Is the First Number to Check" },
-  { slug: "continuous-batching-throughput", title: "Continuous Batching Changes What Throughput Means" },
-  { slug: "kv-cache-is-the-batch-size-ceiling", title: "The KV Cache Is the Real Batch-Size Ceiling" },
-  { slug: "sizing-admission-queues", title: "Sizing Admission Queues Without Guessing" },
-];
+// The corpus currently has no Drafting Posts (the 2026-07 stubs were retired),
+// so these assertions are vacuous until the next draft lands — add it here.
+const DRAFTS: { slug: string; title: string }[] = [];
 
 // status: Outline — also dev-only; a production build emits no page and never
-// references them anywhere public.
-const OUTLINE = [
-  { slug: "sglang-architecture-request-lifecycle-scheduler-prefix-cache", title: "SGLang Architecture Deep Dive" },
-  { slug: "decode-process-deep-dive", title: "Decode Process Deep Dive" },
-];
+// references them anywhere public. Currently empty, same as DRAFTS.
+const OUTLINE: { slug: string; title: string }[] = [];
 
 // The launch Post exercises the rich pipeline end-to-end: an admonition callout
 // (mdast plugin, #16), self-hosted figures with lazy/async images (hast plugin,
