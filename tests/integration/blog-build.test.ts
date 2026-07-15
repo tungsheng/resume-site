@@ -104,7 +104,9 @@ describe("blog production build output", () => {
     expect(html).toContain('class="post-toc"'); // 5 headings ≥ threshold
     expect(html).toContain("On this page");
     expect(html).toContain('class="post-related"');
-    expect(html).toContain('href="/work/gpu-inference-lab"');
+    // Posts no longer declare related.projects (the same lab project on every
+    // Post was boilerplate); the related surface carries experiments only.
+    expect(html).not.toContain('href="/work/gpu-inference-lab"');
     expect(html).toContain('href="/experiments/prefill-decode"');
   });
 

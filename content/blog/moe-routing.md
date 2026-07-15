@@ -10,9 +10,6 @@ tags:
   - routing
   - transformer
   - inference
-related:
-  projects:
-    - gpu-inference-lab
 ---
 
 The router in [DeepSeek-V3](https://arxiv.org/abs/2412.19437) is a 7,168 × 256 matrix — about 1.8M parameters, 0.016% of the 11.3B-parameter mixture-of-experts (MoE) layer it controls. For every token, at every one of 58 MoE layers, that matrix decides which 8 of 256 routed experts run — a ninth, shared expert always does: 396M parameters read, 10.9B untouched. The cheapest component in the model controls the most expensive one. That inversion is the whole bet MoE makes: per-token compute stays fixed while total capacity scales — all the way to V4-Pro's 1.6T parameters on the shelf, 49B per token.

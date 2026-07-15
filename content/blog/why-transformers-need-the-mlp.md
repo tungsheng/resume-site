@@ -11,8 +11,6 @@ tags:
   - swiglu
   - activation-functions
 related:
-  projects:
-    - gpu-inference-lab
   experiments:
     - kernel-matmul-tiling
 ---

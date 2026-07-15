@@ -11,8 +11,6 @@ tags:
   - mla
   - flash-attention
 related:
-  projects:
-    - gpu-inference-lab
   experiments:
     - kv-cache
     - kernel-matmul-tiling

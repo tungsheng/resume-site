@@ -10,8 +10,6 @@ tags:
   - kv-cache
   - transformer
 related:
-  projects:
-    - gpu-inference-lab
   experiments:
     - kv-cache
 ---
