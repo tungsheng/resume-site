@@ -46,6 +46,8 @@ TRACKER: clean — only #50 open (ready-for-human), #47-49 auto-closed by #53.
 VERIFIED: unit 80/80; integration 29/29 (single prod build now) incl. CSP
 + pagefind assertions over the flipped public/; dev-server: blog images +
 vendored KaTeX CSS serve from public/, math renders.
+PUSHED + PR #54 OPENED (2026-07-15): whole branch (deepenings + renumber +
+cleanup). Post-merge: confirm _headers/_redirects + search on the live site.
 #############################################################################
 ARCHITECTURE DEEPENING PASS + ADR RENUMBER (2026-07-15)
 branch feat/architecture-improvements (from main post-#53)
