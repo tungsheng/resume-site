@@ -40,7 +40,7 @@ const LEDE =
         <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
         <script is:inline defer src="/pagefind/pagefind-ui.js"></script>
         {/* External file, not an Astro-processed script: the deployed CSP
-            (public-astro/_headers) is script-src 'self' with no 'unsafe-inline',
+            (public/_headers) is script-src 'self' with no 'unsafe-inline',
             and Astro inlines bundled scripts this small back into the page. */}
         <script is:inline defer src="/js/search-init.js"></script>
       </>

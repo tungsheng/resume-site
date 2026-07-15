@@ -19,7 +19,6 @@
     "baseUrl": ".",
     "paths": {
       "@site": ["src/features/site/index.ts"],
-      "@site/*": ["src/features/site/*"],
       "@resume": ["src/features/resume/index.ts"],
       "@services/*": ["src/services/*"]
     },

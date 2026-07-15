@@ -6,10 +6,7 @@
 export const WORK_PATH = "/work";
 export const GPU_INFERENCE_PROJECT_PATH = `${WORK_PATH}/gpu-inference-lab`;
 export const CUDA_KERNEL_PROJECT_PATH = `${WORK_PATH}/cuda-kernel-lab`;
-export const EXPERIMENTS_PATH = "/experiments";
 export const GPU_INFERENCE_EXPERIMENTS_PATH = `${GPU_INFERENCE_PROJECT_PATH}#experiments`;
 export const CUDA_KERNEL_EXPERIMENTS_PATH = `${CUDA_KERNEL_PROJECT_PATH}#experiments`;
 export const GPU_INFERENCE_DECISIONS_PATH = `${GPU_INFERENCE_PROJECT_PATH}#decisions`;
 export const CUDA_KERNEL_DECISIONS_PATH = `${CUDA_KERNEL_PROJECT_PATH}#decisions`;
-export const BLOG_PATH = "/blog";
-export const RESUME_PATH = "/resume";

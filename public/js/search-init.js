@@ -1,5 +1,5 @@
 // Initializes the Pagefind search island on /blog (#49). Lives in public/ as a
-// plain external file — the deployed CSP (public-astro/_headers) allows only
+// plain external file — the deployed CSP (public/_headers) allows only
 // script-src 'self', no 'unsafe-inline', and Astro would inline a bundled
 // script this small back into the page.
 window.addEventListener("DOMContentLoaded", () => {
