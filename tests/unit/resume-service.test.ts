@@ -107,7 +107,12 @@ describe("Resume Service", () => {
     expect(html).toContain("&lt;script&gt;");
   });
 
-  test("renderResumeHtmlDocument timeline template includes connected rail and job dots", () => {
+  // Asserts observable structure through renderResumeHtmlDocument's string
+  // interface: every experience entry renders with its visible content, in
+  // authored order. (This test previously asserted the decorative timeline
+  // rail/dots — which document-css.ts hides per the ADR-0005 Swiss redesign —
+  // and raw CSS substrings; both reached past the interface.)
+  test("renderResumeHtmlDocument renders every experience entry, in order", () => {
     const mockData: ResumeData = {
       header: {
         name: "John Doe",
@@ -141,14 +146,17 @@ describe("Resume Service", () => {
     };
 
     const html = renderResumeHtmlDocument(mockData);
-    const dotCount = html.match(/class="experience-dot"/g)?.length ?? 0;
 
-    expect(html).toContain("class=\"resume-document\"");
-    expect(html).toContain("<div class=\"experience-rail\"></div>");
-    expect(dotCount).toBe(mockData.experience.length);
-    expect(html).toContain(".resume-document .header-subtitle {");
-    expect(html).toContain("white-space: nowrap;");
-    expect(html).toContain(".resume-document .experience-item {");
-    expect(html).toContain(".resume-document .experience-dot {");
+    expect(html).toContain('class="resume-document"');
+    // One rendered entry per experience item, carrying the visible content.
+    const itemCount = html.match(/class="experience-item"/g)?.length ?? 0;
+    expect(itemCount).toBe(mockData.experience.length);
+    for (const job of mockData.experience) {
+      expect(html).toContain(job.company);
+      expect(html).toContain(job.title);
+      for (const highlight of job.highlights) expect(html).toContain(highlight);
+    }
+    // Authored order is preserved: newest role renders before the older one.
+    expect(html.indexOf("TechCorp")).toBeLessThan(html.indexOf("BuildCo"));
   });
 });

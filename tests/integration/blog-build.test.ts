@@ -235,7 +235,7 @@ describe("blog production build output", () => {
   });
 
   itIf("keeps the island CSP-compliant: external scripts only + wasm allowance", async () => {
-    // The deployed CSP (public-astro/_headers) has no 'unsafe-inline' for
+    // The deployed CSP (public/_headers) has no 'unsafe-inline' for
     // script-src, so every <script> on /blog must carry a src attribute —
     // an inline initializer would silently die on Cloudflare only.
     expect(indexHtml).not.toMatch(/<script(?![^>]*\bsrc=)/);
@@ -289,18 +289,18 @@ describe("blog production build output", () => {
 // #32 / ADR-0006: build-time KaTeX math. The published attention post carries
 // inline + display math, so it is the math target here. The render helper is
 // unit-tested in tests/unit/blog-markdown.test.ts (the `\$` escaped-dollar
-// convention is covered there too). This suite runs its own build, after the
-// production-build suite above; Bun completes a describe before the next one's
-// beforeAll, so the rebuild that clobbers dist/ is safe.
+// convention is covered there too). This suite reuses the production build from
+// the describe above — Bun completes a describe before the next one's beforeAll,
+// so dist/ is already built (and Pagefind doesn't touch the post HTML); a second
+// full `astro build` here would only duplicate the suite's dominant cost.
 describe("build-time KaTeX math output (ADR-0006)", () => {
   const MATH_SLUG = "attention-from-first-principles";
   let mathHtml = "";
 
   beforeAll(async () => {
     if (!RUN) return;
-    // The math target is a Published Post, so a normal production build renders it
-    // (and this is the markup that actually ships).
-    await $`bunx astro build`.env({ ...process.env, NODE_ENV: "production" }).quiet();
+    // The math target is a Published Post, so the production build above rendered
+    // it (and this is the markup that actually ships).
     mathHtml = await Bun.file(`dist/blog/${MATH_SLUG}/index.html`).text();
   });
 
