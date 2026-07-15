@@ -8,6 +8,7 @@ import {
   shouldShowToc,
 } from "../../content/blog-schema";
 import { resolveRelatedLinks } from "../../content/related-links";
+import { isRegisteredTag, tagLabel, tagPath } from "../../content/tag-registry";
 import { hasMathDelimiter } from "../../markdown/detect-math";
 
 // Prerender a Post at /blog/<slug>. Visibility by Status (ADR-0003 §8): in a
@@ -92,6 +93,18 @@ const relatedLinks = resolveRelatedLinks(post.data.related);
     <div class="post-body mt-8">
       <Content />
     </div>
+
+    {
+      post.data.tags && post.data.tags.length > 0 && (
+        <div class="mt-10 flex flex-wrap gap-x-4 gap-y-2" aria-label="Tags">
+          {post.data.tags.filter(isRegisteredTag).map((tag) => (
+            <a href={tagPath(tag)} class="eyebrow transition-colors hover:text-go-green-dark">
+              {tagLabel(tag)}
+            </a>
+          ))}
+        </div>
+      )
+    }
 
     {
       relatedLinks.length > 0 && (

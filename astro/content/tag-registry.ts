@@ -38,3 +38,31 @@ export function isRegisteredTag(value: string): value is TagSlug {
 export function tagLabel(slug: TagSlug): string {
   return TAG_REGISTRY[slug];
 }
+
+export function tagPath(slug: TagSlug): string {
+  return `/blog/tags/${slug}`;
+}
+
+// The Posts carrying a tag, for /blog/tags/[tag] (#48). Generic over the entry
+// shape so it is unit-testable without the Astro runtime (same pattern as
+// sortByPublishedDesc in blog-schema.ts).
+export function selectPostsWithTag<T extends { data: { tags?: string[] } }>(
+  posts: T[],
+  slug: TagSlug,
+): T[] {
+  return posts.filter((post) => (post.data.tags ?? []).includes(slug));
+}
+
+export type TagCount = { slug: TagSlug; label: string; count: number };
+
+// Registry-ordered (alphabetical) tag counts over the given Posts, for the
+// /blog/tags overview. Registered tags with zero Posts are dropped — a topic
+// earns its page with its first Post (ADR-0008: no min-count gate BEYOND
+// existence; an empty tag page would be a soft-404).
+export function selectTagCounts<T extends { data: { tags?: string[] } }>(posts: T[]): TagCount[] {
+  return REGISTERED_TAG_SLUGS.map((slug) => ({
+    slug,
+    label: TAG_REGISTRY[slug],
+    count: selectPostsWithTag(posts, slug).length,
+  })).filter((tag) => tag.count > 0);
+}

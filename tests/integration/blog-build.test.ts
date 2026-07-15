@@ -170,6 +170,44 @@ describe("blog production build output", () => {
     }
   });
 
+  // #48 / ADR-0008 decision 2: static tag pages are the canonical tag surface.
+  itIf("builds the /blog/tags overview with display labels and counts", async () => {
+    const html = await Bun.file("dist/blog/tags/index.html").text();
+    expect(html).toContain('href="/blog/tags/kv-cache"');
+    expect(html).toContain("KV cache"); // display label, not the slug
+    expect(html).toContain("4 posts"); // kv-cache count across the corpus
+    expect(html).toContain('href="/blog/tags/swiglu"');
+    expect(html).toContain("1 post");
+  });
+
+  itIf("builds a tag page listing exactly the Posts carrying the tag", async () => {
+    const html = await Bun.file("dist/blog/tags/kv-cache/index.html").text();
+    for (const slug of [
+      "scheduling-continuous-batching-paged-attention",
+      "attention-how-to-shrink-it",
+      "attention-from-first-principles",
+      "transformer-inference-prefill-and-decode",
+    ]) {
+      expect(html).toContain(`href="/blog/${slug}"`);
+    }
+    expect(html).not.toContain("why-transformers-need-the-mlp"); // no kv-cache tag
+  });
+
+  itIf("links tag chips (display labels) from the blog index and the Post detail page", async () => {
+    expect(indexHtml).toContain('href="/blog/tags/kv-cache"');
+    expect(indexHtml).toContain(">KV cache</a>"); // chip renders the label
+    const postHtml = await Bun.file("dist/blog/why-transformers-need-the-mlp/index.html").text();
+    expect(postHtml).toContain('href="/blog/tags/mlp"');
+    expect(postHtml).toContain('href="/blog/tags/swiglu"');
+    expect(postHtml).toContain(">SwiGLU</a>");
+  });
+
+  itIf("lists tag pages in the sitemap", async () => {
+    const sitemap = await Bun.file("dist/sitemap-0.xml").text();
+    expect(sitemap).toContain("<loc>https://tonylee.bio/blog/tags/</loc>");
+    expect(sitemap).toContain("<loc>https://tonylee.bio/blog/tags/kv-cache/</loc>");
+  });
+
   // Issue #9: robots points crawlers at the sitemap.
   itIf("emits robots.txt referencing the sitemap", async () => {
     const robots = await Bun.file("dist/robots.txt").text();

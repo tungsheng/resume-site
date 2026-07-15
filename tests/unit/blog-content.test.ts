@@ -10,7 +10,10 @@ import {
 import {
   REGISTERED_TAG_SLUGS,
   isRegisteredTag,
+  selectPostsWithTag,
+  selectTagCounts,
   tagLabel,
+  tagPath,
 } from "../../astro/content/tag-registry";
 
 const validPost = {
@@ -88,6 +91,40 @@ describe("governed tag registry (ADR-0008 / #47)", () => {
     for (const category of POST_CATEGORIES) {
       expect(isRegisteredTag(category.toLowerCase())).toBe(false);
     }
+  });
+});
+
+describe("tag page selection (#48)", () => {
+  const post = (slug: string, tags?: string[]) => ({ slug, data: { tags } });
+  const corpus = [
+    post("a", ["kv-cache", "attention"]),
+    post("b", ["kv-cache"]),
+    post("c", ["mlp"]),
+    post("d", undefined),
+  ];
+
+  test("selectPostsWithTag returns exactly the Posts carrying the tag", () => {
+    expect(selectPostsWithTag(corpus, "kv-cache").map((p) => p.slug)).toEqual(["a", "b"]);
+    expect(selectPostsWithTag(corpus, "attention").map((p) => p.slug)).toEqual(["a"]);
+    expect(selectPostsWithTag(corpus, "swiglu")).toEqual([]);
+  });
+
+  test("selectTagCounts drops zero-count tags — a topic earns its page with its first Post", () => {
+    const counts = selectTagCounts(corpus);
+    expect(counts).toEqual([
+      { slug: "attention", label: "Attention", count: 1 },
+      { slug: "kv-cache", label: "KV cache", count: 2 },
+      { slug: "mlp", label: "MLP", count: 1 },
+    ]);
+  });
+
+  test("selectTagCounts keeps registry (alphabetical) order regardless of corpus order", () => {
+    const slugs = selectTagCounts(corpus).map((t) => t.slug);
+    expect(slugs).toEqual([...slugs].sort());
+  });
+
+  test("tagPath builds the canonical /blog/tags URL", () => {
+    expect(tagPath("kv-cache")).toBe("/blog/tags/kv-cache");
   });
 });
 

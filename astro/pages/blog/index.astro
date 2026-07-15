@@ -1,11 +1,12 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostList from "../../components/PostList.astro";
 import { readingTimeMinutes, sortByPublishedDesc } from "../../content/blog-schema";
 import { getVisiblePosts } from "../../content/posts";
 
-// Swiss-minimal redesign — Blog index at /blog (ADR-0005 / #21). Hairline-ruled
-// post list with a mono meta rail (category / ISO date / reading time), matching
-// the home "Latest writing" pattern. Visibility by Status (ADR-0003 §8).
+// Swiss-minimal redesign — Blog index at /blog (ADR-0005 / #21). The
+// hairline-ruled post list lives in PostList.astro, shared with the
+// /blog/tags/[tag] pages (#48). Visibility by Status (ADR-0003 §8).
 const posts = sortByPublishedDesc(await getVisiblePosts()).map((post) => ({
   slug: post.id,
   data: post.data,
@@ -34,35 +35,7 @@ const LEDE =
     posts.length === 0 ? (
       <p class="mt-10 text-muted">No posts published yet.</p>
     ) : (
-      <section>
-        {posts.map((post) => (
-          <article class="grid gap-3 border-b border-surface-border py-8 md:grid-cols-[minmax(0,9rem)_minmax(0,1fr)] md:gap-10">
-            <div class="flex flex-row flex-wrap gap-x-4 gap-y-1 md:flex-col md:gap-2">
-              {import.meta.env.DEV && post.data.status !== "Published" && (
-                <span class="eyebrow self-start rounded-sm border border-warning-warm/40 bg-warning-soft px-1.5 py-px text-warning-warm">
-                  {post.data.status}
-                </span>
-              )}
-              <span class="eyebrow text-go-green-dark">{post.data.category}</span>
-              <time datetime={post.iso} class="eyebrow tabular text-faint">{post.iso}</time>
-              <span class="eyebrow text-faint">{post.minutes} min</span>
-            </div>
-            <div class="grid gap-2.5">
-              <h2 class="text-[1.45rem] font-semibold leading-tight tracking-[-0.01em] md:text-[1.7rem]">
-                <a href={`/blog/${post.slug}`} class="transition-colors hover:text-go-green-dark">
-                  {post.data.title}
-                </a>
-              </h2>
-              <p class="max-w-[48rem] text-[0.97rem] leading-relaxed text-muted">{post.data.summary}</p>
-              {post.data.tags && post.data.tags.length > 0 && (
-                <div class="mt-0.5 flex flex-wrap gap-x-4 gap-y-1">
-                  {post.data.tags.map((tag) => <span class="eyebrow">{tag}</span>)}
-                </div>
-              )}
-            </div>
-          </article>
-        ))}
-      </section>
+      <PostList posts={posts} />
     )
   }
 </BaseLayout>
