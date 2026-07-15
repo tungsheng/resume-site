@@ -2,6 +2,51 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+DEEP CLEANUP / AUDIT PASS (2026-07-15) — branch feat/architecture-improvements
+#############################################################################
+3 parallel audit agents (migration leftovers / docs-vs-reality / deps+config
++tests) + tracker check. Applied:
+  * PUBLIC DIR FLIP COMPLETED (ADR-0003 #12's deferred cleanup): the 7 old
+    Bun HTML shells in ./public DELETED (zero references), public-astro/
+    git-mv'd -> public/, publicDir override REMOVED from astro.config (back
+    to default), stale "Bun/React app in ./src" migration comments rewritten
+    (src/ is deliberately-kept shared libs, not an app awaiting removal).
+    Functional refs updated: package.json dev script, build-resume-pdf
+    outDir, .gitignore, CSP comments. ADR-0006/0007 keep their public-astro
+    mentions (historical records).
+  * DEAD EXPORTS deleted (zero importers, grep-verified): EXPERIMENTS_PATH /
+    BLOG_PATH / RESUME_PATH (site/content.ts), getDecisionProjectTitle
+    (decision-content.ts), getExperimentBySlug (experiment-catalog) + the
+    then-unused getProjectById import.
+  * tsconfig: dead @site/* escape-hatch alias removed (zero deep imports —
+    everything crosses the @site barrel).
+  * engines: node>=22.12 -> bun>=1.3.4 (nothing runs on node; CI installs
+    only Bun, pinned 1.3.4).
+  * TEST HYGIENE: resume-service "timeline rail + dots" test rewritten — it
+    asserted ornaments document-css hides (display:none per ADR-0005) plus
+    raw CSS substrings, reaching past renderResumeHtmlDocument's interface.
+    Now asserts visible content, entry count, authored order. blog-build
+    KaTeX describe no longer reruns a full astro build (reuses build #1;
+    suite ~halved).
+  * DOCS SYNCED: DEVELOPER.md (alias table -> @resume facade, resume flow
+    by export name, /blog/tags + search island in Pages, public/ paths,
+    build cmd incl. pagefind, +preview cmd); deployment.md (pipeline step 4
+    incl. pagefind, new "Security Headers & Search" section: wasm-unsafe-eval
+    + external-only init are Cloudflare-only failure modes, test-pinned);
+    README (pagefind mention, bun run test nit); CLAUDE.md (repo caveat: the
+    build is Astro-on-Vite — don't apply bun-build/no-vite defaults);
+    pages.yml stale "Adjust projectName" TODO.
+NOT APPLIED (deliberate): ralph-once.sh (untracked, references missing
+PRD.md — Tony's local tool, his call); progress.txt + skills-lock.json KEEP
+(this log is the working memory of the loop workflow); dep-section resort
+(inert in a static build — every dep verified used); srcDir flip (astro/ ->
+src/ merge) still not worth the churn — documented as deliberate in
+astro.config + DEVELOPER.md.
+TRACKER: clean — only #50 open (ready-for-human), #47-49 auto-closed by #53.
+VERIFIED: unit 80/80; integration 29/29 (single prod build now) incl. CSP
++ pagefind assertions over the flipped public/; dev-server: blog images +
+vendored KaTeX CSS serve from public/, math renders.
+#############################################################################
 ARCHITECTURE DEEPENING PASS + ADR RENUMBER (2026-07-15)
 branch feat/architecture-improvements (from main post-#53)
 #############################################################################
