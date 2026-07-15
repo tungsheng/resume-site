@@ -34,8 +34,10 @@ no-inline-script + CSP). unit 71/71; integration 29/29 (prod build).
 VERIFIED in dist-preview browser: PagefindUI injects input; "PagedAttention"
 -> exactly the scheduling post; "softmax" -> the 4 posts that discuss it;
 Category/Tag facets w/ display labels; console clean.
-NEXT: branch is 9 commits ahead of origin/main, unpushed — push + PR is the
-remaining step for the whole ADR-0007/0008 arc. #50 (CF Web Analytics
+PUSHED + PR OPENED (2026-07-15): branch pushed, PR #53 to main — the whole
+ADR-0007/0008 arc (ADRs, corpus cleanup, #47/#48/#49; closes all three on
+merge). Post-merge spot-check: search on the DEPLOYED site (the CSP path
+only exists on Cloudflare). #50 (CF Web Analytics
 beacon) stays ready-for-human. Issue #49 closable on merge.
 
 #############################################################################
