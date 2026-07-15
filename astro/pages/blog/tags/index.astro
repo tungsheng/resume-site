@@ -1,0 +1,49 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getVisiblePosts } from "../../../content/posts";
+import { selectTagCounts, tagPath } from "../../../content/tag-registry";
+
+// Tags overview (#48 / ADR-0008 decision 2): every registered tag with at
+// least one visible Post, alphabetical by slug, with counts. The browsable
+// no-JS complement to the /blog index; the search island (#49) layers the
+// same vocabulary as facets.
+const tags = selectTagCounts(await getVisiblePosts());
+
+const LEDE = "Every topic in the blog's vocabulary. Posts carry several tags; tags cut across the series.";
+---
+
+<BaseLayout
+  title="Tags | Blog | Tony Lee"
+  description={LEDE}
+  activeNav="blog"
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Blog", href: "/blog" }, { label: "Tags" }]}
+>
+  <section class="border-b border-surface-border pb-10 md:pb-12">
+    <h1 class="text-balance font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.25rem)]">
+      Tags
+    </h1>
+    <p class="mt-4 max-w-[46rem] text-[1.05rem] leading-relaxed text-muted md:text-[1.15rem]">{LEDE}</p>
+  </section>
+
+  {
+    tags.length === 0 ? (
+      <p class="mt-10 text-muted">No tags yet.</p>
+    ) : (
+      <ul class="mt-2">
+        {tags.map((tag) => (
+          <li class="flex items-baseline gap-4 border-b border-surface-border py-4">
+            <a
+              href={tagPath(tag.slug)}
+              class="text-[1.15rem] font-semibold tracking-[-0.01em] transition-colors hover:text-go-green-dark"
+            >
+              {tag.label}
+            </a>
+            <span class="eyebrow tabular text-faint">
+              {tag.count} {tag.count === 1 ? "post" : "posts"}
+            </span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</BaseLayout>

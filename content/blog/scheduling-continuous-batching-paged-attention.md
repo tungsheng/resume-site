@@ -9,10 +9,6 @@ tags:
   - continuous-batching
   - paged-attention
   - kv-cache
-  - inference
-related:
-  projects:
-    - gpu-inference-lab
 ---
 
 In 2022, [Orca](https://www.usenix.org/conference/osdi22/presentation/yu) reported serving GPT-3 175B at 36.9× the throughput of NVIDIA's FasterTransformer at the same level of latency (author-reported, on their own benchmark). No new kernels made the model faster and no weights changed — the gain came from changing *what the scheduler considers one unit of work*. A year later, the [vLLM paper](https://arxiv.org/abs/2309.06180) profiled how serving systems of that generation used the GPU memory they held and found that only 20.4%–38.2% of KV-cache memory stored actual token states; its fix, PagedAttention, raised that to 96.3% and delivered 2–4× throughput at the same latency (also author-reported).

@@ -13,11 +13,11 @@ A single unit of writing in the Blog. Authored as Markdown. May optionally link 
 _Avoid_: Note, Article, Entry
 
 **Category**:
-The single required broad bucket a Post belongs to. One per Post; the primary axis a reader scans. A **closed set**, enforced as a Zod enum: `Inference`, `CUDA`, `Career`. Finer distinctions (e.g. serving architecture vs. infrastructure vs. internals) are Tags, not new Categories.
+The single required broad bucket a Post belongs to. One per Post, shown alongside each Post in lists. A **closed set**, enforced as a Zod enum: `Inference`, `CUDA`, `Career`. Finer distinctions (e.g. serving architecture vs. infrastructure vs. internals) are Tags, not new Categories. Categories label Posts; Tags are what readers navigate by.
 _Avoid_: Section, Topic
 
 **Tag**:
-An optional fine-grained topic label on a Post (e.g. "SGLang", "Prefix cache"). Many per Post; cross-cuts Categories.
+An optional fine-grained topic label on a Post (e.g. "SGLang", "Prefix cache"). Many per Post; cross-cuts Categories and is the primary axis readers browse the Blog by. Tags are drawn from a **governed registry** — one canonical slug and one display label per topic, enforced at build time, so an unregistered or misspelled tag fails the build instead of forking the vocabulary (`kv-cache` vs `KV cache`). The registry is open for extension while writing; it is not a closed set like Category. A Tag must not restate the Post's Category.
 _Avoid_: Keyword, Label
 
 **Status**:

@@ -9,8 +9,6 @@ tags:
   - prefill-decode
   - kv-cache
 related:
-  projects:
-    - gpu-inference-lab
   experiments:
     - prefill-decode
 ---

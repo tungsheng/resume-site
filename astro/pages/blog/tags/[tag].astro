@@ -1,0 +1,61 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import PostList from "../../../components/PostList.astro";
+import { readingTimeMinutes, sortByPublishedDesc } from "../../../content/blog-schema";
+import { getVisiblePosts } from "../../../content/posts";
+import {
+  isRegisteredTag,
+  selectPostsWithTag,
+  selectTagCounts,
+  tagLabel,
+} from "../../../content/tag-registry";
+
+// Static tag pages (#48 / ADR-0008 decision 2): one page per registered tag
+// with at least one visible Post — the no-JS canonical tag surface. Visibility
+// follows Status exactly like /blog (ADR-0003 §8), so in prod a tag whose only
+// Posts are drafts gets no page at all.
+export async function getStaticPaths() {
+  const posts = await getVisiblePosts();
+  return selectTagCounts(posts).map(({ slug }) => ({ params: { tag: slug } }));
+}
+
+const { tag } = Astro.params;
+if (!isRegisteredTag(tag)) throw new Error(`Unregistered tag route: ${tag}`);
+const label = tagLabel(tag);
+
+const posts = sortByPublishedDesc(selectPostsWithTag(await getVisiblePosts(), tag)).map(
+  (post) => ({
+    slug: post.id,
+    data: post.data,
+    minutes: readingTimeMinutes(post.body ?? ""),
+    iso: post.data.published.toISOString().slice(0, 10),
+  }),
+);
+
+const DESCRIPTION = `Posts tagged “${label}” — engineering writing on inference serving, scheduler behavior, and GPU kernel paths.`;
+---
+
+<BaseLayout
+  title={`${label} | Blog | Tony Lee`}
+  description={DESCRIPTION}
+  activeNav="blog"
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Blog", href: "/blog" },
+    { label: "Tags", href: "/blog/tags" },
+    { label },
+  ]}
+>
+  <section class="border-b border-surface-border pb-10 md:pb-12">
+    <p class="eyebrow text-go-green-dark">Tag</p>
+    <h1 class="mt-3 text-balance font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.25rem)]">
+      {label}
+    </h1>
+    <p class="mt-4 font-mono text-[0.72rem] uppercase tracking-[0.08em] tabular text-muted">
+      {posts.length} {posts.length === 1 ? "post" : "posts"}
+      &middot; <a href="/blog/tags" class="transition-colors hover:text-go-green-dark">All tags</a>
+    </p>
+  </section>
+
+  <PostList posts={posts} />
+</BaseLayout>

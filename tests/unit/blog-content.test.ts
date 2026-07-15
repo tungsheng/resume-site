@@ -1,11 +1,20 @@
 import { describe, expect, test } from "bun:test";
 import {
+  POST_CATEGORIES,
   blogPostSchema,
   isPostVisible,
   readingTimeMinutes,
   selectLatest,
   sortByPublishedDesc,
 } from "../../astro/content/blog-schema";
+import {
+  REGISTERED_TAG_SLUGS,
+  isRegisteredTag,
+  selectPostsWithTag,
+  selectTagCounts,
+  tagLabel,
+  tagPath,
+} from "../../astro/content/tag-registry";
 
 const validPost = {
   title: "Why Prefix Cache Hit Rate Is the First Number to Check",
@@ -28,7 +37,7 @@ describe("blog post frontmatter schema", () => {
     const result = blogPostSchema.safeParse({
       ...validPost,
       updated: "2026-06-20",
-      tags: ["Prefix cache", "SGLang"],
+      tags: ["kv-cache", "prefill-decode"],
       related: { projects: ["gpu-inference-lab"] },
     });
     expect(result.success).toBe(true);
@@ -48,6 +57,74 @@ describe("blog post frontmatter schema", () => {
       false,
     );
     expect(blogPostSchema.safeParse({ ...validPost, category: "Inference" }).success).toBe(true);
+  });
+});
+
+describe("governed tag registry (ADR-0008 / #47)", () => {
+  test("rejects an unregistered tag so the build fails instead of forking the vocabulary", () => {
+    expect(blogPostSchema.safeParse({ ...validPost, tags: ["kv-cache", "kvcache"] }).success).toBe(
+      false,
+    );
+  });
+
+  test("rejects the pre-governance display-label spellings as tags", () => {
+    // These were live forks in the corpus before #47 (`KV cache` vs `kv-cache`).
+    for (const fork of ["KV cache", "Prefix cache", "Continuous batching", "SGLang"]) {
+      expect(blogPostSchema.safeParse({ ...validPost, tags: [fork] }).success).toBe(false);
+    }
+  });
+
+  test("accepts every registered slug", () => {
+    expect(blogPostSchema.safeParse({ ...validPost, tags: [...REGISTERED_TAG_SLUGS] }).success).toBe(
+      true,
+    );
+  });
+
+  test("every slug is kebab-case and carries a non-empty display label", () => {
+    for (const slug of REGISTERED_TAG_SLUGS) {
+      expect(slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(tagLabel(slug).length).toBeGreaterThan(0);
+    }
+  });
+
+  test("no registered tag restates a Category (CONTEXT.md: Tags cross-cut Categories)", () => {
+    for (const category of POST_CATEGORIES) {
+      expect(isRegisteredTag(category.toLowerCase())).toBe(false);
+    }
+  });
+});
+
+describe("tag page selection (#48)", () => {
+  const post = (slug: string, tags?: string[]) => ({ slug, data: { tags } });
+  const corpus = [
+    post("a", ["kv-cache", "attention"]),
+    post("b", ["kv-cache"]),
+    post("c", ["mlp"]),
+    post("d", undefined),
+  ];
+
+  test("selectPostsWithTag returns exactly the Posts carrying the tag", () => {
+    expect(selectPostsWithTag(corpus, "kv-cache").map((p) => p.slug)).toEqual(["a", "b"]);
+    expect(selectPostsWithTag(corpus, "attention").map((p) => p.slug)).toEqual(["a"]);
+    expect(selectPostsWithTag(corpus, "swiglu")).toEqual([]);
+  });
+
+  test("selectTagCounts drops zero-count tags — a topic earns its page with its first Post", () => {
+    const counts = selectTagCounts(corpus);
+    expect(counts).toEqual([
+      { slug: "attention", label: "Attention", count: 1 },
+      { slug: "kv-cache", label: "KV cache", count: 2 },
+      { slug: "mlp", label: "MLP", count: 1 },
+    ]);
+  });
+
+  test("selectTagCounts keeps registry (alphabetical) order regardless of corpus order", () => {
+    const slugs = selectTagCounts(corpus).map((t) => t.slug);
+    expect(slugs).toEqual([...slugs].sort());
+  });
+
+  test("tagPath builds the canonical /blog/tags URL", () => {
+    expect(tagPath("kv-cache")).toBe("/blog/tags/kv-cache");
   });
 });
 

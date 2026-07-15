@@ -27,19 +27,13 @@ const LATEST = PUBLISHED.slice(0, 3);
 const OLDER_PUBLISHED = PUBLISHED.slice(3);
 
 // status: Drafting — dev-only, excluded from a production build entirely.
-const DRAFTS = [
-  { slug: "prefix-cache-hit-rate-matters", title: "Why Prefix Cache Hit Rate Is the First Number to Check" },
-  { slug: "continuous-batching-throughput", title: "Continuous Batching Changes What Throughput Means" },
-  { slug: "kv-cache-is-the-batch-size-ceiling", title: "The KV Cache Is the Real Batch-Size Ceiling" },
-  { slug: "sizing-admission-queues", title: "Sizing Admission Queues Without Guessing" },
-];
+// The corpus currently has no Drafting Posts (the 2026-07 stubs were retired),
+// so these assertions are vacuous until the next draft lands — add it here.
+const DRAFTS: { slug: string; title: string }[] = [];
 
 // status: Outline — also dev-only; a production build emits no page and never
-// references them anywhere public.
-const OUTLINE = [
-  { slug: "sglang-architecture-request-lifecycle-scheduler-prefix-cache", title: "SGLang Architecture Deep Dive" },
-  { slug: "decode-process-deep-dive", title: "Decode Process Deep Dive" },
-];
+// references them anywhere public. Currently empty, same as DRAFTS.
+const OUTLINE: { slug: string; title: string }[] = [];
 
 // The launch Post exercises the rich pipeline end-to-end: an admonition callout
 // (mdast plugin, #16), self-hosted figures with lazy/async images (hast plugin,
@@ -60,6 +54,9 @@ describe("blog production build output", () => {
     // would otherwise treat as non-production (import.meta.env.PROD === false),
     // leaving drafts in. NODE_ENV=production makes import.meta.env.PROD true.
     await $`bunx astro build`.env({ ...process.env, NODE_ENV: "production" }).quiet();
+    // #49: the search index is a post-build step (package.json `build` runs
+    // `pagefind --site dist` after `astro build`); mirror it here.
+    await $`bunx pagefind --site dist`.quiet();
     indexHtml = await Bun.file("dist/blog/index.html").text();
   });
 
@@ -110,7 +107,9 @@ describe("blog production build output", () => {
     expect(html).toContain('class="post-toc"'); // 5 headings ≥ threshold
     expect(html).toContain("On this page");
     expect(html).toContain('class="post-related"');
-    expect(html).toContain('href="/work/gpu-inference-lab"');
+    // Posts no longer declare related.projects (the same lab project on every
+    // Post was boilerplate); the related surface carries experiments only.
+    expect(html).not.toContain('href="/work/gpu-inference-lab"');
     expect(html).toContain('href="/experiments/prefill-decode"');
   });
 
@@ -172,6 +171,83 @@ describe("blog production build output", () => {
     for (const stub of ["/projects/", "/decisions/", "/experiments/</loc>"]) {
       expect(sitemap).not.toContain(`<loc>https://tonylee.bio${stub}`);
     }
+  });
+
+  // #48 / ADR-0008 decision 2: static tag pages are the canonical tag surface.
+  itIf("builds the /blog/tags overview with display labels and counts", async () => {
+    const html = await Bun.file("dist/blog/tags/index.html").text();
+    expect(html).toContain('href="/blog/tags/kv-cache"');
+    expect(html).toContain("KV cache"); // display label, not the slug
+    expect(html).toContain("4 posts"); // kv-cache count across the corpus
+    expect(html).toContain('href="/blog/tags/swiglu"');
+    expect(html).toContain("1 post");
+  });
+
+  itIf("builds a tag page listing exactly the Posts carrying the tag", async () => {
+    const html = await Bun.file("dist/blog/tags/kv-cache/index.html").text();
+    for (const slug of [
+      "scheduling-continuous-batching-paged-attention",
+      "attention-how-to-shrink-it",
+      "attention-from-first-principles",
+      "transformer-inference-prefill-and-decode",
+    ]) {
+      expect(html).toContain(`href="/blog/${slug}"`);
+    }
+    expect(html).not.toContain("why-transformers-need-the-mlp"); // no kv-cache tag
+  });
+
+  itIf("links tag chips (display labels) from the blog index and the Post detail page", async () => {
+    expect(indexHtml).toContain('href="/blog/tags/kv-cache"');
+    expect(indexHtml).toContain(">KV cache</a>"); // chip renders the label
+    const postHtml = await Bun.file("dist/blog/why-transformers-need-the-mlp/index.html").text();
+    expect(postHtml).toContain('href="/blog/tags/mlp"');
+    expect(postHtml).toContain('href="/blog/tags/swiglu"');
+    expect(postHtml).toContain(">SwiGLU</a>");
+  });
+
+  // #49 / ADR-0008 decision 3: Pagefind search, blog-only, built after astro.
+  itIf("emits the Pagefind index and scopes it to Post pages only", async () => {
+    expect(await Bun.file("dist/pagefind/pagefind.js").exists()).toBe(true);
+    expect(await Bun.file("dist/pagefind/pagefind-ui.js").exists()).toBe(true);
+    expect(await Bun.file("dist/pagefind/pagefind-ui.css").exists()).toBe(true);
+    // Blog-only scope: data-pagefind-body appears on Post pages and nowhere
+    // else — when the attribute is present anywhere, Pagefind indexes only
+    // pages that carry it, so this is the whole scoping mechanism.
+    const postHtml = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
+    expect(postHtml).toContain("data-pagefind-body");
+    expect(postHtml).toContain('data-pagefind-filter="category"');
+    expect(postHtml).toContain('data-pagefind-filter="tag"');
+    for (const page of ["dist/index.html", "dist/work/index.html", "dist/blog/index.html"]) {
+      expect(await Bun.file(page).text()).not.toContain("data-pagefind-body");
+    }
+  });
+
+  itIf("mounts the search island on /blog only, injected entirely by JS", async () => {
+    expect(indexHtml).toContain('id="search"');
+    expect(indexHtml).toContain("/pagefind/pagefind-ui.js");
+    // No dead input for no-JS readers: the island div ships empty and the whole
+    // UI is injected at runtime (ADR-0007: static page stays fully functional).
+    expect(indexHtml).not.toContain("<input");
+    // The island is the index page's enhancement — Post pages stay script-free
+    // (the math-page zero-JS test guards this too).
+    const postHtml = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
+    expect(postHtml).not.toContain("pagefind-ui.js");
+  });
+
+  itIf("keeps the island CSP-compliant: external scripts only + wasm allowance", async () => {
+    // The deployed CSP (public-astro/_headers) has no 'unsafe-inline' for
+    // script-src, so every <script> on /blog must carry a src attribute —
+    // an inline initializer would silently die on Cloudflare only.
+    expect(indexHtml).not.toMatch(/<script(?![^>]*\bsrc=)/);
+    // Pagefind's WASM engine needs 'wasm-unsafe-eval' to instantiate.
+    const headers = await Bun.file("dist/_headers").text();
+    expect(headers).toContain("script-src 'self' 'wasm-unsafe-eval'");
+  });
+
+  itIf("lists tag pages in the sitemap", async () => {
+    const sitemap = await Bun.file("dist/sitemap-0.xml").text();
+    expect(sitemap).toContain("<loc>https://tonylee.bio/blog/tags/</loc>");
+    expect(sitemap).toContain("<loc>https://tonylee.bio/blog/tags/kv-cache/</loc>");
   });
 
   // Issue #9: robots points crawlers at the sitemap.

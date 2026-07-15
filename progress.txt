@@ -2,6 +2,117 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+PAGEFIND SEARCH ISLAND (#49) (2026-07-14) — branch feat/adr-0007-0008
+#############################################################################
+ADR-0008 decision 3 implemented — the blog's search, and the site's FIRST
+sanctioned JS island (ADR-0007: search is impossible without client JS):
+  * pagefind 1.5.2 devDependency; package.json build = build:pdf && astro
+    build && pagefind --site dist. Integration beforeAll mirrors the
+    pagefind step after its astro build.
+  * Scope blog-only by construction: data-pagefind-body on the Post
+    <article> ([slug].astro) and NOWHERE else — when the attribute exists
+    anywhere, Pagefind indexes only pages carrying it (6 pages indexed).
+    Drafts can't be indexed (not in dist, ADR-0003 §8).
+  * Facets: data-pagefind-filter="category" on the Post category eyebrow,
+    ="tag" on each Post tag chip -> display labels become filter values.
+  * Island on /blog only: empty #search div + /pagefind/pagefind-ui.js
+    (defer) + /js/search-init.js; whole UI injected at runtime so no-JS
+    readers see no dead input (tag pages remain the no-JS surface). Themed
+    via --pagefind-ui-* custom props -> Swiss tokens. PROD-only render
+    (assets don't exist under astro dev; preview via dist-preview).
+CSP CATCH (review step; local serve can't reproduce): deployed
+public-astro/_headers has script-src 'self' — NO 'unsafe-inline' — which
+would have silently killed (a) my first inline init <script> and (b) my
+second attempt, an Astro-processed script that Astro INLINES back into the
+page when small. Fix: init lives in public-astro/js/search-init.js (plain
+external file, no bundler heuristics) and script-src gains
+'wasm-unsafe-eval' (Pagefind's WASM engine requires it to instantiate).
+New integration test pins both: /blog scripts must all carry src=, and
+dist/_headers must contain the wasm allowance.
+TESTS: +3 integration (index emitted + blog-only scope + island mount /
+no-inline-script + CSP). unit 71/71; integration 29/29 (prod build).
+VERIFIED in dist-preview browser: PagefindUI injects input; "PagedAttention"
+-> exactly the scheduling post; "softmax" -> the 4 posts that discuss it;
+Category/Tag facets w/ display labels; console clean.
+PUSHED + PR OPENED (2026-07-15): branch pushed, PR #53 to main — the whole
+ADR-0007/0008 arc (ADRs, corpus cleanup, #47/#48/#49; closes all three on
+merge). Post-merge spot-check: search on the DEPLOYED site (the CSP path
+only exists on Cloudflare). #50 (CF Web Analytics
+beacon) stays ready-for-human. Issue #49 closable on merge.
+
+#############################################################################
+STATIC TAG PAGES + TAGS OVERVIEW (#48) (2026-07-14) — branch feat/adr-0007-0008
+#############################################################################
+ADR-0008 decision 2 implemented — the no-JS canonical tag surface:
+  * astro/pages/blog/tags/[tag].astro — one static page per registered tag
+    with >=1 visible Post (getStaticPaths over selectTagCounts). Visibility
+    = getVisiblePosts (ADR-0003 §8): a tag whose only Posts are drafts gets
+    NO page in prod. Header: eyebrow "Tag" / label h1 / N posts / All-tags
+    backlink.
+  * astro/pages/blog/tags/index.astro — overview, alphabetical (registry
+    order), display label + count per row.
+  * astro/components/PostList.astro — hairline post-list EXTRACTED from
+    blog/index.astro (verbatim markup) and shared by /blog + tag pages so
+    they can't drift. Chips now LINK to /blog/tags/<slug> and render the
+    registry DISPLAY LABEL (was: inert slug spans).
+  * blog/[slug].astro — post detail gains a linked tag-chip row after the
+    body (detail page had NO tag chips before — issue #48 assumed it did).
+  * tag-registry.ts helpers (pure, unit-tested): tagPath, selectPostsWithTag,
+    selectTagCounts (zero-count tags dropped — a topic earns its page with
+    its first Post; #48's "no min-count gate" means no gate BEYOND existence).
+  * Tests: +4 unit (selection/counts/order/path), +4 integration (overview
+    labels+counts, kv-cache page lists exactly its 4 posts, chips linked on
+    index + detail w/ labels, tag pages in sitemap). Sitemap inclusion is
+    automatic (@astrojs/sitemap walks built pages).
+VERIFIED: unit 71/71; integration 26/26 (full prod build); dev-server pass —
+/blog/tags overview (labels+counts), /blog/tags/kv-cache (h1 "KV cache",
+4 posts, exact set), MLP post chips linked w/ labels, console clean. Pages
+ship zero JS (static anchors only) — ADR-0007 default posture holds.
+NEXT: #49 Pagefind search island (facets ride on this vocabulary), then the
+pending push + PR of this branch (now 7 commits ahead of origin/main).
+
+#############################################################################
+BLOG NAVIGATION GROUNDWORK — ADRs, corpus cleanup, TAG REGISTRY (#47)
+(2026-07-13/14) — branch feat/adr-0007-0008
+#############################################################################
+GRILL SESSION (2026-07-13, Tony): improve blog organization/search/likes on
+Astro 7. Resolved design tree, recorded as:
+  * ADR-0007 — zero-JS becomes DEFAULT not absolute (amends ADR-0003 d7):
+    a feature may ship a progressively-enhanced island only when IMPOSSIBLE
+    without JS; static-first with JS disabled stays mandatory.
+  * ADR-0008 — Tags (not Categories, not Series) are the reader's primary
+    navigation axis; governed tag registry (build-enforced); static tag pages
+    (/blog/tags/[slug] + overview, no min-count gate); Pagefind search,
+    blog-only, tag/category facets — NO standalone filter island.
+  * CONTEXT.md: Tag sharpened (governed registry, must not restate Category);
+    Category demoted from "primary axis" to labeled bucket.
+  * Issues filed: #47 registry+cleanup, #48 tag pages, #49 Pagefind
+    (ready-for-agent, in dependency order); #50 CF Web Analytics
+    (ready-for-human: needs dashboard beacon token); #51 likes DEFERRED +
+    closed (trigger: ~>500 monthly readers; design settled in issue).
+CORPUS CLEANUP (2026-07-14, Tony's calls):
+  * Retired ALL six Drafting/Outline posts (commit 2b3ac4b) — superseded by
+    the published series; recoverable from git history. Integration
+    DRAFTS/OUTLINE fixtures emptied NOT deleted (re-arm on next draft).
+  * Dropped boilerplate related.projects gpu-inference-lab from all 6
+    published posts (commit 5488a73) — related surface is experiments-only
+    now; schema capability KEPT (a future post may still link a project).
+#47 IMPLEMENTED (2026-07-14): astro/content/tag-registry.ts — 17 canonical
+kebab-case slugs + display labels (labels consumed by #48 chips/pages and
+#49 facets; NOT rendered yet — #47 acceptance = no rendering change).
+blog-schema.ts tags -> z.array(z.string().refine(isRegisteredTag)) so an
+unregistered tag fails the build at content-load. Corpus: moe-routing lost
+mixture-of-experts (dup of moe) + inference (restates Category);
+scheduling post lost inference. 5 new unit tests (fork spellings rejected,
+kebab-case + label invariants, no Category restatement in registry).
+VERIFIED: negative test — bogus tag makes `astro sync` throw
+InvalidContentEntryDataError at the file, revert syncs clean; unit 67/67;
+integration 22/22 (full prod build); dev /blog chips correct per post.
+NEXT: #48 static tag pages (blocked-by satisfied once this lands), then
+#49 Pagefind. Branch has 3 prior unpushed commits (ADRs + cleanup) — push
++ PR to main is the pending human step.
+
+#############################################################################
 BLOG POST: SCHEDULING — CONTINUOUS BATCHING + PAGED ATTENTION (2026-07-07)
 branch feat/scheduling-batching
 #############################################################################
