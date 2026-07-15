@@ -1,6 +1,6 @@
 # Migrate the whole site to Astro: zero-JS static output, Tailwind, build-time PDF, CDN-hosted
 
-Status: accepted (supersedes ADR-0002; decision 7 amended by ADR-0007)
+Status: accepted (supersedes ADR-0002; decision 7 amended by ADR-0008)
 
 We are migrating the entire site off the Bun.serve + client-rendered-React + MUI/Emotion stack (with an SSR blog "island") to **Astro with zero-JavaScript static output**: Tailwind for styling (dropping MUI and Emotion entirely), Markdown Posts via Astro **content collections**, the resume PDF generated once at **build time**, and the resulting `dist/` deployed as static files to **Cloudflare Pages**. This reverses ADR-0002's request-time-SSR-on-a-long-running-Bun-server model in favour of a static build, and is the "revisit later" that ADR-0002 explicitly deferred when it kept the MUI mobile-nav `useState` rather than do a zero-JS render. ADR-0001 (Posts authored as Markdown, MDX off) is **preserved** — only its implementation changes.
 

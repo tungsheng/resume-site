@@ -1,4 +1,4 @@
-// The governed Tag registry (ADR-0008 decision 1 / CONTEXT.md "Tag"): one
+// The governed Tag registry (ADR-0009 decision 1 / CONTEXT.md "Tag"): one
 // canonical kebab-case slug and one display label per topic. The frontmatter
 // schema (blog-schema.ts) validates every Post's tags against this set, so an
 // unregistered or misspelled tag fails the build instead of silently forking
@@ -57,7 +57,7 @@ export type TagCount = { slug: TagSlug; label: string; count: number };
 
 // Registry-ordered (alphabetical) tag counts over the given Posts, for the
 // /blog/tags overview. Registered tags with zero Posts are dropped — a topic
-// earns its page with its first Post (ADR-0008: no min-count gate BEYOND
+// earns its page with its first Post (ADR-0009: no min-count gate BEYOND
 // existence; an empty tag page would be a soft-404).
 export function selectTagCounts<T extends { data: { tags?: string[] } }>(posts: T[]): TagCount[] {
   return REGISTERED_TAG_SLUGS.map((slug) => ({

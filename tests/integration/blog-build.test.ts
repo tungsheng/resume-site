@@ -173,7 +173,7 @@ describe("blog production build output", () => {
     }
   });
 
-  // #48 / ADR-0008 decision 2: static tag pages are the canonical tag surface.
+  // #48 / ADR-0009 decision 2: static tag pages are the canonical tag surface.
   itIf("builds the /blog/tags overview with display labels and counts", async () => {
     const html = await Bun.file("dist/blog/tags/index.html").text();
     expect(html).toContain('href="/blog/tags/kv-cache"');
@@ -205,7 +205,7 @@ describe("blog production build output", () => {
     expect(postHtml).toContain(">SwiGLU</a>");
   });
 
-  // #49 / ADR-0008 decision 3: Pagefind search, blog-only, built after astro.
+  // #49 / ADR-0009 decision 3: Pagefind search, blog-only, built after astro.
   itIf("emits the Pagefind index and scopes it to Post pages only", async () => {
     expect(await Bun.file("dist/pagefind/pagefind.js").exists()).toBe(true);
     expect(await Bun.file("dist/pagefind/pagefind-ui.js").exists()).toBe(true);
@@ -226,7 +226,7 @@ describe("blog production build output", () => {
     expect(indexHtml).toContain('id="search"');
     expect(indexHtml).toContain("/pagefind/pagefind-ui.js");
     // No dead input for no-JS readers: the island div ships empty and the whole
-    // UI is injected at runtime (ADR-0007: static page stays fully functional).
+    // UI is injected at runtime (ADR-0008: static page stays fully functional).
     expect(indexHtml).not.toContain("<input");
     // The island is the index page's enhancement — Post pages stay script-free
     // (the math-page zero-JS test guards this too).

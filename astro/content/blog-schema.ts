@@ -19,13 +19,13 @@ export const blogPostSchema = z.object({
   published: z.coerce.date(),
   // optional — richer surfaces (#6/#7/#8) consume these later
   updated: z.coerce.date().optional(),
-  // Governed vocabulary (ADR-0008 / #47): every tag must be a registered slug,
+  // Governed vocabulary (ADR-0009 / #47): every tag must be a registered slug,
   // so a typo or unilateral new spelling fails the build at content-load time.
   tags: z
     .array(
       z.string().refine(isRegisteredTag, {
         message:
-          "Unregistered tag — use a canonical slug from astro/content/tag-registry.ts, or register the new topic there (ADR-0008)",
+          "Unregistered tag — use a canonical slug from astro/content/tag-registry.ts, or register the new topic there (ADR-0009)",
       }),
     )
     .optional(),

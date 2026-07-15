@@ -60,7 +60,7 @@ describe("blog post frontmatter schema", () => {
   });
 });
 
-describe("governed tag registry (ADR-0008 / #47)", () => {
+describe("governed tag registry (ADR-0009 / #47)", () => {
   test("rejects an unregistered tag so the build fails instead of forking the vocabulary", () => {
     expect(blogPostSchema.safeParse({ ...validPost, tags: ["kv-cache", "kvcache"] }).success).toBe(
       false,
