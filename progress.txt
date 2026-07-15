@@ -2,6 +2,43 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+PAGEFIND SEARCH ISLAND (#49) (2026-07-14) — branch feat/adr-0007-0008
+#############################################################################
+ADR-0008 decision 3 implemented — the blog's search, and the site's FIRST
+sanctioned JS island (ADR-0007: search is impossible without client JS):
+  * pagefind 1.5.2 devDependency; package.json build = build:pdf && astro
+    build && pagefind --site dist. Integration beforeAll mirrors the
+    pagefind step after its astro build.
+  * Scope blog-only by construction: data-pagefind-body on the Post
+    <article> ([slug].astro) and NOWHERE else — when the attribute exists
+    anywhere, Pagefind indexes only pages carrying it (6 pages indexed).
+    Drafts can't be indexed (not in dist, ADR-0003 §8).
+  * Facets: data-pagefind-filter="category" on the Post category eyebrow,
+    ="tag" on each Post tag chip -> display labels become filter values.
+  * Island on /blog only: empty #search div + /pagefind/pagefind-ui.js
+    (defer) + /js/search-init.js; whole UI injected at runtime so no-JS
+    readers see no dead input (tag pages remain the no-JS surface). Themed
+    via --pagefind-ui-* custom props -> Swiss tokens. PROD-only render
+    (assets don't exist under astro dev; preview via dist-preview).
+CSP CATCH (review step; local serve can't reproduce): deployed
+public-astro/_headers has script-src 'self' — NO 'unsafe-inline' — which
+would have silently killed (a) my first inline init <script> and (b) my
+second attempt, an Astro-processed script that Astro INLINES back into the
+page when small. Fix: init lives in public-astro/js/search-init.js (plain
+external file, no bundler heuristics) and script-src gains
+'wasm-unsafe-eval' (Pagefind's WASM engine requires it to instantiate).
+New integration test pins both: /blog scripts must all carry src=, and
+dist/_headers must contain the wasm allowance.
+TESTS: +3 integration (index emitted + blog-only scope + island mount /
+no-inline-script + CSP). unit 71/71; integration 29/29 (prod build).
+VERIFIED in dist-preview browser: PagefindUI injects input; "PagedAttention"
+-> exactly the scheduling post; "softmax" -> the 4 posts that discuss it;
+Category/Tag facets w/ display labels; console clean.
+NEXT: branch is 9 commits ahead of origin/main, unpushed — push + PR is the
+remaining step for the whole ADR-0007/0008 arc. #50 (CF Web Analytics
+beacon) stays ready-for-human. Issue #49 closable on merge.
+
+#############################################################################
 STATIC TAG PAGES + TAGS OVERVIEW (#48) (2026-07-14) — branch feat/adr-0007-0008
 #############################################################################
 ADR-0008 decision 2 implemented — the no-JS canonical tag surface:
