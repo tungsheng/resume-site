@@ -2,6 +2,47 @@ BLOG MIGRATION — PROGRESS LOG
 =============================
 
 #############################################################################
+BLOG NAVIGATION GROUNDWORK — ADRs, corpus cleanup, TAG REGISTRY (#47)
+(2026-07-13/14) — branch feat/adr-0007-0008
+#############################################################################
+GRILL SESSION (2026-07-13, Tony): improve blog organization/search/likes on
+Astro 7. Resolved design tree, recorded as:
+  * ADR-0007 — zero-JS becomes DEFAULT not absolute (amends ADR-0003 d7):
+    a feature may ship a progressively-enhanced island only when IMPOSSIBLE
+    without JS; static-first with JS disabled stays mandatory.
+  * ADR-0008 — Tags (not Categories, not Series) are the reader's primary
+    navigation axis; governed tag registry (build-enforced); static tag pages
+    (/blog/tags/[slug] + overview, no min-count gate); Pagefind search,
+    blog-only, tag/category facets — NO standalone filter island.
+  * CONTEXT.md: Tag sharpened (governed registry, must not restate Category);
+    Category demoted from "primary axis" to labeled bucket.
+  * Issues filed: #47 registry+cleanup, #48 tag pages, #49 Pagefind
+    (ready-for-agent, in dependency order); #50 CF Web Analytics
+    (ready-for-human: needs dashboard beacon token); #51 likes DEFERRED +
+    closed (trigger: ~>500 monthly readers; design settled in issue).
+CORPUS CLEANUP (2026-07-14, Tony's calls):
+  * Retired ALL six Drafting/Outline posts (commit 2b3ac4b) — superseded by
+    the published series; recoverable from git history. Integration
+    DRAFTS/OUTLINE fixtures emptied NOT deleted (re-arm on next draft).
+  * Dropped boilerplate related.projects gpu-inference-lab from all 6
+    published posts (commit 5488a73) — related surface is experiments-only
+    now; schema capability KEPT (a future post may still link a project).
+#47 IMPLEMENTED (2026-07-14): astro/content/tag-registry.ts — 17 canonical
+kebab-case slugs + display labels (labels consumed by #48 chips/pages and
+#49 facets; NOT rendered yet — #47 acceptance = no rendering change).
+blog-schema.ts tags -> z.array(z.string().refine(isRegisteredTag)) so an
+unregistered tag fails the build at content-load. Corpus: moe-routing lost
+mixture-of-experts (dup of moe) + inference (restates Category);
+scheduling post lost inference. 5 new unit tests (fork spellings rejected,
+kebab-case + label invariants, no Category restatement in registry).
+VERIFIED: negative test — bogus tag makes `astro sync` throw
+InvalidContentEntryDataError at the file, revert syncs clean; unit 67/67;
+integration 22/22 (full prod build); dev /blog chips correct per post.
+NEXT: #48 static tag pages (blocked-by satisfied once this lands), then
+#49 Pagefind. Branch has 3 prior unpushed commits (ADRs + cleanup) — push
++ PR to main is the pending human step.
+
+#############################################################################
 BLOG POST: SCHEDULING — CONTINUOUS BATCHING + PAGED ATTENTION (2026-07-07)
 branch feat/scheduling-batching
 #############################################################################
