@@ -1,36 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 580" role="img"
      aria-label="How a token becomes a query, key, and value, in three steps. Step 1, token embedding: a token such as cat is looked up as a vector of d_model numbers — its embedding — and one such vector per token, stacked, forms the matrix X of shape seq by d_model. Step 2, projection: X is multiplied by a learned weight matrix W of shape d_model by d_head, a matrix multiply whose shared inner dimension d_model must match, producing an output of shape seq by d_head. Step 3, three roles: three different learned matrices Wq, Wk, Wv project the same X into three vectors per token. The query is what this token is looking for and is not cached, since it is used only at this token's own step. The key is what this token offers to others, and the value is what it passes on if matched; both the key and value are cached, because every later token reuses them.">
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .step  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
-    .note  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .mtx   { fill:#f4f6f5; stroke:#14171a; }
-    .gl    { stroke:#c4ccc8; stroke-width:1; }
-    .sym   { font:600 22px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .lab   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .dim   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .dmg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .tok   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .chip  { fill:#ffffff; stroke:#14171a; }
-    .chiptx{ font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .plain { fill:#ffffff; stroke:#14171a; }
-    .cache { fill:#dff6ee; stroke:#006b40; }
-    .big   { font:700 20px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .bigg  { font:700 20px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .role  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .roleg { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .sub   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .desc  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .pillc { fill:#dff6ee; stroke:#006b40; }
-    .pilln { fill:#ffffff; stroke:#aab2ae; }
-    .pilltc{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .pilltn{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .arr   { stroke:#006b40; stroke-width:1.5; fill:none; }
-    .brace { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .step  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#2f7d3b; }
+    .note  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .mtx   { fill:#f3efe7; stroke:#1c1b17; }
+    .gl    { stroke:#cbc5b9; stroke-width:1; }
+    .sym   { font:600 22px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .lab   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .dim   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .dmg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .tok   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .chip  { fill:#faf8f3; stroke:#1c1b17; }
+    .chiptx{ font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .plain { fill:#faf8f3; stroke:#1c1b17; }
+    .cache { fill:#e4f0e1; stroke:#2f7d3b; }
+    .big   { font:700 20px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .bigg  { font:700 20px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .role  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .roleg { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .sub   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .desc  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .pillc { fill:#e4f0e1; stroke:#2f7d3b; }
+    .pilln { fill:#faf8f3; stroke:#a9a49a; }
+    .pilltc{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .pilltn{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .arr   { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
+    .brace { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
   </style>
   <defs>
-    <marker id="qa" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="qa" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="578" rx="2"/>
@@ -50,7 +50,7 @@
   <text class="dim" x="258" y="146" text-anchor="middle">d_model numbers</text>
   <text class="dim" x="356" y="117" text-anchor="start">= one row of X</text>
 
-  <line x1="34" y1="168" x2="646" y2="168" stroke="#eef0f0" stroke-width="1"/>
+  <line x1="34" y1="168" x2="646" y2="168" stroke="#f0ebe2" stroke-width="1"/>
 
   <!-- ===== STEP 2: projection (matmul) ===== -->
   <text class="step" x="34" y="194">STEP 2 — PROJECT WITH A LEARNED WEIGHT</text>
@@ -91,7 +91,7 @@
   <text class="dmg" x="432" y="282" text-anchor="start">d_model</text>
   <text class="dmg" x="432" y="298" text-anchor="start">must match →</text>
 
-  <line x1="34" y1="362" x2="646" y2="362" stroke="#eef0f0" stroke-width="1"/>
+  <line x1="34" y1="362" x2="646" y2="362" stroke="#f0ebe2" stroke-width="1"/>
 
   <!-- ===== STEP 3: three roles ===== -->
   <text class="step" x="34" y="388">STEP 3 — THREE WEIGHTS, THREE ROLES</text>
@@ -100,7 +100,7 @@
   <!-- Q row -->
   <rect class="plain" x="34" y="420" width="32" height="32" rx="2"/>
   <text class="big"  x="50" y="443" text-anchor="middle">Q</text>
-  <text class="roleg" x="80" y="441" text-anchor="start" fill="#14171a">query</text>
+  <text class="roleg" x="80" y="441" text-anchor="start" fill="#1c1b17">query</text>
   <text class="desc" x="142" y="441" text-anchor="start">— what this token is looking for</text>
   <rect class="pilln" x="540" y="425" width="106" height="22" rx="11"/>
   <text class="pilltn" x="593" y="440" text-anchor="middle">not cached</text>

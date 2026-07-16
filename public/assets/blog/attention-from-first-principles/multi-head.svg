@@ -1,33 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 426" role="img"
      aria-label="Multi-head attention. A token vector of width d_model is split into h heads, each d_head wide, each with its own query, key, and value. Every head runs attention in parallel and caches its own K and V. The head outputs are concatenated back into a d_model-wide vector and mixed by a learned matrix Wo to form the block output, which repeats once per layer down the stack. The cost panel shows what each token adds to the cache — times 2 for K and V, times d_head for the vector width, times num_heads per head, times num_layers per layer, times bytes per number — then times seq_len tokens for the cache of one whole sequence.">
   <style>
-    .bg     { fill:#ffffff; stroke:#e6e6e6; }
-    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .head   { fill:#ffffff; stroke:#14171a; }
-    .htitle { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#5c6670; }
-    .attn   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .chip   { fill:#dff6ee; stroke:#006b40; }
-    .chiptx { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .bar    { fill:#f4f6f5; stroke:#14171a; }
-    .bartx  { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .sub    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .wo     { fill:#ffffff; stroke:#006b40; }
-    .wotx   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .out    { fill:#dff6ee; stroke:#006b40; }
-    .ell    { font:600 18px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .arr    { stroke:#006b40; stroke-width:1.5; fill:none; }
-    .side   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .panel  { fill:#fafbfb; stroke:#cfe6db; }
-    .ptitle { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
-    .ptx    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .fac    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .facem  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .rea    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .pform  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .cap    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .bg     { fill:#faf8f3; stroke:#e4e1da; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .head   { fill:#faf8f3; stroke:#1c1b17; }
+    .htitle { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#6f6d68; }
+    .attn   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .chip   { fill:#e4f0e1; stroke:#2f7d3b; }
+    .chiptx { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .bar    { fill:#f3efe7; stroke:#1c1b17; }
+    .bartx  { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .sub    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .wo     { fill:#faf8f3; stroke:#2f7d3b; }
+    .wotx   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .out    { fill:#e4f0e1; stroke:#2f7d3b; }
+    .ell    { font:600 18px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .arr    { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
+    .side   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .panel  { fill:#faf8f3; stroke:#d5e7cf; }
+    .ptitle { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#2f7d3b; }
+    .ptx    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .fac    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .facem  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .rea    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .pform  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .cap    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
   </style>
   <defs>
-    <marker id="ma" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="ma" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="424" rx="2"/>
@@ -100,7 +100,7 @@
   <text class="facem" x="492" y="245">× num_layers</text> <text class="rea" x="590" y="245">per layer</text>
   <text class="fac"   x="492" y="265">× bytes</text>      <text class="rea" x="590" y="265">fp16 = 2</text>
 
-  <line x1="492" y1="282" x2="646" y2="282" stroke="#cfe6db" stroke-width="1"/>
+  <line x1="492" y1="282" x2="646" y2="282" stroke="#d5e7cf" stroke-width="1"/>
   <text class="facem" x="492" y="305">× seq_len</text>    <text class="rea" x="590" y="305">tokens</text>
   <text class="pform" x="492" y="332">= cache, one</text>
   <text class="pform" x="492" y="349">whole sequence</text>

@@ -1,49 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 560" role="img"
      aria-label="One transformer layer of Llama 2 70B, weighed — drawn as the front card of a stack of 80 identical layer cards receding up and to the right, labeled layer 1, layer 2, dots, layer 80. A single bold residual stream enters from the left, runs horizontally through the front layer, and continues out the right side, hopping up through each ghosted card in the stack — the same stream threads all 80 layers. Inside the layer, two sub-blocks are detours off the stream: each branches off with a read arrow and deposits its output back into the stream at a circled plus node. First a small Attention block, tagged GQA, holding Wq at 8192 by 8192, Wk at 8192 by 1024, Wv at 8192 by 1024, and Wo at 8192 by 8192 — 151.0 million parameters, 18 percent of the layer. Then an MLP block drawn several times larger, its area roughly proportional to its weight, tagged SwiGLU, holding W_gate and W_up at 8,192 by 28,672 and W_down at 28,672 by 8,192 — 704.6 million parameters, 82 percent of the layer, three matrices and no biases. A caption under the stack reads: each sub-block is a detour — branch off the stream, transform, add back at the plus node; one residual stream threads all 80 identical layers. Below, a whole-model bar splits Llama 2 70B's 68.98 billion parameters into a long green MLP segment of 56.4 billion, 81.7 percent, and a short neutral segment of 12.6 billion for everything else. Takeaway: 82 percent of the layer, times 80 layers — four-fifths of the bytes are MLP bytes.">
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .card  { fill:#ffffff; stroke:#14171a; stroke-width:1.2; }
-    .ghost { fill:#ffffff; stroke:#d5dbd7; stroke-width:1; }
-    .glab  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .clab  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .pnl   { fill:#fafbfb; stroke:#e6e6e6; }
-    .ttl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .tag   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#7a847f; }
-    .wbox  { fill:#ffffff; stroke:#14171a; }
-    .wtx   { font:600 9px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .wdim  { font:400 8px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .mbox  { fill:#dff6ee; stroke:#006b40; }
-    .mtx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .mdim  { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .badgA { font:700 9px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .badgM { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .stream{ stroke:#14171a; stroke-width:3; fill:none; }
-    .stub  { stroke:#aab2ae; stroke-width:2; fill:none; }
-    .hop   { stroke:#14171a; stroke-width:1.5; stroke-dasharray:4 3; fill:none; }
-    .rlab  { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .brl   { font:400 8px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .riseA { stroke:#5c6670; stroke-width:1.5; fill:none; }
-    .riseM { stroke:#006b40; stroke-width:2; fill:none; }
-    .plusA { fill:#ffffff; stroke:#5c6670; stroke-width:1.5; }
-    .plusM { fill:#ffffff; stroke:#006b40; stroke-width:1.5; }
-    .ptxA  { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .ptxM  { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .cap1  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .cap2  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .barhd { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:.5px; fill:#5c6670; }
-    .barM  { fill:#006b40; }
-    .barMt { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#ffffff; }
-    .barE  { fill:#fafbfb; stroke:#aab2ae; }
-    .barEt { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .slab  { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .take  { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .card  { fill:#faf8f3; stroke:#1c1b17; stroke-width:1.2; }
+    .ghost { fill:#faf8f3; stroke:#ddd8cf; stroke-width:1; }
+    .glab  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .clab  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .pnl   { fill:#faf8f3; stroke:#e4e1da; }
+    .ttl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .tag   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#79736a; }
+    .wbox  { fill:#faf8f3; stroke:#1c1b17; }
+    .wtx   { font:600 9px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .wdim  { font:400 8px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .mbox  { fill:#e4f0e1; stroke:#2f7d3b; }
+    .mtx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .mdim  { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .badgA { font:700 9px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .badgM { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .stream{ stroke:#1c1b17; stroke-width:3; fill:none; }
+    .stub  { stroke:#a9a49a; stroke-width:2; fill:none; }
+    .hop   { stroke:#1c1b17; stroke-width:1.5; stroke-dasharray:4 3; fill:none; }
+    .rlab  { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .brl   { font:400 8px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .riseA { stroke:#6f6d68; stroke-width:1.5; fill:none; }
+    .riseM { stroke:#2f7d3b; stroke-width:2; fill:none; }
+    .plusA { fill:#faf8f3; stroke:#6f6d68; stroke-width:1.5; }
+    .plusM { fill:#faf8f3; stroke:#2f7d3b; stroke-width:1.5; }
+    .ptxA  { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .ptxM  { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .cap1  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .cap2  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .barhd { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:.5px; fill:#6f6d68; }
+    .barM  { fill:#2f7d3b; }
+    .barMt { font:700 11px 'JetBrains Mono',ui-monospace,monospace; fill:#faf8f3; }
+    .barE  { fill:#faf8f3; stroke:#a9a49a; }
+    .barEt { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .slab  { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .take  { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
   </style>
   <defs>
-    <marker id="ih" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
-    <marker id="ia" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5c6670"/></marker>
-    <marker id="ig" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="ih" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1c1b17"/></marker>
+    <marker id="ia" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6f6d68"/></marker>
+    <marker id="ig" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="558" rx="2"/>
@@ -96,13 +96,13 @@
 
   <!-- ============ RESIDUAL STREAM: the spine ============ -->
   <path class="stream" d="M20,340 L588,340"/>
-  <path d="M34,336 L41,340 L34,344 Z"  fill="#14171a"/>
-  <path d="M193,336 L200,340 L193,344 Z" fill="#14171a"/>
-  <path d="M558,336 L565,340 L558,344 Z" fill="#14171a"/>
+  <path d="M34,336 L41,340 L34,344 Z"  fill="#1c1b17"/>
+  <path d="M193,336 L200,340 L193,344 Z" fill="#1c1b17"/>
+  <path d="M558,336 L565,340 L558,344 Z" fill="#1c1b17"/>
   <text class="rlab" x="52" y="364">residual stream</text>
 
   <!-- attention detour: branch off, add back at ⊕ -->
-  <circle cx="86" cy="340" r="3" fill="#5c6670"/>
+  <circle cx="86" cy="340" r="3" fill="#6f6d68"/>
   <path class="riseA" d="M86,340 L86,312" marker-end="url(#ia)"/>
   <text class="brl" x="93" y="328">read</text>
   <path class="riseA" d="M158,308 L158,326" marker-end="url(#ia)"/>
@@ -111,7 +111,7 @@
   <text class="ptxA" x="158" y="344" text-anchor="middle">+</text>
 
   <!-- MLP detour: branch off, add back at ⊕ -->
-  <circle cx="222" cy="340" r="3" fill="#006b40"/>
+  <circle cx="222" cy="340" r="3" fill="#2f7d3b"/>
   <path class="riseM" d="M222,340 L222,312" marker-end="url(#ig)"/>
   <text class="brl" x="229" y="328">read</text>
   <path class="riseM" d="M526,308 L526,326" marker-end="url(#ig)"/>

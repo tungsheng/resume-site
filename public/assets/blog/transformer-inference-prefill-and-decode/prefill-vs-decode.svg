@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 340" role="img"
      aria-label="Prefill processes the whole prompt in one parallel forward pass and is compute-bound; decode generates one token per forward pass in an autoregressive loop and is memory-bound">
   <style>
-    .bg   { fill:#ffffff; stroke:#e6e6e6; }
-    .hair { stroke:#e6e6e6; stroke-width:1; }
-    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .cap  { font:400 13px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .strong { fill:#14171a; }
-    .tok  { fill:#ffffff; stroke:#14171a; }
-    .toktx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .pass { fill:#ffffff; stroke:#006b40; }
-    .passtx { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .out  { fill:#dff6ee; stroke:#006b40; }
-    .arr  { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .bg   { fill:#faf8f3; stroke:#e4e1da; }
+    .hair { stroke:#e4e1da; stroke-width:1; }
+    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .cap  { font:400 13px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .strong { fill:#1c1b17; }
+    .tok  { fill:#faf8f3; stroke:#1c1b17; }
+    .toktx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .pass { fill:#faf8f3; stroke:#2f7d3b; }
+    .passtx { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .out  { fill:#e4f0e1; stroke:#2f7d3b; }
+    .arr  { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
   </style>
   <defs>
     <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/>
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/>
     </marker>
   </defs>
 
@@ -47,7 +47,7 @@
   <text class="toktx" x="170" y="228" text-anchor="middle">mat</text>
   <text class="cap" x="26" y="282">Whole prompt in one</text>
   <text class="cap" x="26" y="300">parallel pass —</text>
-  <text class="cap strong" x="26" y="318" style="fill:#14171a;font-weight:600">compute-bound.</text>
+  <text class="cap strong" x="26" y="318" style="fill:#1c1b17;font-weight:600">compute-bound.</text>
 
   <!-- DECODE -->
   <text class="ey" x="364" y="42">DECODE</text>
@@ -64,5 +64,5 @@
   <text class="ey" x="620" y="145" text-anchor="middle" transform="rotate(-90 620 145)">APPEND · REPEAT</text>
   <text class="cap" x="364" y="282">One new token per pass,</text>
   <text class="cap" x="364" y="300">fed back in —</text>
-  <text class="cap strong" x="364" y="318" style="fill:#14171a;font-weight:600">memory-bound.</text>
+  <text class="cap strong" x="364" y="318" style="fill:#1c1b17;font-weight:600">memory-bound.</text>
 </svg>

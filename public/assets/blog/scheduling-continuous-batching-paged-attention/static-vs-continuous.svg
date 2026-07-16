@@ -2,33 +2,33 @@
      aria-label="Two stacked grids comparing batching regimes, four batch slots by twelve decode iterations each, from Orca OSDI 2022. Top panel, request-level batching — the batch is one unit of work: requests R1 through R4 occupy the four slots. R1 generates from iteration t1 to t4, R2 through t7, R3 through t9, R4 runs all twelve iterations. After a request finishes, its slot sits idle — drawn as hatched grey cells — until the whole batch completes at t12: R1 idles for eight iterations, R2 for five, R3 for three. A queued request R5 sits outside the batch in a chip labeled R5 queued, annotated waits until t12. Bottom panel, iteration-level scheduling — the batch is re-formed every iteration: the same four slots, but the moment a request finishes, its slot is refilled on the next iteration. R5 takes over R1's slot at t5 and generates t5 to t12, R6 takes R2's slot at t8, R7 takes R3's slot at t10; R4 runs t1 to t12 as before. An arrow at the R1-to-R5 boundary is labeled finished, then slot refilled on the next iteration. There are no idle cells — the batch stays full. Footnote: Orca, OSDI 2022 — iteration-level scheduling: the scheduler runs one iteration, then re-forms the batch.">
   <title>Request-level vs iteration-level scheduling — Orca (OSDI '22)</title>
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .stg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#006b40; }
-    .subin { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .tick  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .row   { font:600 10.5px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .rown  { fill:#006b40; }
-    .cg    { fill:#e8f3ee; stroke:#006b40; stroke-width:1.1; }
-    .cn    { fill:#cfe6da; stroke:#006b40; stroke-width:1.4; }
-    .ci    { fill:url(#hatch); stroke:#d5d9d6; stroke-width:1; }
-    .clbl  { font:700 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .chip  { fill:#ffffff; stroke:#14171a; }
-    .chiptx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .thin  { stroke:#aab2ae; stroke-width:1.2; fill:none; }
-    .arrg  { stroke:#006b40; stroke-width:1.2; fill:none; }
-    .hair  { stroke:#e0e3e1; stroke-width:1; }
-    .vs    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .ann2  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .stg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#2f7d3b; }
+    .subin { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .tick  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .row   { font:600 10.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .rown  { fill:#2f7d3b; }
+    .cg    { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.1; }
+    .cn    { fill:#d5e7cf; stroke:#2f7d3b; stroke-width:1.4; }
+    .ci    { fill:url(#hatch); stroke:#ddd8cf; stroke-width:1; }
+    .clbl  { font:700 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .chip  { fill:#faf8f3; stroke:#1c1b17; }
+    .chiptx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .thin  { stroke:#a9a49a; stroke-width:1.2; fill:none; }
+    .arrg  { stroke:#2f7d3b; stroke-width:1.2; fill:none; }
+    .hair  { stroke:#ddd8cf; stroke-width:1; }
+    .vs    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .ann2  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
   </style>
   <defs>
-    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
-    <marker id="agr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#aab2ae"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
+    <marker id="agr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a9a49a"/></marker>
     <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <rect width="5" height="5" fill="#fbfbfa"/>
-      <line x1="0" y1="0" x2="0" y2="5" stroke="#dde2df" stroke-width="1.2"/>
+      <rect width="5" height="5" fill="#faf8f3"/>
+      <line x1="0" y1="0" x2="0" y2="5" stroke="#ddd8cf" stroke-width="1.2"/>
     </pattern>
   </defs>
 

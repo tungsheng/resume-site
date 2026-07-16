@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 268" role="img"
      aria-label="Share it, or compress it: four panels left to right. A legend marks the two box types: white Q boxes are query heads, green KV boxes are cached keys and values. Every panel has the same top row of four query heads, because the query heads stay many and diverse; what changes is the cached K/V below them. Panel one, multi-head attention: each of the four query heads has its own key-value pair, so four are cached — the baseline. Panel two, grouped-query attention: the four query heads share two key-value pairs, so two are cached, with near-baseline quality. Panel three, multi-query attention: all four query heads share a single key-value pair, so one is cached, at some quality cost. Panel four, multi-head latent attention: the keys and values are replaced by one compressed latent that reconstructs them per head — smaller than grouped-query, slightly larger than multi-query, at quality that matches or beats multi-head. Queries stay many; only what is cached shrinks: four, two, one, then a single latent.">
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .pnl   { fill:#fafbfb; stroke:#e6e6e6; }
-    .ttl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .tag   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#7a847f; }
-    .qbox  { fill:#ffffff; stroke:#14171a; }
-    .qtx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .kv    { fill:#dff6ee; stroke:#006b40; }
-    .kvtx  { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .lat   { fill:#006b40; stroke:#006b40; }
-    .lattx { font:700 10px 'JetBrains Mono',ui-monospace,monospace; fill:#ffffff; }
-    .link  { stroke:#9bbfb0; stroke-width:1; fill:none; }
-    .cnt   { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .qual  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .leg   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .pnl   { fill:#faf8f3; stroke:#e4e1da; }
+    .ttl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .tag   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#79736a; }
+    .qbox  { fill:#faf8f3; stroke:#1c1b17; }
+    .qtx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .kv    { fill:#e4f0e1; stroke:#2f7d3b; }
+    .kvtx  { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .lat   { fill:#2f7d3b; stroke:#2f7d3b; }
+    .lattx { font:700 10px 'JetBrains Mono',ui-monospace,monospace; fill:#faf8f3; }
+    .link  { stroke:#a6b0a4; stroke-width:1; fill:none; }
+    .cnt   { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .qual  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .leg   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
   </style>
 
   <rect class="bg" x="1" y="1" width="678" height="266" rx="2"/>

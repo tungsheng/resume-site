@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 320" role="img"
      aria-label="Tokenization turns prompt text into a sequence of tokens, then maps each token to an integer ID from a fixed vocabulary. The model only ever sees these IDs; detokenization runs the map in reverse to turn generated IDs back into text for the reply.">
   <style>
-    .bg   { fill:#ffffff; stroke:#e6e6e6; }
-    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .txt  { fill:#ffffff; stroke:#14171a; }
-    .tok  { fill:#f4f6f5; stroke:#14171a; }
-    .id   { fill:#dff6ee; stroke:#006b40; }
-    .tx   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .cap  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .arrg { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .bg   { fill:#faf8f3; stroke:#e4e1da; }
+    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .txt  { fill:#faf8f3; stroke:#1c1b17; }
+    .tok  { fill:#f3efe7; stroke:#1c1b17; }
+    .id   { fill:#e4f0e1; stroke:#2f7d3b; }
+    .tx   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .cap  { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .arrg { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
   </style>
   <defs>
-    <marker id="atk" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="atk" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="318" rx="2"/>

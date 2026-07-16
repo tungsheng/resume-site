@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 366" role="img"
      aria-label="The KV cache as it grows over decode steps. After each decode step the cache is a row of per-token entries: step 1 holds one entry, step 2 holds two, and so on. Each step appends exactly one new entry (highlighted) and keeps all the earlier ones, and every step must read the entire row — so the work scales with sequence length and decode is limited by memory bandwidth, not compute.">
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .lbl   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .cell  { fill:#f4f6f5; stroke:#b9c4bf; }
-    .new   { fill:#dff6ee; stroke:#006b40; stroke-width:1.5; }
-    .cn    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .cnn   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .cap   { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .read  { stroke:#006b40; stroke-width:1.2; fill:none; }
-    .down  { stroke:#b9c4bf; stroke-width:1.2; fill:none; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .lbl   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .cell  { fill:#f3efe7; stroke:#c1baad; }
+    .new   { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.5; }
+    .cn    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .cnn   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .cap   { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .read  { stroke:#2f7d3b; stroke-width:1.2; fill:none; }
+    .down  { stroke:#c1baad; stroke-width:1.2; fill:none; }
   </style>
   <defs>
-    <marker id="rd" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
-    <marker id="dn" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#b9c4bf"/></marker>
+    <marker id="rd" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
+    <marker id="dn" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#c1baad"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="364" rx="2"/>
