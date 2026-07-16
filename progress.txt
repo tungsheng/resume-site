@@ -1348,3 +1348,17 @@ gradient, allocation bars/hatching) — all cohere, no white-box clash.
 Other surfaces checked: callouts already use warm accent-soft/warning-soft tokens
 (#55); code blocks keep the intentional dark terminal surface (#0d1117).
 Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.
+
+--------------------------------------------------------------------------------
+2026-07-16 — REDESIGN follow-up: align resume PDF palette to the new tokens
+--------------------------------------------------------------------------------
+Reviewed the build-time resume PDF: rendering clean (one Letter page, two-column,
+all content correct), but it was still on the ADR-0005 Swiss palette — old teal
+green (#00ab66/#006b40) + cool inks — mismatching the redesigned site's brand
+green. Per Tony: PALETTE-ONLY alignment. Updated document-css.ts vars to the new
+tokens (accent #2f7d3b / #235e2c, ink #1c1b17, muted #6f6d68, faint #83817a, rule
+#e4e1da; all AA on white). Deliberately KEPT white background, Inter sans, and the
+two-column layout — print/ATS essentials that shouldn't track the warm-paper web.
+Rebuilt + eyeballed the PDF: kicker/company names/bullets now the brand green.
+public/resume.pdf is gitignored (regenerated at build), so only the source
+changed. Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.
