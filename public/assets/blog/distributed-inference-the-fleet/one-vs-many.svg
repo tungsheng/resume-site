@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 368" role="img"
+     aria-label="A two-panel before-and-after contrast of inference serving, split by a thin vertical hairline with a small 'vs'. Left panel, ONE REPLICA: a single rounded node box holds everything locally — a tile of GPUs holding the weights, a small scheduler chip, and a KV-cache block — all stacked inside the one node, with a request arrow entering from the left. A grey note reads: one node — caps out when it fills. Right panel, A FLEET: at the top a green-accented cache-aware router fans out with arrows to three replica boxes in a row, each a small node with GPUs and a scheduler but no cache of its own; the router picks one replica per request. Below the replicas, a wide green shared KV store spans their width and connects to all three with bidirectional read/write arrows. A grey note reads: router picks a replica; KV pulled into a shared store. The visual story: on the left the KV cache lives inside the single node, and on the right that cache has been pulled out into a shared store while a router has appeared in front.">
+  <title>One replica vs a fleet — the KV cache moves out and a router moves in front</title>
+  <style>
+    .bg     { fill:#faf8f3; stroke:#e4e1da; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .node   { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.25; }
+    .tile   { fill:#faf8f3; stroke:#cbc5b9; stroke-width:1; }
+    .kv     { fill:#f3efe7; stroke:#6f6d68; stroke-width:1.1; }
+    .acc    { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.25; }
+    .lbl    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .lblg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .lbls   { font:600 9px  'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .cap    { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .capg   { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .req    { font:600 9px  'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; letter-spacing:0.5px; }
+    .ann    { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .div    { stroke:#cbc5b9; stroke-width:1; }
+    .vs     { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#a9a49a; letter-spacing:1px; }
+    .lgd    { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .note   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .arrs   { stroke:#6f6d68; stroke-width:1.4; fill:none; }
+    .arrg   { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
+  </style>
+  <defs>
+    <marker id="af" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M3,0 L8,3 L3,6 Z" fill="#6f6d68"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto-start-reverse"><path d="M3,0 L8,3 L3,6 Z" fill="#2f7d3b"/></marker>
+  </defs>
+
+  <!-- ==================================================================
+    COORDINATE ARITHMETIC
+    Canvas 740 x 368. Divider hairline at x=340, y 58..308; "vs" at y=183.
+    Left panel  (x 34..316, content centered on cx=170):
+      eyebrow x=60 y=34. Node box x=96 y=70 w=148 h=168 (70..238), center y=154.
+      Inner tiles at x=110 w=120:
+        GPUs·weights  y=88  h=36 (88..124)
+        scheduler     y=136 h=28 (136..164)
+        KV cache      y=176 h=46 (176..222)   [neutral = local]
+      Request arrow: 38,154 -> 94,154 (into node left edge), label at y=145.
+      Left note: cx=170, y=258.
+    Right panel (x 389..691, content centered on cx=540), canvas widened to 740:
+      eyebrow x=391 y=34. Router x=420 y=70 w=240 h=34 (70..104).
+      Replicas: 3 boxes w=74 h=64 (132..196) at x=389,503,617 -> centers 426,540,654
+        (40px gaps between boxes; outer margins ~49px to divider / ~47px to edge).
+        Inner: GPUs tile y=144 h=24; sched tile y=172 h=18.
+      Router->replica arrows: from 540,104 to each replica top (y=132).
+      Shared store: x=389 y=224 w=302 h=44 (224..268), green, center 540.
+      Replica<->store arrows: vertical at x=426,540,654, y 196<->224 (bidir).
+      Right note: cx=540, y=286 / y=300.
+    Legend row y=326 (swatch)/y=335 (text), centered ~370. Footer y=352, x=370.
+  =================================================================== -->
+
+  <rect class="bg" x="1" y="1" width="738" height="366" rx="2"/>
+
+  <!-- divider hairline + vs -->
+  <line class="div" x1="340" y1="58" x2="340" y2="308"/>
+  <rect x="329" y="172" width="22" height="22" rx="11" fill="#faf8f3"/>
+  <text class="vs" x="340" y="187" text-anchor="middle">vs</text>
+
+  <!-- ===================== LEFT: ONE REPLICA ===================== -->
+  <text class="ey" x="60" y="34">ONE REPLICA</text>
+
+  <!-- request arrow entering the node -->
+  <text class="req" x="40" y="145">request</text>
+  <path class="arrs" d="M38,154 L92,154" marker-end="url(#af)"/>
+
+  <!-- the single node: everything local -->
+  <rect class="node" x="96" y="70" width="148" height="168" rx="6"/>
+  <text class="cap" x="170" y="63" text-anchor="middle">weights + scheduler + cache, all local</text>
+
+  <!-- GPUs holding weights -->
+  <rect class="tile" x="110" y="88" width="120" height="36" rx="3"/>
+  <rect x="120" y="98" width="12" height="16" rx="1.5" fill="#e4e1da" stroke="#6f6d68" stroke-width="0.8"/>
+  <rect x="136" y="98" width="12" height="16" rx="1.5" fill="#e4e1da" stroke="#6f6d68" stroke-width="0.8"/>
+  <rect x="152" y="98" width="12" height="16" rx="1.5" fill="#e4e1da" stroke="#6f6d68" stroke-width="0.8"/>
+  <text class="lbls" x="172" y="103">GPUs</text>
+  <text class="cap"  x="172" y="115">weights</text>
+
+  <!-- scheduler chip -->
+  <rect class="tile" x="110" y="136" width="120" height="28" rx="3"/>
+  <text class="lbl" x="170" y="154" text-anchor="middle">scheduler</text>
+
+  <!-- KV cache block (local, neutral) -->
+  <rect class="kv" x="110" y="176" width="120" height="46" rx="3"/>
+  <text class="lbl" x="170" y="197" text-anchor="middle">KV cache</text>
+  <text class="cap" x="170" y="211" text-anchor="middle">(local)</text>
+
+  <!-- left note -->
+  <text class="ann" x="170" y="258" text-anchor="middle">one node — caps out when it fills</text>
+
+  <!-- ===================== RIGHT: A FLEET ===================== -->
+  <text class="ey" x="391" y="34">A FLEET</text>
+
+  <!-- cache-aware router -->
+  <rect class="acc" x="420" y="70" width="240" height="34" rx="6"/>
+  <text class="lblg" x="540" y="91" text-anchor="middle">cache-aware router</text>
+
+  <!-- router fans out to three replicas -->
+  <path class="arrg" d="M540,104 L433,112 L428,128" marker-end="url(#ag)"/>
+  <path class="arrg" d="M540,104 L540,128" marker-end="url(#ag)"/>
+  <path class="arrg" d="M540,104 L649,112 L654,128" marker-end="url(#ag)"/>
+
+  <!-- three replica nodes (no cache of their own), 40px gaps, centers 426/540/654 -->
+  <!-- replica 1 -->
+  <rect class="node" x="389" y="132" width="74" height="64" rx="5"/>
+  <rect class="tile" x="397" y="144" width="58" height="24" rx="2.5"/>
+  <text class="lbls" x="426" y="160" text-anchor="middle">GPUs</text>
+  <rect class="tile" x="397" y="172" width="58" height="18" rx="2.5"/>
+  <text class="cap"  x="426" y="184" text-anchor="middle">sched</text>
+  <!-- replica 2 -->
+  <rect class="node" x="503" y="132" width="74" height="64" rx="5"/>
+  <rect class="tile" x="511" y="144" width="58" height="24" rx="2.5"/>
+  <text class="lbls" x="540" y="160" text-anchor="middle">GPUs</text>
+  <rect class="tile" x="511" y="172" width="58" height="18" rx="2.5"/>
+  <text class="cap"  x="540" y="184" text-anchor="middle">sched</text>
+  <!-- replica 3 -->
+  <rect class="node" x="617" y="132" width="74" height="64" rx="5"/>
+  <rect class="tile" x="625" y="144" width="58" height="24" rx="2.5"/>
+  <text class="lbls" x="654" y="160" text-anchor="middle">GPUs</text>
+  <rect class="tile" x="625" y="172" width="58" height="18" rx="2.5"/>
+  <text class="cap"  x="654" y="184" text-anchor="middle">sched</text>
+
+  <!-- replicas <-> shared store (bidirectional read/write) -->
+  <path class="arrg" d="M426,200 L426,220" marker-start="url(#ag)" marker-end="url(#ag)"/>
+  <path class="arrg" d="M540,200 L540,220" marker-start="url(#ag)" marker-end="url(#ag)"/>
+  <path class="arrg" d="M654,200 L654,220" marker-start="url(#ag)" marker-end="url(#ag)"/>
+
+  <!-- shared KV store -->
+  <rect class="acc" x="389" y="224" width="302" height="44" rx="6"/>
+  <text class="lblg" x="540" y="244" text-anchor="middle">shared KV store</text>
+  <text class="capg" x="540" y="258" text-anchor="middle">cache pulled out — every replica reads/writes it</text>
+
+  <!-- right note -->
+  <text class="ann" x="540" y="286" text-anchor="middle">router picks a replica;</text>
+  <text class="ann" x="540" y="300" text-anchor="middle">KV pulled into a shared store</text>
+
+  <!-- legend -->
+  <rect class="acc" x="242" y="326" width="11" height="11" rx="2"/>
+  <text class="lgd" x="259" y="335">shared state</text>
+  <rect class="kv"  x="392" y="326" width="11" height="11" rx="2"/>
+  <text class="lgd" x="409" y="335">local / private</text>
+
+  <!-- footer -->
+  <text class="note" x="370" y="356" text-anchor="middle">the KV cache moves out of the node; a cache-aware router moves in front</text>
+</svg>
