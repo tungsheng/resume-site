@@ -1300,3 +1300,31 @@ Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓
 Reverted the 1024px content experiment: <main> max-width 64rem → 75rem, so the
 content column matches the header/footer chrome at 1200px again (all three 75rem,
 aligned). Measured header/main/footer all 1200 @1200vw. Validation ✓.
+
+
+--------------------------------------------------------------------------------
+2026-07-16 — REDESIGN review/cleanup/audit pass
+--------------------------------------------------------------------------------
+Audited the branch diff (17 files) vs origin/main. Applied:
+- a11y: darkened --color-muted #75736f→#6f6d68 (4.46→4.87, was a hair under AA;
+  used on nav inactive links + meta) and --color-faint #969490→#83817a
+  (2.85→3.67, still deliberately de-emphasized). Verified all token contrasts on
+  paper: ink 16.2, body 10.9, secondary 8.7, muted 4.87, accent 4.81, accent-dark
+  7.30, button-hover (paper-on-green) 4.81.
+- dead code: removed unused .h-detail-title utility (0 usages) from global.css and
+  fixed its stale "set in Inter" comment (now Newsreader).
+- docs: wrote ADR-0010 (editorial redesign; supersedes ADR-0005 decisions 3–5
+  canvas/type/accent, retains 2/6/8/9) and marked ADR-0005's status accordingly.
+Verified still-used utilities kept (.eyebrow ×9, .cta ×5, .h-section-title ×5,
+.section-index ×1, .link-external ×3 — all on un-redesigned portfolio pages).
+Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.
+
+Flagged, not changed (owner's call):
+- --color-faint 3.67:1 is still below AA-normal (4.5); kept as an intentional
+  de-emphasis tone for supplementary meta. Can push to full AA (flattens hierarchy).
+- @fontsource-* devDeps are not imported (only used to source the committed woff2);
+  kept for provenance. Removable if a leaner devDep list is preferred.
+- Web resume drops the `website` contact link (per the handoff's contact row);
+  the resume PDF is unaffected.
+- Cleaned a stale 2.5M dist mirror left in the MAIN checkout (preview-serving hack;
+  gitignored, not a branch artifact).

@@ -1,6 +1,6 @@
 # Redesign the site in a Swiss-minimal style with monospace technical detailing
 
-Status: accepted (amends ADR-0003 decision 5)
+Status: accepted (amends ADR-0003 decision 5); decisions 3–5 (canvas, typography, accent) superseded by ADR-0010. The Swiss structure, system detailing, and zero-JS boundary (decisions 2, 6, 8, 9) still hold.
 
 We are redesigning the site's visual language from the faithfully-ported MUI look into **Swiss-International minimalism** (strict grid, generous whitespace, typographic hierarchy, ruthless restraint, hairline rules) carried on a **light** canvas (white paper, near-black ink) with a single accent. This is a **deliberate reversal of ADR-0003 decision 5** ("Faithful port, design frozen… No redesign folded in") and of ADR-0003's rejection of "redesign during the migration" — that freeze existed to keep every page diff-verifiable against the pre-Astro site during the migration; the migration is done (ADR-0003, ADR-0004), so the freeze has served its purpose and is lifted. This is a **skin**: content, routes, the typed data/view-model modules, the Markdown/Sätteri pipeline (ADR-0004), and zero-JS static output (ADR-0003) are all unchanged.
 

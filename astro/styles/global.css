@@ -52,8 +52,8 @@
   --color-ink: #1c1b17; /* headings, primary text */
   --color-body: #3b3933; /* body paragraphs (additive token) */
   --color-secondary: #4a473f; /* descriptions / secondary body (additive token) */
-  --color-muted: #75736f; /* meta lines, company (~.6 ink over paper) */
-  --color-faint: #969490; /* dates, dim counts (~.45 ink over paper) */
+  --color-muted: #6f6d68; /* meta lines, company — 4.87:1 on paper (AA) */
+  --color-faint: #83817a; /* dates, dim counts — 3.67:1, deliberately de-emphasized */
   --color-surface-border: #e4e1da; /* hairline rule (~.13 ink over paper) */
   --color-rule: #e4e1da;
 
@@ -139,27 +139,9 @@ body {
 }
 
 /*
- * Display heading sizes (kept for not-yet-redesigned portfolio pages, now set in
- * Inter via --font-display). line-heights tightened for the grotesque.
+ * Display heading size for the not-yet-redesigned portfolio pages (project detail
+ * and the experiment/decision components), set in Newsreader via --font-display.
  */
-.h-detail-title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-  font-size: 1.71rem;
-}
-@media (min-width: 600px) {
-  .h-detail-title { font-size: 2.065rem; }
-}
-@media (min-width: 900px) {
-  .h-detail-title { font-size: 2.2425rem; }
-}
-@media (min-width: 1200px) {
-  .h-detail-title { font-size: 2.42rem; }
-}
-
 .h-section-title {
   font-family: var(--font-display);
   font-weight: 600;
