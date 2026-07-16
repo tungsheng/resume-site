@@ -2,11 +2,10 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { buildResumeViewModel, publicResumeData } from "@resume";
 
-// Swiss-minimal redesign — Resume web page (ADR-0005 / #21), last web slice.
-// Flush-left header + hairline-left contact rail; sections as mono labels over
-// hairline rules, entries as hairline-separated blocks with mono-dashed
-// highlights and mono tabular date ranges. Zero JS: the PDF download is a plain
-// link to the build-time /resume.pdf. Presentation only — data/view-model reused.
+// Editorial redesign (#59): single 780px column. Stacked header (kicker, name,
+// contact row with a bordered Download-PDF button), then mono-labelled sections
+// on hairline rules. Zero JS: the PDF download is a plain link to the build-time
+// /resume.pdf. Presentation only — the data + view-model are reused unchanged.
 const data = publicResumeData;
 const view = buildResumeViewModel(data);
 const { name, badges, contacts } = data.header;
@@ -17,17 +16,25 @@ const linkedinHref = contacts.linkedin
     : `https://linkedin.com/in/${contacts.linkedin}`
   : null;
 
-const websiteHref = contacts.website
-  ? contacts.website.startsWith("http")
-    ? contacts.website
-    : `https://${contacts.website}`
-  : null;
+// The summary closes on an accent-italic clause (design). Split it off the tail
+// so the lede reads plain and the clause carries the emphasis; falls back to the
+// whole string if the phrase ever changes.
+const SUMMARY_CLAUSE = "measured honestly, negative results included.";
+const clauseAt = view.summary.lastIndexOf(SUMMARY_CLAUSE);
+const summaryHead = clauseAt >= 0 ? view.summary.slice(0, clauseAt) : view.summary;
+const summaryClause = clauseAt >= 0 ? view.summary.slice(clauseAt) : "";
+
+// Project titles embed their stack in parens ("Lab Name (stack)"); render the
+// name as the serif title and the parenthetical as an inline mono tag.
+function splitTitle(title: string): { name: string; tag: string } {
+  const m = title.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  return m ? { name: m[1], tag: m[2] } : { name: title, tag: "" };
+}
 
 const sectionLabel =
-  "border-b border-surface-border pb-2.5 font-mono text-[0.76rem] font-semibold uppercase tracking-[0.14em] text-ink";
-const entry = "border-b border-surface-border py-5 first:pt-0 last:border-b-0";
-const subtitle = "text-[1.02rem] font-semibold text-ink";
-const dateMeta = "shrink-0 font-mono text-[0.72rem] uppercase tracking-[0.08em] tabular text-faint";
+  "border-b border-surface-border pb-3 font-mono text-[0.75rem] font-medium uppercase tracking-[0.14em] text-go-green-dark";
+const contactLink =
+  "font-mono text-[0.78rem] text-go-green-dark border-b border-go-green/40 pb-[3px] transition-colors hover:border-go-green";
 ---
 
 <BaseLayout
@@ -37,183 +44,168 @@ const dateMeta = "shrink-0 font-mono text-[0.72rem] uppercase tracking-[0.08em] 
   breadcrumbs={[{ label: "Home", href: "/" }, { label: "Resume" }]}
 >
   <!-- Header -->
-  <section class="grid gap-6 border-b border-surface-border pb-9 md:pb-10 md:grid-cols-[minmax(0,1fr)_minmax(15rem,0.42fr)] md:gap-12">
-    <div class="flex max-w-[52rem] flex-col gap-5">
-      <h1 class="text-balance font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.25rem)]">
-        {name}
-      </h1>
-      {
-        badges.length > 0 && (
-          <div class="flex flex-wrap gap-x-5 gap-y-1.5">
-            {badges.map((badge) => (
-              <span class="eyebrow text-go-green-dark">{badge}</span>
-            ))}
-          </div>
-        )
-      }
-      <div class="mt-1 flex flex-wrap items-center gap-x-7 gap-y-3">
-        <a href="/resume.pdf" download class="cta group text-go-green-dark hover:text-ink">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          Download PDF
-        </a>
-        <a href="/work" class="cta group text-ink hover:text-go-green-dark">
-          View work
-          <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
-        </a>
-      </div>
-    </div>
-
+  <section>
     {
-      (contacts.email || linkedinHref || websiteHref) && (
-        <address class="flex flex-col gap-2 border-l border-surface-border pl-5 not-italic md:self-center">
-          <span class="eyebrow mb-0.5">Contact</span>
-          {websiteHref && (
-            <a
-              href={websiteHref}
-              class="link-external font-mono text-[0.82rem] text-muted transition-colors hover:text-ink"
-              style="overflow-wrap:anywhere"
-            >
-              {contacts.website}
-            </a>
-          )}
-          {contacts.email && (
-            <a
-              href={`mailto:${contacts.email}`}
-              class="font-mono text-[0.82rem] text-muted transition-colors hover:text-ink"
-              style="overflow-wrap:anywhere"
-            >
-              {contacts.email}
-            </a>
-          )}
-          {linkedinHref && (
-            <a
-              href={linkedinHref}
-              target="_blank"
-              rel="noreferrer"
-              class="link-external font-mono text-[0.82rem] text-muted transition-colors hover:text-ink"
-              style="overflow-wrap:anywhere"
-            >
-              {`linkedin.com/in/${contacts.linkedin}`}
-            </a>
-          )}
-        </address>
+      badges.length > 0 && (
+        <p class="mb-[18px] font-mono text-[0.75rem] uppercase tracking-[0.14em] text-go-green-dark">
+          {badges.join(" · ")}
+        </p>
       )
     }
+    <h1 class="font-medium leading-[1.05] tracking-[-0.022em] text-[clamp(2.625rem,6vw,3.625rem)]">
+      {name}
+    </h1>
+    <div class="mt-[30px] flex flex-wrap items-baseline gap-x-[26px] gap-y-3">
+      <a
+        href="/resume.pdf"
+        download
+        class="rounded-[2px] border border-go-green px-4 py-[9px] font-mono text-[0.78rem] text-go-green-dark transition-colors hover:bg-go-green hover:text-paper"
+      >
+        Download PDF
+      </a>
+      {
+        contacts.email && (
+          <a href={`mailto:${contacts.email}`} class={contactLink}>
+            {contacts.email}
+          </a>
+        )
+      }
+      {
+        linkedinHref && (
+          <a href={linkedinHref} target="_blank" rel="noreferrer" class={contactLink}>
+            LinkedIn <span aria-hidden="true">&rarr;</span>
+          </a>
+        )
+      }
+    </div>
   </section>
 
-  <!-- Web resume view -->
-  <div class="mt-12 grid items-start gap-x-12 gap-y-10 md:mt-14 md:grid-cols-[minmax(0,1.6fr)_minmax(260px,0.85fr)]" aria-label="Web resume view">
-    <!-- Left column -->
-    <div class="grid gap-10">
-      {
-        view.summary && (
-          <section>
-            <h2 class={sectionLabel}>Professional Summary</h2>
-            <p class="mt-4 max-w-[46rem] leading-relaxed text-muted">{view.summary}</p>
-          </section>
-        )
-      }
+  <!-- Professional Summary -->
+  {
+    view.summary && (
+      <section class="mt-16">
+        <h2 class={sectionLabel}>Professional Summary</h2>
+        <p class="mt-6 text-[1.125rem] leading-[1.65] text-body">
+          {summaryHead}
+          {summaryClause && <em class="italic text-go-green-dark">{summaryClause}</em>}
+        </p>
+      </section>
+    )
+  }
 
-      {
-        view.experience.length > 0 && (
-          <section>
-            <h2 class={sectionLabel}>Professional Experience</h2>
-            <div class="mt-1">
-              {view.experience.map((exp) => (
-                <div class={entry}>
-                  <div class="flex flex-col justify-between gap-1 sm:flex-row sm:items-baseline">
-                    <div>
-                      <p class={subtitle}>{exp.title}</p>
-                      <p class="text-[0.92rem] text-muted">{exp.company}</p>
-                    </div>
-                    <p class={dateMeta}>{exp.dateRange}</p>
-                  </div>
-                  {exp.highlights.length > 0 && (
-                    <ul class="mt-3.5 grid gap-2">
-                      {exp.highlights.map((item) => (
-                        <li class="grid grid-cols-[0.9rem_minmax(0,1fr)] gap-2 text-[0.92rem] leading-relaxed text-muted">
-                          <span class="font-mono text-go-green-dark" aria-hidden="true">&mdash;</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
+  <!-- Work Experience -->
+  {
+    view.experience.length > 0 && (
+      <section class="mt-14">
+        <h2 class={sectionLabel}>Work Experience</h2>
+        <div class="mt-2">
+          {view.experience.map((exp) => (
+            <div class="border-b border-surface-border py-7 last:border-b-0">
+              <div class="flex flex-col justify-between gap-1 sm:flex-row sm:items-baseline">
+                <h3 class="text-[1.5rem] font-medium leading-tight tracking-[-0.01em]">{exp.title}</h3>
+                <p class="shrink-0 font-mono text-[0.75rem] tabular text-faint">{exp.dateRange}</p>
+              </div>
+              <p class="mb-4 mt-1.5 font-mono text-[0.78rem] text-muted">{exp.company}</p>
+              {exp.highlights.length > 0 && (
+                <ul class="grid gap-[9px]">
+                  {exp.highlights.map((item) => (
+                    <li class="grid grid-cols-[18px_1fr] text-[1.03rem] leading-[1.5] text-body">
+                      <span class="font-mono text-go-green-dark" aria-hidden="true">
+                        &mdash;
+                      </span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ML Inference — Self-Directed -->
+  {
+    view.projects.length > 0 && (
+      <section class="mt-8">
+        <h2 class={sectionLabel}>{view.projectsTitle}</h2>
+        {view.projectsNote && (
+          <p class="mt-5 text-[1.06rem] italic leading-[1.6] text-secondary">{view.projectsNote}</p>
+        )}
+        <div class="mt-2">
+          {view.projects.map((project) => {
+            const { name: projName, tag } = splitTitle(project.title);
+            return (
+              <div class="border-b border-surface-border py-[26px] last:border-b-0">
+                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 class="text-[1.375rem] font-medium leading-tight tracking-[-0.01em]">
+                    {projName}
+                  </h3>
+                  {tag && (
+                    <span class="font-mono text-[0.72rem] uppercase tracking-[0.06em] text-faint">
+                      {tag}
+                    </span>
                   )}
                 </div>
-              ))}
-            </div>
-          </section>
-        )
-      }
+                {project.highlights.length > 0 && (
+                  <ul class="mt-3.5 grid gap-[9px]">
+                    {project.highlights.map((item) => (
+                      <li class="grid grid-cols-[18px_1fr] text-[1.03rem] leading-[1.5] text-body">
+                        <span class="font-mono text-go-green-dark" aria-hidden="true">
+                          &mdash;
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    )
+  }
 
-      {
-        view.projects.length > 0 && (
-          <section>
-            <h2 class={sectionLabel}>{view.projectsTitle}</h2>
-            {view.projectsNote && (
-              <p class="mt-3 max-w-[46rem] text-[0.9rem] italic leading-relaxed text-faint">
-                {view.projectsNote}
-              </p>
-            )}
-            <div class="mt-1">
-              {view.projects.map((project) => (
-                <div class={entry}>
-                  <p class={subtitle}>{project.title}</p>
-                  {project.highlights.length > 0 && (
-                    <ul class="mt-3 grid gap-2">
-                      {project.highlights.map((item) => (
-                        <li class="grid grid-cols-[0.9rem_minmax(0,1fr)] gap-2 text-[0.92rem] leading-relaxed text-muted">
-                          <span class="font-mono text-go-green-dark" aria-hidden="true">&mdash;</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )
-      }
-    </div>
+  <!-- Skills -->
+  {
+    view.skills.length > 0 && (
+      <section class="mt-8">
+        <h2 class={sectionLabel}>Skills</h2>
+        <dl class="mt-6 grid gap-x-6 gap-y-3 sm:grid-cols-[200px_1fr]">
+          {view.skills.map((skill) => (
+            <>
+              <dt class="font-mono text-[0.75rem] uppercase tracking-[0.06em] text-muted">
+                {skill.categoryLabel}
+              </dt>
+              <dd class="text-[1rem] leading-[1.7] text-body">
+                {skill.itemsText.replaceAll(" • ", " · ")}
+              </dd>
+            </>
+          ))}
+        </dl>
+      </section>
+    )
+  }
 
-    <!-- Right column -->
-    <div class="grid gap-10">
-      {
-        view.skills.length > 0 && (
-          <section>
-            <h2 class={sectionLabel}>Skills</h2>
-            <div class="mt-1">
-              {view.skills.map((skill) => (
-                <div class="border-b border-surface-border py-3.5 first:pt-0 last:border-b-0">
-                  <p class="text-[0.95rem] font-semibold text-ink">{skill.categoryLabel}</p>
-                  <p class="mt-1 text-[0.9rem] leading-relaxed text-muted">{skill.itemsText}</p>
-                </div>
-              ))}
+  <!-- Education -->
+  {
+    view.education.length > 0 && (
+      <section class="mt-14">
+        <h2 class={sectionLabel}>Education</h2>
+        <div class="mt-2">
+          {view.education.map((edu) => (
+            <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-surface-border py-[22px] last:border-b-0">
+              <div>
+                <h3 class="text-[1.25rem] font-medium leading-tight">{edu.degree}</h3>
+                <p class="mt-0.5 text-[0.97rem] text-secondary">{edu.school}</p>
+              </div>
+              <p class="shrink-0 font-mono text-[0.75rem] tabular text-faint">{edu.dateRange}</p>
             </div>
-          </section>
-        )
-      }
-
-      {
-        view.education.length > 0 && (
-          <section>
-            <h2 class={sectionLabel}>Education</h2>
-            <div class="mt-1">
-              {view.education.map((edu) => (
-                <div class={entry}>
-                  <p class={subtitle}>{edu.degree}</p>
-                  <p class="text-[0.92rem] text-muted">{edu.school}</p>
-                  <p class={`mt-1 ${dateMeta}`}>{edu.dateRange}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )
-      }
-    </div>
-  </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
