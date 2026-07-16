@@ -1263,3 +1263,21 @@ void on Home. With Tony's sign-off:
 - Home: hero pb-20→pb-4, Latest-writing mt-[110px]→mt-16 md:mt-20 (~190px void
   → ~90px). Two post rows now sit in the first fold.
 Validation re-run: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.
+
+
+--------------------------------------------------------------------------------
+2026-07-15 — REDESIGN follow-up: widen measure to match tonylee.bio
+--------------------------------------------------------------------------------
+Tony still found the page narrow. Measured the live site (tonylee.bio) at 1440px:
+main is max-width 1200px (75rem), 24px side padding, ~120px margins — with body
+prose capped and structural rows (Latest-writing, dates, rules) spanning the full
+width. Matched it:
+- Shared measure 880px → 75rem (1200px); side padding sm:px-7 → sm:px-6 (24px),
+  mobile gutter stays 20px (px-5). Verified: main 1200, margin 120 @1440 — identical
+  to the live site.
+- Work project description cap 580 → 44rem so rows fill the wider canvas.
+- Home intro (640), Resume summary/bullets (42/44rem), Blog summary (640) caps
+  unchanged — all within the live site's prose measure.
+Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.
+(Note: the branch's earlier work had accidentally landed on local `main`; it was
+relocated to the worktree branch and `main` restored to origin/main.)
