@@ -54,7 +54,7 @@ Strip four current production stacks down — NVIDIA's Dynamo, Moonshot's Moonca
 
 Behind all of it sits a model registry and the plumbing to load hundreds of gigabytes of weights onto a fresh replica — which turns out to matter a great deal when a traffic spike wants a new replica *now* and the weights take minutes to land.
 
-![Figure 2 — The boxes and the two planes. The data plane (solid) is the request's path: router to a prefill pool and a decode pool that read and write a shared, tiered KV store, then tokens stream back. The control plane (dashed) — scheduler, autoscaler, registry — steers and resizes that path without sitting on it.](/assets/blog/distributed-inference-the-fleet/fleet-topology.svg)
+![Figure 2 — The anatomy of one fleet. The data plane (solid) is the request's path: a cache-aware gateway into the worker pools — a prefill pool that builds the KV cache and a decode pool that generates from it, over a shared, tiered KV store — then tokens stream back. The control plane (dashed) sits off that path, each box wired to the one thing it manages: the scheduler places and admits at the gateway, the autoscaler adds and removes replicas in the pools, and the registry loads weights into new ones.](/assets/blog/distributed-inference-the-fleet/fleet-topology.svg)
 
 ## Data plane and control plane
 
@@ -65,6 +65,18 @@ The **data plane** is the request's actual path: router → prefill worker → K
 The **control plane** is everything that manages that path without being on it: the scheduler deciding placement, the autoscaler resizing pools, the cache index tracking which replica holds which prefix, health checks, and model loading. It runs on a slower clock — seconds and minutes, not milliseconds — and when it is down the data plane usually keeps serving on its last decisions. AIBrix draws this line explicitly; the Kubernetes-native stacks implement the control plane as controllers and custom resources, while Mooncake's Conductor is a bespoke global scheduler. Same division either way.
 
 The reason to hold the two apart: a data-plane failure drops requests in flight, while a control-plane failure usually just freezes the fleet's shape — no new scaling, stale routing — which is survivable for a while. The failure and recovery posts later in this series live almost entirely on this distinction.
+
+## Nothing here is a single box
+
+Figure 2 draws the gateway, scheduler, and registry as one box each. That is a lie of convenience: at fleet scale every one of them is itself replicated, because a control plane with a single point of failure fails the whole fleet the moment it dies. The saving grace is that these scale the *cheap* way — on CPU, off the GPU critical path — so they are rarely the part of the bill you fight over.
+
+- **The front door** is a pool of router replicas behind an ordinary L4 load balancer. Routing is close to stateless, with one catch: the cache-aware decision has to know which replica holds which prefix, so the routers share that index — gossiped between them, or kept in a small shared store — rather than each one guessing alone.
+- **The control plane** runs replicated for availability: leader-elected (one active planner, warm standbys) or sharded by responsibility. The Kubernetes-native stacks get this largely for free as controllers with leader election; a bespoke global scheduler like Mooncake's Conductor has to build the same high availability itself.
+- **The registry** is not one file server but a cached, distributed artifact store fronting a fan-out weight-loading path — peer-to-peer or broadcast — because standing up a new replica means moving hundreds of gigabytes *now*, and pulling that serially from one origin is how a traffic spike becomes an outage.
+
+The worker pools are the expensive, GPU-bound part the autoscaler sweats over. Everything here scales the boring way — which is exactly why it is easy to forget it has to scale at all.
+
+![Figure 3 — The control plane and front door, drawn honestly. Each single box from Figure 2 is really a pool: the gateway is router replicas behind an L4 load balancer, sharing one prefix-cache index; the scheduler is leader-elected or sharded controllers; the registry is a distributed, cached store fanning weights out to new replicas. All of it scales on cheap CPU, off the GPU critical path.](/assets/blog/distributed-inference-the-fleet/control-plane-scaling.svg)
 
 ## Homogeneous, disaggregated, or hybrid
 
