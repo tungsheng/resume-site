@@ -1292,3 +1292,11 @@ footer inner containers stay at 75rem. Both centered → content sits inside the
 chrome with a symmetric ~88px inset each side (measured: header/footer 1200,
 main 1024). Prose caps unchanged (all < 1024). Padding 24px desktop / 20px mobile.
 Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.
+
+
+--------------------------------------------------------------------------------
+2026-07-15 — REDESIGN follow-up: content back to 1200px
+--------------------------------------------------------------------------------
+Reverted the 1024px content experiment: <main> max-width 64rem → 75rem, so the
+content column matches the header/footer chrome at 1200px again (all three 75rem,
+aligned). Measured header/main/footer all 1200 @1200vw. Validation ✓.
