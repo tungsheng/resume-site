@@ -11,6 +11,13 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval'; font-src 'self'; base-uri 'self'; form-action 'self'
 
+# Astro's bundled assets are content-hashed in the filename (…​.HASH.css/js), so a
+# change ships under a new URL — safe to cache immutably. Without this rule they
+# fall under /* and CF revalidates them (cf-cache-status: REVALIDATED), leaving
+# asset delivery more fragile across a deploy; immutable makes it hermetic.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # Self-hosted blog images (#6) are content-addressed by post slug and effectively
 # immutable once published — let the browser cache them aggressively.
 /assets/blog/*
