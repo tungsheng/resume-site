@@ -1281,3 +1281,14 @@ width. Matched it:
 Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.
 (Note: the branch's earlier work had accidentally landed on local `main`; it was
 relocated to the worktree branch and `main` restored to origin/main.)
+
+
+--------------------------------------------------------------------------------
+2026-07-15 — REDESIGN follow-up: split chrome (1200) from content (1024)
+--------------------------------------------------------------------------------
+Per Tony: keep the header/footer chrome at 1200px (75rem) but narrow the page
+content column to 1024px (64rem). Only the <main> max-width changed; header and
+footer inner containers stay at 75rem. Both centered → content sits inside the
+chrome with a symmetric ~88px inset each side (measured: header/footer 1200,
+main 1024). Prose caps unchanged (all < 1024). Padding 24px desktop / 20px mobile.
+Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.
