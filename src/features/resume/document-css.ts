@@ -18,19 +18,19 @@ body {
   margin: 0;
 }
 
-/* Swiss-minimal PDF re-theme (ADR-0005 / #21). Aligns the build-time resume PDF
-   to the web Swiss system within the constraint that ONLY Inter is embedded
-   (no monospace): ink name, neutral hairline rules under section labels, dropped
-   timeline ornament, uppercase letter-spaced tabular dates, single accent
-   reserved for the badges line and list bullets. Layout metrics kept so the
-   resume still fits one Letter page. */
+/* PDF palette tracks the editorial redesign tokens (ADR-0010): the new green
+   accent (#2f7d3b / #235e2c, AA on white) and warm neutral inks. It deliberately
+   KEEPS the print essentials that don't belong on paper stock — a white
+   background (ink cost / ATS) and the embedded Inter sans (scannability) — plus
+   the space-efficient two-column layout that fits one Letter page. Only the color
+   variables changed from the prior ADR-0005 theme. */
 .resume-document {
-  --resume-accent: #00ab66;
-  --resume-accent-dark: #006b40;
-  --resume-ink: #14171a;
-  --resume-muted: #5c6670;
-  --resume-faint: #8b939c;
-  --resume-rule: #e0e2e0;
+  --resume-accent: #2f7d3b;
+  --resume-accent-dark: #235e2c;
+  --resume-ink: #1c1b17;
+  --resume-muted: #6f6d68;
+  --resume-faint: #83817a;
+  --resume-rule: #e4e1da;
   --ui-font: '${RESUME_PDF_FONT_FAMILY}', Arial, sans-serif;
   --page-x: 0.38in;
   --column-gap: 0.2in;
