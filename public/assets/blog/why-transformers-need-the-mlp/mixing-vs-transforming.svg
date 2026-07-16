@@ -1,33 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 400" role="img"
      aria-label="Inside the hull, or out of it — why attention alone collapses. The figure contrasts two worlds separated by a vertical divider labeled vs; the recurring visual anchor is a lightly shaded convex hull drawn in the same style in every drawing. Left zone, WITHOUT THE MLP, contains one causal thought experiment in two linked panels. First panel, one attention step: three value vectors v1, v2, v3 are points in the plane with their convex hull shaded; the attention output, 0.7 times v1 plus 0.2 times v2 plus 0.1 times v3, is plotted strictly inside the hull — softmax weights are non-negative and sum to one, so the output stays inside the hull. A causal arrow labeled stack L layers leads to the second panel, collapse: the same hull shrinks layer over layer — a large copy at layer 0, a smaller one, then a single point at layer L. This is rank-1 collapse, token uniformity, at a doubly exponential 3 to the L rate — Dong et al., ICML 2021. Across the divider, the right zone, WITH THE MLP, is not a next step but the alternative the real architecture ships: a token x sits inside the same-styled hull, and a curved green arrow labeled MLP carries it out of the hull to MLP(x) — outside the hull: new features, not an average; the operation is position-wise, no other tokens involved. Footer takeaway: attention moves information; the MLP transforms it.">
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .zone  { fill:#fafbfb; stroke:#e6e6e6; }
-    .pnl   { fill:#ffffff; stroke:#e6e6e6; }
-    .znA   { font:700 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.2px; fill:#14171a; }
-    .znB   { font:700 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.2px; fill:#006b40; }
-    .ttl   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .tag   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .zone  { fill:#faf8f3; stroke:#e4e1da; }
+    .pnl   { fill:#faf8f3; stroke:#e4e1da; }
+    .znA   { font:700 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.2px; fill:#1c1b17; }
+    .znB   { font:700 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.2px; fill:#2f7d3b; }
+    .ttl   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .tag   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
     .hull  { fill:#f0eee9; stroke:#d8d3c8; stroke-width:1; }
-    .pt    { fill:#14171a; }
-    .ptx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .link  { stroke:#9bbfb0; stroke-width:1; fill:none; }
-    .fml   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .lbl   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .col   { stroke:#14171a; stroke-width:1.2; fill:none; }
-    .caus  { stroke:#14171a; stroke-width:1.4; fill:none; }
-    .vs    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .mlp   { stroke:#006b40; stroke-width:2; fill:none; }
-    .gpt   { fill:#006b40; }
-    .gtx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .trafA { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .trafB { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
+    .pt    { fill:#1c1b17; }
+    .ptx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .link  { stroke:#a6b0a4; stroke-width:1; fill:none; }
+    .fml   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .lbl   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .col   { stroke:#1c1b17; stroke-width:1.2; fill:none; }
+    .caus  { stroke:#1c1b17; stroke-width:1.4; fill:none; }
+    .vs    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .mlp   { stroke:#2f7d3b; stroke-width:2; fill:none; }
+    .gpt   { fill:#2f7d3b; }
+    .gtx   { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .trafA { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .trafB { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
   </style>
   <defs>
-    <marker id="ih" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
-    <marker id="ig" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="ih" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1c1b17"/></marker>
+    <marker id="ig" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="398" rx="2"/>
@@ -87,8 +87,8 @@
   <text class="note"  x="347" y="300" text-anchor="middle">Dong et al., ICML 2021</text>
 
   <!-- ============ separator: contrast, not sequence ============ -->
-  <line x1="451" y1="48" x2="451" y2="342" stroke="#e6e6e6" stroke-width="1"/>
-  <rect x="439" y="185" width="24" height="20" rx="10" fill="#ffffff" stroke="#e6e6e6"/>
+  <line x1="451" y1="48" x2="451" y2="342" stroke="#e4e1da" stroke-width="1"/>
+  <rect x="439" y="185" width="24" height="20" rx="10" fill="#faf8f3" stroke="#e4e1da"/>
   <text class="vs" x="451" y="199" text-anchor="middle">vs</text>
 
   <!-- ============ ZONE 2 — WITH THE MLP (the escape the architecture ships) ============ -->
@@ -118,6 +118,6 @@
   <text class="note"  x="555" y="300" text-anchor="middle">no other tokens involved</text>
 
   <!-- ============ footer takeaway ============ -->
-  <line x1="34" y1="354" x2="646" y2="354" stroke="#e6e6e6" stroke-width="1"/>
+  <line x1="34" y1="354" x2="646" y2="354" stroke="#e4e1da" stroke-width="1"/>
   <text class="trafB" x="340" y="378" text-anchor="middle">attention moves information; the MLP transforms it</text>
 </svg>

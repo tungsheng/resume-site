@@ -1328,3 +1328,23 @@ Flagged, not changed (owner's call):
   the resume PDF is unaffected.
 - Cleaned a stale 2.5M dist mirror left in the MAIN checkout (preview-serving hack;
   gitignored, not a branch artifact).
+
+
+--------------------------------------------------------------------------------
+2026-07-16 — REDESIGN follow-up: recolor blog figures for warm paper
+--------------------------------------------------------------------------------
+The 23 blog SVG diagrams were authored for the old white Swiss canvas (white .bg
+card, #006b40 green, #14171a ink, #5c6670 cool muted, #e6e6e6 border, #dff6ee
+mint) and clashed on the #FAF8F3 paper (white card boxes, old-green accent, cool
+greys). Remapped their shared semantic palette to the new tokens (37-pair map,
+713 substitutions across all 23 figures) via a Bun script:
+  white → paper #faf8f3 (cards + node fills blend, framed by a warm hairline)
+  #006b40 → #2f7d3b (site accent green); #14171a → ink #1c1b17;
+  #5c6670 → warm muted #6f6d68; #e6e6e6 → warm border #e4e1da;
+  #dff6ee/mint → accent-soft #e4f0e1; cool near-whites/greys → warm equivalents.
+Verified: 0 residual old colors, all SVGs valid + loading (image/svg+xml, 200).
+Spot-checked 4 figures on paper (box/arrow, dark-fill router, attention heatmap
+gradient, allocation bars/hatching) — all cohere, no white-box clash.
+Other surfaces checked: callouts already use warm accent-soft/warning-soft tokens
+(#55); code blocks keep the intentional dark terminal surface (#0d1117).
+Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.

@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 280" role="img"
      aria-label="The life of one request: a client sends a prompt to the server, which tokenizes it into IDs, runs prefill over the whole prompt, loops decode to generate one token per pass, detokenizes each token back to text, and streams the tokens back to the client. Tokenize, detokenize, and stream are ordinary serving work; prefill and decode are the engine.">
   <style>
-    .bg     { fill:#ffffff; stroke:#e6e6e6; }
-    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .cap    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .sub    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .client { fill:#ffffff; stroke:#14171a; }
-    .clitx  { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .neu    { fill:#f4f6f5; stroke:#14171a; }
-    .neutx  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .eng    { fill:#dff6ee; stroke:#006b40; }
-    .engtx  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .srv    { fill:none; stroke:#cfe6db; stroke-width:1; stroke-dasharray:4 4; }
-    .arr    { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .bg     { fill:#faf8f3; stroke:#e4e1da; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .cap    { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .sub    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .client { fill:#faf8f3; stroke:#1c1b17; }
+    .clitx  { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .neu    { fill:#f3efe7; stroke:#1c1b17; }
+    .neutx  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .eng    { fill:#e4f0e1; stroke:#2f7d3b; }
+    .engtx  { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .srv    { fill:none; stroke:#d5e7cf; stroke-width:1; stroke-dasharray:4 4; }
+    .arr    { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
   </style>
   <defs>
-    <marker id="al" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="al" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="278" rx="2"/>
@@ -23,7 +23,7 @@
 
   <!-- server container -->
   <rect class="srv" x="164" y="64" width="468" height="128" rx="3"/>
-  <text class="ey" x="174" y="82" style="fill:#9bbdb0">SERVER · GPU</text>
+  <text class="ey" x="174" y="82" style="fill:#a6b0a4">SERVER · GPU</text>
 
   <!-- client -->
   <rect class="client" x="20" y="100" width="80" height="56" rx="2"/>

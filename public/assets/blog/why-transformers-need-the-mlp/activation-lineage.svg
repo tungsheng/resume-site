@@ -1,37 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 400" role="img"
      aria-label="The activation lineage, in two panels plus a timeline. Left panel: three pointwise curves on one shared axis from x equals minus 4 to plus 4. ReLU, the original 2017 Transformer choice, is a hard-cornered gray line: exactly zero for every negative input — a dead zero-gradient region, annotated as such — then a straight ramp up. GELU, from 2016 and adopted by GPT and BERT, and SiLU, also written Swish or x times sigmoid of x, track ReLU closely but bend the corner smooth, keeping a small nonzero response and gradient below zero; SiLU shows its characteristic dip to about minus 0.28 near x equals minus 1.3 before rising. Right panel: SwiGLU, Shazeer 2020, is not a curve at all but a block diagram — the token x is projected twice, SiLU of x times W gate forms a soft mask that multiplies x times W up elementwise, and W down writes the product back into the residual stream. The gate path decides how much; the up path carries the content, and a side note marks that the gate slot is swappable — GELU there instead gives GEGLU, Gemma's choice. A timeline underneath runs the transformer adoption story: ReLU in the 2017 Transformer, GELU adopted by GPT and BERT in 2018, SwiGLU from 2020. The bottom row gives Shazeer's parameter-matched heldout log-perplexity: ReLU 1.677, SwiGLU 1.636, GEGLU 1.633 — the gate wins, modestly and nearly for free.">
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .pnl   { fill:#fafbfb; stroke:#e6e6e6; }
-    .ttl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .tag   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#7a847f; }
-    .axis  { stroke:#aab2ae; stroke-width:1; fill:none; }
-    .axlab { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .relu  { stroke:#8a938e; stroke-width:1.5; fill:none; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .pnl   { fill:#faf8f3; stroke:#e4e1da; }
+    .ttl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .tag   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#79736a; }
+    .axis  { stroke:#a9a49a; stroke-width:1; fill:none; }
+    .axlab { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .relu  { stroke:#847e74; stroke-width:1.5; fill:none; }
     .gelu  { stroke:#3d454d; stroke-width:1.5; fill:none; }
-    .silu  { stroke:#006b40; stroke-width:2; fill:none; }
+    .silu  { stroke:#2f7d3b; stroke-width:2; fill:none; }
     .dead  { fill:#f0eee9; }
-    .leg   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .gnote { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .ptr   { stroke:#aab2ae; stroke-width:1; fill:none; }
-    .box   { fill:#ffffff; stroke:#14171a; }
-    .boxtx { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .gate  { fill:#dff6ee; stroke:#006b40; }
-    .gatetx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .mul   { fill:#006b40; stroke:#006b40; }
-    .multx { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#ffffff; }
-    .flow  { stroke:#14171a; stroke-width:1.5; fill:none; }
-    .gflow { stroke:#006b40; stroke-width:2; fill:none; }
-    .tl    { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .scr   { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .scrw  { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .sep   { font:400 13px 'JetBrains Mono',ui-monospace,monospace; fill:#aab2ae; }
+    .leg   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .gnote { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .ptr   { stroke:#a9a49a; stroke-width:1; fill:none; }
+    .box   { fill:#faf8f3; stroke:#1c1b17; }
+    .boxtx { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .gate  { fill:#e4f0e1; stroke:#2f7d3b; }
+    .gatetx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .mul   { fill:#2f7d3b; stroke:#2f7d3b; }
+    .multx { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#faf8f3; }
+    .flow  { stroke:#1c1b17; stroke-width:1.5; fill:none; }
+    .gflow { stroke:#2f7d3b; stroke-width:2; fill:none; }
+    .tl    { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .scr   { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .scrw  { font:700 13px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .sep   { font:400 13px 'JetBrains Mono',ui-monospace,monospace; fill:#a9a49a; }
   </style>
   <defs>
-    <marker id="mi" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
-    <marker id="mg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="mi" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1c1b17"/></marker>
+    <marker id="mg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="398" rx="2"/>
@@ -126,7 +126,7 @@
   <text class="note" x="499" y="278" text-anchor="middle">back into the residual stream</text>
 
   <!-- ================= BOTTOM: timeline + scores ================= -->
-  <line x1="34" y1="294" x2="646" y2="294" stroke="#eef0f0" stroke-width="1"/>
+  <line x1="34" y1="294" x2="646" y2="294" stroke="#f0ebe2" stroke-width="1"/>
 
   <text class="tl" x="161" y="312" text-anchor="middle">2017 · ReLU (Transformer)</text>
   <path class="gflow" d="M254,308 L294,308" marker-end="url(#mg)"/>

@@ -1,24 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 506" role="img"
      aria-label="A transformer forward pass: tokens become embeddings, then flow through a stack of N identical decoder layers (layer 1, layer 2, and so on to layer N), each layer's output feeding the next. A zoom callout shows that one layer contains a normalized self-attention sublayer and a normalized MLP sublayer, each wrapped in a residual add. After the stack, a final norm projects to a next-token distribution.">
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .box   { fill:#ffffff; stroke:#14171a; }
-    .layer { fill:#f4f6f5; stroke:#14171a; }
-    .panel { fill:#ffffff; stroke:#006b40; }
-    .sub   { fill:#f4f6f5; stroke:#14171a; }
-    .out   { fill:#dff6ee; stroke:#006b40; }
-    .tx    { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .cap   { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .dots  { font:700 20px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .arr   { stroke:#14171a; stroke-width:1.5; fill:none; }
-    .arrg  { stroke:#006b40; stroke-width:1.5; fill:none; }
-    .zoom  { stroke:#006b40; stroke-width:1; fill:none; stroke-dasharray:3 3; }
-    .brace { stroke:#006b40; stroke-width:1.5; fill:none; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .box   { fill:#faf8f3; stroke:#1c1b17; }
+    .layer { fill:#f3efe7; stroke:#1c1b17; }
+    .panel { fill:#faf8f3; stroke:#2f7d3b; }
+    .sub   { fill:#f3efe7; stroke:#1c1b17; }
+    .out   { fill:#e4f0e1; stroke:#2f7d3b; }
+    .tx    { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .cap   { font:400 12px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .dots  { font:700 20px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .arr   { stroke:#1c1b17; stroke-width:1.5; fill:none; }
+    .arrg  { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
+    .zoom  { stroke:#2f7d3b; stroke-width:1; fill:none; stroke-dasharray:3 3; }
+    .brace { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
   </style>
   <defs>
-    <marker id="ai" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
-    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="ai" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1c1b17"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="718" height="504" rx="2"/>

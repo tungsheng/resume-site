@@ -1,34 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 362" role="img"
      aria-label="Multi-head latent attention. A token's hidden state of width d_model is sent down two paths. The main path multiplies it by a down-projection weight to produce a small compressed latent vector c-KV of dimension d_c, here 512, one per token. A second decoupled path multiplies it by another weight and applies RoPE to produce one small positional key k-R of dimension d_h-R, here 64, shared by all heads. Both vectors land inside a single green container labelled: the entire KV cache — nothing else is stored. At attention time the keys and values are rebuilt per head by up-projection matrices, with the shared RoPE key concatenated onto every rebuilt key; because those matrices are fixed they absorb into the query and output projections, so the full keys and values never hit the cache. A side panel compares sizes per token per layer as two bars on the same scale: full multi-head attention caches 2 times 128 heads times 128 dims, 32,768 numbers; MLA caches 512 plus 64, 576 numbers — about 57 times smaller, using DeepSeek-V2 dimensions.">
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .bar   { fill:#f4f6f5; stroke:#14171a; }
-    .bartx { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .sub   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .proj  { fill:#ffffff; stroke:#14171a; }
-    .projtx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .projst{ font:600 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#5c6670; }
-    .cbox  { fill:#f4faf7; stroke:#006b40; }
-    .cboxlab{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .cache { fill:#dff6ee; stroke:#006b40; }
-    .cachetx{ font:700 14px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .cachest{ font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .recon { fill:#fafbfb; stroke:#aab2ae; stroke-dasharray:4 3; }
-    .recontx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .reconst{ font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .arr   { stroke:#006b40; stroke-width:1.5; fill:none; }
-    .arrg  { stroke:#aab2ae; stroke-width:1.5; fill:none; stroke-dasharray:4 3; }
-    .panel { fill:#fafbfb; stroke:#cfe6db; }
-    .ptitle{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:.5px; fill:#006b40; }
-    .pk    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .pv    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .pr    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .pform { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .bar   { fill:#f3efe7; stroke:#1c1b17; }
+    .bartx { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .sub   { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .proj  { fill:#faf8f3; stroke:#1c1b17; }
+    .projtx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .projst{ font:600 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#6f6d68; }
+    .cbox  { fill:#faf8f3; stroke:#2f7d3b; }
+    .cboxlab{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .cache { fill:#e4f0e1; stroke:#2f7d3b; }
+    .cachetx{ font:700 14px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .cachest{ font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .recon { fill:#faf8f3; stroke:#a9a49a; stroke-dasharray:4 3; }
+    .recontx{ font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .reconst{ font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .arr   { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
+    .arrg  { stroke:#a9a49a; stroke-width:1.5; fill:none; stroke-dasharray:4 3; }
+    .panel { fill:#faf8f3; stroke:#d5e7cf; }
+    .ptitle{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:.5px; fill:#2f7d3b; }
+    .pk    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .pv    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .pr    { font:400 11px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .pform { font:600 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
   </style>
   <defs>
-    <marker id="la" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
-    <marker id="lg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#aab2ae"/></marker>
+    <marker id="la" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
+    <marker id="lg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a9a49a"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="360" rx="2"/>
@@ -80,14 +80,14 @@
   <text class="ptitle" x="492" y="124">PER TOKEN, PER LAYER</text>
 
   <text class="pk" x="492" y="152">full MHA</text><text class="pk" x="632" y="152" text-anchor="end">32,768</text>
-  <rect x="492" y="160" width="140" height="10" rx="1" fill="#d7dedb"/>
+  <rect x="492" y="160" width="140" height="10" rx="1" fill="#ddd8cf"/>
   <text class="pr" x="492" y="186">= 2 × 128 × 128</text>
 
   <text class="pv" x="492" y="214">MLA</text><text class="pv" x="632" y="214" text-anchor="end">576</text>
-  <rect x="492" y="222" width="3" height="10" rx="1" fill="#006b40"/>
+  <rect x="492" y="222" width="3" height="10" rx="1" fill="#2f7d3b"/>
   <text class="pr" x="492" y="248">= 512 c_KV + 64 k_R</text>
 
-  <line x1="492" y1="266" x2="632" y2="266" stroke="#cfe6db" stroke-width="1"/>
+  <line x1="492" y1="266" x2="632" y2="266" stroke="#d5e7cf" stroke-width="1"/>
   <text class="pform" x="492" y="292">≈ 57× smaller</text>
   <text class="pr"    x="492" y="312">(DeepSeek-V2 dims)</text>
 

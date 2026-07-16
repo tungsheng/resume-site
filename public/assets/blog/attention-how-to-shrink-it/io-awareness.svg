@@ -1,30 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 380" role="img"
      aria-label="Why FlashAttention wins: memory traffic, not arithmetic. Both panels show a GPU's two memory pools — fast on-chip SRAM at about 19 terabytes per second on top, big but slow HBM at about 2 terabytes per second below — with arrows for bytes crossing the bus between them. Left, standard attention: the N-by-N score matrix S equals Q K-transpose and its softmax P don't fit in SRAM, so they spill to HBM and come back — four separate bus crossings drawn as four arrows in order: write S, read S, write P, read P. In HBM the grid is drawn large, dwarfing the Q, K, and V chips. That is order N-squared bytes, and the round-trip, not the matmul, is the bottleneck. Right, FlashAttention: Q, K, and V are read once as tiles, the grid is computed tile by tile inside SRAM with a running online softmax, and only the small output O is written back — no grid traffic at all. A dashed empty square in HBM marks where the grid would have been: never written. Order N bytes over the bus, exact same output, just faster.">
   <style>
-    .bg    { fill:#ffffff; stroke:#e6e6e6; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#006b40; }
-    .ptl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .mem   { fill:#fafbfb; stroke:#aab2ae; }
-    .memlab{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:.5px; fill:#5c6670; }
-    .bw    { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
-    .op    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#5c6670; }
-    .chip  { fill:#ffffff; stroke:#14171a; }
-    .chiptx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .grid  { fill:#f0eee9; stroke:#14171a; stroke-width:1.5; }
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .ptl   { font:600 13px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .mem   { fill:#faf8f3; stroke:#a9a49a; }
+    .memlab{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:.5px; fill:#6f6d68; }
+    .bw    { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .op    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .chip  { fill:#faf8f3; stroke:#1c1b17; }
+    .chiptx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .grid  { fill:#f0eee9; stroke:#1c1b17; stroke-width:1.5; }
     .gridln{ stroke:#d8d3c8; stroke-width:1; }
-    .gridtx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .ghost { fill:none; stroke:#aab2ae; stroke-width:1.5; stroke-dasharray:5 4; }
-    .keep  { fill:#dff6ee; stroke:#006b40; }
-    .keeptx{ font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .rw    { stroke:#14171a; stroke-width:2; fill:none; }
-    .thin  { stroke:#006b40; stroke-width:1.5; fill:none; }
-    .trafA { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#14171a; }
-    .trafB { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#006b40; }
-    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#7a847f; }
+    .gridtx{ font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .ghost { fill:none; stroke:#a9a49a; stroke-width:1.5; stroke-dasharray:5 4; }
+    .keep  { fill:#e4f0e1; stroke:#2f7d3b; }
+    .keeptx{ font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .rw    { stroke:#1c1b17; stroke-width:2; fill:none; }
+    .thin  { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
+    .trafA { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .trafB { font:700 12px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .note  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
   </style>
   <defs>
-    <marker id="ih" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#14171a"/></marker>
-    <marker id="ig" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#006b40"/></marker>
+    <marker id="ih" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1c1b17"/></marker>
+    <marker id="ig" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7d3b"/></marker>
   </defs>
 
   <rect class="bg" x="1" y="1" width="678" height="378" rx="2"/>
@@ -70,7 +70,7 @@
   <text class="note"  x="182" y="364" text-anchor="middle">the round-trip is the bottleneck, not the matmul</text>
 
   <!-- divider -->
-  <line x1="340" y1="48" x2="340" y2="330" stroke="#eef0f0" stroke-width="1"/>
+  <line x1="340" y1="48" x2="340" y2="330" stroke="#f0ebe2" stroke-width="1"/>
 
   <!-- ================= RIGHT: FlashAttention ================= -->
   <text class="ptl" x="498" y="58" text-anchor="middle">FlashAttention</text>
