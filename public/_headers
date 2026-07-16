@@ -16,6 +16,7 @@
 /assets/blog/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Self-hosted Inter web font (ADR-0005). Versioned by content; cache aggressively.
+# Self-hosted web fonts (#55): Newsreader + IBM Plex Mono woff2. Versioned by
+# content; cache aggressively.
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable

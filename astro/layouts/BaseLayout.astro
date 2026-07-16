@@ -55,11 +55,12 @@ function isNavActive(key: NavKey): boolean {
   return key === activeNav;
 }
 
-// Swiss/mono nav (ADR-0005): uppercase letter-spaced monospace links; the active
-// item is marked by ink color + a go-green underline rather than a filled pill.
+// Editorial mono nav (#55): title-case IBM Plex Mono links; the active item is
+// marked by ink color + a 1.5px go-green underline, inactive is muted with a
+// transparent underline that resolves to ink on hover.
 function navLinkClass(key: NavKey): string {
   const base =
-    "font-mono text-[0.72rem] font-medium uppercase tracking-[0.14em] pb-1 border-b-2 transition-colors";
+    "font-mono text-[0.78rem] tracking-[0.03em] pb-1 border-b-[1.5px] transition-colors";
   return isNavActive(key)
     ? base + " border-go-green text-ink"
     : base + " border-transparent text-muted hover:text-ink";
@@ -114,22 +115,20 @@ const isArticle = ogType === "article";
   </head>
   <body class="flex min-h-screen flex-col font-sans text-ink antialiased">
     <header class="sticky top-0 z-20 border-b border-surface-border bg-paper">
-      <div class="mx-auto flex w-full max-w-[75rem] items-center gap-6 px-4 py-3 sm:px-6">
-        <!-- Brand: the "T│L" monospace monogram (ported from the pre-Astro
-             header), restyled Swiss — ink glyphs with a drawn go-green bar as the
-             divider (matches favicon.svg, which the thin │ glyph rendered too
-             faintly at small sizes). -->
+      <div class="mx-auto flex w-full max-w-[780px] items-baseline justify-between px-7 py-5">
+        <!-- Brand: the "TL." editorial wordmark — Newsreader semibold ink glyphs
+             with an accent-colored period. -->
         <a
           href="/"
           aria-label="Tony Lee home"
-          class="mr-auto font-mono text-[1.35rem] font-semibold leading-none tracking-[-0.03em] text-ink"
+          class="font-sans text-[1.31rem] font-semibold leading-none tracking-[-0.01em] text-ink"
         >
-          <span aria-hidden="true">T<span class="mx-[0.115em] inline-block h-[0.69em] w-[0.154em] rounded-full bg-go-green align-baseline"></span>L</span>
+          TL<span class="text-go-green" aria-hidden="true">.</span>
         </a>
 
         <!-- Desktop nav -->
         <nav aria-label="Primary" class="hidden sm:block">
-          <ul class="flex flex-wrap items-center justify-end gap-x-6 gap-y-2">
+          <ul class="flex flex-wrap items-center justify-end gap-x-7 gap-y-2">
             {
               navItems.map((item) => (
                 <li>
@@ -186,19 +185,19 @@ const isArticle = ogType === "article";
       </div>
     </header>
 
-    <main class="mx-auto w-full max-w-[75rem] flex-1 px-4 py-6 sm:px-6 md:py-8">
+    <main class="mx-auto w-full max-w-[780px] flex-1 px-7 pb-20 pt-8">
       {
         breadcrumbs.length > 0 && (
           <nav
             aria-label="Breadcrumb"
-            class="mb-6 font-mono text-[0.72rem] uppercase tracking-[0.12em] md:mb-8"
+            class="mb-6 font-mono text-[0.75rem] tracking-[0.02em] md:mb-8"
           >
             <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted">
               {breadcrumbs.map((crumb, i) => {
                 const isCurrent = i === breadcrumbs.length - 1 || !crumb.href;
                 return (
                   <li class="flex items-center gap-x-2">
-                    {i > 0 && <span aria-hidden="true" class="text-faint">/</span>}
+                    {i > 0 && <span aria-hidden="true" class="text-go-green">/</span>}
                     {isCurrent ? (
                       <span aria-current="page" class="text-ink">
                         {crumb.label}
@@ -218,12 +217,24 @@ const isArticle = ogType === "article";
       <slot />
     </main>
 
-    <footer class="mt-16 border-t border-surface-border">
+    <footer class="border-t border-surface-border">
       <div
-        class="mx-auto flex w-full max-w-[75rem] flex-col gap-2 px-4 py-8 font-mono text-[0.72rem] uppercase tracking-[0.14em] sm:flex-row sm:items-center sm:justify-between sm:px-6"
+        class="mx-auto flex w-full max-w-[780px] flex-wrap items-baseline justify-between gap-x-6 gap-y-3 px-7 py-7"
       >
-        <span class="text-ink">Tony Lee</span>
-        <span class="text-muted">Staff Software Engineer · ML Inference</span>
+        <div class="flex flex-col gap-1">
+          <span class="font-sans text-[1rem] font-semibold text-ink">Tony Lee</span>
+          <span class="font-mono text-[0.72rem] tracking-[0.02em] text-muted"
+            >Staff Software Engineer · ML Inference</span
+          >
+        </div>
+        <a
+          href="https://linkedin.com/in/tonyslee8"
+          target="_blank"
+          rel="noreferrer"
+          class="font-mono text-[0.72rem] tracking-[0.02em] text-muted transition-colors hover:text-ink"
+        >
+          LinkedIn &rarr;
+        </a>
       </div>
     </footer>
   </body>
