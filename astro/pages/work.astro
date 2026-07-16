@@ -3,10 +3,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { projectPortfolioContent, getDecisionRecordsByProject } from "@site";
 
 // Work index (Plan A consolidation): /work lists the projects directly — no
-// Projects/Experiments/Decisions switchboard. Each block is the teaser: what
-// the project is (summary), the numbers (evidence bullets), one primary CTA.
-// The bold result sentence leads the project page hero instead, so no sentence
-// renders in both places. Data modules reused unchanged.
+// Projects/Experiments/Decisions switchboard. Editorial redesign (#57): each
+// project is a two-column row — a giant serif index numeral beside the meta
+// line, title, description, measured-result bullets, and links. Data unchanged.
 const PAGE_TITLE = "Work | Tony Lee";
 const LEDE =
   "Evidence-backed GPU systems work across serving infrastructure and kernel optimization. " +
@@ -24,55 +23,67 @@ const projects = projectPortfolioContent.projects.map((project) => ({
   activeNav="work"
   breadcrumbs={[{ label: "Home", href: "/" }, { label: "Work" }]}
 >
-  <!-- Index header -->
-  <section
-    class="grid gap-6 border-b border-surface-border pb-10 md:pb-12 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.5fr)] lg:gap-12"
-  >
-    <div class="flex max-w-[52rem] flex-col gap-5">
-      <span class="eyebrow">Work</span>
-      <h1
-        class="text-balance font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.25rem)]"
-      >
-        Measured GPU systems work
-      </h1>
-      <p class="text-[1.05rem] leading-relaxed text-muted md:text-[1.15rem]">{LEDE}</p>
-    </div>
+  <!-- Header -->
+  <section class="pb-16">
+    <h1
+      class="max-w-[620px] font-medium leading-[1.05] tracking-[-0.022em] text-[clamp(2.625rem,6vw,3.625rem)]"
+    >
+      Measured GPU systems work
+    </h1>
+    <p class="mt-[22px] max-w-[620px] text-[1.19rem] leading-[1.6] text-body">{LEDE}</p>
   </section>
 
-  <!-- Project blocks -->
+  <!-- Project rows -->
   <section>
     {
-      projects.map((project) => (
-        <article class="grid gap-4 border-b border-surface-border py-9 md:grid-cols-[minmax(0,8rem)_minmax(0,1fr)] md:gap-10">
-          <div class="flex flex-row flex-wrap gap-x-4 gap-y-1 md:flex-col md:gap-2">
-            <span class="eyebrow">{project.layer}</span>
-            <span class="eyebrow text-faint">{project.experimentCount} experiments</span>
-            <span class="eyebrow text-faint">{project.decisionCount} decisions</span>
-          </div>
+      projects.map((project, i) => (
+        <article
+          class:list={[
+            "grid grid-cols-1 items-start gap-x-6 gap-y-4 border-t border-surface-border pt-11 pb-12 sm:grid-cols-[110px_1fr]",
+            i === projects.length - 1 && "border-b",
+          ]}
+        >
+          <span class="font-normal leading-none text-[3.25rem] text-[#c9c7c3]">
+            {String(i + 1).padStart(2, "0")}
+          </span>
 
-          <div class="grid gap-3">
-            <h2 class="text-[1.4rem] font-semibold leading-tight tracking-[-0.01em] md:text-[1.7rem]">
+          <div class="flex flex-col gap-[14px]">
+            <p class="font-mono text-[0.69rem] uppercase tracking-[0.12em] text-muted">
+              {project.layer}
+              <span class="text-faint">
+                {" · "}
+                {project.experimentCount} experiments · {project.decisionCount} decisions
+              </span>
+            </p>
+
+            <h2 class="text-[2rem] font-medium leading-[1.1] tracking-[-0.015em]">
               <a href={project.path} class="transition-colors hover:text-go-green-dark">
                 {project.title}
               </a>
             </h2>
-            <p class="max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">{project.summary}</p>
+
+            <p class="max-w-[580px] text-[1.09rem] leading-[1.55] text-secondary">
+              {project.summary}
+            </p>
 
             <ul class="mt-1 grid gap-2">
               {project.evidence.map((item) => (
-                <li class="grid grid-cols-[0.9rem_minmax(0,1fr)] gap-2 text-[0.92rem] leading-normal text-muted">
-                  <span class="font-mono text-go-green-dark" aria-hidden="true">
+                <li class="grid grid-cols-[1rem_1fr] gap-x-2 font-mono text-[0.78rem] leading-[1.5] text-secondary">
+                  <span class="text-go-green-dark" aria-hidden="true">
                     &mdash;
                   </span>
-                  <span class="max-w-[44rem]">{item}</span>
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>
 
-            <div class="mt-3 flex flex-wrap items-center gap-x-7 gap-y-3">
-              <a href={project.path} class="cta group text-go-green-dark hover:text-ink">
+            <div class="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2">
+              <a
+                href={project.path}
+                class="group inline-flex items-baseline gap-2 font-mono text-[0.78rem] text-go-green-dark transition-colors hover:text-ink"
+              >
                 View project
-                <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">
+                <span aria-hidden="true" class="transition-transform group-hover:translate-x-0.5">
                   &rarr;
                 </span>
               </a>
@@ -80,9 +91,9 @@ const projects = projectPortfolioContent.projects.map((project) => ({
                 href={project.repositoryUrl}
                 target="_blank"
                 rel="noreferrer"
-                class="cta link-external text-ink hover:text-go-green-dark"
+                class="font-mono text-[0.78rem] text-ink transition-colors hover:text-go-green-dark"
               >
-                GitHub
+                GitHub <span aria-hidden="true">&#8599;</span>
               </a>
             </div>
           </div>
