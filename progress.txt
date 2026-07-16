@@ -1244,3 +1244,22 @@ Committed as six commits on `worktree-feat+editorial-redesign` (foundation first
 one per page, + this docs record); NOT yet pushed / no PR (awaiting Tony). Blog
 article DETAIL pages inherit the new chrome but their prose body is unchanged
 (out of scope, as filed).
+
+
+--------------------------------------------------------------------------------
+2026-07-15 — REDESIGN follow-up: balance width, space & alignment
+--------------------------------------------------------------------------------
+Reviewed all views at desktop (1440) + mobile (375). Alignment was already clean
+(everything snapped to the measure); the imbalance was the 780px column stranding
+content on wide screens (330px side margins @1440) + a ~190px hero→Latest-writing
+void on Home. With Tony's sign-off:
+- Measure 780 → 880px (header/main/footer/rules follow). Margin @1440 330→280.
+- Responsive gutter: 28px → 20px on mobile (px-5 sm:px-7); kicker now wraps 2
+  lines not 3; content 319→335 on a 375 screen. No horizontal overflow.
+- Capped prose so the wider column keeps a readable measure: Home intro 640
+  (unchanged); Resume summary 42rem, projectsNote/experience/project bullets
+  44rem; Work desc 580 (unchanged). Section rules + date ranges keep the full
+  880 measure — rule-wider-than-text editorial hierarchy.
+- Home: hero pb-20→pb-4, Latest-writing mt-[110px]→mt-16 md:mt-20 (~190px void
+  → ~90px). Two post rows now sit in the first fold.
+Validation re-run: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.

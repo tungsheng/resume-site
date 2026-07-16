@@ -26,7 +26,7 @@ const latest = selectLatest(await getVisiblePosts(), LATEST_COUNT);
 
 <BaseLayout title={PAGE_TITLE} description={HOME_LEDE} activeNav="home">
   <!-- Hero -->
-  <section class="pb-20 pt-14 md:pt-[72px]">
+  <section class="pb-4 pt-14 md:pt-[72px]">
     <p class="font-mono text-[0.75rem] uppercase tracking-[0.14em] text-go-green-dark">
       {HOME_ROLE}
     </p>
@@ -54,7 +54,7 @@ const latest = selectLatest(await getVisiblePosts(), LATEST_COUNT);
 
   {
     latest.length > 0 && (
-      <section class="mt-[110px]" aria-labelledby="latest-writing">
+      <section class="mt-16 md:mt-20" aria-labelledby="latest-writing">
         <div class="flex items-baseline justify-between gap-4 border-b border-surface-border pb-3">
           <h2
             id="latest-writing"
