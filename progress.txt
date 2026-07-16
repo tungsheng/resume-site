@@ -1165,3 +1165,82 @@ GOTCHAS / NOTES
   hence the temporary ./public-astro. Clean ./public when removing the Bun app.
 - content/blog/prefix-cache-hit-rate-matters.md already exists as a clean
   Published fixture for the content collection (#3).
+
+
+================================================================================
+2026-07-15 — EDITORIAL REDESIGN: handoff triaged into issues
+================================================================================
+Design handoff `design_handoff_tonylee_redesign/` (typography-first re-skin of
+the ADR-0005 Swiss-minimal site) broken into vertical slices via /to-issues and
+filed on GitHub. Work happens on worktree branch
+`worktree-feat+editorial-redesign` (off main @ cfdd4cc).
+
+Decisions (confirmed with Tony):
+- Fonts self-hosted woff2 (Newsreader + IBM Plex Mono), NOT Google CDN — keeps
+  the Cloudflare CSP clean, matches the self-hosted Inter/KaTeX convention.
+- Accent = #2F7D3B (the brighter green), OVERRIDING the handoff README's #1E6B4E
+  canonical. Foundation issue must add an AA-safe darker text tone on #FAF8F3.
+- 5-issue breakdown: 1 foundation prefactor + 4 page slices.
+
+Issues (all labeled enhancement + ready-for-agent):
+  #55 Foundation — type system (Newsreader/IBM Plex Mono), warm palette
+      (#FAF8F3 paper / #1C1B17 ink / #2F7D3B accent), 780px measure, shared
+      nav ("TL." logo) + footer (+ LinkedIn link). BLOCKS all others.
+  #56 Home — hero (clamp Newsreader H1, accent-italic clause, CTA row) +
+      Latest-writing 3-post grid. Blocked by #55.
+  #57 Work — breadcrumb/H1/intro + two project rows (giant serif numeral,
+      meta line, measured-result bullets from data modules). Blocked by #55.
+  #58 Blog index — stacked post list w/ reading-time computed from word count.
+      Blocked by #55.
+  #59 Resume — header (Download-PDF button + contact row) + 5 sections driven
+      from the resume data module. Blocked by #55.
+
+Out of scope: blog post/article detail pages (handoff only specs the 4 index
+views); they inherit the new chrome from #55 automatically.
+
+
+================================================================================
+2026-07-15 — EDITORIAL REDESIGN: implemented #55–#59 on the worktree branch
+================================================================================
+All five redesign issues built and verified on `worktree-feat+editorial-redesign`.
+
+#55 Foundation:
+- Self-hosted Newsreader (opsz+wght variable, roman+italic) + IBM Plex Mono
+  (400/500) woff2 in public/fonts, sourced from @fontsource packages (added as
+  devDeps). CSP font-src 'self' unchanged. Removed the orphaned public Inter
+  woff2 (the resume PDF keeps its own copy under src/features/resume/fonts).
+- Re-authored global.css @theme: paper #FAF8F3, ink #1C1B17, body #3B3933,
+  secondary #4A473F, muted/faint warm greys, hairline #E4E1DA. Accent
+  --color-go-green #2F7D3B (4.80:1 on paper), --color-go-green-dark #235E2C
+  (7.30:1) for text/hover — both AA. Additive tokens: text-body, text-secondary.
+  --font-sans/--font-display → Newsreader, --font-mono → IBM Plex Mono.
+- BaseLayout: 780px measure (was 75rem), "TL." wordmark w/ accent dot, mono
+  title-case nav + accent active underline, accent breadcrumb "/", footer with
+  Newsreader name + LinkedIn link. Selection tint → accent 16%.
+
+#56 Home: kicker, clamp Newsreader H1 (500), intro w/ accent-italic clause, CTA
+  row w/ 0.4→1.0 accent underline, Latest-writing 3-post grid (index · eyebrow+
+  title · date), whole-row accent hover. Data-driven (newest = scheduling post).
+#57 Work: breadcrumb/H1/intro + project rows — giant serif numeral, mono meta
+  (layer + experiment/decision counts, counts dimmed), title, description,
+  accent-dash result bullets, View project / GitHub. From the work data modules.
+#58 Blog: reading time already existed (post.minutes); restyled PostList to the
+  stacked-card design (category · date · reading time · title · summary, whole-
+  card hover). Registered tag chips kept in a mono row below each card (outside
+  the card link) so ADR-0009 tag navigation + its integration test survive.
+#59 Resume: single 780px column. Header kicker + H1 + contact row w/ bordered
+  Download-PDF button (hover fills accent). Sections: Summary (accent-italic
+  clause split off the tail), Work Experience, ML Inference (project titles
+  parsed "Name (stack)" → serif name + inline mono tag), Skills 200px/1fr grid,
+  Education. All from the resume view-model; no copy hard-coded.
+
+Deviations from the handoff (deliberate): accent is the brighter #2F7D3B (Tony's
+call, overrides README #1E6B4E); blog tag chips sit BELOW each card rather than
+being omitted (preserves tag nav + test).
+
+Validation: typecheck ✓ · 80 unit ✓ · full build (PDF 322KB + Pagefind 6 pages)
+✓ · 29 integration ✓. Verified all four pages in dist-preview incl. mobile.
+Committed as six commits on `worktree-feat+editorial-redesign` (foundation first,
+one per page, + this docs record); NOT yet pushed / no PR (awaiting Tony). Blog
+article DETAIL pages inherit the new chrome but their prose body is unchanged
+(out of scope, as filed).
