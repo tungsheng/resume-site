@@ -4,57 +4,72 @@ import { selectLatest } from "../content/blog-schema";
 import { isoDay } from "../content/post-list";
 import { getVisiblePosts } from "../content/posts";
 
-// Swiss-minimal redesign tracer (ADR-0005 / PRD #20): flush-left grid-led hero
-// and a hairline-ruled "Latest writing" list with monospace system detailing.
-// Presentation only — the data (getVisiblePosts/selectLatest) is unchanged.
+// Editorial redesign (#56): a typography-first hero in Newsreader + a hairline-
+// ruled "Latest writing" list detailed in IBM Plex Mono. Presentation only — the
+// data (getVisiblePosts/selectLatest) is unchanged.
 const PAGE_TITLE = "Tony Lee | Staff Software Engineer (Full-Stack)";
 const HOME_ROLE = "Staff Software Engineer (Full-Stack) · Transitioning to ML Inference";
+// SEO description mirrors the visible lede (kept as one flat string for the meta).
 const HOME_LEDE =
-  "I build full-stack products and lead architecture across cross-regional teams. I'm now transitioning into ML inference engineering through self-directed, reproducible labs — vLLM GPU serving on AWS/EKS and CUDA/Triton kernel benchmarking, measured honestly including the negative results.";
+  "I build full-stack products and lead architecture across cross-regional teams. I'm now transitioning into ML inference engineering through self-directed, reproducible labs — vLLM GPU serving on AWS/EKS and CUDA/Triton kernel benchmarking, measured honestly, including the negative results.";
 
+// Mono CTA link with an accent underline that resolves from 0.4 opacity to full
+// on hover; pair with `group` + the arrow span for the nudge.
 const ctaLink =
-  "group inline-flex items-center gap-2 font-mono text-[0.75rem] font-semibold uppercase tracking-[0.12em] transition-colors";
+  "group inline-flex items-baseline gap-2 font-mono text-[0.84rem] text-go-green-dark border-b border-go-green/40 pb-[3px] transition-colors hover:border-go-green";
 
-// "Latest writing" (#10): baked into the static HTML at build time — the newest
-// Published Posts, no runtime fetch. Drafts are filtered out by getVisiblePosts.
+// "Latest writing" (#10): the newest Published Posts, baked into static HTML at
+// build time. Drafts are filtered out by getVisiblePosts.
 const LATEST_COUNT = 3;
 const latest = selectLatest(await getVisiblePosts(), LATEST_COUNT);
 ---
 
 <BaseLayout title={PAGE_TITLE} description={HOME_LEDE} activeNav="home">
-  <!-- Hero: flush-left, no card; whitespace + big Inter type do the work. -->
-  <section class="border-b border-surface-border pb-12 pt-4 md:pb-20 md:pt-10">
-    <p class="eyebrow mb-6">{HOME_ROLE}</p>
+  <!-- Hero -->
+  <section class="pb-20 pt-14 md:pt-[72px]">
+    <p class="font-mono text-[0.75rem] uppercase tracking-[0.14em] text-go-green-dark">
+      {HOME_ROLE}
+    </p>
     <h1
-      class="max-w-4xl text-balance font-semibold leading-[0.95] tracking-[-0.02em] text-[clamp(3rem,9vw,6.5rem)]"
+      class="mb-[34px] mt-5 max-w-[15ch] font-medium leading-[0.98] tracking-[-0.028em] text-[clamp(4rem,11vw,6.75rem)]"
     >
       Tony Lee
     </h1>
-    <p class="mt-7 max-w-2xl text-[1.05rem] leading-relaxed text-muted md:mt-9 md:text-[1.2rem]">
-      {HOME_LEDE}
+    <p class="max-w-[640px] text-[1.25rem] leading-[1.62] text-body">
+      I build full-stack products and lead architecture across cross-regional teams. I'm now
+      transitioning into ML inference engineering through self-directed, reproducible labs — vLLM
+      GPU serving on AWS/EKS and CUDA/Triton kernel benchmarking, <em
+        class="italic text-go-green-dark">measured honestly, including the negative results.</em
+      >
     </p>
-    <div class="mt-9 flex flex-wrap gap-x-8 gap-y-3 md:mt-12">
-      <a href="/work" class={ctaLink + " text-go-green-dark hover:text-ink"}>
-        View work <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+    <div class="mt-[38px] flex flex-wrap gap-x-[26px] gap-y-3">
+      <a href="/work" class={ctaLink}>
+        View work <span aria-hidden="true" class="transition-transform group-hover:translate-x-0.5">&rarr;</span>
       </a>
-      <a href="/resume" class={ctaLink + " text-ink hover:text-go-green-dark"}>
-        View resume <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+      <a href="/resume" class={ctaLink}>
+        View resume <span aria-hidden="true" class="transition-transform group-hover:translate-x-0.5">&rarr;</span>
       </a>
     </div>
   </section>
 
   {
     latest.length > 0 && (
-      <section class="pt-12 md:pt-16" aria-labelledby="latest-writing">
-        <div class="mb-2 flex items-baseline justify-between gap-4 border-b border-surface-border pb-4">
+      <section class="mt-[110px]" aria-labelledby="latest-writing">
+        <div class="flex items-baseline justify-between gap-4 border-b border-surface-border pb-3">
           <h2
             id="latest-writing"
-            class="text-[1.4rem] font-semibold tracking-[-0.01em] md:text-[1.7rem]"
+            class="font-mono text-[0.75rem] uppercase tracking-[0.14em] text-muted"
           >
             Latest writing
           </h2>
-          <a href="/blog" class={ctaLink + " shrink-0 text-go-green-dark hover:text-ink"}>
-            Read the blog <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+          <a
+            href="/blog"
+            class="group inline-flex items-baseline gap-2 shrink-0 font-mono text-[0.78rem] text-go-green-dark transition-colors hover:text-ink"
+          >
+            Read the blog{" "}
+            <span aria-hidden="true" class="transition-transform group-hover:translate-x-0.5">
+              &rarr;
+            </span>
           </a>
         </div>
         <ul>
@@ -62,27 +77,22 @@ const latest = selectLatest(await getVisiblePosts(), LATEST_COUNT);
             <li class="border-b border-surface-border">
               <a
                 href={`/blog/${post.id}`}
-                class="group grid grid-cols-[auto_1fr] items-baseline gap-x-4 py-5 sm:grid-cols-[2.5rem_1fr_auto] sm:gap-x-8"
+                class="group grid grid-cols-[2.5rem_1fr] items-baseline gap-x-4 py-[26px] text-ink transition-colors hover:text-go-green-dark sm:grid-cols-[4rem_1fr_auto] sm:gap-x-6"
               >
-                <span class="section-index text-[0.72rem] tabular">
+                <span class="font-mono text-[0.81rem] tabular text-faint">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div class="min-w-0">
-                  <div class="mb-1.5 flex flex-wrap items-center gap-2">
-                    <span class="eyebrow">{post.data.category}</span>
-                    {import.meta.env.DEV && post.data.status !== "Published" && (
-                      <span class="eyebrow rounded-sm border border-warning-warm/40 bg-warning-soft px-1.5 py-px text-warning-warm">
-                        {post.data.status}
-                      </span>
-                    )}
-                  </div>
-                  <h3 class="text-[1.15rem] font-semibold leading-snug text-ink transition-colors group-hover:text-go-green-dark md:text-[1.4rem]">
+                  <span class="font-mono text-[0.69rem] uppercase tracking-[0.1em] text-go-green-dark">
+                    {post.data.category}
+                  </span>
+                  <h3 class="mt-1.5 font-medium leading-[1.25] text-[1.35rem] sm:text-[1.55rem]">
                     {post.data.title}
                   </h3>
                 </div>
                 <time
                   datetime={isoDay(post.data.published)}
-                  class="col-start-2 mt-2 font-mono text-[0.72rem] tabular text-muted sm:col-start-3 sm:mt-0 sm:text-right"
+                  class="col-start-2 mt-2 font-mono text-[0.75rem] tabular text-faint sm:col-start-3 sm:mt-0 sm:text-right"
                 >
                   {isoDay(post.data.published)}
                 </time>
