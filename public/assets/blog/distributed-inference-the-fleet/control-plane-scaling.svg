@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 236" role="img"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 262" role="img"
      aria-label="Three panels showing that the gateway, scheduler, and registry from the fleet map are each really a replicated pool, not a single box. Left panel, the front door: an L4 load balancer feeds a stack of stateless router replicas that share one prefix-cache index. Middle panel, the control plane: a stack of controllers with one green leader on top and two dashed standbys below it, leader-elected or sharded for high availability. Right panel, the model registry: a distributed cached store that fans weights out over two arrows to two new worker replicas, by peer-to-peer or broadcast. A footer notes that all three scale on cheap CPU, off the GPU critical path — the worker pools are the expensive part.">
   <title>Scaling the front door and the control plane — none of it is one box</title>
   <style>
@@ -23,9 +23,10 @@
     <marker id="ad" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto-start-reverse"><path d="M3,0 L8,3 L3,6 Z" fill="#1c1b17"/></marker>
   </defs>
 
-  <!-- canvas 720 x 236. Three columns: A front door (c140), B control (c360), C registry (c580).
-       separators x250,x470 (y44..200). headers y50. captions y190. footer y216. -->
-  <rect class="bg" x="1" y="1" width="718" height="234" rx="2"/>
+  <!-- canvas 720 x 262. Three columns: A front door (c140), B control (c360), C registry (c580).
+       separators x250,x470 (y44..200). headers y50. captions y190.
+       legend row y210 (green=active/primary, dashed=warm standby). footer y246. -->
+  <rect class="bg" x="1" y="1" width="718" height="260" rx="2"/>
   <text class="ey" x="30" y="26">NONE OF IT IS ONE BOX — SCALING THE FRONT DOOR &amp; CONTROL PLANE</text>
 
   <line class="sep" x1="250" y1="46" x2="250" y2="198"/>
@@ -66,6 +67,12 @@
   <text class="nsub" x="620" y="153" text-anchor="middle">replica</text>
   <text class="cap"  x="580" y="190" text-anchor="middle">fan-out weight load · P2P / broadcast</text>
 
+  <!-- ===== legend ===== -->
+  <rect class="gnode" x="242" y="210" width="13" height="13" rx="2"/>
+  <text class="cap" x="262" y="220">active / primary</text>
+  <rect class="cbox" x="392" y="210" width="13" height="13" rx="2"/>
+  <text class="cap" x="412" y="220">warm standby</text>
+
   <!-- ===== footer ===== -->
-  <text class="note" x="360" y="218" text-anchor="middle">all three scale on cheap CPU, off the GPU critical path — the worker pools are the expensive part</text>
+  <text class="note" x="360" y="246" text-anchor="middle">all three scale on cheap CPU, off the GPU critical path — the worker pools are the expensive part</text>
 </svg>

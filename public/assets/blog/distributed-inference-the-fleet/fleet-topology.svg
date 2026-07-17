@@ -156,6 +156,9 @@
   <text class="slbl" x="330" y="381">SSD</text>
   <text class="ssub" x="642" y="381" text-anchor="end">cold — largest, slowest</text>
 
-  <!-- ===================== FOOTER KEY ===================== -->
-  <text class="note" x="360" y="450" text-anchor="middle">dashed = control plane, off the critical path   ·   solid = data plane, on every token's critical path</text>
+  <!-- ===================== LEGEND KEY ===================== -->
+  <rect class="cbox" x="99" y="444" width="13" height="13" rx="2"/>
+  <text class="note" x="119" y="454">control plane — off the critical path</text>
+  <rect class="node" x="356" y="444" width="13" height="13" rx="2"/>
+  <text class="note" x="376" y="454">data plane — on every token's critical path</text>
 </svg>

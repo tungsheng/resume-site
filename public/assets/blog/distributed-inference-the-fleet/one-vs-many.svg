@@ -135,10 +135,10 @@
   <text class="ann" x="540" y="300" text-anchor="middle">KV pulled into a shared store</text>
 
   <!-- legend -->
-  <rect class="acc" x="242" y="326" width="11" height="11" rx="2"/>
-  <text class="lgd" x="259" y="335">shared state</text>
-  <rect class="kv"  x="392" y="326" width="11" height="11" rx="2"/>
-  <text class="lgd" x="409" y="335">local / private</text>
+  <rect class="acc" x="188" y="325" width="13" height="13" rx="2"/>
+  <text class="lgd" x="208" y="335">shared state — pulled out of the node</text>
+  <rect class="kv"  x="447" y="325" width="13" height="13" rx="2"/>
+  <text class="lgd" x="467" y="335">local / private</text>
 
   <!-- footer -->
   <text class="note" x="370" y="356" text-anchor="middle">the KV cache moves out of the node; a cache-aware router moves in front</text>
