@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 444" role="img"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 464" role="img"
      aria-label="Anatomy of one production LLM inference fleet, drawn as two planes on a balanced grid. Across the top, inside a full-width dashed band, is the CONTROL PLANE, off the critical path, with three evenly spaced dashed boxes — a scheduler (placement and admission), an autoscaler (resizes pools to hold SLOs), and a model registry (weights for new replicas) — each connected by a dashed arrow down to the part of the data plane it manages. Below, the DATA PLANE on every token's critical path, in solid boxes: a client sends a prompt into a green cache-aware gateway and router, which forwards it into the worker pools — a prefill pool of GPU workers that reads the prompt and builds the KV cache, which hands that KV across a green handoff arrow to a decode pool of GPU workers that generates tokens; the tokens then stream back along the bottom to the client. Below the pools sits a wide green shared KV store both pools read and write, drawn as three stacked tiers: GPU hot, CPU warm, SSD cold — fastest to largest, top to bottom. The scheduler wires to the gateway, and the autoscaler and registry wire to the worker pools. A footer gives the key: dashed is the control plane off the critical path, solid is the data plane on every token's critical path.">
   <title>Anatomy of one inference fleet — the control plane wired to the data plane it manages</title>
   <style>
@@ -71,7 +71,7 @@
     Footer key y=430 centred.
   =================================================================== -->
 
-  <rect class="bg" x="1" y="1" width="718" height="442" rx="2"/>
+  <rect class="bg" x="1" y="1" width="718" height="462" rx="2"/>
   <text class="ey" x="34" y="26">THE INFERENCE FLEET — ONE FLEET, TWO PLANES</text>
 
   <!-- ===================== CONTROL PLANE (dashed) ===================== -->
@@ -115,36 +115,36 @@
   <text class="nsub" x="206" y="231" text-anchor="middle">cache-aware router</text>
 
   <!-- worker pools group -->
-  <rect class="grp" x="300" y="166" width="372" height="102" rx="4"/>
+  <rect class="grp" x="290" y="166" width="392" height="102" rx="4"/>
   <text class="gtag" x="312" y="181">WORKER POOLS</text>
 
-  <rect class="node" x="314" y="190" width="150" height="64" rx="3"/>
-  <text class="pttl" x="389" y="210" text-anchor="middle">PREFILL</text>
-  <text class="nsub" x="389" y="225" text-anchor="middle">GPU workers ×N</text>
-  <text class="nsub" x="389" y="240" text-anchor="middle">reads prompt · builds KV</text>
+  <rect class="node" x="305" y="190" width="150" height="64" rx="3"/>
+  <text class="pttl" x="379" y="210" text-anchor="middle">PREFILL</text>
+  <text class="nsub" x="379" y="225" text-anchor="middle">GPU workers ×N</text>
+  <text class="nsub" x="379" y="240" text-anchor="middle">reads prompt · builds KV</text>
 
-  <rect class="node" x="508" y="190" width="150" height="64" rx="3"/>
-  <text class="pttl" x="583" y="210" text-anchor="middle">DECODE</text>
-  <text class="nsub" x="583" y="225" text-anchor="middle">GPU workers ×N</text>
-  <text class="nsub" x="583" y="240" text-anchor="middle">generates tokens</text>
+  <rect class="node" x="518" y="190" width="150" height="64" rx="3"/>
+  <text class="pttl" x="593" y="210" text-anchor="middle">DECODE</text>
+  <text class="nsub" x="593" y="225" text-anchor="middle">GPU workers ×N</text>
+  <text class="nsub" x="593" y="240" text-anchor="middle">generates tokens</text>
 
   <!-- data-plane flow arrows -->
   <path class="flow"  d="M116,222 L142,222" marker-end="url(#ad)"/>
-  <path class="flow"  d="M266,222 L310,222" marker-end="url(#ad)"/>
-  <path class="flowg" d="M466,222 L504,222" marker-end="url(#ag)"/>
+  <path class="flow"  d="M266,222 L300,222" marker-end="url(#ad)"/>
+  <path class="flowg" d="M456,222 L514,222" marker-end="url(#ag)"/>
   <text class="alabg" x="486" y="214" text-anchor="middle">KV handoff</text>
 
   <!-- tokens returned to client (bottom U) -->
-  <path class="flow" d="M658,222 L690,222 L690,414 L78,414 L78,247" marker-end="url(#ad)"/>
-  <text class="alab" x="360" y="408" text-anchor="middle">← tokens streamed back to the client</text>
+  <path class="flow" d="M668,222 L690,222 L690,430 L78,430 L78,247" marker-end="url(#ad)"/>
+  <text class="alab" x="360" y="423" text-anchor="middle">← tokens streamed back to the client</text>
 
   <!-- ===================== SHARED KV STORE ===================== -->
-  <path class="flowg" d="M389,254 L389,288" marker-start="url(#ag)" marker-end="url(#ag)"/>
-  <path class="flowg" d="M583,254 L583,288" marker-start="url(#ag)" marker-end="url(#ag)"/>
-  <text class="alabk" x="379" y="276" text-anchor="end">writes KV</text>
-  <text class="alabk" x="593" y="276">reads KV</text>
+  <path class="flowg" d="M379,258 L379,284" marker-start="url(#ag)" marker-end="url(#ag)"/>
+  <path class="flowg" d="M593,258 L593,284" marker-start="url(#ag)" marker-end="url(#ag)"/>
+  <text class="alabk" x="369" y="276" text-anchor="end">writes KV</text>
+  <text class="alabk" x="603" y="276">reads KV</text>
 
-  <rect class="store" x="306" y="288" width="360" height="108" rx="3"/>
+  <rect class="store" x="306" y="288" width="360" height="113" rx="3"/>
   <text class="pttl" x="486" y="306" text-anchor="middle">SHARED KV STORE</text>
   <rect class="slab" x="320" y="314" width="332" height="22" rx="2"/>
   <text class="slbl" x="330" y="329">GPU</text>
@@ -157,5 +157,5 @@
   <text class="ssub" x="642" y="381" text-anchor="end">cold — largest, slowest</text>
 
   <!-- ===================== FOOTER KEY ===================== -->
-  <text class="note" x="360" y="430" text-anchor="middle">dashed = control plane, off the critical path   ·   solid = data plane, on every token's critical path</text>
+  <text class="note" x="360" y="450" text-anchor="middle">dashed = control plane, off the critical path   ·   solid = data plane, on every token's critical path</text>
 </svg>
