@@ -96,9 +96,9 @@
   <text class="lblg" x="540" y="91" text-anchor="middle">cache-aware router</text>
 
   <!-- router fans out to three replicas -->
-  <path class="arrg" d="M540,104 L433,112 L428,128" marker-end="url(#ag)"/>
+  <path class="arrg" d="M540,104 L540,112 L428,112 L428,128" marker-end="url(#ag)"/>
   <path class="arrg" d="M540,104 L540,128" marker-end="url(#ag)"/>
-  <path class="arrg" d="M540,104 L649,112 L654,128" marker-end="url(#ag)"/>
+  <path class="arrg" d="M540,104 L540,112 L654,112 L654,128" marker-end="url(#ag)"/>
 
   <!-- three replica nodes (no cache of their own), 40px gaps, centers 426/540/654 -->
   <!-- replica 1 -->
