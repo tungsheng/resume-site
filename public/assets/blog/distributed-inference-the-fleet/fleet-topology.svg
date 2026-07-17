@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 464" role="img"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img"
      aria-label="Anatomy of one production LLM inference fleet, drawn as two planes on a balanced grid. Across the top, inside a full-width dashed band, is the CONTROL PLANE, off the critical path, with three evenly spaced dashed boxes — a scheduler (placement and admission), an autoscaler (resizes pools to hold SLOs), and a model registry (weights for new replicas) — each connected by a dashed arrow down to the part of the data plane it manages. Below, the DATA PLANE on every token's critical path, in solid boxes: a client sends a prompt into a green cache-aware gateway and router, which forwards it into the worker pools — a prefill pool of GPU workers that reads the prompt and builds the KV cache, which hands that KV across a green handoff arrow to a decode pool of GPU workers that generates tokens; the tokens then stream back along the bottom to the client. Below the pools sits a wide green shared KV store both pools read and write, drawn as three stacked tiers: GPU hot, CPU warm, SSD cold — fastest to largest, top to bottom. The scheduler wires to the gateway, and the autoscaler and registry wire to the worker pools. A footer gives the key: dashed is the control plane off the critical path, solid is the data plane on every token's critical path.">
   <title>Anatomy of one inference fleet — the control plane wired to the data plane it manages</title>
   <style>
@@ -38,7 +38,7 @@
   </defs>
 
   <!-- ==================================================================
-    COORDINATE MAP   (canvas 720 x 444) — balanced grid.
+    COORDINATE MAP   (canvas 720 x 480) — balanced grid.
     Control boxes are EVENLY distributed (centres 143/360/577) so the
     cluster is canvas-centred and the upper-left is no longer empty;
     each still wires to the data-plane part it manages. The worker-pool
@@ -59,19 +59,22 @@
     Data spine centre y=222.
       client  x40  y199 w76 h46  -> centre 78,222
       gateway x146 y196 w120 h52 -> centre 206,222 (green)
-      WORKER POOLS group: x300 y166 w372 h102 -> 300..672, y166..268. tag 312,180.
-        PREFILL x314 y190 w150 h64 -> centre 389 ; DECODE x508 y190 w150 h64 -> centre 583.
-        KV handoff prefill 466 -> decode 504 @222 (green, label 486,214).
-      client->gateway 116->142 ; gateway->prefill 266->310 @222.
-      return U: decode 658,222 ->690,222 ->690,414 ->78,414 ->78,247 (into client).
-    SHARED KV STORE: x306 y288 w360 h108 -> centre 486 ; header title inside @486,306.
+      WORKER POOLS group: x290 y166 w392 h102 -> 290..682, y166..268. tag 312,181.
+        PREFILL x305 y190 w150 h64 -> centre 379 ; DECODE x518 y190 w150 h64 -> centre 593.
+        KV handoff prefill 456 -> decode 514 @222 (green, label 486,214).
+      client->gateway 116->142 ; gateway->prefill 266->300 @222.
+      return U: decode 668,222 ->690,222 ->690,430 ->78,430 ->78,247 (into client).
+    SHARED KV STORE: x306 y288 w360 h113 -> 288..401, centre 486 ; header title inside @486,306.
       slabs x320 w332 (320..652): GPU y314, CPU y340, SSD y366 (h22).
-      links (green bidir): prefill 389 254<->288 ; decode 583 254<->288.
-        labels "writes KV" 379,276 end ; "reads KV" 593,276 (in the gap, y268..288).
-    Footer key y=430 centred.
+      links (green bidir): prefill 379 258<->284 ; decode 593 258<->284.
+        labels "writes KV" 369,276 end ; "reads KV" 603,276 (in the gap, y268..288).
+    tokens label 360,423 ; return line y430.
+    LEGEND (swatch key), swatches y450 (h13), labels y460:
+      cbox swatch x99  -> "control plane — off the critical path"
+      node swatch x356 -> "data plane — on every token's critical path"
   =================================================================== -->
 
-  <rect class="bg" x="1" y="1" width="718" height="462" rx="2"/>
+  <rect class="bg" x="1" y="1" width="718" height="478" rx="2"/>
   <text class="ey" x="34" y="26">THE INFERENCE FLEET — ONE FLEET, TWO PLANES</text>
 
   <!-- ===================== CONTROL PLANE (dashed) ===================== -->
@@ -157,8 +160,8 @@
   <text class="ssub" x="642" y="381" text-anchor="end">cold — largest, slowest</text>
 
   <!-- ===================== LEGEND KEY ===================== -->
-  <rect class="cbox" x="99" y="444" width="13" height="13" rx="2"/>
-  <text class="note" x="119" y="454">control plane — off the critical path</text>
-  <rect class="node" x="356" y="444" width="13" height="13" rx="2"/>
-  <text class="note" x="376" y="454">data plane — on every token's critical path</text>
+  <rect class="cbox" x="99" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="119" y="460">control plane — off the critical path</text>
+  <rect class="node" x="356" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="376" y="460">data plane — on every token's critical path</text>
 </svg>
