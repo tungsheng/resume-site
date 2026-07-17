@@ -51,8 +51,7 @@ Strip four current production stacks down — NVIDIA's Dynamo, Moonshot's Moonca
 - **The KV-cache store.** The shared state. Instead of every replica hoarding its own cache, a fleet treats KV as a tiered resource — living in GPU memory, spilling to CPU DRAM, then SSD, then remote storage — that workers read, write, and increasingly share. Dynamo's block manager, Mooncake's distributed KVCache pool, and AIBrix's distributed KV runtime are all this box. Moving cache between workers is enough of a concern that these systems ship dedicated transfer libraries for it.
 - **The scheduler / conductor.** The brain that decides placement: which pool, which replica, when to admit a request, what to do under overload. Mooncake names it the Conductor; it is the same role llm-d's endpoint picker and AIBrix's control plane play.
 - **The autoscaler.** The part that changes the number of replicas to hold latency targets at the lowest cost, driven by inference-aware signals like KV-cache utilization rather than plain CPU load. Dynamo's Planner, llm-d's workload autoscaler, AIBrix's LLM-specific autoscaler.
-
-Behind all of it sits a model registry and the plumbing to load hundreds of gigabytes of weights onto a fresh replica — which turns out to matter a great deal when a traffic spike wants a new replica *now* and the weights take minutes to land.
+- **The model registry.** The weights and the plumbing to load hundreds of gigabytes onto a fresh replica — which turns out to matter a great deal when a traffic spike wants a new replica *now* and the weights take minutes to land.
 
 ![Figure 2 — The anatomy of one fleet. The data plane (solid) is the request's path: a cache-aware gateway into the worker pools — a prefill pool that builds the KV cache and a decode pool that generates from it, over a shared, tiered KV store — then tokens stream back. The control plane (dashed) sits off that path, each box wired to the one thing it manages: the scheduler places and admits at the gateway, the autoscaler adds and removes replicas in the pools, and the registry loads weights into new ones.](/assets/blog/distributed-inference-the-fleet/fleet-topology.svg)
 
@@ -103,7 +102,7 @@ Targets are stated at the tail — "99% of requests under X ms TTFT and Y ms TBT
 
 ## The map, and where the series goes
 
-So the map. Requests arrive at a cache-aware router, which places them on a prefill pool and a decode pool that read and write a tiered, shared KV cache; a control plane of scheduler and autoscaler resizes and steers the whole thing to hold goodput against its SLOs; and a registry keeps weights ready to stand up new replicas. Six boxes, two planes, three walls, one metric.
+So the map. Requests arrive at a cache-aware router, which places them on a prefill pool and a decode pool that read and write a tiered, shared KV cache; a control plane of scheduler and autoscaler resizes and steers the whole thing to hold goodput against its SLOs; and a registry keeps weights ready to stand up new replicas. Seven boxes, two planes, three walls, one metric.
 
 The rest of the series opens each box in turn — disaggregation and what the KV handoff costs; routing, and why round-robin is the wrong default; the distributed KV cache as a storage system with its own tiers and eviction; and the parallelism that serving uses, which is not the parallelism training used. Then the three things a map like this quietly assumes away: what happens when traffic spikes faster than the autoscaler can react, what breaks when a GPU dies mid-decode, and how a fleet recovers state that was only ever held in memory.
 
