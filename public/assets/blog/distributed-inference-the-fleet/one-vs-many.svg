@@ -4,10 +4,10 @@
   <style>
     .bg     { fill:#faf8f3; stroke:#e4e1da; }
     .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
-    .node   { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.25; }
+    .node   { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.3; }
     .tile   { fill:#faf8f3; stroke:#cbc5b9; stroke-width:1; }
     .kv     { fill:#f3efe7; stroke:#6f6d68; stroke-width:1.1; }
-    .acc    { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.25; }
+    .acc    { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
     .lbl    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
     .lblg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
     .lbls   { font:600 9px  'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
@@ -60,33 +60,33 @@
   <!-- ===================== LEFT: ONE REPLICA ===================== -->
   <text class="ey" x="60" y="34">ONE REPLICA</text>
 
-  <!-- request arrow entering the node -->
-  <text class="req" x="40" y="145">request</text>
-  <path class="arrs" d="M38,154 L92,154" marker-end="url(#af)"/>
+  <!-- request arrow entering the node (at node vertical centre y=169) -->
+  <text class="req" x="40" y="160">request</text>
+  <path class="arrs" d="M38,169 L92,169" marker-end="url(#af)"/>
 
-  <!-- the single node: everything local -->
-  <rect class="node" x="96" y="70" width="148" height="168" rx="6"/>
+  <!-- the single node: everything local. 70..268 bottom-aligns with the fleet's shared store. -->
+  <rect class="node" x="96" y="70" width="148" height="198" rx="4"/>
   <text class="cap" x="170" y="63" text-anchor="middle">weights + scheduler + cache, all local</text>
 
   <!-- GPUs holding weights -->
-  <rect class="tile" x="110" y="88" width="120" height="36" rx="3"/>
-  <rect x="120" y="98" width="12" height="16" rx="1.5" fill="#e4e1da" stroke="#6f6d68" stroke-width="0.8"/>
-  <rect x="136" y="98" width="12" height="16" rx="1.5" fill="#e4e1da" stroke="#6f6d68" stroke-width="0.8"/>
-  <rect x="152" y="98" width="12" height="16" rx="1.5" fill="#e4e1da" stroke="#6f6d68" stroke-width="0.8"/>
-  <text class="lbls" x="172" y="103">GPUs</text>
-  <text class="cap"  x="172" y="115">weights</text>
+  <rect class="tile" x="110" y="90" width="120" height="42" rx="3"/>
+  <rect x="120" y="101" width="12" height="18" rx="1.5" fill="#e4e1da" stroke="#6f6d68" stroke-width="0.8"/>
+  <rect x="136" y="101" width="12" height="18" rx="1.5" fill="#e4e1da" stroke="#6f6d68" stroke-width="0.8"/>
+  <rect x="152" y="101" width="12" height="18" rx="1.5" fill="#e4e1da" stroke="#6f6d68" stroke-width="0.8"/>
+  <text class="lbls" x="172" y="108">GPUs</text>
+  <text class="cap"  x="172" y="121">weights</text>
 
   <!-- scheduler chip -->
-  <rect class="tile" x="110" y="136" width="120" height="28" rx="3"/>
-  <text class="lbl" x="170" y="154" text-anchor="middle">scheduler</text>
+  <rect class="tile" x="110" y="148" width="120" height="30" rx="3"/>
+  <text class="lbl" x="170" y="167" text-anchor="middle">scheduler</text>
 
   <!-- KV cache block (local, neutral) -->
-  <rect class="kv" x="110" y="176" width="120" height="46" rx="3"/>
-  <text class="lbl" x="170" y="197" text-anchor="middle">KV cache</text>
-  <text class="cap" x="170" y="211" text-anchor="middle">(local)</text>
+  <rect class="kv" x="110" y="196" width="120" height="54" rx="3"/>
+  <text class="lbl" x="170" y="219" text-anchor="middle">KV cache</text>
+  <text class="cap" x="170" y="234" text-anchor="middle">(local)</text>
 
   <!-- left note -->
-  <text class="ann" x="170" y="258" text-anchor="middle">one node — caps out when it fills</text>
+  <text class="ann" x="170" y="293" text-anchor="middle">one node — caps out when it fills</text>
 
   <!-- ===================== RIGHT: A FLEET ===================== -->
   <text class="ey" x="391" y="34">A FLEET</text>
