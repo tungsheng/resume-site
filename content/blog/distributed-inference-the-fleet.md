@@ -1,6 +1,6 @@
 ---
 title: "Distributed Inference: From One GPU to a Fleet"
-summary: "Past a certain load you run out of node, and the fix isn't a bigger GPU — it's a fleet, with a cache-aware router in front and a shared KV store behind. This is the map: the boxes a production inference fleet is made of, the data-plane/control-plane split, the three walls that force the jump, and the one metric — goodput — that judges the whole thing."
+summary: "Past a certain load you run out of node, and the fix isn't a bigger GPU — it's a fleet, with a cache-aware router in front and a shared KV store behind. The layout: the boxes a production inference fleet is made of, the data-plane/control-plane split, the three walls that force the jump, and the one metric — goodput — that judges the whole thing."
 category: "Inference"
 status: Drafting
 published: 2026-07-16
@@ -29,15 +29,15 @@ So the load balancer in front has to be cache-aware, and the state behind the re
 
 ## Memory, compute, network
 
-"The machine is full" is really three separate walls. They are worth naming up front because they are independent — you can be nowhere near the compute limit and still be wedged against the memory one.
+A node hits one of three walls. They are worth naming up front because they are independent — you can be nowhere near the compute limit and still be wedged against the memory one.
 
 **Memory.** The weights and the KV cache share the same high-bandwidth memory (HBM), and both are large. A 70-billion-parameter model in 16-bit precision is about 140 GB of weights — already past a single 80 GB accelerator. Llama 3.1 405B is roughly 810 GB in fp16; DeepSeek-V3, trained in FP8, is about 671 GB. Those do not fit on one node. And the KV cache grows on top of the weights, with concurrency and context: for a 70B model with grouped-query attention (GQA), one token of context is about 0.32 MB of cache across all layers, so a single 128k-token request is roughly 40 GB — for one user. (These are back-of-envelope sizings from the published configs, not measured footprints; real deployments add activations and framework overhead.) Serve many users at long context and the cache, not the weights, runs you out of memory.
 
-**Compute.** Prefill — reading the prompt — is compute-bound: it processes every prompt token in parallel and saturates the GPU's math units. Decode is the opposite, memory-bandwidth-bound, one token per step. On a single node the two compete for the GPU: a large prefill stalls the decodes sharing the machine, and there is no batching configuration that satisfies both at once. (Sarathi-Serve reports naive hybrid batching inflating time-between-tokens by up to 28×, author-reported.) Sustaining prefill throughput under real load means spreading it across more GPUs than one node holds.
+**Compute.** Prefill — reading the prompt — is compute-bound: it processes every prompt token in parallel and saturates the GPU's math units. Decode is the opposite, memory-bandwidth-bound, one token per step. On a single node the two compete for the GPU: a large prefill stalls the decodes sharing the machine, and no batching split satisfies both at once. (Sarathi-Serve reports naive hybrid batching inflating time-between-tokens by up to 28×, author-reported.) Sustaining prefill throughput under real load means spreading it across more GPUs than one node holds.
 
 **Network.** The moment a model is sharded across GPUs, they have to talk every forward pass. Tensor parallelism does an all-reduce at each layer; a mixture-of-experts (MoE) model adds an all-to-all to route tokens to experts. Both sit on the critical path — one vendor's measurements put the tensor-parallel all-reduce at up to about 30% of end-to-end latency in specific configurations, and MoE's all-to-all in a similar range. Disaggregating prefill from decode adds one more transfer: the KV cache itself, handed from the machine that built it to the machine that generates from it. Communication is a first-class cost here.
 
-The rest of the map is the machinery between these walls.
+Everything else is the machinery between these walls.
 
 ## Anatomy of a fleet
 
@@ -65,7 +65,7 @@ The reason to hold the two apart: a data-plane failure drops requests in flight,
 
 ## Every box is really a pool
 
-Figure 2 draws the gateway, scheduler, and registry as one box each. That is a simplification: at fleet scale every one of them is replicated, because a control plane with a single point of failure fails the whole fleet the moment it dies. These scale cheaply — on CPU, off the GPU critical path — so they are rarely the dominant cost.
+Figure 2 draws the gateway, scheduler, and registry as one box each. That is a simplification: at fleet scale every one of them is replicated, because a control plane with a single point of failure fails the whole fleet the moment it dies. These scale cheaply — on CPU, off the GPU critical path.
 
 - **The front door** is a pool of router replicas behind an ordinary L4 load balancer. Routing is close to stateless, with one catch: the cache-aware decision has to know which replica holds which prefix, so the routers share that index — gossiped between them, or kept in a small shared store — rather than each one guessing alone.
 - **The control plane** runs replicated for availability: leader-elected (one active planner, warm standbys) or sharded by responsibility. The Kubernetes-native stacks get this largely for free as controllers with leader election; a bespoke global scheduler like Mooncake's Conductor has to build the same high availability itself.
@@ -89,17 +89,17 @@ Set the control plane aside: the worker pools carry the one design decision that
 
 A fleet is judged on **goodput**: the request rate it can serve while still meeting its latency targets. The distinction from raw throughput is the whole point — you can inflate tokens-per-second by batching so aggressively that half the requests miss their deadlines, and those tokens are served but useless. DistServe popularized the term for LLM serving precisely to stop that inflation, and it is the number the autoscaler and scheduler are really optimizing.
 
-The latency targets themselves are two, because the two phases feel different to a user:
+The latency targets are two, one per phase:
 
 - **Time to first token (TTFT)** — submission to the first token. Dominated by prefill, so it grows with prompt length. This is responsiveness.
-- **Time between tokens (TBT)** — also called inter-token latency or time per output token — the gap between streamed tokens after the first. Dominated by decode. This is smoothness. The names are not used identically everywhere: some measure a per-token interval you can take a p99 of, others an average across the whole reply that hides stalls — a distinction that matters once you optimize tail latency.
+- **Time between tokens (TBT)** — also called inter-token latency or time per output token — the gap between streamed tokens after the first. Dominated by decode. This is smoothness, and it is measured inconsistently: a per-token interval you can take a p99 of, or an average that hides stalls.
 
 Targets are stated at the tail — "99% of requests under X ms TTFT and Y ms TBT" — and **SLO attainment**, the fraction of requests that clear both bars, is what goodput is measured against (SLO: service-level objective). Underneath, the number the business watches is **cost per million tokens**, which is just the fleet's hourly bill divided by the tokens it serves within SLO. Every architectural choice is ultimately an argument about one of these numbers.
 
-## The map, and the open problems
+## The shape, and the open problems
 
-So the map. Requests arrive at a cache-aware router, which places them on a prefill pool and a decode pool that read and write a tiered, shared KV cache; a control plane of scheduler and autoscaler resizes and steers the whole thing to hold goodput against its SLOs; and a registry keeps weights ready to stand up new replicas. Seven boxes, two planes, three walls, one metric.
+Put it together. Requests arrive at a cache-aware router, which places them on a prefill pool and a decode pool that read and write a tiered, shared KV cache; a control plane of scheduler and autoscaler resizes and steers the whole thing to hold goodput against its SLOs; and a registry keeps weights ready to stand up new replicas. Seven boxes, two planes, three walls, one metric.
 
-Each box is a problem of its own: disaggregation and what the KV handoff costs; routing, and why round-robin is the wrong default; the distributed KV cache as a storage system with its own tiers and eviction; and the parallelism that serving uses, which is not the parallelism training used. Then the three things a map like this quietly assumes away: what happens when traffic spikes faster than the autoscaler can react, what breaks when a GPU dies mid-decode, and how a fleet recovers state that was only ever held in memory.
+Each box is a problem of its own: disaggregation and what the KV handoff costs; routing, and why round-robin is the wrong default; the distributed KV cache as a storage system with its own tiers and eviction; and the parallelism that serving uses, which is not the parallelism training used. Then the three things an overview like this quietly assumes away: what happens when traffic spikes faster than the autoscaler can react, what breaks when a GPU dies mid-decode, and how a fleet recovers state that was only ever held in memory.
 
 That is the shape of it. More notes as I go.
