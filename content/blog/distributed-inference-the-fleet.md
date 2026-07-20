@@ -31,7 +31,7 @@ So the load balancer in front has to be cache-aware, and the state behind the re
 
 ## Three scaling walls
 
-A single node caps out in one of three ways, and each one is a different post later in this series. They are worth naming up front because they are independent — you can be nowhere near the compute limit and still be wedged against the memory one.
+"The machine is full" is really three separate walls, and each one is a different post later in this series. They are worth naming up front because they are independent — you can be nowhere near the compute limit and still be wedged against the memory one.
 
 **Memory.** The weights and the KV cache share the same high-bandwidth memory (HBM), and both are large. A 70-billion-parameter model in 16-bit precision is about 140 GB of weights — already past a single 80 GB accelerator. Llama 3.1 405B is roughly 810 GB in fp16; DeepSeek-V3, trained in FP8, is about 671 GB. Those do not fit on one node. And the KV cache grows on top of the weights, with concurrency and context: for a 70B model with grouped-query attention (GQA), one token of context is about 0.32 MB of cache across all layers, so a single 128k-token request is roughly 40 GB — for one user. (These are back-of-envelope sizings from the published configs, not measured footprints; real deployments add activations and framework overhead.) Serve many users at long context and it is the cache, not the weights, that runs you out of memory.
 
@@ -79,7 +79,7 @@ The worker pools are the expensive, GPU-bound part the autoscaler manages. Every
 
 ## Homogeneous, disaggregated, or hybrid
 
-The one design decision that shapes everything else: do prefill and decode run on the same workers, or different ones?
+Set the control plane aside: the worker pools carry the one design decision that shapes everything else — do prefill and decode run on the same workers, or different ones?
 
 **Homogeneous** replicas do both. Every worker prefills and decodes, batching the two phases together — the classic vLLM continuous-batching design. It is simple, and it is where most deployments start. Its problem is the compute wall from earlier: the two phases interfere, and one replica's parallelism and memory plan has to compromise for both.
 
