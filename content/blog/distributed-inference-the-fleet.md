@@ -2,7 +2,7 @@
 title: "Distributed Inference: From One GPU to a Fleet"
 summary: "Past a certain load you run out of node, and the fix isn't a bigger GPU — it's a fleet, with a cache-aware router in front and a shared KV store behind. The layout: the boxes a production inference fleet is made of, the data-plane/control-plane split, the three walls that force the jump, and the one metric — goodput — that judges the whole thing."
 category: "Inference"
-status: Drafting
+status: Published
 published: 2026-07-16
 tags:
   - distributed-inference
