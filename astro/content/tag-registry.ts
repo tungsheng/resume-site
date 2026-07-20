@@ -9,6 +9,7 @@ export const TAG_REGISTRY = {
   "activation-functions": "Activation functions",
   attention: "Attention",
   "continuous-batching": "Continuous batching",
+  "distributed-inference": "Distributed inference",
   ffn: "FFN",
   "flash-attention": "FlashAttention",
   gqa: "GQA",
@@ -21,6 +22,7 @@ export const TAG_REGISTRY = {
   routing: "Routing",
   scheduling: "Scheduling",
   "self-attention": "Self-attention",
+  serving: "Serving",
   swiglu: "SwiGLU",
   transformer: "Transformer",
 } as const;

@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 262" role="img"
+     aria-label="Three panels showing that the gateway, scheduler, and registry from the fleet map are each really a replicated pool, not a single box. Left panel, the front door: an L4 load balancer feeds a stack of stateless router replicas that share one prefix-cache index. Middle panel, the control plane: a stack of controllers with one green leader on top and two dashed standbys below it, leader-elected or sharded for high availability. Right panel, the model registry: a distributed cached store that fans weights out over two arrows to two new worker replicas, by peer-to-peer or broadcast. A footer notes that all three scale on cheap CPU, off the GPU critical path — the worker pools are the expensive part.">
+  <title>Scaling the front door and the control plane — none of it is one box</title>
+  <style>
+    .bg     { fill:#faf8f3; stroke:#e4e1da; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.2px; fill:#2f7d3b; }
+    .hdr    { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#2f7d3b; }
+    .node   { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.2; }
+    .cardb  { fill:#efeae1; stroke:#b7b1a6; stroke-width:1; }
+    .gnode  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
+    .store  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
+    .cbox   { fill:#faf8f3; stroke:#a9a49a; stroke-width:1.1; stroke-dasharray:5 4; }
+    .ntl    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .gtl    { font:600 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .nsub   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .csub   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .cap    { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .flow   { stroke:#1c1b17; stroke-width:1.5; fill:none; }
+    .sep    { stroke:#d8d3c8; stroke-width:1; fill:none; stroke-dasharray:3 4; }
+    .note   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+  </style>
+  <defs>
+    <marker id="ad" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto-start-reverse"><path d="M3,0 L8,3 L3,6 Z" fill="#1c1b17"/></marker>
+  </defs>
+
+  <!-- canvas 720 x 262. Three columns: A front door (c140), B control (c360), C registry (c580).
+       separators x250,x470 (y44..200). headers y50. captions y190.
+       legend row y210 (green=active/primary, dashed=warm standby). footer y246. -->
+  <rect class="bg" x="1" y="1" width="718" height="260" rx="2"/>
+  <text class="ey" x="30" y="26">NONE OF IT IS ONE BOX — SCALING THE FRONT DOOR &amp; CONTROL PLANE</text>
+
+  <line class="sep" x1="250" y1="46" x2="250" y2="198"/>
+  <line class="sep" x1="470" y1="46" x2="470" y2="198"/>
+
+  <!-- ===== A · FRONT DOOR ===== -->
+  <text class="hdr" x="140" y="60" text-anchor="middle">FRONT DOOR</text>
+  <rect class="node" x="95" y="68" width="90" height="26" rx="3"/>
+  <text class="ntl" x="140" y="85" text-anchor="middle">L4 LB</text>
+  <path class="flow" d="M140,94 L140,116" marker-end="url(#ad)"/>
+  <rect class="cardb" x="100" y="118" width="104" height="44" rx="3"/>
+  <rect class="cardb" x="94"  y="123" width="104" height="44" rx="3"/>
+  <rect class="node"  x="88"  y="128" width="104" height="44" rx="3"/>
+  <text class="ntl"  x="140" y="149" text-anchor="middle">ROUTER ×M</text>
+  <text class="nsub" x="140" y="163" text-anchor="middle">stateless</text>
+  <text class="cap"  x="140" y="190" text-anchor="middle">stateless · shares prefix index</text>
+
+  <!-- ===== B · CONTROL PLANE ===== -->
+  <text class="hdr" x="360" y="60" text-anchor="middle">CONTROL PLANE</text>
+  <rect class="gnode" x="300" y="72" width="120" height="28" rx="3"/>
+  <text class="gtl" x="360" y="90" text-anchor="middle">CONTROLLER · leader</text>
+  <rect class="cbox" x="300" y="104" width="120" height="26" rx="3"/>
+  <text class="csub" x="360" y="121" text-anchor="middle">standby</text>
+  <rect class="cbox" x="300" y="134" width="120" height="26" rx="3"/>
+  <text class="csub" x="360" y="151" text-anchor="middle">standby</text>
+  <text class="cap"  x="360" y="190" text-anchor="middle">leader-elected or sharded for HA</text>
+
+  <!-- ===== C · MODEL REGISTRY ===== -->
+  <text class="hdr" x="580" y="60" text-anchor="middle">MODEL REGISTRY</text>
+  <rect class="store" x="520" y="72" width="120" height="34" rx="3"/>
+  <text class="gtl"  x="580" y="88"  text-anchor="middle">DIST. STORE</text>
+  <text class="nsub" x="580" y="100" text-anchor="middle">cached artifacts</text>
+  <path class="flow" d="M560,106 L540,134" marker-end="url(#ad)"/>
+  <path class="flow" d="M600,106 L620,134" marker-end="url(#ad)"/>
+  <rect class="node" x="512" y="136" width="56" height="26" rx="3"/>
+  <text class="nsub" x="540" y="153" text-anchor="middle">replica</text>
+  <rect class="node" x="592" y="136" width="56" height="26" rx="3"/>
+  <text class="nsub" x="620" y="153" text-anchor="middle">replica</text>
+  <text class="cap"  x="580" y="190" text-anchor="middle">fan-out weight load · P2P / broadcast</text>
+
+  <!-- ===== legend ===== -->
+  <rect class="gnode" x="242" y="210" width="13" height="13" rx="2"/>
+  <text class="cap" x="262" y="220">active / primary</text>
+  <rect class="cbox" x="392" y="210" width="13" height="13" rx="2"/>
+  <text class="cap" x="412" y="220">warm standby</text>
+
+  <!-- ===== footer ===== -->
+  <text class="note" x="360" y="246" text-anchor="middle">all three scale on cheap CPU, off the GPU critical path — the worker pools are the expensive part</text>
+</svg>

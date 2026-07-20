@@ -7,8 +7,8 @@
   },
   "scripts": {
     "astro": "astro",
-    "dev": "test -f public/resume.pdf || bun run build:pdf; astro dev",
-    "preview": "astro preview",
+    "dev": "test -f public/resume.pdf || bun run build:pdf; astro dev --port ${PORT:-4321}",
+    "preview": "astro preview --port ${PORT:-4321}",
     "build": "bun run build:pdf && astro build && pagefind --site dist",
     "build:pdf": "bun run scripts/build-resume-pdf.ts",
     "test": "bun run test:unit",

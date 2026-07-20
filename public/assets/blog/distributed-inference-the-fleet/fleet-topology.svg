@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img"
+     aria-label="Anatomy of one production LLM inference fleet, drawn as two planes on a balanced grid. Across the top, inside a full-width dashed band, is the CONTROL PLANE, off the critical path, with three evenly spaced dashed boxes — a scheduler (placement and admission), an autoscaler (resizes pools to hold SLOs), and a model registry (weights for new replicas) — each connected by a dashed arrow down to the part of the data plane it manages. Below, the DATA PLANE on every token's critical path, in solid boxes: a client sends a prompt into a green cache-aware gateway and router, which forwards it into the worker pools — a prefill pool of GPU workers that reads the prompt and builds the KV cache, which hands that KV across a green handoff arrow to a decode pool of GPU workers that generates tokens; the tokens then stream back along the bottom to the client. Below the pools sits a wide green shared KV store both pools read and write, drawn as three stacked tiers: GPU hot, CPU warm, SSD cold — fastest to largest, top to bottom. The scheduler wires to the gateway, and the autoscaler and registry wire to the worker pools. A footer gives the key: dashed is the control plane off the critical path, solid is the data plane on every token's critical path.">
+  <title>Anatomy of one inference fleet — the control plane wired to the data plane it manages</title>
+  <style>
+    .bg     { fill:#faf8f3; stroke:#e4e1da; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .plane  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.2px; fill:#2f7d3b; }
+    .planed { font:400 10px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:.3px; fill:#8a857c; }
+    .band   { fill:none; stroke:#cbc5b9; stroke-width:1; stroke-dasharray:6 4; }
+    .cbox   { fill:#faf8f3; stroke:#a9a49a; stroke-width:1.1; stroke-dasharray:5 4; }
+    .ctitle { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#3a3934; }
+    .csub   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .grp    { fill:#fbfaf6; stroke:#cbc5b9; stroke-width:1; }
+    .gtag   { font:600 9px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#8a857c; }
+    .node   { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.3; }
+    .gnode  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
+    .ntitle { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .gttl   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .nsub   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .store  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
+    .slab   { fill:#f2f8f0; stroke:#6aa06f; stroke-width:1; }
+    .slbl   { font:700 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .ssub   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .pttl   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#2f7d3b; }
+    .flow   { stroke:#1c1b17; stroke-width:1.6; fill:none; }
+    .flowg  { stroke:#2f7d3b; stroke-width:1.6; fill:none; }
+    .ctrl   { stroke:#a9a49a; stroke-width:1.3; fill:none; stroke-dasharray:5 4; }
+    .alab   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .alabg  { font:600 9px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .alabk  { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .clab   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .note   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+  </style>
+  <defs>
+    <marker id="ad"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto-start-reverse"><path d="M3,0 L8,3 L3,6 Z" fill="#1c1b17"/></marker>
+    <marker id="ag"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto-start-reverse"><path d="M3,0 L8,3 L3,6 Z" fill="#2f7d3b"/></marker>
+    <marker id="agr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto-start-reverse"><path d="M3,0 L8,3 L3,6 Z" fill="#a9a49a"/></marker>
+  </defs>
+
+  <!-- ==================================================================
+    COORDINATE MAP   (canvas 720 x 480) — balanced grid.
+    Control boxes are EVENLY distributed (centres 143/360/577) so the
+    cluster is canvas-centred and the upper-left is no longer empty;
+    each still wires to the data-plane part it manages. The worker-pool
+    ↔ KV-store junction is opened up: the store title lives INSIDE the
+    store as a header, leaving the gap for just the read/write arrows.
+
+    Eyebrow y=26.
+    CONTROL band: x34..686, y40..120 (h80, dashed). label 46,58.
+      3 dashed boxes y66..108 (h42), titles y85, subs y99:
+        scheduler  x53  w180 -> centre 143
+        autoscaler x270 w180 -> centre 360
+        registry   x487 w180 -> centre 577
+    CONTROL -> DATA (dashed): each box to the part it manages
+      scheduler 143,110 -> gateway 203,191   label "places · admits" 188,150
+      autoscaler 360,110 -> pools 398,164     label "scales replicas ±" 404,150
+      registry  577,110 -> pools 576,164      label "loads weights" 588,150
+    DATA label 34,160.
+    Data spine centre y=222.
+      client  x40  y199 w76 h46  -> centre 78,222
+      gateway x146 y196 w120 h52 -> centre 206,222 (green)
+      WORKER POOLS group: x290 y166 w392 h102 -> 290..682, y166..268. tag 312,181.
+        PREFILL x305 y190 w150 h64 -> centre 379 ; DECODE x518 y190 w150 h64 -> centre 593.
+        KV handoff prefill 456 -> decode 514 @222 (green, label 486,214).
+      client->gateway 116->142 ; gateway->prefill 266->300 @222.
+      return U: decode 668,222 ->690,222 ->690,430 ->78,430 ->78,247 (into client).
+    SHARED KV STORE: x306 y288 w360 h113 -> 288..401, centre 486 ; header title inside @486,306.
+      slabs x320 w332 (320..652): GPU y314, CPU y340, SSD y366 (h22).
+      links (green bidir): prefill 379 258<->284 ; decode 593 258<->284.
+        labels "writes KV" 369,276 end ; "reads KV" 603,276 (in the gap, y268..288).
+    tokens label 360,423 ; return line y430.
+    LEGEND (swatch key), swatches y450 (h13), labels y460:
+      cbox swatch x99  -> "control plane — off the critical path"
+      node swatch x356 -> "data plane — on every token's critical path"
+  =================================================================== -->
+
+  <rect class="bg" x="1" y="1" width="718" height="478" rx="2"/>
+  <text class="ey" x="34" y="26">THE INFERENCE FLEET — ONE FLEET, TWO PLANES</text>
+
+  <!-- ===================== CONTROL PLANE (dashed) ===================== -->
+  <rect class="band" x="34" y="40" width="652" height="80" rx="3"/>
+  <text class="plane"  x="46" y="58">CONTROL PLANE</text>
+  <text class="planed" x="162" y="58">off the critical path — steers and resizes the data plane</text>
+
+  <rect class="cbox" x="53" y="66" width="180" height="42" rx="3"/>
+  <text class="ctitle" x="143" y="85" text-anchor="middle">SCHEDULER</text>
+  <text class="csub"   x="143" y="99" text-anchor="middle">placement / admission</text>
+
+  <rect class="cbox" x="270" y="66" width="180" height="42" rx="3"/>
+  <text class="ctitle" x="360" y="85" text-anchor="middle">AUTOSCALER</text>
+  <text class="csub"   x="360" y="99" text-anchor="middle">resizes pools to hold SLOs</text>
+
+  <rect class="cbox" x="487" y="66" width="180" height="42" rx="3"/>
+  <text class="ctitle" x="577" y="85" text-anchor="middle">MODEL REGISTRY</text>
+  <text class="csub"   x="577" y="99" text-anchor="middle">weights for new replicas</text>
+
+  <!-- control -> data: each box wired to what it manages -->
+  <path class="ctrl" d="M143,110 L203,191" marker-end="url(#agr)"/>
+  <text class="clab" x="188" y="150">places · admits</text>
+
+  <path class="ctrl" d="M360,110 L398,164" marker-end="url(#agr)"/>
+  <text class="clab" x="404" y="150">scales replicas ±</text>
+
+  <path class="ctrl" d="M577,110 L576,164" marker-end="url(#agr)"/>
+  <text class="clab" x="588" y="150">loads weights</text>
+
+  <!-- ===================== DATA PLANE (solid) ===================== -->
+  <text class="plane" x="34" y="160">DATA PLANE</text>
+
+  <!-- client -->
+  <rect class="node" x="40" y="199" width="76" height="46" rx="3"/>
+  <text class="ntitle" x="78" y="219" text-anchor="middle">CLIENT</text>
+  <text class="nsub"   x="78" y="232" text-anchor="middle">prompt in</text>
+
+  <!-- gateway / router -->
+  <rect class="gnode" x="146" y="196" width="120" height="52" rx="3"/>
+  <text class="gttl" x="206" y="218" text-anchor="middle">GATEWAY</text>
+  <text class="nsub" x="206" y="231" text-anchor="middle">cache-aware router</text>
+
+  <!-- worker pools group -->
+  <rect class="grp" x="290" y="166" width="392" height="102" rx="4"/>
+  <text class="gtag" x="312" y="181">WORKER POOLS</text>
+
+  <rect class="node" x="305" y="190" width="150" height="64" rx="3"/>
+  <text class="pttl" x="379" y="210" text-anchor="middle">PREFILL</text>
+  <text class="nsub" x="379" y="225" text-anchor="middle">GPU workers ×N</text>
+  <text class="nsub" x="379" y="240" text-anchor="middle">reads prompt · builds KV</text>
+
+  <rect class="node" x="518" y="190" width="150" height="64" rx="3"/>
+  <text class="pttl" x="593" y="210" text-anchor="middle">DECODE</text>
+  <text class="nsub" x="593" y="225" text-anchor="middle">GPU workers ×N</text>
+  <text class="nsub" x="593" y="240" text-anchor="middle">generates tokens</text>
+
+  <!-- data-plane flow arrows -->
+  <path class="flow"  d="M116,222 L142,222" marker-end="url(#ad)"/>
+  <path class="flow"  d="M266,222 L300,222" marker-end="url(#ad)"/>
+  <path class="flowg" d="M456,222 L514,222" marker-end="url(#ag)"/>
+  <text class="alabg" x="486" y="214" text-anchor="middle">KV handoff</text>
+
+  <!-- tokens returned to client (bottom U) -->
+  <path class="flow" d="M668,222 L690,222 L690,430 L78,430 L78,247" marker-end="url(#ad)"/>
+  <text class="alab" x="360" y="423" text-anchor="middle">← tokens streamed back to the client</text>
+
+  <!-- ===================== SHARED KV STORE ===================== -->
+  <path class="flowg" d="M379,258 L379,284" marker-start="url(#ag)" marker-end="url(#ag)"/>
+  <path class="flowg" d="M593,258 L593,284" marker-start="url(#ag)" marker-end="url(#ag)"/>
+  <text class="alabk" x="369" y="276" text-anchor="end">writes KV</text>
+  <text class="alabk" x="603" y="276">reads KV</text>
+
+  <rect class="store" x="306" y="288" width="360" height="113" rx="3"/>
+  <text class="pttl" x="486" y="306" text-anchor="middle">SHARED KV STORE</text>
+  <rect class="slab" x="320" y="314" width="332" height="22" rx="2"/>
+  <text class="slbl" x="330" y="329">GPU</text>
+  <text class="ssub" x="642" y="329" text-anchor="end">hot — fastest, smallest</text>
+  <rect class="slab" x="320" y="340" width="332" height="22" rx="2"/>
+  <text class="slbl" x="330" y="355">CPU</text>
+  <text class="ssub" x="642" y="355" text-anchor="end">warm — spillover</text>
+  <rect class="slab" x="320" y="366" width="332" height="22" rx="2"/>
+  <text class="slbl" x="330" y="381">SSD</text>
+  <text class="ssub" x="642" y="381" text-anchor="end">cold — largest, slowest</text>
+
+  <!-- ===================== LEGEND KEY ===================== -->
+  <rect class="cbox" x="99" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="119" y="460">control plane — off the critical path</text>
+  <rect class="node" x="356" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="376" y="460">data plane — on every token's critical path</text>
+</svg>

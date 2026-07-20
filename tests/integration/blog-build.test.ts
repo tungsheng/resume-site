@@ -13,6 +13,7 @@ const itIf = RUN ? test : test.skip;
 // (tests/unit/blog-markdown.test.ts); here we assert they survive a real build
 // and land in dist/. Keep this list newest-first — LATEST below slices it.
 const PUBLISHED = [
+  { slug: "distributed-inference-the-fleet", title: "Distributed Inference: From One GPU to a Fleet" },
   { slug: "scheduling-continuous-batching-paged-attention", title: "Scheduling: How Continuous Batching and Paged Attention Fill a GPU" },
   { slug: "moe-routing", title: "MoE: How the Mixture of Experts Routes a Token" },
   { slug: "why-transformers-need-the-mlp", title: "MLP: Why Transformers Need the Multilayer Perceptron" },
