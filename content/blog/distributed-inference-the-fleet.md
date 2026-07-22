@@ -1,6 +1,6 @@
 ---
 title: "Distributed Inference: From One GPU to a Fleet"
-summary: "Past a certain load you run out of node, and the fix isn't a bigger GPU — it's a fleet, with a cache-aware router in front and a shared KV store behind. The layout: the boxes a production inference fleet is made of, the data-plane/control-plane split, the three walls that force the jump, and the one metric — goodput — that judges the whole thing."
+summary: "Past a certain load you run out of node, and the fix isn't a bigger GPU — it's a fleet, with a cache-aware router in front and a shared KV store behind. The layout: the boxes a production inference fleet is made of, the three planes they sort into — request, storage-and-events, control — the three walls that force the jump, and the one metric — goodput — that judges the whole thing."
 category: "Inference"
 status: Published
 published: 2026-07-16
@@ -41,39 +41,49 @@ Everything else is the machinery between these walls.
 
 ## Anatomy of a fleet
 
-Strip four current production stacks down — NVIDIA's Dynamo, Moonshot's Mooncake, the Kubernetes-native llm-d, ByteDance's AIBrix — and the same parts list appears under different names. A fleet is these boxes:
+Strip four current production stacks down — NVIDIA's Dynamo, Moonshot's Mooncake, the Kubernetes-native llm-d, ByteDance's AIBrix — and the same parts list appears under different names: seven boxes that sort into three planes.
 
-- **The gateway / router.** The front door: it terminates the request and chooses a replica. In every one of these stacks that choice is cache-aware — Dynamo's "smart router," AIBrix's prefix-cache-aware policies, llm-d's endpoint picker — routing by which replica already holds the relevant KV and how loaded each one is, not by round-robin.
+*The request plane — on every token's path:*
+
+- **The front door — frontend and router.** The frontend terminates and normalizes the request; the router chooses a replica. That choice is cache-aware in every one of these stacks — Dynamo splits it into a Frontend and a KV-aware router, AIBrix has prefix-cache-aware policies, llm-d an endpoint picker — routing by which replica already holds the relevant KV and how loaded each one is, not by round-robin.
 - **The prefill pool.** Workers that read prompts and build KV cache. Compute-heavy.
-- **The decode pool.** Workers that generate tokens from that cache. Memory-bandwidth-heavy. In several of these systems prefill and decode are physically separate pools; in others they are the same workers doing both. That choice is the next section.
-- **The KV-cache store.** The shared state. Instead of every replica keeping its own cache, a fleet treats KV as a tiered resource — living in GPU memory, spilling to CPU DRAM, then SSD, then remote storage — that workers read, write, and share. Dynamo's block manager, Mooncake's distributed KVCache pool, and AIBrix's distributed KV runtime are all this box. Moving cache between workers matters enough that these systems ship dedicated transfer libraries.
+- **The decode pool.** Workers that generate tokens from that cache. Memory-bandwidth-heavy. In several of these systems prefill and decode are physically separate pools; in others they are the same workers doing both. That choice is its own section below.
+
+*The storage & events plane — the KV state, and its movement:*
+
+- **The KV store, its transfer, its events.** The shared state, treated as a tiered resource — GPU memory, spilling to CPU DRAM, then SSD, then remote storage — that workers read, write, and share: Dynamo's KV Block Manager (KVBM), Mooncake's distributed KVCache pool, AIBrix's distributed KV runtime. Moving a block between workers is hot-path enough to earn its own engine — Dynamo ships NIXL, the others ship equivalents — and the store *announces* what it holds, the KV events that tell the router which replica has which prefix. Store, transfer, events: this is the plane the two-plane picture folds away, and the next section pulls it back out.
+
+*The control plane — off the path:*
+
 - **The scheduler / conductor.** The placement decisions: which pool, which replica, when to admit a request, what to do under overload. Mooncake names it the Conductor; it is the same role llm-d's endpoint picker and AIBrix's control plane play.
 - **The autoscaler.** The part that changes the number of replicas to hold latency targets at the lowest cost, driven by inference-aware signals like KV-cache utilization rather than plain CPU load. Dynamo's Planner, llm-d's workload autoscaler, AIBrix's LLM-specific autoscaler.
 - **The model registry.** The weights and the plumbing to load hundreds of gigabytes onto a fresh replica — which matters when a traffic spike needs a new replica *now* and the weights take minutes to load.
 
-![Figure 2 — One fleet, end to end. The data plane (solid) is the request's path: a cache-aware gateway into the worker pools — a prefill pool that builds the KV cache and a decode pool that generates from it, over a shared, tiered KV store — then tokens stream back. The control plane (dashed) sits off that path, each box wired to the one thing it manages: the scheduler places and admits at the gateway, the autoscaler adds and removes replicas in the pools, and the registry loads weights into new ones.](/assets/blog/distributed-inference-the-fleet/fleet-topology.svg)
+![Figure 2 — One fleet, three planes. The request plane (solid) is every token's path: a frontend and cache-aware router into the worker pools — a prefill pool that builds the KV cache, a decode pool that generates from it — then tokens stream back. The storage & events plane (green) is the KV state and its movement: a shared, tiered store both pools read and write, the transfer that carries cache from prefill to decode, and the events that tell the router which replica holds which prefix. The control plane (dashed) sits off the path, each box wired to the one thing it manages: the scheduler places and admits at the front door, the autoscaler adds and removes replicas in the pools, and the registry loads weights into new ones.](/assets/blog/distributed-inference-the-fleet/fleet-topology.svg)
 
-## Data plane and control plane
+## The three planes
 
-Those boxes sort cleanly into two planes, and the split predicts how a fleet scales and how it fails.
+Those boxes sort into three planes, not the two you might expect — and which plane a box lives in predicts how the fleet scales and how it fails.
 
-The **data plane** is the request's actual path: router → prefill worker → KV transfer → decode worker → tokens streamed back, plus the KV store the workers read and write. It is on the critical path of every token, and its latency is what the user feels.
+The **request plane** is every token's critical path: frontend → router → prefill → KV transfer → decode → tokens streamed back. Its latency is what the user feels. This is the "data plane" by another name, and Dynamo's rename to *request plane* pays off once the next plane appears.
 
-The **control plane** is everything that manages that path without being on it: the scheduler deciding placement, the autoscaler resizing pools, the cache index tracking which replica holds which prefix, health checks, and model loading. It runs on a slower clock — seconds and minutes, not milliseconds — and when it is down the data plane usually keeps serving on its last decisions. AIBrix draws this line explicitly; the Kubernetes-native stacks implement the control plane as controllers and custom resources, while Mooncake's Conductor is a bespoke global scheduler. Same division either way.
+The **storage & events plane** is the KV state and its movement: the tiered store the workers share, the transfer that carries cache from prefill to decode, and the events that announce which replica holds which prefix. It is what a two-plane picture loses, because it sits cleanly on neither side — a cache hit turns a prefill into a lookup, so it is on the critical path, yet the router steers on its events and the autoscaler watches its utilization, so it also answers to the control plane. Pulling it out is Dynamo's structural move, and it pays: once KV is a plane, it stops being a footnote to the data path and becomes a storage system with its own tiers, eviction, and failure modes.
 
-The reason to hold the two apart: a data-plane failure drops requests in flight, while a control-plane failure usually just freezes the fleet's shape — no new scaling, stale routing — which is survivable for a while. How a fleet fails and recovers hinges almost entirely on this distinction.
+The **control plane** manages the other two without being on their path: the scheduler placing work, the autoscaler resizing pools, health checks, model loading. It runs on a slower clock — seconds and minutes, not milliseconds — and when it is down the request plane keeps serving on its last decisions. AIBrix draws the data/control line explicitly, and the Kubernetes-native stacks realize the control plane as controllers and custom resources while Mooncake's Conductor is a bespoke global scheduler; Dynamo adds the third cut.
+
+Hold the three apart because they fail differently. A request-plane failure drops requests in flight; a control-plane failure only freezes the fleet's shape — no new scaling, stale routing — survivable for a while; a storage-&-events failure is its own case, where a lost cache block is merely recomputable but lost events leave routing blind. How a fleet fails and recovers hinges almost entirely on which plane broke — which is why Dynamo runs a loop for each: a serving loop keeping the request plane fast, a planning loop matching control-plane capacity to demand, and a resilience loop for the failures (health checks, request migration, graceful shutdown, load shedding).
 
 ## Every box is really a pool
 
-Figure 2 draws the gateway, scheduler, and registry as one box each. That is a simplification: at fleet scale every one of them is replicated, because a control plane with a single point of failure fails the whole fleet the moment it dies. These scale cheaply — on CPU, off the GPU critical path.
+Figure 2 draws the front door, scheduler, and registry as one box each. That is a simplification: at fleet scale every one of them is replicated, because a control plane with a single point of failure fails the whole fleet the moment it dies. These scale cheaply — on CPU, off the GPU critical path.
 
-- **The front door** is a pool of router replicas behind an ordinary L4 load balancer. Routing is close to stateless, with one catch: the cache-aware decision has to know which replica holds which prefix, so the routers share that index — gossiped between them, or kept in a small shared store — rather than each one guessing alone.
+- **The front door** is a pool of router replicas behind an ordinary L4 load balancer. Routing is close to stateless, with one catch: the cache-aware decision has to know which replica holds which prefix, so the routers share that prefix index — fed by the storage-and-events plane's KV events, gossiped between routers or kept in a small shared store — rather than each one guessing alone.
 - **The control plane** runs replicated for availability: leader-elected (one active planner, warm standbys) or sharded by responsibility. The Kubernetes-native stacks get this largely for free as controllers with leader election; a bespoke global scheduler like Mooncake's Conductor has to build the same high availability itself.
 - **The registry** is not one file server but a cached, distributed artifact store fronting a fan-out weight-loading path — peer-to-peer or broadcast — because standing up a new replica means moving hundreds of gigabytes *now*, and pulling that serially from one origin is how a traffic spike becomes an outage.
 
 The worker pools are the expensive, GPU-bound part the autoscaler manages. Everything else here is cheap enough that it is easy to forget it has to scale at all.
 
-![Figure 3 — The control plane and front door at fleet scale. Each single box from Figure 2 is really a pool: the gateway is router replicas behind an L4 load balancer, sharing one prefix-cache index; the scheduler is leader-elected or sharded controllers; the registry is a distributed, cached store fanning weights out to new replicas. All of it scales on cheap CPU, off the GPU critical path.](/assets/blog/distributed-inference-the-fleet/control-plane-scaling.svg)
+![Figure 3 — The control plane and front door at fleet scale. Each single box from Figure 2 is really a pool: the front door is router replicas behind an L4 load balancer, sharing one prefix-cache index; the scheduler is leader-elected or sharded controllers; the registry is a distributed, cached store fanning weights out to new replicas. All of it scales on cheap CPU, off the GPU critical path.](/assets/blog/distributed-inference-the-fleet/control-plane-scaling.svg)
 
 ## Homogeneous, disaggregated, or hybrid
 
@@ -98,8 +108,8 @@ Targets are stated at the tail — "99% of requests under X ms TTFT and Y ms TBT
 
 ## The shape, and the open problems
 
-Put it together. Requests arrive at a cache-aware router, which places them on a prefill pool and a decode pool that read and write a tiered, shared KV cache; a control plane of scheduler and autoscaler resizes and steers the whole thing to hold goodput against its SLOs; and a registry keeps weights ready to stand up new replicas. Seven boxes, two planes, three walls, one metric.
+Put it together. Requests arrive at a frontend and cache-aware router, which place them on a prefill pool and a decode pool that read and write a tiered, shared KV store — the storage-and-events plane; a control plane of scheduler and autoscaler resizes and steers the whole thing to hold goodput against its SLOs; and a registry keeps weights ready to stand up new replicas. Seven boxes, three planes, three walls, one metric.
 
-Each box is a problem of its own: disaggregation and what the KV handoff costs; routing, and why round-robin is the wrong default; the distributed KV cache as a storage system with its own tiers and eviction; and the parallelism that serving uses, which is not the parallelism training used. Then the three things an overview like this quietly assumes away: what happens when traffic spikes faster than the autoscaler can react, what breaks when a GPU dies mid-decode, and how a fleet recovers state that was only ever held in memory.
+Each box is a problem of its own: disaggregation and what the KV handoff costs; routing, and why round-robin is the wrong default; the distributed KV cache as a storage system with its own tiers and eviction; and the parallelism that serving uses, which is not the parallelism training used. Then the resilience loop's own work — the three things an overview like this quietly assumes away: what happens when traffic spikes faster than the autoscaler can react, what breaks when a GPU dies mid-decode, and how a fleet recovers state that was only ever held in memory.
 
 That is the shape of it. More notes as I go.

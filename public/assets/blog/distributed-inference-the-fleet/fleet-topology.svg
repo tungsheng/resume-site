@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img"
-     aria-label="Anatomy of one production LLM inference fleet, drawn as two planes on a balanced grid. Across the top, inside a full-width dashed band, is the CONTROL PLANE, off the critical path, with three evenly spaced dashed boxes — a scheduler (placement and admission), an autoscaler (resizes pools to hold SLOs), and a model registry (weights for new replicas) — each connected by a dashed arrow down to the part of the data plane it manages. Below, the DATA PLANE on every token's critical path, in solid boxes: a client sends a prompt into a green cache-aware gateway and router, which forwards it into the worker pools — a prefill pool of GPU workers that reads the prompt and builds the KV cache, which hands that KV across a green handoff arrow to a decode pool of GPU workers that generates tokens; the tokens then stream back along the bottom to the client. Below the pools sits a wide green shared KV store both pools read and write, drawn as three stacked tiers: GPU hot, CPU warm, SSD cold — fastest to largest, top to bottom. The scheduler wires to the gateway, and the autoscaler and registry wire to the worker pools. A footer gives the key: dashed is the control plane off the critical path, solid is the data plane on every token's critical path.">
-  <title>Anatomy of one inference fleet — the control plane wired to the data plane it manages</title>
+     aria-label="Anatomy of one production LLM inference fleet, drawn as three planes on a balanced grid. Across the top, inside a full-width dashed band, is the CONTROL PLANE, off the critical path, with three evenly spaced dashed boxes — a scheduler (placement and admission), an autoscaler (resizes pools to hold SLOs), and a model registry (weights for new replicas) — each connected by a dashed arrow down to the part it manages. In the middle, the REQUEST PLANE on every token's critical path, in solid boxes: a client sends a prompt into a green front door — a frontend and cache-aware router — which forwards it into the worker pools — a prefill pool of GPU workers that reads the prompt and builds the KV cache, which hands that KV across a green KV-transfer arrow to a decode pool of GPU workers that generates tokens; the tokens then stream back along the bottom to the client. Below the pools sits the STORAGE &amp; EVENTS PLANE: a wide green shared KV store both pools read and write, drawn as three stacked tiers — GPU hot, CPU warm, SSD cold, fastest to largest top to bottom — with a dashed green KV-events arrow running from the store up to the front door, the signal that tells the router which replica holds which prefix. The scheduler wires to the front door, and the autoscaler and registry wire to the worker pools. A footer key marks the three planes: dashed control plane off the critical path, solid request plane on it, and green storage-and-events plane for the KV state.">
+  <title>Anatomy of one inference fleet — three planes: request, storage &amp; events, control</title>
   <style>
     .bg     { fill:#faf8f3; stroke:#e4e1da; }
     .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
@@ -24,6 +24,7 @@
     .pttl   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#2f7d3b; }
     .flow   { stroke:#1c1b17; stroke-width:1.6; fill:none; }
     .flowg  { stroke:#2f7d3b; stroke-width:1.6; fill:none; }
+    .evt    { stroke:#2f7d3b; stroke-width:1.2; fill:none; stroke-dasharray:4 3; }
     .ctrl   { stroke:#a9a49a; stroke-width:1.3; fill:none; stroke-dasharray:5 4; }
     .alab   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
     .alabg  { font:600 9px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
@@ -55,7 +56,7 @@
       scheduler 143,110 -> gateway 203,191   label "places · admits" 188,150
       autoscaler 360,110 -> pools 398,164     label "scales replicas ±" 404,150
       registry  577,110 -> pools 576,164      label "loads weights" 588,150
-    DATA label 34,160.
+    REQUEST label 34,160.
     Data spine centre y=222.
       client  x40  y199 w76 h46  -> centre 78,222
       gateway x146 y196 w120 h52 -> centre 206,222 (green)
@@ -69,18 +70,21 @@
       links (green bidir): prefill 379 258<->284 ; decode 593 258<->284.
         labels "writes KV" 369,276 end ; "reads KV" 603,276 (in the gap, y268..288).
     tokens label 360,423 ; return line y430.
-    LEGEND (swatch key), swatches y450 (h13), labels y460:
-      cbox swatch x99  -> "control plane — off the critical path"
-      node swatch x356 -> "data plane — on every token's critical path"
+    STORAGE & EVENTS PLANE label centred @486,283 ; KV events arrow (dashed green)
+      store 330,288 -> front door 207,249, label "KV events" 250,262.
+    LEGEND (three swatches) y450 (h13), labels y460:
+      cbox  swatch x40  -> "control — off the path"
+      node  swatch x250 -> "request — every token's path"
+      store swatch x470 -> "storage & events — the KV state"
   =================================================================== -->
 
   <rect class="bg" x="1" y="1" width="718" height="478" rx="2"/>
-  <text class="ey" x="34" y="26">THE INFERENCE FLEET — ONE FLEET, TWO PLANES</text>
+  <text class="ey" x="34" y="26">THE INFERENCE FLEET — ONE FLEET, THREE PLANES</text>
 
   <!-- ===================== CONTROL PLANE (dashed) ===================== -->
   <rect class="band" x="34" y="40" width="652" height="80" rx="3"/>
   <text class="plane"  x="46" y="58">CONTROL PLANE</text>
-  <text class="planed" x="162" y="58">off the critical path — steers and resizes the data plane</text>
+  <text class="planed" x="162" y="58">off the critical path — steers and resizes the other planes</text>
 
   <rect class="cbox" x="53" y="66" width="180" height="42" rx="3"/>
   <text class="ctitle" x="143" y="85" text-anchor="middle">SCHEDULER</text>
@@ -105,7 +109,7 @@
   <text class="clab" x="588" y="150">loads weights</text>
 
   <!-- ===================== DATA PLANE (solid) ===================== -->
-  <text class="plane" x="34" y="160">DATA PLANE</text>
+  <text class="plane" x="34" y="160">REQUEST PLANE</text>
 
   <!-- client -->
   <rect class="node" x="40" y="199" width="76" height="46" rx="3"/>
@@ -114,7 +118,7 @@
 
   <!-- gateway / router -->
   <rect class="gnode" x="146" y="196" width="120" height="52" rx="3"/>
-  <text class="gttl" x="206" y="218" text-anchor="middle">GATEWAY</text>
+  <text class="gttl" x="206" y="218" text-anchor="middle">FRONT DOOR</text>
   <text class="nsub" x="206" y="231" text-anchor="middle">cache-aware router</text>
 
   <!-- worker pools group -->
@@ -135,7 +139,7 @@
   <path class="flow"  d="M116,222 L142,222" marker-end="url(#ad)"/>
   <path class="flow"  d="M266,222 L300,222" marker-end="url(#ad)"/>
   <path class="flowg" d="M456,222 L514,222" marker-end="url(#ag)"/>
-  <text class="alabg" x="486" y="214" text-anchor="middle">KV handoff</text>
+  <text class="alabg" x="486" y="214" text-anchor="middle">KV transfer</text>
 
   <!-- tokens returned to client (bottom U) -->
   <path class="flow" d="M668,222 L690,222 L690,430 L78,430 L78,247" marker-end="url(#ad)"/>
@@ -146,6 +150,11 @@
   <path class="flowg" d="M593,258 L593,284" marker-start="url(#ag)" marker-end="url(#ag)"/>
   <text class="alabk" x="369" y="276" text-anchor="end">writes KV</text>
   <text class="alabk" x="603" y="276">reads KV</text>
+
+  <!-- storage & events plane label + KV events feeding the router -->
+  <text class="plane" x="486" y="283" text-anchor="middle">STORAGE &amp; EVENTS PLANE</text>
+  <path class="evt" d="M330,288 L207,249" marker-end="url(#ag)"/>
+  <text class="alabk" x="201" y="259" text-anchor="end">KV events</text>
 
   <rect class="store" x="306" y="288" width="360" height="113" rx="3"/>
   <text class="pttl" x="486" y="306" text-anchor="middle">SHARED KV STORE</text>
@@ -160,8 +169,10 @@
   <text class="ssub" x="642" y="381" text-anchor="end">cold — largest, slowest</text>
 
   <!-- ===================== LEGEND KEY ===================== -->
-  <rect class="cbox" x="99" y="450" width="13" height="13" rx="2"/>
-  <text class="note" x="119" y="460">control plane — off the critical path</text>
-  <rect class="node" x="356" y="450" width="13" height="13" rx="2"/>
-  <text class="note" x="376" y="460">data plane — on every token's critical path</text>
+  <rect class="cbox" x="40" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="60" y="460">control — off the path</text>
+  <rect class="node" x="250" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="270" y="460">request — every token's path</text>
+  <rect class="store" x="470" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="490" y="460">storage &amp; events — the KV state</text>
 </svg>
