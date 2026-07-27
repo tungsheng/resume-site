@@ -10,6 +10,7 @@ export const TAG_REGISTRY = {
   attention: "Attention",
   "continuous-batching": "Continuous batching",
   "distributed-inference": "Distributed inference",
+  dynamo: "Dynamo",
   ffn: "FFN",
   "flash-attention": "FlashAttention",
   gqa: "GQA",
