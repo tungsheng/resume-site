@@ -30,7 +30,12 @@ const OLDER_PUBLISHED = PUBLISHED.slice(3);
 // status: Drafting — dev-only, excluded from a production build entirely.
 // The corpus currently has no Drafting Posts (the 2026-07 stubs were retired),
 // so these assertions are vacuous until the next draft lands — add it here.
-const DRAFTS: { slug: string; title: string }[] = [];
+const DRAFTS: { slug: string; title: string }[] = [
+  {
+    slug: "dynamo-kv-router-and-cache",
+    title: "Dynamo's KV Router: Routing on What the Fleet Already Cached",
+  },
+];
 
 // status: Outline — also dev-only; a production build emits no page and never
 // references them anywhere public. Currently empty, same as DRAFTS.

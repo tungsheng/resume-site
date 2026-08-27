@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 430" role="img"
+     aria-label="The anatomy of Dynamo's KV router, drawn as a loop. A request enters at the left into a Frontend box that tokenizes the prompt, splits it into fixed-size blocks, and hashes each block. Two arrows leave the Frontend: one into a green prefix index box, which answers which worker holds which prefix, and one into a load tracker box, which answers how many active prefill and decode blocks each worker already has. Both feed arrows right into a selector box that computes one cost per worker and takes the minimum. A dispatch bus runs from the selector down and across to three worker boxes in a row, each containing an engine with its KV cache and a small green publisher chip. From every publisher a green rail runs down, back along the bottom of the figure, up the left edge and into the top of the prefix index, labelled as the KV event stream of store and remove events. The picture's point: the request path is short and one-way, and the only thing keeping the index honest is the event loop coming back from the workers.">
+  <title>Dynamo's KV router — index, load tracker, selector, and the event loop that keeps them current</title>
+  <style>
+    .bg   { fill:#faf8f3; stroke:#e4e1da; }
+    .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .node { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.3; }
+    .tile { fill:#faf8f3; stroke:#cbc5b9; stroke-width:1; }
+    .acc  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
+    .chip { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.1; }
+    .lbl  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .lblg { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .lbls { font:600 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .cap  { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .capg { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .ann  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .req  { font:600 9px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; letter-spacing:0.5px; }
+    .lgd  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .note { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .arrs { stroke:#6f6d68; stroke-width:1.4; fill:none; }
+    .arrg { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
+  </style>
+  <defs>
+    <marker id="af" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M3,0 L8,3 L3,6 Z" fill="#6f6d68"/></marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M3,0 L8,3 L3,6 Z" fill="#2f7d3b"/></marker>
+  </defs>
+
+  <!-- ==================================================================
+    COORDINATE ARITHMETIC  (canvas 740 x 430)
+    Frontend   x 58..208,  y 76..168   (tiles x=70 w=126 at y 88/114/140, h=20)
+    Index      x 250..440, y 62..120   (green)
+    Load track x 250..440, y 136..194
+    Selector   x 470..640, y 90..166
+    Workers    y 250..322, w=176 at x=58 / 282 / 506  (centers 146 / 370 / 594)
+    Dispatch bus: selector bottom (555,166) -> y=214 rail -> down into worker tops.
+    Event rail: worker bottoms -> y=356 rail -> x=34 -> up to y=42 -> right to
+                x=345 -> down into index top (345,62).
+  =================================================================== -->
+
+  <rect class="bg" x="1" y="1" width="738" height="428" rx="2"/>
+  <text class="ey" x="28" y="30">REQUEST PATH</text>
+
+  <!-- request in -->
+  <text class="req" x="10" y="112">request</text>
+  <path class="arrs" d="M18,122 L54,122" marker-end="url(#af)"/>
+
+  <!-- frontend -->
+  <rect class="node" x="58" y="76" width="150" height="92" rx="4"/>
+  <text class="cap" x="133" y="70" text-anchor="middle">frontend</text>
+  <rect class="tile" x="70" y="88" width="126" height="20" rx="2.5"/>
+  <text class="lbls" x="133" y="102" text-anchor="middle">tokenize</text>
+  <rect class="tile" x="70" y="114" width="126" height="20" rx="2.5"/>
+  <text class="lbls" x="133" y="128" text-anchor="middle">split into blocks</text>
+  <rect class="tile" x="70" y="140" width="126" height="20" rx="2.5"/>
+  <text class="lbls" x="133" y="154" text-anchor="middle">hash each block</text>
+
+  <!-- frontend -> index / load tracker -->
+  <path class="arrs" d="M208,104 L228,104 L228,91 L246,91" marker-end="url(#af)"/>
+  <path class="arrs" d="M208,140 L228,140 L228,165 L246,165" marker-end="url(#af)"/>
+
+  <!-- prefix index (green: shared state) -->
+  <rect class="acc" x="250" y="62" width="190" height="58" rx="6"/>
+  <text class="lblg" x="345" y="88" text-anchor="middle">prefix index</text>
+  <text class="capg" x="345" y="104" text-anchor="middle">which worker holds which prefix</text>
+
+  <!-- load tracker -->
+  <rect class="node" x="250" y="136" width="190" height="58" rx="6"/>
+  <text class="lbl" x="345" y="162" text-anchor="middle">load tracker</text>
+  <text class="cap" x="345" y="178" text-anchor="middle">active prefill + decode blocks</text>
+
+  <!-- into the selector -->
+  <path class="arrg" d="M440,91 L456,91 L456,116 L466,116" marker-end="url(#ag)"/>
+  <path class="arrs" d="M440,165 L456,165 L456,140 L466,140" marker-end="url(#af)"/>
+  <text class="capg" x="452" y="80" text-anchor="middle">overlap</text>
+  <text class="cap"  x="452" y="186" text-anchor="middle">load</text>
+
+  <!-- selector -->
+  <rect class="node" x="470" y="90" width="170" height="76" rx="6"/>
+  <text class="lbl" x="555" y="120" text-anchor="middle">selector</text>
+  <text class="cap" x="555" y="136" text-anchor="middle">one cost per worker,</text>
+  <text class="cap" x="555" y="148" text-anchor="middle">take the minimum</text>
+
+  <!-- dispatch bus -->
+  <path class="arrs" d="M555,166 L555,214"/>
+  <path class="arrs" d="M146,214 L594,214"/>
+  <path class="arrs" d="M146,214 L146,246" marker-end="url(#af)"/>
+  <path class="arrs" d="M370,214 L370,246" marker-end="url(#af)"/>
+  <path class="arrs" d="M594,214 L594,246" marker-end="url(#af)"/>
+  <text class="ann" x="230" y="208" text-anchor="middle">dispatch — one worker</text>
+
+  <!-- workers -->
+  <rect class="node" x="58" y="250" width="176" height="72" rx="5"/>
+  <text class="lbls" x="70" y="268">worker 1</text>
+  <rect class="tile" x="70" y="276" width="100" height="34" rx="2.5"/>
+  <text class="cap" x="120" y="290" text-anchor="middle">engine</text>
+  <text class="cap" x="120" y="303" text-anchor="middle">+ KV cache</text>
+  <rect class="chip" x="178" y="276" width="46" height="34" rx="3"/>
+  <text class="capg" x="201" y="290" text-anchor="middle">pub-</text>
+  <text class="capg" x="201" y="303" text-anchor="middle">lisher</text>
+
+  <rect class="node" x="282" y="250" width="176" height="72" rx="5"/>
+  <text class="lbls" x="294" y="268">worker 2</text>
+  <rect class="tile" x="294" y="276" width="100" height="34" rx="2.5"/>
+  <text class="cap" x="344" y="290" text-anchor="middle">engine</text>
+  <text class="cap" x="344" y="303" text-anchor="middle">+ KV cache</text>
+  <rect class="chip" x="402" y="276" width="46" height="34" rx="3"/>
+  <text class="capg" x="425" y="290" text-anchor="middle">pub-</text>
+  <text class="capg" x="425" y="303" text-anchor="middle">lisher</text>
+
+  <rect class="node" x="506" y="250" width="176" height="72" rx="5"/>
+  <text class="lbls" x="518" y="268">worker 3</text>
+  <rect class="tile" x="518" y="276" width="100" height="34" rx="2.5"/>
+  <text class="cap" x="568" y="290" text-anchor="middle">engine</text>
+  <text class="cap" x="568" y="303" text-anchor="middle">+ KV cache</text>
+  <rect class="chip" x="626" y="276" width="46" height="34" rx="3"/>
+  <text class="capg" x="649" y="290" text-anchor="middle">pub-</text>
+  <text class="capg" x="649" y="303" text-anchor="middle">lisher</text>
+
+  <!-- KV event loop back to the index -->
+  <path class="arrg" d="M201,310 L201,356"/>
+  <path class="arrg" d="M425,310 L425,356"/>
+  <path class="arrg" d="M649,310 L649,356"/>
+  <path class="arrg" d="M649,356 L34,356 L34,42 L345,42 L345,58" marker-end="url(#ag)"/>
+  <text class="capg" x="313" y="350" text-anchor="middle">KV events — store / remove</text>
+
+  <!-- legend + footer -->
+  <rect class="acc" x="176" y="382" width="13" height="13" rx="2"/>
+  <text class="lgd" x="196" y="392">cache state — published by the workers</text>
+  <rect class="node" x="470" y="382" width="13" height="13" rx="2"/>
+  <text class="lgd" x="490" y="392">request path — one way</text>
+  <text class="note" x="370" y="416" text-anchor="middle">the engines cache and evict on their own schedule, so they have to say so out loud</text>
+</svg>
