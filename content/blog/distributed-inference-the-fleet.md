@@ -2,7 +2,7 @@
 title: "How NVIDIA Dynamo Runs an Inference Fleet"
 summary: "Past a certain load one GPU node isn't enough, and a bigger GPU won't save you — the fix is a fleet. NVIDIA Dynamo is an open framework for running one, and its design is the clearest map I've found of the whole problem: three planes — request, control, storage-and-events — and three control loops that keep the fleet fast, right-sized, and alive. These are my notes on the parts a Dynamo fleet is built from, how it manages them, and the one metric — goodput — that judges the result."
 category: "Inference"
-status: Published
+status: Drafting
 published: 2026-07-16
 tags:
   - distributed-inference
