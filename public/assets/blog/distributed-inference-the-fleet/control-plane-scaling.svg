@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 262" role="img"
-     aria-label="Three panels showing that the KV router, the control plane, and the weight source from the fleet map are each really a replicated pool, not a single box. Left panel, the front door: an L4 load balancer feeds a stack of stateless KV-router replicas that share one prefix index. Middle panel, the control plane: a stack of Dynamo-operator instances with one green leader on top and two dashed standbys below it, leader-elected for high availability. Right panel, ModelExpress: one loaded copy of the weights that streams them GPU-to-GPU over two arrows to two new worker replicas via NIXL. A footer notes that all three scale on cheap CPU, off the GPU critical path — the worker pools are the expensive part.">
-  <title>Scaling the front door and the control plane — none of it is one box</title>
+     aria-label="Three panels showing that the KV router, the control plane, and the weight source from the fleet map are each really a replicated pool, not a single box. Left panel, the router tier: an L4 load balancer feeds a stack of stateless KV-router replicas that share one prefix index. Middle panel, the control plane: a stack of Dynamo-operator instances with one green leader on top and two dashed standbys below it, leader-elected for high availability. Right panel, ModelExpress: one loaded copy of the weights that streams them GPU-to-GPU over two arrows to two new worker replicas via NIXL. A footer notes that all three scale on cheap CPU, off the GPU critical path — the worker pools are the expensive part.">
+  <title>Scaling the router tier and the control plane — none of it is one box</title>
   <style>
     .bg     { fill:#faf8f3; stroke:#e4e1da; }
     .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.2px; fill:#2f7d3b; }
@@ -23,17 +23,17 @@
     <marker id="ad" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto-start-reverse"><path d="M3,0 L8,3 L3,6 Z" fill="#1c1b17"/></marker>
   </defs>
 
-  <!-- canvas 720 x 262. Three columns: A front door (c140), B control (c360), C model express (c580).
+  <!-- canvas 720 x 262. Three columns: A router tier (c140), B control (c360), C modelexpress (c580).
        separators x250,x470 (y44..200). headers y50. captions y190.
        legend row y210 (green=active/primary, dashed=warm standby). footer y246. -->
   <rect class="bg" x="1" y="1" width="718" height="260" rx="2"/>
-  <text class="ey" x="30" y="26">NONE OF IT IS ONE BOX — SCALING THE FRONT DOOR &amp; CONTROL PLANE</text>
+  <text class="ey" x="30" y="26">NONE OF IT IS ONE BOX — SCALING THE ROUTER TIER &amp; CONTROL PLANE</text>
 
   <line class="sep" x1="250" y1="46" x2="250" y2="198"/>
   <line class="sep" x1="470" y1="46" x2="470" y2="198"/>
 
-  <!-- ===== A · FRONT DOOR ===== -->
-  <text class="hdr" x="140" y="60" text-anchor="middle">FRONT DOOR</text>
+  <!-- ===== A · ROUTER TIER ===== -->
+  <text class="hdr" x="140" y="60" text-anchor="middle">ROUTER TIER</text>
   <rect class="node" x="95" y="68" width="90" height="26" rx="3"/>
   <text class="ntl" x="140" y="85" text-anchor="middle">L4 LB</text>
   <path class="flow" d="M140,94 L140,116" marker-end="url(#ad)"/>

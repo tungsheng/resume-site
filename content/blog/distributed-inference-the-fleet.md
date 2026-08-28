@@ -80,17 +80,17 @@ The **planning loop** is the one that ticks, and it is where fleet management ac
 
 The **resilience loop** keeps the fleet serving under failure: health checks to find dead workers, discovery liveness to drop stale endpoints, graceful shutdown to drain in-flight work, request migration and cancellation, and load shedding to keep an overload from cascading. Each of those is a hard problem in its own right; the loop is the name for the fact that something has to own them.
 
-## Scaling the control plane and front door
+## Scaling the control plane and router
 
 Figure 2 draws the router, the control plane, and the weight source as one box each. At fleet scale every one of them is a pool, because a control plane with a single point of failure takes the whole fleet down the moment it dies. These scale cheaply — on CPU, off the GPU critical path.
 
-- **The front door** is a set of router replicas behind an ordinary L4 load balancer. Routing is close to stateless, with one catch: the cache-aware decision has to know which worker holds which prefix, so the routers share that prefix index — built from the storage-and-events plane's KV events — rather than each one guessing alone.
+- **The router** is a set of replicas behind an ordinary L4 load balancer. Routing is close to stateless, with one catch: the cache-aware decision has to know which worker holds which prefix, so the routers share that prefix index — built from the storage-and-events plane's KV events — rather than each one guessing alone.
 - **The control plane** runs replicated for availability. On Kubernetes the Dynamo operator is a controller, and controllers get availability the standard way — leader election, one active instance with warm standbys behind it — which the platform gives you largely for free.
 - **Weight loading** is not one file server but a fan-out path. ModelExpress loads a model once and streams the weights to new workers GPU-to-GPU, because standing up a replica means moving hundreds of gigabytes *now*, and pulling that serially from one origin is how a traffic spike becomes an outage. NVIDIA presents it as a way to shorten replica cold start.
 
 The worker pools are the expensive, GPU-bound part the Planner sizes. Everything else here is cheap enough that it is easy to forget it has to scale at all.
 
-![Figure 3 — The control plane and front door at fleet scale. Each single box from Figure 2 is really a pool: the front door is KV-router replicas behind an L4 load balancer, sharing one prefix index; the control plane is a leader-elected Dynamo operator with warm standbys; ModelExpress is a single loaded copy that streams weights out to new workers. All of it scales on cheap CPU, off the GPU critical path.](/assets/blog/distributed-inference-the-fleet/control-plane-scaling.svg)
+![Figure 3 — The control plane and router at fleet scale. Each single box from Figure 2 is really a pool: the router is a set of KV-router replicas behind an L4 load balancer, sharing one prefix index; the control plane is a leader-elected Dynamo operator with warm standbys; ModelExpress is a single loaded copy that streams weights out to new workers. All of it scales on cheap CPU, off the GPU critical path.](/assets/blog/distributed-inference-the-fleet/control-plane-scaling.svg)
 
 ## Aggregated, disaggregated, or hybrid
 
@@ -104,7 +104,7 @@ Set the control plane aside: the worker pools carry the one design decision that
 
 ## What to measure
 
-A fleet is judged on **goodput**: the request rate it can serve while still meeting its latency targets. The distinction from raw throughput is what matters — you can inflate tokens-per-second by batching so aggressively that half the requests miss their deadlines, and those tokens are served but useless. DistServe popularized the term for LLM serving precisely to stop that inflation, and it is the number the Planner is really optimizing.
+A fleet is judged on **goodput**: the request rate it can serve while still meeting its latency targets. The distinction from raw throughput is what matters — you can inflate tokens-per-second by batching so aggressively that half the requests miss their deadlines, and those tokens are served but useless. DistServe popularized the term for LLM serving precisely to stop that inflation. Dynamo's Planner is stated in TTFT and ITL SLA terms rather than in goodput, but holding those at the lowest cost comes to the same thing.
 
 The latency targets are two, one per phase:
 
@@ -115,7 +115,7 @@ Targets are stated at the tail — "99% of requests under X ms TTFT and Y ms ITL
 
 ## The shape, and the open problems
 
-Put it together. Requests arrive at a Frontend and KV router, which place them on a prefill pool and a decode pool that each keep a tiered KV cache — KVBM — moved between them by NIXL, with KV events feeding the routing; a Planner sizes the two pools to hold goodput against its SLOs; the operator keeps the whole shape reconciled; and ModelExpress keeps weights ready to stand up new workers. Three planes, three control loops, three limits, one metric.
+Put it together. Requests arrive at a Frontend and KV router, which place them on a prefill pool and a decode pool that each keep a tiered KV cache — KVBM — moved between them by NIXL, with KV events feeding the routing; a Planner sizes the two pools to hold its latency SLOs at the lowest cost; the operator keeps the whole shape reconciled; and ModelExpress keeps weights ready to stand up new workers. Three planes, three control loops, three limits, one metric.
 
 Each part is a problem of its own: disaggregation and what the KV transfer costs; routing, and why round-robin is the wrong default; the distributed KV cache as a storage system with its own tiers and eviction; and the parallelism that serving uses, which is not the parallelism training used. Then the resilience loop's own work — the three things an overview like this leaves out: what happens when traffic spikes faster than the Planner can react, what breaks when a GPU dies mid-decode, and how a fleet recovers state that was only ever held in memory.
 
