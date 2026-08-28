@@ -13,6 +13,7 @@ const itIf = RUN ? test : test.skip;
 // (tests/unit/blog-markdown.test.ts); here we assert they survive a real build
 // and land in dist/. Keep this list newest-first — LATEST below slices it.
 const PUBLISHED = [
+  { slug: "distributed-inference-the-fleet", title: "How NVIDIA Dynamo Runs an Inference Fleet" },
   { slug: "scheduling-continuous-batching-paged-attention", title: "Scheduling: How Continuous Batching and Paged Attention Fill a GPU" },
   { slug: "moe-routing", title: "MoE: How the Mixture of Experts Routes a Token" },
   { slug: "why-transformers-need-the-mlp", title: "MLP: Why Transformers Need the Multilayer Perceptron" },
@@ -27,12 +28,9 @@ const LATEST = PUBLISHED.slice(0, 3);
 const OLDER_PUBLISHED = PUBLISHED.slice(3);
 
 // status: Drafting — dev-only, excluded from a production build entirely.
-// The Dynamo re-spine of the fleet post is parked here as a draft while it is
-// reworked, so a production build must emit no page for it and drop it from the
-// index (it was Published until the rework — the assertions below prove it left).
-const DRAFTS: { slug: string; title: string }[] = [
-  { slug: "distributed-inference-the-fleet", title: "How NVIDIA Dynamo Runs an Inference Fleet" },
-];
+// The corpus currently has no Drafting Posts; these assertions are vacuous until
+// the next draft lands — add it here.
+const DRAFTS: { slug: string; title: string }[] = [];
 
 // status: Outline — also dev-only; a production build emits no page and never
 // references them anywhere public. Currently empty, same as DRAFTS.

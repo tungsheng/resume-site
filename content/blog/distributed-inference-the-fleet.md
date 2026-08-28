@@ -1,8 +1,8 @@
 ---
 title: "How NVIDIA Dynamo Runs an Inference Fleet"
-summary: "Past a certain load one GPU node isn't enough, and a bigger GPU won't save you — the fix is a fleet. NVIDIA Dynamo is an open framework for running one, and its design is the clearest overview I've found of the whole problem: three planes — request, control, storage-and-events — and three control loops that keep the fleet fast, right-sized, and alive. These are my notes on the parts a Dynamo fleet is built from, how it manages them, and the one metric — goodput — that judges the result."
+summary: "Past a certain load one GPU node isn't enough, and a bigger GPU won't save you — the fix is a fleet. NVIDIA Dynamo is an open framework for running one, and its design is the clearest overview I've found of the whole problem: three planes — request, control, storage & events — and three control loops that keep the fleet fast, right-sized, and alive. These are my notes on the parts a Dynamo fleet is built from, how it manages them, and the one metric — goodput — that judges the result."
 category: "Inference"
-status: Drafting
+status: Published
 published: 2026-07-16
 tags:
   - distributed-inference
@@ -42,7 +42,7 @@ Dynamo's structure is a set of answers to these three limits — tier the cache 
 
 ## The three planes
 
-Dynamo's design doc splits the system into three planes — a *request plane*, a *control plane*, and a *storage-and-events plane* — described as three cooperating concerns: a fast request path, a responsive control path, and a resilient state path. Which plane a part lives in predicts how it scales and how it fails, so it is the first distinction to apply.
+Dynamo's design doc splits the system into three planes — a *request plane*, a *control plane*, and a *storage & events plane* — described as three cooperating concerns: a fast request path, a responsive control path, and a resilient state path. Which plane a part lives in predicts how it scales and how it fails, so it is the first distinction to apply.
 
 The **request plane** is every token's critical path — Frontend → KV router → prefill worker → KV transfer → decode worker → tokens streamed back — and its latency is what the user feels. Three parts sit on it:
 
@@ -50,7 +50,7 @@ The **request plane** is every token's critical path — Frontend → KV router 
 - **The KV router.** It picks a worker by *load and KV-cache overlap* — routing the request to the worker that already holds the relevant prefix rather than round-robin. Dynamo is engine-agnostic: the workers themselves run vLLM, SGLang, or TensorRT-LLM.
 - **The prefill and decode workers.** Two pools — one that reads prompts and builds KV cache, one that generates tokens from it. Whether they are actually two pools or one is the design choice a later section is about.
 
-The **storage-and-events plane** is the KV state and its movement. It is the plane a two-plane data/control split omits, and the one Dynamo separates deliberately:
+The **storage & events plane** is the KV state and its movement. It is the plane a two-plane data/control split omits, and the one Dynamo separates deliberately:
 
 - **KVBM** — the KV Block Manager — treats KV as a tiered resource, offloading blocks across GPU → CPU → SSD → remote storage so effective context outlives GPU memory.
 - **NIXL** — the NVIDIA Inference Xfer Library — is the point-to-point engine that moves blocks between workers and memory tiers, over NVLink, InfiniBand, or whatever interconnect is fastest.
@@ -61,36 +61,36 @@ Pulling this out is the structural move. A cache hit turns a prefill into a look
 The **control plane** manages the other two without being on their path, on a slower clock — seconds and minutes, not milliseconds:
 
 - **The Planner** is the autoscaler; it has its own section below.
-- **The Dynamo operator** reconciles the deployment to its desired state on Kubernetes — health, placement, replica counts.
+- **The Dynamo Operator** reconciles the deployment to its desired state on Kubernetes — health, placement, replica counts.
 - **ModelExpress** loads and streams model weights to new workers, which is the difference between a new replica coming online quickly and one that stalls behind a slow, serial pull of its weights.
 
 When the control plane is down, the request plane keeps serving on its last decisions — no new scaling, stale routing — which the fleet can tolerate for a time.
 
-One request ties the three together. The client hits the Frontend; the router picks a prefill worker, which computes the prompt's KV and hands back transfer metadata; the router picks a decode worker, which pulls that KV over NIXL and starts generating; tokens stream back through the Frontend; and as blocks are cached and evicted, KV events update what the router knows for the next request. Request plane for the path, storage-and-events for the state, control plane monitoring both.
+One request ties the three together. The client hits the Frontend; the router picks a prefill worker, which computes the prompt's KV and hands back transfer metadata; the router picks a decode worker, which pulls that KV over NIXL and starts generating; tokens stream back through the Frontend; and as blocks are cached and evicted, KV events update what the router knows for the next request. Request plane for the path, storage & events for the state, control plane monitoring both.
 
-![Figure 2 — One Dynamo fleet, three planes. The request plane (solid) is every token's path: a Frontend and KV-aware router into the worker pools — a prefill pool that builds the KV cache, a decode pool that generates from it — then tokens stream back. The storage-and-events plane (green) is the KV state and its movement: a tiered KVBM cache each worker manages (GPU, CPU, SSD, remote), the NIXL transfer that carries cache from prefill to decode, and the KV events that tell the router which worker holds which prefix. The control plane (dashed) sits off the path: the Dynamo operator reconciles the deployment, the Planner sizes the pools to hold SLOs, and ModelExpress streams weights into new workers.](/assets/blog/distributed-inference-the-fleet/fleet-topology.svg)
+![Figure 2 — One Dynamo fleet, three planes. The request plane (solid) is every token's path: a Frontend and KV-aware router into the worker pools — a prefill pool that builds the KV cache, a decode pool that generates from it — then tokens stream back. The storage & events plane (green) is the KV state and its movement: a tiered KVBM cache each worker manages (GPU, CPU, SSD, remote), the NIXL transfer that carries cache from prefill to decode, and the KV events that tell the router which worker holds which prefix. The control plane (dashed) sits off the path: the Dynamo Operator reconciles the deployment, the Planner sizes the pools to hold SLOs, and ModelExpress streams weights into new workers.](/assets/blog/distributed-inference-the-fleet/fleet-topology.svg)
 
-## Three control loops
+## Three Control Loops
 
-Over those planes Dynamo names three control loops — *serving*, *planning*, and *resilience*. Only one of them literally ticks on a timer; the other two are names for a job the fleet is always doing, and naming them ensures each of these jobs has a clear owner.
+Over those planes Dynamo names three Control Loops — *Serving*, *Planning*, and *Resilience*. Only one of them literally ticks on a timer; the other two are names for a job the fleet is always doing, and naming them ensures each of these jobs has a clear owner.
 
-The **serving loop** keeps request-plane latency low across Frontend, router, prefill, and decode. This is the steady state — the single replica's continuous-batching loop, now spread across the fleet.
+The **Serving Loop** keeps request-plane latency low across Frontend, router, prefill, and decode. This is the steady state — the single replica's continuous-batching loop, now spread across the fleet.
 
-The **planning loop** is the one that ticks, and it is where fleet management actually happens. The Planner is an autoscaler driven by service-level agreements (SLAs): it profiles the workload and right-sizes the prefill and decode pools to hold its latency targets at the lowest cost. It sizes the two pools *independently*, because prefill is compute-bound and scales with input length while decode is memory-bound and scales with concurrent sequences and KV usage — one replica count can't capture both. It scales on inference-aware signals — KV-cache utilization, queue depth, per-iteration timing — not CPU load, and it targets time-to-first-token and inter-token latency directly (the SLA defaults are 500 ms and 50 ms). On Kubernetes it applies a decision by editing the deployment's desired prefill and decode counts, which the operator reconciles into workers. One open edge: Dynamo's docs don't specify whether a scaled-down worker is drained of in-flight work or killed mid-request — the planner-design page states only that it scales by ±1 per interval. The resilience loop's graceful shutdown and request migration exist precisely because autoscaling a stateful fleet is not the same as autoscaling web pods.
+The **Planning Loop** is the one that ticks, and it is where fleet management actually happens. The Planner is an autoscaler driven by service-level agreements (SLAs): it profiles the workload and right-sizes the prefill and decode pools to hold its latency targets at the lowest cost. It sizes the two pools *independently*, because prefill is compute-bound and scales with input length while decode is memory-bound and scales with concurrent sequences and KV usage — one replica count can't capture both. It scales on inference-aware signals — KV-cache utilization, queue depth, per-iteration timing — not CPU load, and it targets Time-To-First-Token and Inter-Token Latency directly (the SLA defaults are 500 ms and 50 ms). On Kubernetes it applies a decision by editing the deployment's desired prefill and decode counts, which the operator reconciles into workers. One open edge: Dynamo's docs don't specify whether a scaled-down worker is drained of in-flight work or killed mid-request — the planner-design page states only that it scales by ±1 per interval. The Resilience Loop's graceful shutdown and request migration exist precisely because autoscaling a stateful fleet is not the same as autoscaling web pods.
 
-The **resilience loop** keeps the fleet serving under failure: health checks to find dead workers, discovery liveness to drop stale endpoints, graceful shutdown to drain in-flight work, request migration and cancellation, and load shedding to keep an overload from cascading. Each of those is a hard problem in its own right; the loop is the name for the fact that something has to own them.
+The **Resilience Loop** keeps the fleet serving under failure: health checks to find dead workers, discovery liveness to drop stale endpoints, graceful shutdown to drain in-flight work, request migration and cancellation, and load shedding to keep an overload from cascading. Each of those is a hard problem in its own right; the loop is the name for the fact that something has to own them.
 
 ## Scaling the control plane and router
 
 Figure 2 draws the router, the control plane, and the weight source as one box each. At fleet scale every one of them is a pool, because a control plane with a single point of failure takes the whole fleet down the moment it dies. These scale cheaply — on CPU, off the GPU critical path.
 
-- **The router** is a set of replicas behind an ordinary L4 load balancer. Routing is close to stateless, with one catch: the cache-aware decision has to know which worker holds which prefix, so the routers share that prefix index — built from the storage-and-events plane's KV events — rather than each one guessing alone.
-- **The control plane** runs replicated for availability. On Kubernetes the Dynamo operator is a controller, and controllers get availability the standard way — leader election, one active instance with warm standbys behind it — which the platform gives you largely for free.
+- **The router** is a set of replicas behind an ordinary L4 load balancer. Routing is close to stateless, with one catch: the cache-aware decision has to know which worker holds which prefix, so the routers share that prefix index — built from the storage & events plane's KV events — rather than each one guessing alone.
+- **The control plane** runs replicated for availability. On Kubernetes the Dynamo Operator is a controller, and controllers get availability the standard way — leader election, one active instance with warm standbys behind it — which the platform gives you largely for free.
 - **Weight loading** is not one file server but a fan-out path. ModelExpress loads a model once and streams the weights to new workers GPU-to-GPU, because standing up a replica means moving hundreds of gigabytes *now*, and pulling that serially from one origin is how a traffic spike becomes an outage. NVIDIA presents it as a way to shorten replica cold start.
 
 The worker pools are the expensive, GPU-bound part the Planner sizes. Everything else here is cheap enough that it is easy to forget it has to scale at all.
 
-![Figure 3 — The control plane and router at fleet scale. Each single box from Figure 2 is really a pool: the router is a set of KV-router replicas behind an L4 load balancer, sharing one prefix index; the control plane is a leader-elected Dynamo operator with warm standbys; ModelExpress is a single loaded copy that streams weights out to new workers. All of it scales on cheap CPU, off the GPU critical path.](/assets/blog/distributed-inference-the-fleet/control-plane-scaling.svg)
+![Figure 3 — The control plane and router at fleet scale. Each single box from Figure 2 is really a pool: the router is a set of KV-router replicas behind an L4 load balancer, sharing one prefix index; the control plane is a leader-elected Dynamo Operator with warm standbys; ModelExpress is a single loaded copy that streams weights out to new workers. All of it scales on cheap CPU, off the GPU critical path.](/assets/blog/distributed-inference-the-fleet/control-plane-scaling.svg)
 
 ## Aggregated, disaggregated, or hybrid
 
@@ -108,8 +108,8 @@ A fleet is judged on **goodput**: the request rate it can serve while still meet
 
 The latency targets are two, one per phase:
 
-- **Time to first token (TTFT)** — submission to the first token. Dominated by prefill, so it grows with prompt length. This is responsiveness.
-- **Time between tokens (TBT)** — which Dynamo calls inter-token latency (ITL) — the gap between streamed tokens after the first. Dominated by decode. This is smoothness, and it is measured inconsistently: a per-token interval you can take a p99 of, or an average that hides stalls.
+- **Time-To-First-Token (TTFT)** — submission to the first token. Dominated by prefill, so it grows with prompt length. This is responsiveness.
+- **Time between tokens (TBT)** — which Dynamo calls Inter-Token Latency (ITL) — the gap between streamed tokens after the first. Dominated by decode. This is smoothness, and it is measured inconsistently: a per-token interval you can take a p99 of, or an average that hides stalls.
 
 Targets are stated at the tail — "99% of requests under X ms TTFT and Y ms ITL" — and **SLO attainment**, the fraction of requests that clear both bars, is what goodput is measured against (SLO: service-level objective). Underneath, the number the business watches is **cost per million tokens**, which is just the fleet's hourly bill divided by the tokens it serves within SLO. Every architectural choice is ultimately an argument about one of these numbers — and they are exactly the numbers the Planner's targets are stated in.
 
@@ -117,6 +117,6 @@ Targets are stated at the tail — "99% of requests under X ms TTFT and Y ms ITL
 
 Put it together. Requests arrive at a Frontend and KV router, which place them on a prefill pool and a decode pool that each keep a tiered KV cache — KVBM — moved between them by NIXL, with KV events feeding the routing; a Planner sizes the two pools to hold its latency SLOs at the lowest cost; the operator keeps the whole shape reconciled; and ModelExpress keeps weights ready to stand up new workers. Three planes, three control loops, three limits, one metric.
 
-Each part is a problem of its own: disaggregation and what the KV transfer costs; routing, and why round-robin is the wrong default; the distributed KV cache as a storage system with its own tiers and eviction; and the parallelism that serving uses, which is not the parallelism training used. Then the resilience loop's own work — the three things an overview like this leaves out: what happens when traffic spikes faster than the Planner can react, what breaks when a GPU dies mid-decode, and how a fleet recovers state that was only ever held in memory.
+Each part is a problem of its own: disaggregation and what the KV transfer costs; routing, and why round-robin is the wrong default; the distributed KV cache as a storage system with its own tiers and eviction; and the parallelism that serving uses, which is not the parallelism training used. Then the Resilience Loop's own work — the three things an overview like this leaves out: what happens when traffic spikes faster than the Planner can react, what breaks when a GPU dies mid-decode, and how a fleet recovers state that was only ever held in memory.
 
 That is the shape of it. More notes as I go.
