@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img"
-     aria-label="Anatomy of one NVIDIA Dynamo inference fleet, drawn as three planes on a balanced grid. Across the top, inside a full-width dashed band, is the CONTROL PLANE, off the critical path, with three evenly spaced dashed boxes — the Dynamo operator (reconciles the deployment), the Planner (sizes pools to hold SLOs), and Model Express (weights for new workers) — each connected by a dashed arrow down to the part it manages. In the middle, the REQUEST PLANE on every token's critical path, in solid boxes: a client sends a prompt into a green Frontend and KV-aware router, which forwards it into the worker pools — a prefill pool of GPU workers that reads the prompt and builds the KV cache, which hands that KV across a green NIXL-transfer arrow to a decode pool of GPU workers that generates tokens; the tokens then stream back along the bottom to the client. Below the pools sits the STORAGE &amp; EVENTS PLANE: a wide green KVBM store both pools read and write, drawn as three stacked tiers — GPU hot, CPU warm, SSD cold, fastest to largest top to bottom — with a dashed green KV-events arrow running from the store up to the front door, the signal that tells the router which worker holds which prefix. The operator wires to the front door, and the Planner and Model Express wire to the worker pools. A footer key marks the three planes: dashed control plane off the critical path, solid request plane on it, and green storage-and-events plane for the KV state.">
+     aria-label="Anatomy of one NVIDIA Dynamo inference fleet, drawn as three planes on a balanced grid. Across the top, inside a full-width dashed band, is the CONTROL PLANE, off the critical path, with three evenly spaced dashed boxes — the Dynamo operator (reconciles the deployment), the Planner (sizes pools to hold SLOs), and ModelExpress (weights for new workers) — each connected by a dashed arrow down to the part it manages. In the middle, the REQUEST PLANE on every token's critical path, in solid boxes: a client sends a prompt into a green Frontend and KV-aware router, which forwards it into the worker pools — a prefill pool of GPU workers that reads the prompt and builds the KV cache, which hands that KV across a green NIXL-transfer arrow to a decode pool of GPU workers that generates tokens; the tokens then stream back along the bottom to the client. Below the pools sits the STORAGE &amp; EVENTS PLANE: a tiered KVBM cache — GPU hot, CPU warm, SSD, and remote object storage — that the workers manage, with a dashed green KV-events arrow running from the workers up to the router, the signal that tells the router which worker holds which prefix. The operator wires to the front door, and the Planner and ModelExpress wire to the worker pools. A footer key marks the three planes: dashed control plane off the critical path, solid request plane on it, and green storage-and-events plane for the KV state.">
   <title>Anatomy of one NVIDIA Dynamo fleet — three planes: request, storage &amp; events, control</title>
   <style>
     .bg     { fill:#faf8f3; stroke:#e4e1da; }
@@ -65,13 +65,13 @@
         KV handoff prefill 456 -> decode 514 @222 (green, label 486,214).
       client->frontend 116->142 ; frontend->prefill 266->300 @222.
       return U: decode 668,222 ->690,222 ->690,430 ->78,430 ->78,247 (into client).
-    KVBM STORE: x306 y288 w360 h113 -> 288..401, centre 486 ; header title inside @486,306.
-      slabs x320 w332 (320..652): GPU y314, CPU y340, SSD y366 (h22).
+    KVBM STORE: x306 y288 w360 h118 -> 288..406, centre 486 ; header title inside @486,306.
+      4 slabs x320 w332 (320..652): GPU y313, CPU y336, SSD y359, REMOTE y382 (h20).
       links (green bidir): prefill 379 258<->284 ; decode 593 258<->284.
         labels "writes KV" 369,276 end ; "reads KV" 603,276 (in the gap, y268..288).
     tokens label 360,423 ; return line y430.
     STORAGE & EVENTS PLANE label centred @486,283 ; KV events arrow (dashed green)
-      store 330,288 -> front door 207,249, label "KV events" 250,262.
+      workers 330,268 -> router 210,250, label "KV events" 201,262 (events emitted by workers).
     LEGEND (three swatches) y450 (h13), labels y460:
       cbox  swatch x40  -> "control — off the path"
       node  swatch x250 -> "request — every token's path"
@@ -95,7 +95,7 @@
   <text class="csub"   x="360" y="99" text-anchor="middle">sizes pools to hold SLOs</text>
 
   <rect class="cbox" x="487" y="66" width="180" height="42" rx="3"/>
-  <text class="ctitle" x="577" y="85" text-anchor="middle">MODEL EXPRESS</text>
+  <text class="ctitle" x="577" y="85" text-anchor="middle">MODELEXPRESS</text>
   <text class="csub"   x="577" y="99" text-anchor="middle">weights for new workers</text>
 
   <!-- control -> data: each box wired to what it manages -->
@@ -153,20 +153,23 @@
 
   <!-- storage & events plane label + KV events feeding the router -->
   <text class="plane" x="486" y="283" text-anchor="middle">STORAGE &amp; EVENTS PLANE</text>
-  <path class="evt" d="M330,288 L207,249" marker-end="url(#ag)"/>
-  <text class="alabk" x="201" y="259" text-anchor="end">KV events</text>
+  <path class="evt" d="M330,268 L210,250" marker-end="url(#ag)"/>
+  <text class="alabk" x="201" y="262" text-anchor="end">KV events</text>
 
-  <rect class="store" x="306" y="288" width="360" height="113" rx="3"/>
+  <rect class="store" x="306" y="288" width="360" height="118" rx="3"/>
   <text class="pttl" x="486" y="306" text-anchor="middle">KVBM — KV BLOCK MANAGER</text>
-  <rect class="slab" x="320" y="314" width="332" height="22" rx="2"/>
-  <text class="slbl" x="330" y="329">GPU</text>
-  <text class="ssub" x="642" y="329" text-anchor="end">hot — fastest, smallest</text>
-  <rect class="slab" x="320" y="340" width="332" height="22" rx="2"/>
-  <text class="slbl" x="330" y="355">CPU</text>
-  <text class="ssub" x="642" y="355" text-anchor="end">warm — spillover</text>
-  <rect class="slab" x="320" y="366" width="332" height="22" rx="2"/>
-  <text class="slbl" x="330" y="381">SSD</text>
-  <text class="ssub" x="642" y="381" text-anchor="end">cold — largest, slowest</text>
+  <rect class="slab" x="320" y="313" width="332" height="20" rx="2"/>
+  <text class="slbl" x="330" y="327">GPU</text>
+  <text class="ssub" x="642" y="327" text-anchor="end">hot — fastest, smallest</text>
+  <rect class="slab" x="320" y="336" width="332" height="20" rx="2"/>
+  <text class="slbl" x="330" y="350">CPU</text>
+  <text class="ssub" x="642" y="350" text-anchor="end">warm — spillover</text>
+  <rect class="slab" x="320" y="359" width="332" height="20" rx="2"/>
+  <text class="slbl" x="330" y="373">SSD</text>
+  <text class="ssub" x="642" y="373" text-anchor="end">cold — local disk</text>
+  <rect class="slab" x="320" y="382" width="332" height="20" rx="2"/>
+  <text class="slbl" x="330" y="396">REMOTE</text>
+  <text class="ssub" x="642" y="396" text-anchor="end">object storage — largest</text>
 
   <!-- ===================== LEGEND KEY ===================== -->
   <rect class="cbox" x="40" y="450" width="13" height="13" rx="2"/>

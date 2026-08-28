@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 262" role="img"
-     aria-label="Three panels showing that the KV router, the control plane, and the weight source from the fleet map are each really a replicated pool, not a single box. Left panel, the front door: an L4 load balancer feeds a stack of stateless KV-router replicas that share one prefix index. Middle panel, the control plane: a stack of Dynamo-operator instances with one green leader on top and two dashed standbys below it, leader-elected for high availability. Right panel, Model Express: one loaded copy of the weights that streams them GPU-to-GPU over two arrows to two new worker replicas via NIXL. A footer notes that all three scale on cheap CPU, off the GPU critical path — the worker pools are the expensive part.">
+     aria-label="Three panels showing that the KV router, the control plane, and the weight source from the fleet map are each really a replicated pool, not a single box. Left panel, the front door: an L4 load balancer feeds a stack of stateless KV-router replicas that share one prefix index. Middle panel, the control plane: a stack of Dynamo-operator instances with one green leader on top and two dashed standbys below it, leader-elected for high availability. Right panel, ModelExpress: one loaded copy of the weights that streams them GPU-to-GPU over two arrows to two new worker replicas via NIXL. A footer notes that all three scale on cheap CPU, off the GPU critical path — the worker pools are the expensive part.">
   <title>Scaling the front door and the control plane — none of it is one box</title>
   <style>
     .bg     { fill:#faf8f3; stroke:#e4e1da; }
@@ -54,8 +54,8 @@
   <text class="csub" x="360" y="151" text-anchor="middle">standby</text>
   <text class="cap"  x="360" y="190" text-anchor="middle">leader-elected or sharded for HA</text>
 
-  <!-- ===== C · MODEL EXPRESS ===== -->
-  <text class="hdr" x="580" y="60" text-anchor="middle">MODEL EXPRESS</text>
+  <!-- ===== C · MODELEXPRESS ===== -->
+  <text class="hdr" x="580" y="60" text-anchor="middle">MODELEXPRESS</text>
   <rect class="store" x="520" y="72" width="120" height="34" rx="3"/>
   <text class="gtl"  x="580" y="88"  text-anchor="middle">WEIGHT SOURCE</text>
   <text class="nsub" x="580" y="100" text-anchor="middle">one loaded copy</text>
