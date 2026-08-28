@@ -4,6 +4,7 @@ summary: "Past a certain load one GPU node isn't enough, and a bigger GPU won't 
 category: "Inference"
 status: Published
 published: 2026-07-16
+updated: 2026-08-28
 tags:
   - distributed-inference
   - serving

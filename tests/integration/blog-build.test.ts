@@ -46,6 +46,16 @@ const RICH = {
   asset: "assets/blog/transformer-inference-prefill-and-decode/request-lifecycle.svg",
 };
 
+// The Dynamo fleet post carries an `updated` date later than `published`, so it
+// is the first Published Post to exercise the "Updated" byline surface (#7) and
+// the article:modified_time SEO tag (#8) end-to-end. The updatedIsoDay rule
+// (show only when updated > published) is unit-tested in post-list; this proves
+// the built page actually carries both.
+const UPDATED = {
+  slug: "distributed-inference-the-fleet",
+  day: "2026-08-28",
+};
+
 describe("blog production build output", () => {
   let indexHtml = "";
 
@@ -128,6 +138,14 @@ describe("blog production build output", () => {
     expect(html).toContain('property="article:section" content="Inference"');
     expect(html).toContain('property="article:tag"');
     expect(html).toContain("twitter:card");
+  });
+
+  itIf("renders the Updated byline and article:modified_time for a Post with an updated date", async () => {
+    const html = await Bun.file(`dist/blog/${UPDATED.slug}/index.html`).text();
+    expect(html).toContain(`Updated ${UPDATED.day}`);
+    expect(html).toContain(
+      `property="article:modified_time" content="${UPDATED.day}T00:00:00.000Z"`,
+    );
   });
 
   itIf("uses og:type=website with no article tags on non-blog pages", async () => {
