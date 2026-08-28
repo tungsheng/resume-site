@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img"
-     aria-label="Anatomy of one production LLM inference fleet, drawn as two planes on a balanced grid. Across the top, inside a full-width dashed band, is the CONTROL PLANE, off the critical path, with three evenly spaced dashed boxes — a scheduler (placement and admission), an autoscaler (resizes pools to hold SLOs), and a model registry (weights for new replicas) — each connected by a dashed arrow down to the part of the data plane it manages. Below, the DATA PLANE on every token's critical path, in solid boxes: a client sends a prompt into a green cache-aware gateway and router, which forwards it into the worker pools — a prefill pool of GPU workers that reads the prompt and builds the KV cache, which hands that KV across a green handoff arrow to a decode pool of GPU workers that generates tokens; the tokens then stream back along the bottom to the client. Below the pools sits a wide green shared KV store both pools read and write, drawn as three stacked tiers: GPU hot, CPU warm, SSD cold — fastest to largest, top to bottom. The scheduler wires to the gateway, and the autoscaler and registry wire to the worker pools. A footer gives the key: dashed is the control plane off the critical path, solid is the data plane on every token's critical path.">
-  <title>Anatomy of one inference fleet — the control plane wired to the data plane it manages</title>
+     aria-label="Anatomy of one NVIDIA Dynamo inference fleet, drawn as three planes on a balanced grid. Across the top, inside a full-width dashed band, is the CONTROL PLANE, off the critical path, with three evenly spaced dashed boxes — the Dynamo operator (reconciles the deployment), the Planner (sizes pools to hold SLOs), and ModelExpress (weights for new workers) — each connected by a dashed arrow down to the part it manages. In the middle, the REQUEST PLANE on every token's critical path, in solid boxes: a client sends a prompt into a green Frontend, then a separate green KV router that picks a worker, and on into the worker pools — a prefill pool of GPU workers that reads the prompt and builds the KV cache, which hands that KV across a green NIXL-transfer arrow to a decode pool of GPU workers that generates tokens; the tokens then stream back along the bottom and up through the Frontend to the client. Below the pools sits the STORAGE &amp; EVENTS PLANE: a tiered KVBM cache — GPU hot, CPU warm, SSD, and remote object storage — that the workers manage, with a dashed green KV-events arrow running from the workers up to the router, the signal that tells the router which worker holds which prefix. The operator wires to the Frontend, and the Planner and ModelExpress wire to the worker pools. A footer key marks the three planes: dashed control plane off the critical path, solid request plane on it, and green storage &amp; events plane for the KV state.">
+  <title>Anatomy of one NVIDIA Dynamo fleet — three planes: request, storage &amp; events, control</title>
   <style>
     .bg     { fill:#faf8f3; stroke:#e4e1da; }
     .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
@@ -24,6 +24,7 @@
     .pttl   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1px; fill:#2f7d3b; }
     .flow   { stroke:#1c1b17; stroke-width:1.6; fill:none; }
     .flowg  { stroke:#2f7d3b; stroke-width:1.6; fill:none; }
+    .evt    { stroke:#2f7d3b; stroke-width:1.2; fill:none; stroke-dasharray:4 3; }
     .ctrl   { stroke:#a9a49a; stroke-width:1.3; fill:none; stroke-dasharray:5 4; }
     .alab   { font:400 9px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
     .alabg  { font:600 9px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
@@ -48,74 +49,84 @@
     Eyebrow y=26.
     CONTROL band: x34..686, y40..120 (h80, dashed). label 46,58.
       3 dashed boxes y66..108 (h42), titles y85, subs y99:
-        scheduler  x53  w180 -> centre 143
-        autoscaler x270 w180 -> centre 360
-        registry   x487 w180 -> centre 577
+        operator      x53  w180 -> centre 143
+        planner       x270 w180 -> centre 360
+        model express x487 w180 -> centre 577
     CONTROL -> DATA (dashed): each box to the part it manages
-      scheduler 143,110 -> gateway 203,191   label "places · admits" 188,150
-      autoscaler 360,110 -> pools 398,164     label "scales replicas ±" 404,150
-      registry  577,110 -> pools 576,164      label "loads weights" 588,150
-    DATA label 34,160.
+      operator 143,110 -> frontend 154,192   label "reconciles" 162,150
+      planner  360,110 -> pools 398,164        label "sizes pools ±" 404,150
+      model express 577,110 -> pools 576,164    label "streams weights" 588,150
+    REQUEST label 34,160.
     Data spine centre y=222.
-      client  x40  y199 w76 h46  -> centre 78,222
-      gateway x146 y196 w120 h52 -> centre 206,222 (green)
+      client   x34  y199 w64 h46  -> centre 66,222
+      frontend x116 y196 w76 h52  -> centre 154,222 (green)
+      KV router x206 y196 w80 h52 -> centre 246,222 (green)
       WORKER POOLS group: x290 y166 w392 h102 -> 290..682, y166..268. tag 312,181.
         PREFILL x305 y190 w150 h64 -> centre 379 ; DECODE x518 y190 w150 h64 -> centre 593.
         KV handoff prefill 456 -> decode 514 @222 (green, label 486,214).
-      client->gateway 116->142 ; gateway->prefill 266->300 @222.
-      return U: decode 668,222 ->690,222 ->690,430 ->78,430 ->78,247 (into client).
-    SHARED KV STORE: x306 y288 w360 h113 -> 288..401, centre 486 ; header title inside @486,306.
-      slabs x320 w332 (320..652): GPU y314, CPU y340, SSD y366 (h22).
+      client->frontend 98->114 ; frontend->router 192->204 ; router->prefill 286->300 @222.
+      return U: decode 668,222 ->690,222 ->690,430 ->154,430 ->154,248 (up into FRONTEND);
+        then frontend->client 116->100 @236 (tokens stream back through the Frontend).
+    KVBM STORE: x306 y288 w360 h118 -> 288..406, centre 486 ; header title inside @486,306.
+      4 slabs x320 w332 (320..652): GPU y313, CPU y336, SSD y359, REMOTE y382 (h20).
       links (green bidir): prefill 379 258<->284 ; decode 593 258<->284.
         labels "writes KV" 369,276 end ; "reads KV" 603,276 (in the gap, y268..288).
     tokens label 360,423 ; return line y430.
-    LEGEND (swatch key), swatches y450 (h13), labels y460:
-      cbox swatch x99  -> "control plane — off the critical path"
-      node swatch x356 -> "data plane — on every token's critical path"
+    STORAGE & EVENTS PLANE label centred @486,283 ; KV events arrow (dashed green)
+      workers 330,268 -> router 210,250, label "KV events" 201,262 (events emitted by workers).
+    LEGEND (three swatches) y450 (h13), labels y460:
+      cbox  swatch x40  -> "control — off the path"
+      node  swatch x250 -> "request — every token's path"
+      store swatch x470 -> "storage & events — the KV state"
   =================================================================== -->
 
   <rect class="bg" x="1" y="1" width="718" height="478" rx="2"/>
-  <text class="ey" x="34" y="26">THE INFERENCE FLEET — ONE FLEET, TWO PLANES</text>
+  <text class="ey" x="34" y="26">NVIDIA DYNAMO — ONE FLEET, THREE PLANES</text>
 
   <!-- ===================== CONTROL PLANE (dashed) ===================== -->
   <rect class="band" x="34" y="40" width="652" height="80" rx="3"/>
   <text class="plane"  x="46" y="58">CONTROL PLANE</text>
-  <text class="planed" x="162" y="58">off the critical path — steers and resizes the data plane</text>
+  <text class="planed" x="162" y="58">off the critical path — steers and resizes the other planes</text>
 
   <rect class="cbox" x="53" y="66" width="180" height="42" rx="3"/>
-  <text class="ctitle" x="143" y="85" text-anchor="middle">SCHEDULER</text>
-  <text class="csub"   x="143" y="99" text-anchor="middle">placement / admission</text>
+  <text class="ctitle" x="143" y="85" text-anchor="middle">DYNAMO OPERATOR</text>
+  <text class="csub"   x="143" y="99" text-anchor="middle">reconciles the deployment</text>
 
   <rect class="cbox" x="270" y="66" width="180" height="42" rx="3"/>
-  <text class="ctitle" x="360" y="85" text-anchor="middle">AUTOSCALER</text>
-  <text class="csub"   x="360" y="99" text-anchor="middle">resizes pools to hold SLOs</text>
+  <text class="ctitle" x="360" y="85" text-anchor="middle">PLANNER</text>
+  <text class="csub"   x="360" y="99" text-anchor="middle">sizes pools to hold SLOs</text>
 
   <rect class="cbox" x="487" y="66" width="180" height="42" rx="3"/>
-  <text class="ctitle" x="577" y="85" text-anchor="middle">MODEL REGISTRY</text>
-  <text class="csub"   x="577" y="99" text-anchor="middle">weights for new replicas</text>
+  <text class="ctitle" x="577" y="85" text-anchor="middle">MODELEXPRESS</text>
+  <text class="csub"   x="577" y="99" text-anchor="middle">weights for new workers</text>
 
   <!-- control -> data: each box wired to what it manages -->
-  <path class="ctrl" d="M143,110 L203,191" marker-end="url(#agr)"/>
-  <text class="clab" x="188" y="150">places · admits</text>
+  <path class="ctrl" d="M143,110 L154,192" marker-end="url(#agr)"/>
+  <text class="clab" x="162" y="150">reconciles</text>
 
   <path class="ctrl" d="M360,110 L398,164" marker-end="url(#agr)"/>
-  <text class="clab" x="404" y="150">scales replicas ±</text>
+  <text class="clab" x="404" y="150">sizes pools ±</text>
 
   <path class="ctrl" d="M577,110 L576,164" marker-end="url(#agr)"/>
-  <text class="clab" x="588" y="150">loads weights</text>
+  <text class="clab" x="588" y="150">streams weights</text>
 
   <!-- ===================== DATA PLANE (solid) ===================== -->
-  <text class="plane" x="34" y="160">DATA PLANE</text>
+  <text class="plane" x="34" y="160">REQUEST PLANE</text>
 
   <!-- client -->
-  <rect class="node" x="40" y="199" width="76" height="46" rx="3"/>
-  <text class="ntitle" x="78" y="219" text-anchor="middle">CLIENT</text>
-  <text class="nsub"   x="78" y="232" text-anchor="middle">prompt in</text>
+  <rect class="node" x="34" y="199" width="64" height="46" rx="3"/>
+  <text class="ntitle" x="66" y="219" text-anchor="middle">CLIENT</text>
+  <text class="nsub"   x="66" y="232" text-anchor="middle">prompt in</text>
 
-  <!-- gateway / router -->
-  <rect class="gnode" x="146" y="196" width="120" height="52" rx="3"/>
-  <text class="gttl" x="206" y="218" text-anchor="middle">GATEWAY</text>
-  <text class="nsub" x="206" y="231" text-anchor="middle">cache-aware router</text>
+  <!-- frontend (OpenAI-compatible API server) -->
+  <rect class="gnode" x="116" y="196" width="76" height="52" rx="3"/>
+  <text class="gttl" x="154" y="218" text-anchor="middle">FRONTEND</text>
+  <text class="nsub" x="154" y="231" text-anchor="middle">OpenAI HTTP</text>
+
+  <!-- KV router (separate component that picks a worker) -->
+  <rect class="gnode" x="206" y="196" width="80" height="52" rx="3"/>
+  <text class="gttl" x="246" y="218" text-anchor="middle">KV ROUTER</text>
+  <text class="nsub" x="246" y="231" text-anchor="middle">cache-aware</text>
 
   <!-- worker pools group -->
   <rect class="grp" x="290" y="166" width="392" height="102" rx="4"/>
@@ -132,36 +143,48 @@
   <text class="nsub" x="593" y="240" text-anchor="middle">generates tokens</text>
 
   <!-- data-plane flow arrows -->
-  <path class="flow"  d="M116,222 L142,222" marker-end="url(#ad)"/>
-  <path class="flow"  d="M266,222 L300,222" marker-end="url(#ad)"/>
+  <path class="flow"  d="M98,222 L114,222" marker-end="url(#ad)"/>
+  <path class="flow"  d="M192,222 L204,222" marker-end="url(#ad)"/>
+  <path class="flow"  d="M286,222 L300,222" marker-end="url(#ad)"/>
   <path class="flowg" d="M456,222 L514,222" marker-end="url(#ag)"/>
-  <text class="alabg" x="486" y="214" text-anchor="middle">KV handoff</text>
+  <text class="alabg" x="486" y="214" text-anchor="middle">KV via NIXL</text>
 
   <!-- tokens returned to client (bottom U) -->
-  <path class="flow" d="M668,222 L690,222 L690,430 L78,430 L78,247" marker-end="url(#ad)"/>
-  <text class="alab" x="360" y="423" text-anchor="middle">← tokens streamed back to the client</text>
+  <path class="flow" d="M668,222 L690,222 L690,430 L154,430 L154,248" marker-end="url(#ad)"/>
+  <path class="flow" d="M116,236 L100,236" marker-end="url(#ad)"/>
+  <text class="alab" x="422" y="423" text-anchor="middle">← tokens stream back through the Frontend</text>
 
-  <!-- ===================== SHARED KV STORE ===================== -->
+  <!-- ===================== KVBM STORE ===================== -->
   <path class="flowg" d="M379,258 L379,284" marker-start="url(#ag)" marker-end="url(#ag)"/>
   <path class="flowg" d="M593,258 L593,284" marker-start="url(#ag)" marker-end="url(#ag)"/>
   <text class="alabk" x="369" y="276" text-anchor="end">writes KV</text>
   <text class="alabk" x="603" y="276">reads KV</text>
 
-  <rect class="store" x="306" y="288" width="360" height="113" rx="3"/>
-  <text class="pttl" x="486" y="306" text-anchor="middle">SHARED KV STORE</text>
-  <rect class="slab" x="320" y="314" width="332" height="22" rx="2"/>
-  <text class="slbl" x="330" y="329">GPU</text>
-  <text class="ssub" x="642" y="329" text-anchor="end">hot — fastest, smallest</text>
-  <rect class="slab" x="320" y="340" width="332" height="22" rx="2"/>
-  <text class="slbl" x="330" y="355">CPU</text>
-  <text class="ssub" x="642" y="355" text-anchor="end">warm — spillover</text>
-  <rect class="slab" x="320" y="366" width="332" height="22" rx="2"/>
-  <text class="slbl" x="330" y="381">SSD</text>
-  <text class="ssub" x="642" y="381" text-anchor="end">cold — largest, slowest</text>
+  <!-- storage & events plane label + KV events feeding the router -->
+  <text class="plane" x="486" y="283" text-anchor="middle">STORAGE &amp; EVENTS PLANE</text>
+  <path class="evt" d="M330,268 L250,250" marker-end="url(#ag)"/>
+  <text class="alabk" x="250" y="264" text-anchor="middle">KV events</text>
+
+  <rect class="store" x="306" y="288" width="360" height="118" rx="3"/>
+  <text class="pttl" x="486" y="306" text-anchor="middle">KVBM — KV BLOCK MANAGER</text>
+  <rect class="slab" x="320" y="313" width="332" height="20" rx="2"/>
+  <text class="slbl" x="330" y="327">GPU</text>
+  <text class="ssub" x="642" y="327" text-anchor="end">hot — fastest, smallest</text>
+  <rect class="slab" x="320" y="336" width="332" height="20" rx="2"/>
+  <text class="slbl" x="330" y="350">CPU</text>
+  <text class="ssub" x="642" y="350" text-anchor="end">warm — spillover</text>
+  <rect class="slab" x="320" y="359" width="332" height="20" rx="2"/>
+  <text class="slbl" x="330" y="373">SSD</text>
+  <text class="ssub" x="642" y="373" text-anchor="end">cold — local disk</text>
+  <rect class="slab" x="320" y="382" width="332" height="20" rx="2"/>
+  <text class="slbl" x="330" y="396">REMOTE</text>
+  <text class="ssub" x="642" y="396" text-anchor="end">object storage — largest</text>
 
   <!-- ===================== LEGEND KEY ===================== -->
-  <rect class="cbox" x="99" y="450" width="13" height="13" rx="2"/>
-  <text class="note" x="119" y="460">control plane — off the critical path</text>
-  <rect class="node" x="356" y="450" width="13" height="13" rx="2"/>
-  <text class="note" x="376" y="460">data plane — on every token's critical path</text>
+  <rect class="cbox" x="40" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="60" y="460">control — off the path</text>
+  <rect class="node" x="250" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="270" y="460">request — every token's path</text>
+  <rect class="store" x="470" y="450" width="13" height="13" rx="2"/>
+  <text class="note" x="490" y="460">storage &amp; events — the KV state</text>
 </svg>

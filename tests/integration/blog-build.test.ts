@@ -13,7 +13,7 @@ const itIf = RUN ? test : test.skip;
 // (tests/unit/blog-markdown.test.ts); here we assert they survive a real build
 // and land in dist/. Keep this list newest-first — LATEST below slices it.
 const PUBLISHED = [
-  { slug: "distributed-inference-the-fleet", title: "Distributed Inference: From One GPU to a Fleet" },
+  { slug: "distributed-inference-the-fleet", title: "How NVIDIA Dynamo Runs an Inference Fleet" },
   { slug: "scheduling-continuous-batching-paged-attention", title: "Scheduling: How Continuous Batching and Paged Attention Fill a GPU" },
   { slug: "moe-routing", title: "MoE: How the Mixture of Experts Routes a Token" },
   { slug: "why-transformers-need-the-mlp", title: "MLP: Why Transformers Need the Multilayer Perceptron" },
@@ -28,8 +28,8 @@ const LATEST = PUBLISHED.slice(0, 3);
 const OLDER_PUBLISHED = PUBLISHED.slice(3);
 
 // status: Drafting — dev-only, excluded from a production build entirely.
-// The corpus currently has no Drafting Posts (the 2026-07 stubs were retired),
-// so these assertions are vacuous until the next draft lands — add it here.
+// The corpus currently has no Drafting Posts; these assertions are vacuous until
+// the next draft lands — add it here.
 const DRAFTS: { slug: string; title: string }[] = [];
 
 // status: Outline — also dev-only; a production build emits no page and never
@@ -44,6 +44,16 @@ const RICH = {
   slug: "transformer-inference-prefill-and-decode",
   title: "LLM Inference: The Life of a Request",
   asset: "assets/blog/transformer-inference-prefill-and-decode/request-lifecycle.svg",
+};
+
+// The Dynamo fleet post carries an `updated` date later than `published`, so it
+// is the first Published Post to exercise the "Updated" byline surface (#7) and
+// the article:modified_time SEO tag (#8) end-to-end. The updatedIsoDay rule
+// (show only when updated > published) is unit-tested in post-list; this proves
+// the built page actually carries both.
+const UPDATED = {
+  slug: "distributed-inference-the-fleet",
+  day: "2026-08-28",
 };
 
 describe("blog production build output", () => {
@@ -128,6 +138,14 @@ describe("blog production build output", () => {
     expect(html).toContain('property="article:section" content="Inference"');
     expect(html).toContain('property="article:tag"');
     expect(html).toContain("twitter:card");
+  });
+
+  itIf("renders the Updated byline and article:modified_time for a Post with an updated date", async () => {
+    const html = await Bun.file(`dist/blog/${UPDATED.slug}/index.html`).text();
+    expect(html).toContain(`Updated ${UPDATED.day}`);
+    expect(html).toContain(
+      `property="article:modified_time" content="${UPDATED.day}T00:00:00.000Z"`,
+    );
   });
 
   itIf("uses og:type=website with no article tags on non-blog pages", async () => {
