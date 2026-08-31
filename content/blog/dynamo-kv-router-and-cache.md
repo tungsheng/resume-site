@@ -2,8 +2,8 @@
 title: "Dynamo's KV Router: Routing on What the Fleet Already Cached"
 summary: "A fleet's replicas are not interchangeable — each one holds a different slice of KV cache, and routing to the wrong one turns a cache hit into a full prefill. NVIDIA Dynamo's KV router answers that with one number per worker: a cost combining how much of the prompt that worker already has against how loaded it is. These are my notes on the parts that produce those two numbers — block hashes and KV events, the global prefix index, the tiered block manager behind it — and on the cost function that spends them."
 category: "Inference"
-status: Drafting
-published: 2026-08-27
+status: Published
+published: 2026-08-31
 tags:
   - distributed-inference
   - serving

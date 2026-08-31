@@ -7,12 +7,24 @@ import { $ } from "bun";
 const RUN = process.env.RUN_INTEGRATION_TESTS === "1";
 const itIf = RUN ? test : test.skip;
 
+// Titles are authored as plain text but land escaped in the built output, and
+// the two emitters disagree on which entity to use for an apostrophe: Astro's
+// HTML escaping writes &#39;, the RSS serializer writes &apos;. Compare against
+// the escaped form rather than the source string, or any Post whose title
+// carries an apostrophe fails these assertions for a formatting reason.
+const asHtml = (title: string) => title.replaceAll("&", "&amp;").replaceAll("'", "&#39;");
+const asRss = (title: string) => title.replaceAll("&", "&amp;").replaceAll("'", "&apos;");
+
 // Every Published Post ships in the production build, newest first. The custom
 // Sätteri transforms (admonition callouts #16, figure/lazy images #17) plus GFM
 // tables and Shiki are exercised at the node level in the unit suite
 // (tests/unit/blog-markdown.test.ts); here we assert they survive a real build
 // and land in dist/. Keep this list newest-first — LATEST below slices it.
 const PUBLISHED = [
+  {
+    slug: "dynamo-kv-router-and-cache",
+    title: "Dynamo's KV Router: Routing on What the Fleet Already Cached",
+  },
   { slug: "distributed-inference-the-fleet", title: "Distributed Inference: From One GPU to a Fleet" },
   { slug: "scheduling-continuous-batching-paged-attention", title: "Scheduling: How Continuous Batching and Paged Attention Fill a GPU" },
   { slug: "moe-routing", title: "MoE: How the Mixture of Experts Routes a Token" },
@@ -30,12 +42,7 @@ const OLDER_PUBLISHED = PUBLISHED.slice(3);
 // status: Drafting — dev-only, excluded from a production build entirely.
 // The corpus currently has no Drafting Posts (the 2026-07 stubs were retired),
 // so these assertions are vacuous until the next draft lands — add it here.
-const DRAFTS: { slug: string; title: string }[] = [
-  {
-    slug: "dynamo-kv-router-and-cache",
-    title: "Dynamo's KV Router: Routing on What the Fleet Already Cached",
-  },
-];
+const DRAFTS: { slug: string; title: string }[] = [];
 
 // status: Outline — also dev-only; a production build emits no page and never
 // references them anywhere public. Currently empty, same as DRAFTS.
@@ -67,20 +74,20 @@ describe("blog production build output", () => {
   });
 
   itIf("lists every Published Post on the index and omits drafts/outlines", () => {
-    for (const post of PUBLISHED) expect(indexHtml).toContain(post.title);
-    for (const post of [...DRAFTS, ...OUTLINE]) expect(indexHtml).not.toContain(post.title);
+    for (const post of PUBLISHED) expect(indexHtml).toContain(asHtml(post.title));
+    for (const post of [...DRAFTS, ...OUTLINE]) expect(indexHtml).not.toContain(asHtml(post.title));
   });
 
   itIf("builds a detail page for each Published Post", async () => {
     for (const post of PUBLISHED) {
       const html = await Bun.file(`dist/blog/${post.slug}/index.html`).text();
-      expect(html).toContain(post.title);
+      expect(html).toContain(asHtml(post.title));
     }
   });
 
   itIf("excludes every draft from the index and emits no draft page", async () => {
     for (const post of DRAFTS) {
-      expect(indexHtml).not.toContain(post.title);
+      expect(indexHtml).not.toContain(asHtml(post.title));
       expect(await Bun.file(`dist/blog/${post.slug}/index.html`).exists()).toBe(false);
     }
   });
@@ -148,7 +155,7 @@ describe("blog production build output", () => {
   itIf("emits an RSS 2.0 full-content feed, Published-only", async () => {
     const rss = await Bun.file("dist/rss.xml").text();
     expect(rss).toContain('<rss version="2.0"');
-    for (const post of PUBLISHED) expect(rss).toContain(`<title>${post.title}</title>`);
+    for (const post of PUBLISHED) expect(rss).toContain(`<title>${asRss(post.title)}</title>`);
 
     // full content (not just summary): the rendered admonition callout (Sätteri
     // mdast plugin, #16) and a body phrase carry through, and the #6 self-hosted
@@ -157,7 +164,7 @@ describe("blog production build output", () => {
     expect(rss).toContain("memory bandwidth");
     expect(rss).toContain(`https://tonylee.bio/${RICH.asset}`);
 
-    for (const post of [...DRAFTS, ...OUTLINE]) expect(rss).not.toContain(post.title);
+    for (const post of [...DRAFTS, ...OUTLINE]) expect(rss).not.toContain(asRss(post.title));
   });
 
   // Issue #9: whole-site sitemap lists every public page + Published Post, no
@@ -271,7 +278,7 @@ describe("blog production build output", () => {
       expect(html).toContain(`href="/blog/${post.slug}"`);
     }
     for (const post of [...OLDER_PUBLISHED, ...DRAFTS, ...OUTLINE]) {
-      expect(html).not.toContain(post.title);
+      expect(html).not.toContain(asHtml(post.title));
       expect(html).not.toContain(`/blog/${post.slug}`);
     }
   });
@@ -284,10 +291,10 @@ describe("blog production build output", () => {
     const rss = await Bun.file("dist/rss.xml").text();
     for (const post of OUTLINE) {
       expect(await Bun.file(`dist/blog/${post.slug}/index.html`).exists()).toBe(false);
-      expect(indexHtml).not.toContain(post.title);
+      expect(indexHtml).not.toContain(asHtml(post.title));
       expect(sitemap).not.toContain(post.slug);
       expect(home).not.toContain(post.slug);
-      expect(rss).not.toContain(post.title);
+      expect(rss).not.toContain(asRss(post.title));
     }
   });
 });
