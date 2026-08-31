@@ -1,93 +1,101 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 430" role="img"
-     aria-label="Three candidate workers scored by the router's cost function, drawn as horizontal bars measured in KV blocks. The formula sits at the top: cost equals the prefill scale times the prompt-side blocks minus the overlap credit, clamped at zero, plus the worker's decode blocks. Worker A has the deepest cache hit — 48 of 60 prompt blocks already cached, shown as a nearly full green gauge — leaving only 12 blocks of prefill work, but it carries 46 blocks of resident decode load, for a total cost of 58. Worker B has a much shallower hit, 20 of 60 blocks, leaving 40 blocks of prefill, but its batch is nearly empty at 8 decode blocks, for a total cost of 48 — the shorter bar, and the worker the router picks. Worker C is drawn greyed out and struck through: it never reaches scoring because the busy threshold filters it out first. The picture's point is that cache overlap and decode footprint are charged in the same currency, so the deepest cache hit does not automatically win.">
+     aria-label="Three candidate workers, two of them scored by the router's cost function and drawn as horizontal bars measured in KV blocks. The formula sits at the top: cost equals the prefill scale times the prompt-side blocks minus the overlap credit, clamped at zero, plus the worker's decode blocks, with the prefill scale set to 1 here. Worker A has the deepest cache hit among the workers that reach scoring — 48 of 60 prompt blocks already cached, shown as a green gauge four-fifths full — leaving only 12 blocks of prefill work, but it carries 46 blocks of resident decode load, for a total cost of 58. Worker B has a much shallower hit, 20 of 60 blocks, leaving 40 blocks of prefill, but its batch is nearly empty at 8 decode blocks, for a total cost of 48 — the shorter bar, and the worker the router picks. Worker C is drawn greyed out and carries no bar at all: it never reaches scoring, because the busy threshold filters it out before the cost function runs — even though its cache hit is the deepest of the three at 52 of 60 blocks. The picture's point is that cache overlap and decode footprint are charged in the same currency, so the deepest cache hit does not automatically win.">
   <title>Scoring three workers — cache overlap and decode load in the same currency</title>
   <style>
-    .bg    { fill:#faf8f3; stroke:#e4e1da; }
-    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
-    .lbl   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
-    .lblg  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
-    .lbls  { font:600 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
-    .cap   { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
-    .capg  { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
-    .mono  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
-    .ann   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
-    .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
-    .lgd   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
-    .pre   { fill:#d8d3c8; stroke:#1c1b17; stroke-width:1.1; }
-    .dec   { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.1; }
-    .out   { fill:#f6f3ec; stroke:#cbc5b9; stroke-width:1; stroke-dasharray:4 3; }
-    .gauge { fill:#f3efe7; stroke:#cbc5b9; stroke-width:0.9; }
-    .gfill { fill:#a9cfa4; stroke:#2f7d3b; stroke-width:0.9; }
-    .box   { fill:#f6f3ec; stroke:#e4e1da; stroke-width:1; }
-    .pick  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.3; }
-    .axis  { stroke:#cbc5b9; stroke-width:1; }
-    .div   { stroke:#e4e1da; stroke-width:1; }
+    .bg     { fill:#faf8f3; stroke:#e4e1da; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .lbl    { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .lblg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .lblm   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .capm   { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .annm   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .cap    { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .mono   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .note   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .lgd    { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .pre    { fill:#e4e1da; stroke:#1c1b17; stroke-width:1.3; }
+    .dec    { fill:#faf8f3; stroke:#1c1b17; stroke-width:1.3; }
+    .gauge  { fill:#f3efe7; stroke:#cbc5b9; stroke-width:0.9; }
+    .gfill  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1; }
+    .gfillm { fill:#e4e1da; stroke:#a9a49a; stroke-width:1; }
+    .box    { fill:#faf8f3; stroke:#e4e1da; stroke-width:1; }
+    .pick   { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
+    .axis   { stroke:#cbc5b9; stroke-width:1; }
+    .div    { stroke:#e4e1da; stroke-width:1; }
   </style>
 
   <!-- ==================================================================
     COORDINATE ARITHMETIC  (canvas 740 x 430)
-    Scale: 3 px per KV block. Bars start at x=200 (the axis).
-      worker A: prefill 12 -> 36px (200..236), decode 46 -> 138px (236..374), cost 58
-      worker B: prefill 40 -> 120px (200..320), decode  8 ->  24px (320..344), cost 48
-      worker C: filtered before scoring — dashed ghost bar 200..300
-    Rows centred at y = 148 / 226 / 304; bar height 26 (centre-13).
-    Left label column x 34..190; cache-hit gauge w=110 at x=34.
-    Cost readout column x 600..712.
+    Content column x 28..712; content centre x=370.
+    Scale: 5 px per KV block. Bars start at x=200 (the axis).
+      worker A: prefill 12 -> 60px (200..260), decode 46 -> 230px (260..490), cost 58
+      worker B: prefill 40 -> 200px (200..400), decode  8 ->  40px (400..440), cost 48
+      worker C: filtered before scoring, so it carries NO bar — an unmeasured
+                bar on a measured axis would read as a cost
+    Rows centred at y = 148 / 226 / 304; bar height 26 (row centre minus 13).
+    Row dividers sit on the row midpoints: y = 187 and y = 265.
+    Left label column starts x=28; cache-hit gauge w=110 at x=28 (ends 138).
+    Segment labels are centred above their own segment on the row's cap line
+    (y=129 for row A, y=207 for row B).
+    Cost readout column x 592..712; both readouts centred on x=652.
+    Legend swatches x=176/402 y=382, labels x=196/422 y=392 (block centre 370);
+    footer note y=416 (series rhythm).
   =================================================================== -->
 
   <rect class="bg" x="1" y="1" width="738" height="428" rx="2"/>
-  <text class="ey" x="28" y="32">WORKER SCORING</text>
+  <text class="ey"  x="28"  y="32">WORKER SCORING</text>
+  <text class="cap" x="712" y="32" text-anchor="end">three candidates, one currency</text>
 
   <!-- the formula -->
   <rect class="box" x="28" y="46" width="684" height="52" rx="4"/>
-  <text class="mono" x="44" y="68">cost = prefill_scale · max(0, prompt_blocks − overlap_credit) + decode_blocks</text>
-  <text class="cap"  x="44" y="86">overlap_credit = matched blocks × tier weight (device 1.00 · host 0.75 · disk 0.25) — lowest cost wins</text>
+  <text class="mono" x="44"  y="66">cost = prefill_load_scale · max(0, prompt_blocks − overlap_credit) + decode_blocks</text>
+  <text class="cap"  x="696" y="66" text-anchor="end">prefill_load_scale = 1 here</text>
+  <text class="cap"  x="44"  y="84">overlap_credit = matched blocks × tier weight (device 1.00 · host 0.75 · disk 0.25) — device-tier hits here; lowest cost wins</text>
 
   <!-- axis -->
   <line class="axis" x1="200" y1="112" x2="200" y2="336"/>
-  <text class="cap" x="200" y="352">0</text>
-  <text class="cap" x="380" y="352" text-anchor="middle">cost, in KV blocks →</text>
+  <text class="cap" x="200" y="352" text-anchor="middle">0</text>
+  <text class="cap" x="370" y="352" text-anchor="middle">cost, in KV blocks →</text>
 
   <!-- worker A -->
-  <text class="lbl"  x="34" y="140">worker A</text>
-  <text class="cap"  x="34" y="153">cache hit 48 / 60 blocks</text>
-  <rect class="gauge" x="34" y="160" width="110" height="7" rx="1.5"/>
-  <rect class="gfill" x="34" y="160" width="88" height="7" rx="1.5"/>
-  <rect class="pre" x="200" y="135" width="36"  height="26" rx="2"/>
-  <rect class="dec" x="236" y="135" width="138" height="26" rx="2"/>
-  <text class="cap" x="218" y="129" text-anchor="middle">12</text>
-  <text class="cap" x="305" y="129" text-anchor="middle">46 decode blocks resident</text>
-  <text class="lbl" x="600" y="153">cost 58</text>
+  <text class="lbl"  x="28" y="140">worker A</text>
+  <text class="cap"  x="28" y="153">cache hit 48 / 60 blocks</text>
+  <rect class="gauge" x="28" y="160" width="110" height="7" rx="1.5"/>
+  <rect class="gfill" x="28" y="160" width="88"  height="7" rx="1.5"/>
+  <rect class="pre" x="200" y="135" width="60"  height="26" rx="2"/>
+  <rect class="dec" x="260" y="135" width="230" height="26" rx="2"/>
+  <text class="cap" x="230" y="129" text-anchor="middle">12</text>
+  <text class="cap" x="375" y="129" text-anchor="middle">46 decode blocks resident</text>
+  <text class="lbl" x="652" y="152" text-anchor="middle">cost 58</text>
 
-  <line class="div" x1="28" y1="184" x2="712" y2="184"/>
+  <line class="div" x1="28" y1="187" x2="712" y2="187"/>
 
   <!-- worker B -->
-  <text class="lbl"  x="34" y="218">worker B</text>
-  <text class="cap"  x="34" y="231">cache hit 20 / 60 blocks</text>
-  <rect class="gauge" x="34" y="238" width="110" height="7" rx="1.5"/>
-  <rect class="gfill" x="34" y="238" width="37" height="7" rx="1.5"/>
-  <rect class="pre" x="200" y="213" width="120" height="26" rx="2"/>
-  <rect class="dec" x="320" y="213" width="24"  height="26" rx="2"/>
-  <text class="cap" x="200" y="207">40 blocks of prompt left to prefill</text>
-  <text class="cap" x="332" y="230" text-anchor="middle">8</text>
-  <rect class="pick" x="592" y="216" width="120" height="22" rx="4"/>
-  <text class="lblg" x="652" y="232" text-anchor="middle">cost 48 — picked</text>
+  <text class="lbl"  x="28" y="218">worker B</text>
+  <text class="cap"  x="28" y="231">cache hit 20 / 60 blocks</text>
+  <rect class="gauge" x="28" y="238" width="110" height="7" rx="1.5"/>
+  <rect class="gfill" x="28" y="238" width="37"  height="7" rx="1.5"/>
+  <rect class="pre" x="200" y="213" width="200" height="26" rx="2"/>
+  <rect class="dec" x="400" y="213" width="40"  height="26" rx="2"/>
+  <text class="cap" x="300" y="207" text-anchor="middle">40 blocks of prompt left to prefill</text>
+  <text class="cap" x="420" y="207" text-anchor="middle">8</text>
+  <rect class="pick" x="592" y="215" width="120" height="22" rx="4"/>
+  <text class="lblg" x="652" y="230" text-anchor="middle">cost 48 — picked</text>
 
-  <line class="div" x1="28" y1="262" x2="712" y2="262"/>
+  <line class="div" x1="28" y1="265" x2="712" y2="265"/>
 
   <!-- worker C -->
-  <text class="cap" x="34" y="296">worker C</text>
-  <text class="cap" x="34" y="309">cache hit 52 / 60 blocks</text>
-  <rect class="gauge" x="34" y="316" width="110" height="7" rx="1.5"/>
-  <rect class="gauge" x="34" y="316" width="95" height="7" rx="1.5"/>
-  <rect class="out" x="200" y="291" width="100" height="26" rx="2"/>
-  <text class="cap" x="312" y="308">never scored — filtered by the busy threshold</text>
+  <text class="lblm" x="28" y="296">worker C</text>
+  <text class="capm" x="28" y="309">cache hit 52 / 60 blocks</text>
+  <rect class="gauge"  x="28" y="316" width="110" height="7" rx="1.5"/>
+  <rect class="gfillm" x="28" y="316" width="95"  height="7" rx="1.5"/>
+  <text class="annm" x="206" y="308">deepest hit of the three — and never scored: the busy threshold filters it first</text>
 
   <!-- legend -->
-  <rect class="pre" x="176" y="374" width="13" height="13" rx="2"/>
-  <text class="lgd" x="196" y="384">prompt work left after credit</text>
-  <rect class="dec" x="392" y="374" width="13" height="13" rx="2"/>
-  <text class="lgd" x="412" y="384">resident decode footprint</text>
+  <rect class="pre" x="176" y="382" width="13" height="13" rx="2"/>
+  <text class="lgd" x="196" y="392">prompt work left after credit</text>
+  <rect class="dec" x="402" y="382" width="13" height="13" rx="2"/>
+  <text class="lgd" x="422" y="392">resident decode footprint</text>
 
-  <text class="note" x="370" y="412" text-anchor="middle">the deepest cache hit does not win by itself — overlap and load are charged in the same currency</text>
+  <text class="note" x="370" y="416" text-anchor="middle">the deepest cache hit does not win by itself — overlap and load are charged in the same currency</text>
 </svg>

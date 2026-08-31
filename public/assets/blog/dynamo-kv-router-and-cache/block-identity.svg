@@ -1,13 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 476" role="img"
-     aria-label="Two stacked panels explaining how the router names a prefix. The top panel, BLOCK IDENTITY, shows a prompt split into four fixed-size blocks in a row. Under each block sits its local hash — a content hash of that block's tokens alone — and blocks 0 and 2 are outlined in green dashes because they contain the same tokens and therefore carry the same local hash h-a. Below that runs a chain of sequence hashes, each computed from the previous sequence hash and the current local hash, so blocks 0 and 2 end up with different sequence hashes s0 and s2 even though their local hashes match. The bottom panel, GLOBAL PREFIX INDEX, draws the tree those hashes build: a root, a node for h-a holding workers w1, w2 and w3, branching into h-b held by w1 and w2 and h-c held by w3, with h-d under h-b held by w1 alone. Because children hang off a parent, two blocks with the same local hash only collide when they share the same prefix. To the right, a query walk table shows the worker set shrinking at each step — three workers, then two, then one — giving overlap scores of three for w1, two for w2 and one for w3.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 516" role="img"
+     aria-label="Two stacked panels explaining how the router names a prefix. The top panel, BLOCK IDENTITY, shows a prompt split into four fixed-size blocks in a row. Under each block sits its local hash — a content hash of that block's tokens alone — and blocks 0 and 2 are outlined in grey dashes, joined by a grey callout, because they contain the same tokens and therefore carry the same local hash h-a. Below that runs a chain of sequence hashes, each computed from the previous sequence hash and the current local hash, so blocks 0 and 2 end up with different sequence hashes s0 and s2 even though their local hashes match. The bottom panel, GLOBAL PREFIX INDEX, draws the tree many such requests build. A neutral root holds a green node for h-a, cached by workers w1, w2 and w3, which branches into h-b held by w1 and w2 and h-e held by w3; under h-b sits a second node also named h-a, held by w1 alone. That second h-a is the collision from the top panel: same local hash, different parent, so a different node — both are outlined in dashes, echoing the two identical blocks above. Every hash node is filled green because each one is cache state held by some worker; the root is neutral because it is an empty sentinel. To the right, a query walk table walks the drawn prompt's hashes h-a, h-b, h-a and shows the worker set shrinking at each step — three workers, then two, then one — and then a greyed fourth row where the prompt’s last block h-c finds no node at all and the walk stops, giving overlap scores of three for w1, two for w2 and one for w3. A legend at the foot binds the green fill to cache state and the dashes to a repeated local hash.">
   <title>Block identity and the global prefix index — local hashes, sequence hashes, and the tree they build</title>
   <style>
     .bg   { fill:#faf8f3; stroke:#e4e1da; }
     .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
     .node { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.3; }
     .tile { fill:#faf8f3; stroke:#cbc5b9; stroke-width:1; }
-    .dup  { fill:#faf8f3; stroke:#2f7d3b; stroke-width:1.3; stroke-dasharray:4 3; }
+    .dup  { fill:#faf8f3; stroke:#6f6d68; stroke-width:1.3; stroke-dasharray:4 3; }
+    .seq  { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.2; }
     .acc  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
+    .accd { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; stroke-dasharray:4 3; }
     .panel{ fill:#f6f3ec; stroke:#e4e1da; stroke-width:1; }
     .lbl  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
     .lblg { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
@@ -15,11 +17,14 @@
     .cap  { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
     .capg { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
     .mono { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .monm { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
     .ann  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
     .note { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .lgd  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
     .div  { stroke:#cbc5b9; stroke-width:1; }
-    .arrs { stroke:#6f6d68; stroke-width:1.3; fill:none; }
+    .rule { stroke:#e4e1da; stroke-width:1; }
     .arrg { stroke:#2f7d3b; stroke-width:1.4; fill:none; }
+    .arrn { stroke:#6f6d68; stroke-width:1.4; fill:none; }
     .edge { stroke:#1c1b17; stroke-width:1.2; fill:none; }
   </style>
   <defs>
@@ -28,26 +33,37 @@
   </defs>
 
   <!-- ==================================================================
-    COORDINATE ARITHMETIC  (canvas 740 x 476)
-    TOP PANEL  y 44..214
-      blocks     x 60/188/316/444, w=116, y 60..98
-      local hash x same,          y 110..132
-      seq hash   x same,          y 148..170  (chain arrows between, y=159)
+    COORDINATE ARITHMETIC  (canvas 740 x 516)
+    Content column x 28..712 throughout; side caption column starts x=592.
+    TOP PANEL  content y 32..214
+      blocks     x 60/188/316/444, w=116, y 60..98  (centres 118/246/374/502)
+      callout    rail y=106, drawn 118..164 and 328..374, with a stub up into
+                 block 0 and block 2 (arrow tips land at y=100.2)
+                 caption centred x=246, baseline y=109, ink 102.8..109
+      local hash x same, w=116, y 116..138
+      seq hash   x same, w=116, y 154..178  (chain arrows between, y=166)
+      side caps  x=592: local 119/130/141, seq 158/169/180 (11px leading)
+      prose      x=60, baselines y=200 and y=214
     divider hairline y=228
-    BOTTOM PANEL y 240..436
-      root  x 172 w=86  y 268..294   (center 215)
-      h_a   x 140 w=150 y 312..342   (center 215)
-      h_b   x  58 w=142 y 360..390   (center 129)
-      h_c   x 250 w=142 y 360..390   (center 321)
-      h_d   x  58 w=142 y 406..436   (center 129)
-      query panel x 430..712, y 268..416
+    BOTTOM PANEL content y 256..438
+      root  x 172 w=86  y 268..294   (centre 215)
+      h_a   x 144 w=142 y 312..342   (centre 215)
+      h_b   x  58 w=142 y 360..390   (centre 129)
+      h_e   x 230 w=142 y 360..390   (centre 301)
+      h_a'  x  58 w=142 y 406..436   (centre 129)  the collision, dashed
+      child bar y=352 runs 129..301, midpoint 215 = the parent stem
+      tree note x=222, baselines y=410/424/438 (28 chars max, ends x=390,
+                so it clears the query panel at x=430)
+      query panel x 430..712, y 268..436 (bottom-aligned with the tree);
+                  rules and rows inset to 444..698, rows y=330/348/366/384
+    footer note baseline y=462, centred x=370 (13px above the frame)
   =================================================================== -->
 
-  <rect class="bg" x="1" y="1" width="738" height="474" rx="2"/>
+  <rect class="bg" x="1" y="1" width="738" height="514" rx="2"/>
 
   <!-- ===================== TOP: BLOCK IDENTITY ===================== -->
-  <text class="ey" x="28" y="34">BLOCK IDENTITY</text>
-  <text class="cap" x="712" y="34" text-anchor="end">one prompt, four fixed-size blocks</text>
+  <text class="ey" x="28" y="32">BLOCK IDENTITY</text>
+  <text class="cap" x="712" y="32" text-anchor="end">one prompt, four fixed-size blocks</text>
 
   <!-- blocks -->
   <rect class="dup"  x="60"  y="60" width="116" height="38" rx="3"/>
@@ -63,39 +79,44 @@
   <text class="lbls" x="502" y="76" text-anchor="middle">block 3</text>
   <text class="cap"  x="502" y="90" text-anchor="middle">"…and repeat"</text>
 
-  <!-- local hashes -->
-  <text class="cap" x="592" y="126">local hash — content only,</text>
-  <text class="cap" x="592" y="138">position-independent</text>
-  <rect class="tile" x="60"  y="110" width="116" height="22" rx="2.5"/>
-  <text class="mono" x="118" y="125" text-anchor="middle">h_a</text>
-  <rect class="tile" x="188" y="110" width="116" height="22" rx="2.5"/>
-  <text class="mono" x="246" y="125" text-anchor="middle">h_b</text>
-  <rect class="tile" x="316" y="110" width="116" height="22" rx="2.5"/>
-  <text class="mono" x="374" y="125" text-anchor="middle">h_a</text>
-  <rect class="tile" x="444" y="110" width="116" height="22" rx="2.5"/>
-  <text class="mono" x="502" y="125" text-anchor="middle">h_c</text>
+  <!-- same-hash callout between block 0 and block 2, label inline on the rail -->
+  <path class="arrn" d="M118,106 L164,106"/>
+  <path class="arrn" d="M328,106 L374,106"/>
+  <path class="arrn" d="M118,106 L118,100.8" marker-end="url(#af)"/>
+  <path class="arrn" d="M374,106 L374,100.8" marker-end="url(#af)"/>
+  <text class="capg" x="246" y="109" text-anchor="middle">same tokens → same local hash</text>
 
-  <!-- same-hash callout between block 0 and block 2 -->
-  <path class="arrg" d="M118,104 L118,106 L374,106 L374,104" marker-start="url(#ag)" marker-end="url(#ag)"/>
-  <text class="capg" x="246" y="145" text-anchor="middle">same tokens → same local hash</text>
+  <!-- local hashes -->
+  <text class="cap" x="592" y="119">local hash —</text>
+  <text class="cap" x="592" y="130">content only,</text>
+  <text class="cap" x="592" y="141">position-independent</text>
+  <rect class="tile" x="60"  y="116" width="116" height="22" rx="2.5"/>
+  <text class="mono" x="118" y="131" text-anchor="middle">h_a</text>
+  <rect class="tile" x="188" y="116" width="116" height="22" rx="2.5"/>
+  <text class="mono" x="246" y="131" text-anchor="middle">h_b</text>
+  <rect class="tile" x="316" y="116" width="116" height="22" rx="2.5"/>
+  <text class="mono" x="374" y="131" text-anchor="middle">h_a</text>
+  <rect class="tile" x="444" y="116" width="116" height="22" rx="2.5"/>
+  <text class="mono" x="502" y="131" text-anchor="middle">h_c</text>
 
   <!-- sequence hashes -->
-  <text class="cap" x="592" y="164">sequence hash — rolling over</text>
-  <text class="cap" x="592" y="176">the whole prefix, so unique</text>
-  <rect class="acc" x="60"  y="148" width="116" height="24" rx="3"/>
-  <text class="mono" x="118" y="164" text-anchor="middle">s0 = h_a</text>
-  <rect class="acc" x="188" y="148" width="116" height="24" rx="3"/>
-  <text class="mono" x="246" y="164" text-anchor="middle">s1 = H(s0‖h_b)</text>
-  <rect class="acc" x="316" y="148" width="116" height="24" rx="3"/>
-  <text class="mono" x="374" y="164" text-anchor="middle">s2 = H(s1‖h_a)</text>
-  <rect class="acc" x="444" y="148" width="116" height="24" rx="3"/>
-  <text class="mono" x="502" y="164" text-anchor="middle">s3 = H(s2‖h_c)</text>
-  <path class="arrg" d="M176,160 L186,160" marker-end="url(#ag)"/>
-  <path class="arrg" d="M304,160 L314,160" marker-end="url(#ag)"/>
-  <path class="arrg" d="M432,160 L442,160" marker-end="url(#ag)"/>
+  <text class="cap" x="592" y="158">sequence hash —</text>
+  <text class="cap" x="592" y="169">rolling over the whole</text>
+  <text class="cap" x="592" y="180">prefix, so unique</text>
+  <rect class="node" x="60"  y="154" width="116" height="24" rx="3"/>
+  <text class="mono" x="118" y="170" text-anchor="middle">s0 = h_a</text>
+  <rect class="node" x="188" y="154" width="116" height="24" rx="3"/>
+  <text class="mono" x="246" y="170" text-anchor="middle">s1 = H(s0‖h_b)</text>
+  <rect class="node" x="316" y="154" width="116" height="24" rx="3"/>
+  <text class="mono" x="374" y="170" text-anchor="middle">s2 = H(s1‖h_a)</text>
+  <rect class="node" x="444" y="154" width="116" height="24" rx="3"/>
+  <text class="mono" x="502" y="170" text-anchor="middle">s3 = H(s2‖h_c)</text>
+  <path class="arrn" d="M176,166 L186,166" marker-end="url(#af)"/>
+  <path class="arrn" d="M304,166 L314,166" marker-end="url(#af)"/>
+  <path class="arrn" d="M432,166 L442,166" marker-end="url(#af)"/>
 
-  <text class="ann" x="60" y="196">blocks 0 and 2 share a local hash — only the sequence hash tells them apart,</text>
-  <text class="ann" x="60" y="210">and only the tree below can tell them apart without recomputing it.</text>
+  <text class="ann" x="60" y="200">blocks 0 and 2 share a local hash — only the sequence hash tells them apart,</text>
+  <text class="ann" x="60" y="214">and only the tree below can tell them apart without recomputing it.</text>
 
   <line class="div" x1="28" y1="228" x2="712" y2="228"/>
 
@@ -108,41 +129,51 @@
   <text class="lbls" x="215" y="285" text-anchor="middle">root</text>
 
   <path class="edge" d="M215,294 L215,312"/>
-  <rect class="acc" x="140" y="312" width="150" height="30" rx="4"/>
+  <rect class="accd" x="144" y="312" width="142" height="30" rx="4"/>
   <text class="mono" x="215" y="325" text-anchor="middle">h_a</text>
   <text class="capg" x="215" y="337" text-anchor="middle">w1 · w2 · w3</text>
 
   <path class="edge" d="M215,342 L215,352 L129,352 L129,360"/>
-  <path class="edge" d="M215,342 L215,352 L321,352 L321,360"/>
+  <path class="edge" d="M215,342 L215,352 L301,352 L301,360"/>
   <rect class="acc" x="58" y="360" width="142" height="30" rx="4"/>
   <text class="mono" x="129" y="373" text-anchor="middle">h_b</text>
   <text class="capg" x="129" y="385" text-anchor="middle">w1 · w2</text>
-  <rect class="node" x="250" y="360" width="142" height="30" rx="4"/>
-  <text class="mono" x="321" y="373" text-anchor="middle">h_c</text>
-  <text class="cap"  x="321" y="385" text-anchor="middle">w3</text>
+  <rect class="acc" x="230" y="360" width="142" height="30" rx="4"/>
+  <text class="mono" x="301" y="373" text-anchor="middle">h_e</text>
+  <text class="capg" x="301" y="385" text-anchor="middle">w3</text>
 
   <path class="edge" d="M129,390 L129,406"/>
-  <rect class="acc" x="58" y="406" width="142" height="30" rx="4"/>
-  <text class="mono" x="129" y="419" text-anchor="middle">h_d</text>
+  <rect class="accd" x="58" y="406" width="142" height="30" rx="4"/>
+  <text class="mono" x="129" y="419" text-anchor="middle">h_a</text>
   <text class="capg" x="129" y="431" text-anchor="middle">w1</text>
 
-  <text class="cap" x="250" y="412">a collision is only possible</text>
-  <text class="cap" x="250" y="424">under a shared parent —</text>
-  <text class="cap" x="250" y="436">which means a shared prefix</text>
+  <text class="ann" x="222" y="410">h_a appears twice — the same</text>
+  <text class="ann" x="222" y="424">local hash under a different</text>
+  <text class="ann" x="222" y="438">parent, so a different node.</text>
 
   <!-- query walk -->
-  <rect class="panel" x="430" y="268" width="282" height="148" rx="4"/>
+  <rect class="panel" x="430" y="268" width="282" height="168" rx="4"/>
   <text class="lbl"  x="444" y="288">query walk</text>
-  <text class="cap"  x="444" y="302">walk the query's block hashes down from the root</text>
-  <line class="div" x1="444" y1="312" x2="698" y2="312"/>
-  <text class="mono" x="444" y="330">h_a  →  { w1, w2, w3 }</text>
-  <text class="cap"  x="668" y="330" text-anchor="end">depth 1</text>
-  <text class="mono" x="444" y="350">h_b  →  { w1, w2 }</text>
-  <text class="cap"  x="668" y="350" text-anchor="end">depth 2</text>
-  <text class="mono" x="444" y="370">h_d  →  { w1 }</text>
-  <text class="cap"  x="668" y="370" text-anchor="end">depth 3</text>
-  <line class="div" x1="444" y1="382" x2="698" y2="382"/>
-  <text class="lblg" x="444" y="402">overlap:  w1 = 3   w2 = 2   w3 = 1</text>
+  <text class="cap"  x="444" y="302">all four blocks above, walked down from the root</text>
+  <line class="rule" x1="444" y1="312" x2="698" y2="312"/>
+  <text class="mono" x="444" y="330" xml:space="preserve">h_a  →  { w1, w2, w3 }</text>
+  <text class="cap"  x="698" y="330" text-anchor="end">depth 1</text>
+  <text class="mono" x="444" y="348" xml:space="preserve">h_b  →  { w1, w2 }</text>
+  <text class="cap"  x="698" y="348" text-anchor="end">depth 2</text>
+  <text class="mono" x="444" y="366" xml:space="preserve">h_a  →  { w1 }</text>
+  <text class="cap"  x="698" y="366" text-anchor="end">depth 3</text>
+  <text class="monm" x="444" y="384" xml:space="preserve">h_c  →  { }</text>
+  <text class="cap"  x="698" y="384" text-anchor="end">no node — the walk stops</text>
+  <line class="rule" x1="444" y1="396" x2="698" y2="396"/>
+  <text class="lblg" x="444" y="416">overlap:</text>
+  <text class="lblg" x="522" y="416">w1 = 3</text>
+  <text class="lblg" x="590" y="416">w2 = 2</text>
+  <text class="lblg" x="658" y="416">w3 = 1</text>
 
-  <text class="note" x="370" y="462" text-anchor="middle">workers only drop out as the walk goes deeper — each is drained at most once</text>
+  <rect class="acc" x="176" y="468" width="13" height="13" rx="2"/>
+  <text class="lgd" x="196" y="478">cache state — a worker holds this block</text>
+  <rect class="dup" x="452" y="468" width="13" height="13" rx="2"/>
+  <text class="lgd" x="472" y="478">the same local hash, twice</text>
+
+  <text class="note" x="370" y="502" text-anchor="middle">workers only drop out as the walk goes deeper — each is drained at most once</text>
 </svg>

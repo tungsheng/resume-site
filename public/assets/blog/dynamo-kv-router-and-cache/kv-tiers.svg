@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 430" role="img"
-     aria-label="The four-tier KV block ladder and how it feeds routing. Four stacked bars widen as they descend, showing capacity growing while speed falls: G1 GPU HBM at nanosecond latency and the smallest capacity, G2 pinned host DRAM at microseconds, G3 local NVMe at milliseconds, and G4 object storage at about a hundred milliseconds and effectively unbounded capacity. On the left, a downward arrow marks offload — blocks demoting through a pipeline of policy filtering, waiting for the forward pass to finish, batching, and transfer, cancellable right up to commit — and a green upward arrow marks onboarding, a session that searches, holds, prepares and then pulls blocks back over NIXL. On the right, a panel maps the top three tiers onto the router's overlap credit weights: a device-local hit credits at 1.0, a host hit at 0.75, a disk hit at 0.25, with remote storage reached through the shared cache. Dotted lines connect each tier to its weight. The point: a hit on a slower tier discounts the prefill cost less, because the blocks still have to be brought back.">
+     aria-label="The four-tier KV block ladder and how it feeds routing. Four stacked bars widen as they descend, showing capacity growing while speed falls: G1 GPU HBM at nanosecond latency and the smallest capacity, G2 pinned host DRAM at microseconds, G3 local NVMe at milliseconds, and G4 object storage at about a hundred milliseconds and effectively unbounded capacity. On the left, a downward arrow marks offload — blocks demoting through a pipeline of policy filtering, waiting for the forward pass to finish, batching, and transfer, cancellable right up to commit — and a green upward arrow marks onboarding, a session that searches, holds, prepares and then pulls blocks back over NIXL. On the right, a panel maps the top three tiers onto the router's overlap credit weights: a device-local hit credits at 1.0, a host hit at 0.75, a disk hit at 0.25, with remote storage reached through the shared cache. Dashed leader lines connect each of those three tiers to its weight, and the three credited bars are drawn in green while G4 is left neutral. The point: a hit on a slower tier discounts the prefill cost less, because the blocks still have to be brought back.">
   <title>KVBM's tier ladder and the router's overlap credit weights</title>
   <style>
     .bg    { fill:#faf8f3; stroke:#e4e1da; }
     .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
-    .tier  { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.2; }
-    .tierc { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.2; }
+    .tier  { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.3; }
+    .tierc { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
     .chip  { fill:#faf8f3; stroke:#cbc5b9; stroke-width:1; }
     .panel { fill:#f6f3ec; stroke:#e4e1da; stroke-width:1; }
     .row   { fill:#faf8f3; stroke:#cbc5b9; stroke-width:0.9; }
@@ -13,13 +13,14 @@
     .lblg  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
     .lbls  { font:600 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
     .cap   { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
-    .capg  { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
     .mono  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .lgd   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
     .ann   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .anng  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
     .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
-    .arrs  { stroke:#6f6d68; stroke-width:1.5; fill:none; }
-    .arrg  { stroke:#2f7d3b; stroke-width:1.6; fill:none; }
-    .dot   { stroke:#a9a49a; stroke-width:1; stroke-dasharray:2 3; fill:none; }
+    .arrs  { stroke:#6f6d68; stroke-width:1.4; fill:none; }
+    .arrg  { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
+    .dot   { stroke:#cbc5b9; stroke-width:1.2; stroke-dasharray:4 3; fill:none; }
     .div   { stroke:#e4e1da; stroke-width:1; }
   </style>
   <defs>
@@ -32,81 +33,97 @@
     Tier bars all start at x=110; width grows with capacity, h=50, 10px gaps:
       G1 w=180 (110..290) y  58..108   G2 w=240 (110..350) y 118..168
       G3 w=310 (110..420) y 178..228   G4 w=386 (110..496) y 238..288
-    Left rail: offload arrow x=76 (down), onboarding arrow x=40 (up, green),
-      rotated labels at x=62 and x=26, both centred on y=173.
-    Credit panel x 546..712, y 58..250; rows centred y=125 / 163 / 201.
-    Dotted connectors: G1 (290,83)->(546,118), G2 (350,143)->(546,156),
-      G3 (420,203)->(546,194).
+    Green (.tierc) = credited by the router, so G1, G2 and G3; G4 is neutral.
+    Each bar centre is y=83 / 143 / 203 / 263; the two text baselines sit at
+      centre minus 4 and centre plus 10, matching the chip rect (centre +/- 11).
+    Left rail: offload arrow x=88 (down, y 68..282), onboard arrow x=52
+      (up, green, y 278..64), rotated labels at x=74 and x=38, centred y=173;
+      the green label's ink starts at x=28.5, on the series content column.
+      Both arrowheads land ~3px inside the bar stack (58..288).
+    Credit panel x 546..712, y 58..300 (its foot clears the G4 bar by 12);
+      rows h=30 at y 118/158/198, centred y=133 / 173 / 213.
+    Dashed leaders: G1 (290,83)->(546,133), G2 (350,143)->(546,173),
+      G3 (420,203)->(546,213) — all three slope the same way.
+    Footer band: legend swatches y 382..395 with .lgd baselines y=392,
+      note baseline y=416 (13px above the frame, matching the sibling figures).
   =================================================================== -->
 
   <rect class="bg" x="1" y="1" width="738" height="428" rx="2"/>
   <text class="ey" x="28" y="32">KV TIERS</text>
-  <text class="cap" x="712" y="32" text-anchor="end">bar width tracks capacity — the ladder widens as it slows</text>
+  <text class="cap" x="712" y="32" text-anchor="end">bar width suggests capacity — the ladder widens as it slows</text>
 
   <!-- left rail: offload down, onboard up -->
-  <path class="arrs" d="M76,64 L76,278" marker-end="url(#af)"/>
-  <path class="arrg" d="M40,278 L40,64" marker-end="url(#ag)"/>
-  <text class="cap"  transform="rotate(-90 62 173)" x="62" y="173" text-anchor="middle">offload — demote</text>
-  <text class="capg" transform="rotate(-90 26 173)" x="26" y="173" text-anchor="middle">onboard — promote</text>
+  <path class="arrs" d="M88,68 L88,282" marker-end="url(#af)"/>
+  <path class="arrs" d="M52,278 L52,64" marker-end="url(#af)"/>
+  <text class="ann"  transform="rotate(-90 74 173)" x="74" y="173" text-anchor="middle">offload — demote</text>
+  <text class="ann" transform="rotate(-90 38 173)" x="38" y="173" text-anchor="middle">onboard — promote</text>
 
   <!-- G1 -->
   <rect class="tierc" x="110" y="58" width="180" height="50" rx="4"/>
   <rect class="chip" x="120" y="72" width="30" height="22" rx="3"/>
   <text class="lbls" x="135" y="87" text-anchor="middle">G1</text>
-  <text class="lbl"  x="160" y="82">GPU HBM</text>
-  <text class="cap"  x="160" y="96">read by the kernels</text>
-  <text class="cap"  x="282" y="70" text-anchor="end">~ns</text>
+  <text class="lbl"  x="160" y="79">GPU HBM</text>
+  <text class="cap"  x="160" y="93">read by the kernels</text>
+  <text class="cap"  x="282" y="74" text-anchor="end">~ns</text>
 
   <!-- G2 -->
   <rect class="tierc" x="110" y="118" width="240" height="50" rx="4"/>
   <rect class="chip" x="120" y="132" width="30" height="22" rx="3"/>
   <text class="lbls" x="135" y="147" text-anchor="middle">G2</text>
-  <text class="lbl"  x="160" y="142">pinned host DRAM</text>
-  <text class="cap"  x="160" y="156">staging for RDMA and promotion</text>
-  <text class="cap"  x="342" y="130" text-anchor="end">~µs</text>
+  <text class="lbl"  x="160" y="139">pinned host DRAM</text>
+  <text class="cap"  x="160" y="153">staging for RDMA and promotion</text>
+  <text class="cap"  x="342" y="134" text-anchor="end">~µs</text>
 
   <!-- G3 -->
-  <rect class="tier" x="110" y="178" width="310" height="50" rx="4"/>
+  <rect class="tierc" x="110" y="178" width="310" height="50" rx="4"/>
   <rect class="chip" x="120" y="192" width="30" height="22" rx="3"/>
   <text class="lbls" x="135" y="207" text-anchor="middle">G3</text>
-  <text class="lbl"  x="160" y="202">local NVMe</text>
-  <text class="cap"  x="160" y="216">warm blocks that outlive GPU memory</text>
-  <text class="cap"  x="412" y="190" text-anchor="end">~ms</text>
+  <text class="lbl"  x="160" y="199">local NVMe</text>
+  <text class="cap"  x="160" y="213">warm blocks that outlive GPU memory</text>
+  <text class="cap"  x="412" y="194" text-anchor="end">~ms</text>
 
   <!-- G4 -->
   <rect class="tier" x="110" y="238" width="386" height="50" rx="4"/>
   <rect class="chip" x="120" y="252" width="30" height="22" rx="3"/>
   <text class="lbls" x="135" y="267" text-anchor="middle">G4</text>
-  <text class="lbl"  x="160" y="262">object storage</text>
-  <text class="cap"  x="160" y="276">cold and archival — effectively unbounded</text>
-  <text class="cap"  x="488" y="250" text-anchor="end">~100 ms</text>
+  <text class="lbl"  x="160" y="259">object storage</text>
+  <text class="cap"  x="160" y="273">cold and archival — effectively unbounded</text>
+  <text class="cap"  x="488" y="254" text-anchor="end">~100 ms</text>
 
   <!-- dotted connectors into the credit panel -->
-  <path class="dot" d="M290,83 L546,125"/>
-  <path class="dot" d="M350,143 L546,163"/>
-  <path class="dot" d="M420,203 L546,201"/>
+  <path class="dot" d="M290,83 L546,133"/>
+  <path class="dot" d="M350,143 L546,173"/>
+  <path class="dot" d="M420,203 L546,213"/>
 
   <!-- credit panel -->
-  <rect class="panel" x="546" y="58" width="166" height="192" rx="4"/>
+  <rect class="panel" x="546" y="58" width="166" height="242" rx="4"/>
   <text class="lblg" x="560" y="80">overlap credit</text>
   <text class="cap"  x="560" y="94">how much a hit on that tier</text>
   <text class="cap"  x="560" y="105">discounts the prefill cost</text>
-  <rect class="row" x="560" y="112" width="138" height="26" rx="3"/>
-  <text class="mono" x="570" y="129">device</text>
-  <text class="lbl"  x="688" y="129" text-anchor="end">1.00</text>
-  <rect class="row" x="560" y="150" width="138" height="26" rx="3"/>
-  <text class="mono" x="570" y="167">host</text>
-  <text class="lbl"  x="688" y="167" text-anchor="end">0.75</text>
-  <rect class="row" x="560" y="188" width="138" height="26" rx="3"/>
-  <text class="mono" x="570" y="205">disk</text>
-  <text class="lbl"  x="688" y="205" text-anchor="end">0.25</text>
-  <line class="div" x1="560" y1="224" x2="698" y2="224"/>
-  <text class="cap" x="560" y="240">G4 — via the shared cache</text>
+  <rect class="row" x="560" y="118" width="138" height="30" rx="3"/>
+  <text class="mono" x="570" y="137">device</text>
+  <text class="lbl"  x="688" y="137" text-anchor="end">1.00</text>
+  <rect class="row" x="560" y="158" width="138" height="30" rx="3"/>
+  <text class="mono" x="570" y="177">host</text>
+  <text class="lbl"  x="688" y="177" text-anchor="end">0.75</text>
+  <rect class="row" x="560" y="198" width="138" height="30" rx="3"/>
+  <text class="mono" x="570" y="217">disk</text>
+  <text class="lbl"  x="688" y="217" text-anchor="end">0.25</text>
+  <line class="div" x1="560" y1="248" x2="698" y2="248"/>
+  <text class="cap" x="560" y="266">G4 carries no weight of</text>
+  <text class="cap" x="560" y="278">its own — it credits</text>
+  <text class="cap" x="560" y="290">through the shared cache</text>
 
   <!-- pipeline captions -->
   <text class="ann" x="110" y="316">offload:  policy filter → wait for the forward pass → batch (8–64 blocks, 10 ms flush) → transfer</text>
   <text class="cap" x="110" y="332">every stage before commit is cancellable — a block that gets re-used never moves</text>
   <text class="ann" x="110" y="358">onboard:  search → hold → prepare → pull over NIXL (RDMA)</text>
 
-  <text class="note" x="370" y="400" text-anchor="middle">a hit on a slower tier credits less, because you still pay to bring the blocks back</text>
+  <!-- legend + footer -->
+  <rect class="tierc" x="185" y="382" width="13" height="13" rx="2"/>
+  <text class="lgd" x="205" y="392">credited by the router</text>
+  <rect class="tier" x="375" y="382" width="13" height="13" rx="2"/>
+  <text class="lgd" x="395" y="392">reached via the shared cache</text>
+
+  <text class="note" x="370" y="416" text-anchor="middle">a hit on a slower tier credits less, because you still pay to bring the blocks back</text>
 </svg>
