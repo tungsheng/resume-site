@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 430" role="img"
+     aria-label="The four-tier KV block ladder and what a hit on each is worth to the router. Four stacked bars widen as they descend, showing capacity growing while speed falls: G1 GPU HBM at nanosecond latency and the smallest capacity, G2 pinned host DRAM at microseconds, G3 local NVMe at milliseconds, and G4 object store at about a hundred milliseconds and effectively unbounded capacity. A note at the top says these G-names are Dynamo's own labels for the tiers. Each bar's second line opens with its latency, so the four latencies form a column. On the left, a downward arrow marks offload — blocks demoting through a pipeline of policy filtering, waiting for the forward pass to finish, batching, transfer and commit, cancellable right up to commit — and an upward arrow marks onboarding, a session that searches, pins the block against eviction, prepares and then pulls it back over NIXL. On the right, a panel titled match credit gives what one already-cached block on each tier is worth to the router: GPU HBM, which is G1, counts times one; host DRAM, which is G2, times nought point seven five; local NVMe, which is G3, times nought point two five; and object store, which is G4, earns no credit until its blocks are onboarded into a faster tier. The panel rows carry the same tier names as the bars, so no leader lines are needed. The point: a hit on a slower tier is worth less, because you still pay to bring the blocks back.">
+  <title>KV tiers, and what a hit on each is worth to the router</title>
+  <style>
+    .bg    { fill:#faf8f3; stroke:#e4e1da; }
+    .ey    { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .tier  { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.2; }
+    .tierc { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.2; }
+    .chip  { fill:#faf8f3; stroke:#cbc5b9; stroke-width:1; }
+    .panel { fill:#faf8f3; stroke:#e4e1da; stroke-width:1; }
+    .row   { fill:#f6f3ec; stroke:#cbc5b9; stroke-width:0.9; }
+    .lbl   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .lblg  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .lbls  { font:600 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .cap   { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .mono  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .monm  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .ann   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .note  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .lgd   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .arrs  { stroke:#6f6d68; stroke-width:1.4; fill:none; }
+    .dot   { stroke:#a9a49a; stroke-width:1.2; stroke-dasharray:4 3; fill:none; }
+    .div   { stroke:#e4e1da; stroke-width:1; }
+  </style>
+  <defs>
+    <marker id="af" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M3,0 L8,3 L3,6 Z" fill="#6f6d68"/></marker>
+  </defs>
+
+  <!-- ==================================================================
+    COORDINATE ARITHMETIC  (canvas 740 x 430)
+    Tier bars all start at x=110; width grows with capacity, h=50, 10px gaps:
+      G1 w=180 (110..290) y  58..108   G2 w=240 (110..350) y 118..168
+      G3 w=310 (110..420) y 178..228   G4 w=386 (110..496) y 238..288
+    Green (.tierc) = the router scores this tier by weight, so G1..G3;
+      G4 is neutral because it has no weight of its own.
+    Bar centres y=83 / 143 / 203 / 263. Each bar carries its name at
+      centre minus 4 and, at centre plus 10, a second line that OPENS with
+      the latency, so the four latencies line up in one column at x=160.
+    Left rail: offload arrow x=88 (down, y 68..282), onboard arrow x=52
+      (up, y 278..64), rotated labels at x=74 and x=38, centred y=173.
+    Credit panel x 520..712, y 58..288 (foot level with the G4 bar); rows at
+      y 118/154/190 (h=28, x 534..698) and a taller G4 row at 226..266, then a
+      provenance line at y=280.  The rows repeat the bars' own names, so the
+      dashed leader lines that used to join the two vocabularies are gone.
+    Pipeline captions y=316/330 (offload) and y=356 (onboard).
+    Footer: note baseline y=416 (13px above the frame, matching the siblings).
+      No legend row — the panel names every tier and its credit, so a key
+      384px below the marks it explained was redundant.
+  =================================================================== -->
+
+  <rect class="bg" x="1" y="1" width="738" height="428" rx="2"/>
+  <text class="ey" x="28" y="32">KV TIERS</text>
+  <text class="cap" x="712" y="32" text-anchor="end">G1–G4 are Dynamo's names for the tiers · bar width: relative capacity, not to scale</text>
+
+  <!-- left rail: offload down, onboard up -->
+  <path class="arrs" d="M88,68 L88,282" marker-end="url(#af)"/>
+  <path class="arrs" d="M52,278 L52,64" marker-end="url(#af)"/>
+  <text class="cap" transform="rotate(-90 74 252)" x="74" y="252" text-anchor="middle">offload</text>
+  <text class="cap" transform="rotate(-90 38 96)" x="38" y="96" text-anchor="middle">onboard</text>
+
+  <!-- G1 -->
+  <rect class="tierc" x="110" y="58" width="180" height="50" rx="4"/>
+  <rect class="chip" x="120" y="72" width="30" height="22" rx="3"/>
+  <text class="lbls" x="135" y="87" text-anchor="middle">G1</text>
+  <text class="lbl"  x="160" y="79">GPU HBM</text>
+  <text class="cap"  x="160" y="93">~ns · read by kernels</text>
+
+  <!-- G2 -->
+  <rect class="tierc" x="110" y="118" width="240" height="50" rx="4"/>
+  <rect class="chip" x="120" y="132" width="30" height="22" rx="3"/>
+  <text class="lbls" x="135" y="147" text-anchor="middle">G2</text>
+  <text class="lbl"  x="160" y="139">pinned host DRAM</text>
+  <text class="cap"  x="160" y="153">~µs · staging for transfers</text>
+
+  <!-- G3 -->
+  <rect class="tierc" x="110" y="178" width="310" height="50" rx="4"/>
+  <rect class="chip" x="120" y="192" width="30" height="22" rx="3"/>
+  <text class="lbls" x="135" y="207" text-anchor="middle">G3</text>
+  <text class="lbl"  x="160" y="199">local NVMe</text>
+  <text class="cap"  x="160" y="213">~ms · warm blocks that outlive GPU memory</text>
+
+  <!-- G4 -->
+  <rect class="tier" x="110" y="238" width="386" height="50" rx="4"/>
+  <rect class="chip" x="120" y="252" width="30" height="22" rx="3"/>
+  <text class="lbls" x="135" y="267" text-anchor="middle">G4</text>
+  <text class="lbl"  x="160" y="259">object store</text>
+  <text class="cap"  x="160" y="273">~100 ms · cold and archival, effectively unbounded</text>
+
+
+  <!-- credit panel: the bars' own names, so the join needs no leader lines -->
+  <rect class="panel" x="520" y="58" width="192" height="230" rx="4"/>
+  <text class="lblg" x="534" y="80">match credit</text>
+  <text class="cap"  x="534" y="94">what one already-cached</text>
+  <text class="cap"  x="534" y="105">block is worth here</text>
+  <rect class="row" x="534" y="118" width="164" height="28" rx="3"/>
+  <text class="mono" x="544" y="136">GPU HBM (G1)</text>
+  <text class="lbl"  x="688" y="136" text-anchor="end">×1.00</text>
+  <rect class="row" x="534" y="154" width="164" height="28" rx="3"/>
+  <text class="mono" x="544" y="172">host DRAM (G2)</text>
+  <text class="lbl"  x="688" y="172" text-anchor="end">×0.75</text>
+  <rect class="row" x="534" y="190" width="164" height="28" rx="3"/>
+  <text class="mono" x="544" y="208">local NVMe (G3)</text>
+  <text class="lbl"  x="688" y="208" text-anchor="end">×0.25</text>
+  <rect class="row" x="534" y="226" width="164" height="40" rx="3"/>
+  <text class="monm" x="544" y="243">object store (G4)</text>
+  <text class="cap"  x="544" y="257">no credit until onboarded</text>
+  <text class="cap"  x="534" y="280">Dynamo's defaults; tunable</text>
+
+  <!-- pipeline captions -->
+  <text class="ann" x="110" y="316">offload:  screen by policy → wait for the forward pass → batch (8–64 blocks, 10 ms flush)</text>
+  <text class="ann" x="110" y="330">→ transfer over NIXL → commit;  cancellable at every stage before commit</text>
+  <text class="ann" x="110" y="356">onboard:  search → pin against eviction → pull back over NIXL, NVIDIA's RDMA layer</text>
+
+  <!-- footer -->
+  <text class="note" x="370" y="416" text-anchor="middle">a hit on a slower tier is worth less, because you still pay to bring the blocks back</text>
+</svg>

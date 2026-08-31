@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 430" role="img"
+     aria-label="Three candidate workers for one 60-block request, two of them scored by the router's cost function and drawn as horizontal bars measured in KV blocks. A box at the top carries the formula: cost equals the prefill load scale times the incoming prompt blocks minus the overlap credit, clamped at zero, plus the potential decode blocks; underneath it, the overlap credit is matched blocks times a tier weight, and the lowest cost wins. A third line pins the example: the load scale is 1, no worker has queued prefill, and every hit is in the device tier, so credit equals matched blocks. Worker 1 has 48 of 60 blocks matched, shown as a green meter four-fifths full, leaving only 12 blocks of prefill left — but 46 blocks are already resident for requests decoding on it, so its cost is 58. Worker 2 has only 20 of 60 blocks matched, leaving 40 blocks of prefill left, but its batch is nearly empty at 8 resident decode blocks, so its cost is 48 — the shorter bar, and the worker the router picks. Worker 3 has the deepest match of all, 52 of 60, and its meter is the longest, but it carries no bar and a grey chip reading not scored: it is already over its busy threshold, so it is dropped before any cost is computed. The picture's point is that overlap and load are counted in the same unit, so the deepest overlap does not win by itself.">
+  <title>Scoring the candidates — overlap spent against load, both counted in KV blocks</title>
+  <style>
+    .bg     { fill:#faf8f3; stroke:#e4e1da; }
+    .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
+    .lbl    { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .lblg   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .lblm   { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .cap    { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .capm   { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .mono   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .annm   { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .num    { font:600 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
+    .note   { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
+    .lgd    { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
+    .pre    { fill:#e4e1da; stroke:#1c1b17; stroke-width:1.3; }
+    .dec    { fill:#faf8f3; stroke:#1c1b17; stroke-width:1.3; }
+    .gauge  { fill:#f3efe7; stroke:#cbc5b9; stroke-width:0.9; }
+    .gfill  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1; }
+    .box    { fill:#faf8f3; stroke:#e4e1da; stroke-width:1; }
+    .pick   { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
+    .drop   { fill:#f3efe7; stroke:#a9a49a; stroke-width:1.2; stroke-dasharray:4 3; }
+    .axis   { stroke:#cbc5b9; stroke-width:1; }
+    .tick   { stroke:#e4e1da; stroke-width:1; }
+    .div    { stroke:#e4e1da; stroke-width:1; }
+  </style>
+
+  <!-- ==================================================================
+    COORDINATE ARITHMETIC  (canvas 740 x 430)
+    Content column x 28..712; content centre x=370.
+    Scale: 5 px per KV block, bars start on the axis at x=200, and the
+      cache meters are NOT on that scale, so they carry no bar-length
+      comparison: they are 110px wide and read only against their own track.
+      worker 1: prefill 12 -> 60px (200..260), decode 46 -> 230px (260..490)
+      worker 2: prefill 40 -> 200px (200..400), decode 8 -> 40px (400..440)
+      worker 3: filtered before scoring, so no bar at all — an unmeasured
+                bar on a measured axis would read as a cost
+    Ticks every 20 blocks: x = 200 / 300 / 400 / 500, faint, behind the bars,
+      starting at y=132 so the column headers at y=126 clear them.
+    Rows centred at y = 148 / 226 / 304; bar height 26 (row centre minus 13).
+    Row dividers on the row midpoints: y = 187 and y = 265.
+    Segment numbers sit INSIDE their segment; the words naming the two
+      segments appear once, above row 1, at y=129.
+    Cost readout column x 592..712, all three chips centred on x=652.
+    Legend swatches x=118/303/482 y=382, labels x=138/323/502 y=392,
+    the block spanning 118..622 so it centres on x=370;
+      footer note y=416 (13px above the frame).
+  =================================================================== -->
+
+  <rect class="bg" x="1" y="1" width="738" height="428" rx="2"/>
+  <text class="ey"  x="28"  y="32">WORKER SCORING</text>
+  <text class="cap" x="712" y="32" text-anchor="end">one request, 60 prompt blocks, three candidates</text>
+
+  <!-- the formula, with the example pinned so every number can be re-derived -->
+  <rect class="box" x="28" y="46" width="684" height="60" rx="4"/>
+  <text class="mono" x="44" y="66">cost = prefill_load_scale · max(0, incoming_prompt_blocks − overlap_credit) + potential_decode</text>
+  <text class="cap"  x="44" y="82">overlap_credit = matched blocks × tier weight (Dynamo defaults: device 1.00 · host 0.75 · disk 0.25)</text>
+  <text class="cap"  x="44" y="96">here: prefill_load_scale = 1, nothing queued, every hit in the device tier — so credit = matched blocks; lowest cost wins</text>
+
+  <!-- axis and ticks -->
+  <line class="tick" x1="300" y1="132" x2="300" y2="336"/>
+  <line class="tick" x1="400" y1="132" x2="400" y2="336"/>
+  <line class="tick" x1="500" y1="132" x2="500" y2="336"/>
+  <line class="axis" x1="200" y1="132" x2="200" y2="336"/>
+  <text class="cap" x="200" y="352" text-anchor="middle">0</text>
+  <text class="cap" x="300" y="352" text-anchor="middle">20</text>
+  <text class="cap" x="400" y="352" text-anchor="middle">40</text>
+  <text class="cap" x="500" y="352" text-anchor="middle">60</text>
+  <text class="cap" x="620" y="352" text-anchor="middle">cost, in KV blocks — lower is better</text>
+
+  <!-- segment names, said once -->
+  <text class="cap" x="230" y="126" text-anchor="middle">prefill still to compute</text>
+  <text class="cap" x="420" y="126" text-anchor="middle">decode already resident on that worker</text>
+
+  <!-- worker 1 -->
+  <text class="lbl"  x="28" y="140">worker 1</text>
+  <text class="cap"  x="28" y="153">48 of 60 blocks matched</text>
+  <rect class="gauge" x="28" y="160" width="110" height="7" rx="1.5"/>
+  <rect class="gfill" x="28" y="160" width="88"  height="7" rx="1.5"/>
+  <rect class="pre" x="200" y="135" width="60"  height="26" rx="2"/>
+  <rect class="dec" x="260" y="135" width="230" height="26" rx="2"/>
+  <text class="num" x="230" y="152" text-anchor="middle">12</text>
+  <text class="num" x="375" y="152" text-anchor="middle">46</text>
+  <text class="lbl" x="652" y="152" text-anchor="middle">cost 58</text>
+
+  <line class="div" x1="28" y1="187" x2="712" y2="187"/>
+
+  <!-- worker 2 -->
+  <text class="lbl"  x="28" y="218">worker 2</text>
+  <text class="cap"  x="28" y="231">20 of 60 blocks matched</text>
+  <rect class="gauge" x="28" y="238" width="110" height="7" rx="1.5"/>
+  <rect class="gfill" x="28" y="238" width="37"  height="7" rx="1.5"/>
+  <rect class="pre" x="200" y="213" width="200" height="26" rx="2"/>
+  <rect class="dec" x="400" y="213" width="40"  height="26" rx="2"/>
+  <text class="num" x="300" y="230" text-anchor="middle">40</text>
+  <text class="num" x="420" y="230" text-anchor="middle">8</text>
+  <rect class="pick" x="592" y="215" width="120" height="22" rx="4"/>
+  <text class="lblg" x="652" y="230" text-anchor="middle">cost 48 · picked</text>
+
+  <line class="div" x1="28" y1="265" x2="712" y2="265"/>
+
+  <!-- worker 3: the deepest overlap, and never scored -->
+  <text class="lblm" x="28" y="296">worker 3</text>
+  <text class="capm" x="28" y="309">52 of 60 blocks matched</text>
+  <rect class="gauge" x="28" y="316" width="110" height="7" rx="1.5"/>
+  <rect class="gfill" x="28" y="316" width="95"  height="7" rx="1.5"/>
+  <text class="annm" x="206" y="308">the deepest match of the three, and too loaded to consider:</text>
+  <text class="annm" x="206" y="322">the busy threshold drops it before any cost is computed</text>
+  <rect class="drop" x="592" y="293" width="120" height="22" rx="4"/>
+  <text class="lblm" x="652" y="308" text-anchor="middle">not scored</text>
+
+  <!-- legend: the same words as the column headers -->
+  <rect class="pre" x="118" y="382" width="13" height="13" rx="2"/>
+  <text class="lgd" x="138" y="392">prefill still to compute</text>
+  <rect class="dec" x="303" y="382" width="13" height="13" rx="2"/>
+  <text class="lgd" x="323" y="392">decode already resident</text>
+  <rect class="gfill" x="482" y="384" width="13" height="9" rx="1.5"/>
+  <text class="lgd" x="502" y="392">blocks already cached</text>
+
+  <text class="note" x="370" y="416" text-anchor="middle">a deep match does not win by itself: it is spent against the worker's load, and an overloaded worker is never scored</text>
+</svg>
