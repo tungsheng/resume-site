@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 368" role="img"
-     aria-label="A two-panel before-and-after contrast of inference serving, split by a thin vertical hairline with a small 'vs'. Left panel, ONE REPLICA: a single rounded node box holds everything locally — a tile of GPUs holding the weights, a small scheduler chip, and a KV-cache block — all stacked inside the one node, with a request arrow entering from the left. A grey note reads: one node — caps out when it fills. Right panel, A FLEET: at the top a green-accented cache-aware router fans out with arrows to three replica boxes in a row, each a small node with GPUs and a scheduler but no cache of its own; the router picks one replica per request. Below the replicas, a wide green shared KV store spans their width and connects to all three with bidirectional read/write arrows. A grey note reads: router picks a replica; KV pulled into a shared store. The visual story: on the left the KV cache lives inside the single node, and on the right that cache has been pulled out into a shared store while a router has appeared in front.">
-  <title>One replica vs a fleet — the KV cache moves out and a router moves in front</title>
+     aria-label="A two-panel before-and-after contrast of inference serving, split by a thin vertical hairline with a small 'vs'. Left panel, ONE REPLICA: a single rounded node box holds everything locally — a tile of GPUs holding the weights, a small scheduler chip, and a KV-cache block — all stacked inside the one node, with a request arrow entering from the left. A grey note reads: one node — caps out when it fills. Right panel, A FLEET: at the top a green cache-aware router fans out with arrows to three replica boxes in a row, each a small node that keeps its OWN KV cache alongside its GPUs. Below the replicas, a wide green shared prefix index that the replicas publish into (dashed KV-events arrows down) and that the router reads (a dashed feedback arrow up the left margin back to the router), tracking which replica holds which prefix. A grey note reads: each replica keeps its cache; the router finds it via a shared index. The visual story: the KV cache stays inside each replica — not pooled in one central store — and a cache-aware router uses a shared prefix index to send each request to the replica that already holds its prefix.">
+  <title>One replica vs a fleet — each replica keeps its cache; a router uses a shared prefix index</title>
   <style>
     .bg     { fill:#faf8f3; stroke:#e4e1da; }
     .ey     { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
@@ -42,10 +42,11 @@
       eyebrow x=391 y=34. Router x=420 y=70 w=240 h=34 (70..104).
       Replicas: 3 boxes w=74 h=64 (132..196) at x=389,503,617 -> centers 426,540,654
         (40px gaps between boxes; outer margins ~49px to divider / ~47px to edge).
-        Inner: GPUs tile y=144 h=24; sched tile y=172 h=18.
+        Inner: GPUs tile y=144 h=24; KV-cache tile y=172 h=18 (each replica keeps its cache).
       Router->replica arrows: from 540,104 to each replica top (y=132).
-      Shared store: x=389 y=224 w=302 h=44 (224..268), green, center 540.
-      Replica<->store arrows: vertical at x=426,540,654, y 196<->224 (bidir).
+      Shared prefix index: x=389 y=224 w=302 h=44 (224..268), green, center 540.
+      Replica->index KV-events arrows (dashed, down) x=426,540,654 y198..222 ;
+        index->router feedback (dashed) up the left margin x=374 (389,238 -> 416,88).
       Right note: cx=540, y=286 / y=300.
     Legend row y=326 (swatch)/y=335 (text), centered ~370. Footer y=352, x=370.
   =================================================================== -->
@@ -105,41 +106,45 @@
   <rect class="node" x="389" y="132" width="74" height="64" rx="5"/>
   <rect class="tile" x="397" y="144" width="58" height="24" rx="2.5"/>
   <text class="lbls" x="426" y="160" text-anchor="middle">GPUs</text>
-  <rect class="tile" x="397" y="172" width="58" height="18" rx="2.5"/>
-  <text class="cap"  x="426" y="184" text-anchor="middle">sched</text>
+  <rect class="kv" x="397" y="172" width="58" height="18" rx="2.5"/>
+  <text class="cap"  x="426" y="184" text-anchor="middle">KV cache</text>
   <!-- replica 2 -->
   <rect class="node" x="503" y="132" width="74" height="64" rx="5"/>
   <rect class="tile" x="511" y="144" width="58" height="24" rx="2.5"/>
   <text class="lbls" x="540" y="160" text-anchor="middle">GPUs</text>
-  <rect class="tile" x="511" y="172" width="58" height="18" rx="2.5"/>
-  <text class="cap"  x="540" y="184" text-anchor="middle">sched</text>
+  <rect class="kv" x="511" y="172" width="58" height="18" rx="2.5"/>
+  <text class="cap"  x="540" y="184" text-anchor="middle">KV cache</text>
   <!-- replica 3 -->
   <rect class="node" x="617" y="132" width="74" height="64" rx="5"/>
   <rect class="tile" x="625" y="144" width="58" height="24" rx="2.5"/>
   <text class="lbls" x="654" y="160" text-anchor="middle">GPUs</text>
-  <rect class="tile" x="625" y="172" width="58" height="18" rx="2.5"/>
-  <text class="cap"  x="654" y="184" text-anchor="middle">sched</text>
+  <rect class="kv" x="625" y="172" width="58" height="18" rx="2.5"/>
+  <text class="cap"  x="654" y="184" text-anchor="middle">KV cache</text>
 
-  <!-- replicas <-> shared store (bidirectional read/write) -->
-  <path class="arrg" d="M426,200 L426,220" marker-start="url(#ag)" marker-end="url(#ag)"/>
-  <path class="arrg" d="M540,200 L540,220" marker-start="url(#ag)" marker-end="url(#ag)"/>
-  <path class="arrg" d="M654,200 L654,220" marker-start="url(#ag)" marker-end="url(#ag)"/>
+  <!-- replicas publish which prefixes they hold (KV events) into the shared index -->
+  <path class="arrg" d="M426,198 L426,222" marker-end="url(#ag)" stroke-dasharray="4 3"/>
+  <path class="arrg" d="M540,198 L540,222" marker-end="url(#ag)" stroke-dasharray="4 3"/>
+  <path class="arrg" d="M654,198 L654,222" marker-end="url(#ag)" stroke-dasharray="4 3"/>
+  <text class="capg" x="483" y="215" text-anchor="middle">KV events</text>
 
-  <!-- shared KV store -->
+  <!-- shared prefix index (NOT a store): tracks which replica holds which prefix -->
   <rect class="acc" x="389" y="224" width="302" height="44" rx="6"/>
-  <text class="lblg" x="540" y="244" text-anchor="middle">shared KV store</text>
-  <text class="capg" x="540" y="258" text-anchor="middle">cache pulled out — every replica reads/writes it</text>
+  <text class="lblg" x="540" y="244" text-anchor="middle">shared prefix index</text>
+  <text class="capg" x="540" y="258" text-anchor="middle">the router routes by which replica holds each prefix</text>
+
+  <!-- the index feeds the cache-aware router (read path), routed up the left margin -->
+  <path class="arrg" d="M389,238 L374,238 L374,88 L416,88" marker-end="url(#ag)" stroke-dasharray="4 3"/>
 
   <!-- right note -->
-  <text class="ann" x="540" y="286" text-anchor="middle">router picks a replica;</text>
-  <text class="ann" x="540" y="300" text-anchor="middle">KV pulled into a shared store</text>
+  <text class="ann" x="540" y="286" text-anchor="middle">each replica keeps its cache;</text>
+  <text class="ann" x="540" y="300" text-anchor="middle">the router finds it via a shared index</text>
 
   <!-- legend -->
-  <rect class="acc" x="188" y="325" width="13" height="13" rx="2"/>
-  <text class="lgd" x="208" y="335">shared state — pulled out of the node</text>
-  <rect class="kv"  x="447" y="325" width="13" height="13" rx="2"/>
-  <text class="lgd" x="467" y="335">local / private</text>
+  <rect class="acc" x="240" y="325" width="13" height="13" rx="2"/>
+  <text class="lgd" x="260" y="335">shared prefix index</text>
+  <rect class="kv"  x="400" y="325" width="13" height="13" rx="2"/>
+  <text class="lgd" x="420" y="335">local KV cache</text>
 
   <!-- footer -->
-  <text class="note" x="370" y="356" text-anchor="middle">the KV cache moves out of the node; a cache-aware router moves in front</text>
+  <text class="note" x="370" y="356" text-anchor="middle">each replica keeps its KV cache; a cache-aware router finds it via a shared prefix index</text>
 </svg>
