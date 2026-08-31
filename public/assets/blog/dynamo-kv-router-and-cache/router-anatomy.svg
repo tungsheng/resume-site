@@ -1,23 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 430" role="img"
-     aria-label="The anatomy of Dynamo's KV router, drawn as a loop. A request enters at the left into a Frontend box that tokenizes the prompt, splits it into fixed-size blocks, and hashes each block. Two arrows leave the Frontend: one into a green prefix index box, which answers which worker holds which prefix, and one into a load tracker box, which answers how many active prefill and decode blocks each worker already has. Both feed arrows right into a selector box that computes one cost per worker and takes the minimum. A dispatch bus runs from the selector down and across to three worker boxes in a row, each containing an engine with its KV cache and a small green publisher chip; the arrow into the chosen worker is solid and the other two are dashed, since only one worker is dispatched to. From every publisher a green rail runs down, back along the bottom of the figure, up the right edge and into the top of the prefix index, labelled as the KV event stream of store and remove events. The picture's point: the request path is short and one-way, and the only thing keeping the index honest is the event loop coming back from the workers.">
-  <title>Dynamo's KV router — index, load tracker, selector, and the event loop that keeps them current</title>
+     aria-label="The anatomy of Dynamo's KV-aware router, drawn as a loop. A request enters at the left into a frontend box, titled inside itself, which tokenizes the prompt, splits it into fixed-size blocks and hashes each block. Two arrows leave the frontend: one into a green indexer box, which holds the prefix index and answers which worker holds which prefix, and one into a load tracker box, which answers how many blocks are in flight on each worker — queued prefill plus running decode. The indexer's arrow is labelled overlap and the load tracker's is labelled load, and both feed a selector box that spells out the arithmetic: cost equals load minus overlap, and the lowest cost wins. A dispatch bus runs from the selector down and across to three worker boxes in a row, each holding an engine with its KV cache and a green KV-event publisher chip; the arrow into the chosen worker is solid and tagged chosen, while the two workers the router passed over get dashed arrows. From every publisher a green rail runs down, back along the bottom of the figure, up the right edge and into the top of the indexer, labelled as the KV event stream of store and remove events and, at its arrowhead, as the index update. The picture's point: the request path is short and one-way, and the only thing keeping the index honest is the event loop coming back from the workers.">
+  <title>Dynamo's KV-aware router — indexer, load tracker, selector, and the event loop that keeps them current</title>
   <style>
     .bg   { fill:#faf8f3; stroke:#e4e1da; }
     .ey   { font:600 12px 'JetBrains Mono',ui-monospace,monospace; letter-spacing:1.5px; fill:#2f7d3b; }
     .node { fill:#f3efe7; stroke:#1c1b17; stroke-width:1.3; }
     .tile { fill:#faf8f3; stroke:#cbc5b9; stroke-width:1; }
     .acc  { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
-    .chip { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.1; }
+    .chip { fill:#e4f0e1; stroke:#2f7d3b; stroke-width:1.4; }
     .lbl  { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
     .lblg { font:600 11px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
     .lbls { font:600 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
     .cap  { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
     .capg { font:400 8.5px 'JetBrains Mono',ui-monospace,monospace; fill:#2f7d3b; }
+    .mono { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#1c1b17; }
     .ann  { font:400 10px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
-    .req  { font:600 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
     .lgd  { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#6f6d68; }
     .note { font:400 9.5px 'JetBrains Mono',ui-monospace,monospace; fill:#79736a; }
     .arrs { stroke:#6f6d68; stroke-width:1.4; fill:none; }
+    .arrd { stroke:#6f6d68; stroke-width:1.4; fill:none; stroke-dasharray:4 3; }
     .arrg { stroke:#2f7d3b; stroke-width:1.5; fill:none; }
   </style>
   <defs>
@@ -28,114 +29,133 @@
   <!-- ==================================================================
     COORDINATE ARITHMETIC  (canvas 740 x 430)
     All three upper columns share the vertical centre y=128.
-    Frontend   x 76..208,  y 82..174   (tiles x=88 w=108 at y 92/118/144, h=20;
-                10px of padding above and below the tile stack)
-    Index      x 250..440, y 62..120   (green)
+    Frontend   x 76..208, y 77..179  (title inside at y=91; tiles x=88 w=108
+                at y 99/125/151, h=20, 8px below the last tile)
+    Indexer    x 250..440, y 62..120   (green)
     Load track x 250..440, y 136..194
     Selector   x 470..640, y 90..166
     Feeders both leave the frontend at its centre y=128, jogging at x=228 to
-                the index inlet (246,91) and the tracker inlet (246,165).
+                the indexer inlet (246,91) and the tracker inlet (246,165).
                 Neither exit sits on a tile, so neither claims one.
-    Workers    y 250..322, w=176 at x=58 / 282 / 506  (centers 146 / 370 / 594)
+    Edge labels sit just clear of both boxes: overlap (460,80) and load
+                (460,180) — each in the 440..470 gutter, above/below the selector.
+    Workers    y 250..322, w=176 at x=58 / 282 / 506  (centres 146 / 370 / 594)
       inner tiles x=70 / 294 / 518 w=82; publisher chips x=164 / 388 / 612
       w=58 (12px inset on both sides), chip centres 193 / 417 / 641.
     Dispatch bus: selector bottom (555,166) -> y=214 rail -> down into worker
-                tops; the drop into worker 1 is solid, the other two dashed.
-    Event rail: publisher chip bottoms (y=310) at x=193/417/641 -> y=356 rail -> right to x=711
-                -> up to y=42 -> left to x=345 -> down to (345,58), arrow tip
-                at the index top y=62.  Rail on the content column at x=711; the
-                left gutter carries the request label, which starts on the
-                series content column at x=28.
+                tops. Only the chosen drop reaches worker 1, with an arrowhead
+                and a "chosen" tag; the other two are dashed, headless, and
+                stop 12px short, so the bus cannot read as a fan-out.
+    Event rail: publisher chip bottoms (y=310) at x=193/417/641 -> y=356 rail
+                -> right to x=690 -> up to y=54 -> left to x=345 -> down into
+                the indexer top (345,58).  Inset 49px from the frame and given
+                three arrowheads along its run, so it reads as travel rather
+                than as the card's border.
+    Legend row y=382 (swatch) / y=392 (labels), spanning 157..583 so the
+      two items are 30px apart and the block centres on x=370; footer y=416.
   =================================================================== -->
 
   <rect class="bg" x="1" y="1" width="738" height="428" rx="2"/>
-  <text class="ey" x="28" y="32">REQUEST PATH</text>
+  <text class="ey" x="28" y="32">THE KV-AWARE ROUTER</text>
   <text class="cap" x="712" y="32" text-anchor="end">one request in, one worker out</text>
 
   <!-- request in -->
-  <text class="req" x="28" y="118">request</text>
+  <text class="ann" x="28" y="118">request</text>
   <path class="arrs" d="M36,128 L72,128" marker-end="url(#af)"/>
 
   <!-- frontend -->
-  <rect class="node" x="76" y="82" width="132" height="92" rx="4"/>
-  <text class="cap" x="142" y="74" text-anchor="middle">frontend</text>
-  <rect class="tile" x="88" y="92" width="108" height="20" rx="2.5"/>
-  <text class="lbls" x="142" y="106" text-anchor="middle">tokenize</text>
-  <rect class="tile" x="88" y="118" width="108" height="20" rx="2.5"/>
-  <text class="lbls" x="142" y="132" text-anchor="middle">split into blocks</text>
-  <rect class="tile" x="88" y="144" width="108" height="20" rx="2.5"/>
-  <text class="lbls" x="142" y="158" text-anchor="middle">hash each block</text>
+  <rect class="node" x="76" y="77" width="132" height="102" rx="4"/>
+  <text class="lbls" x="88" y="91">frontend</text>
+  <rect class="tile" x="88" y="99" width="108" height="20" rx="2.5"/>
+  <text class="lbls" x="142" y="113" text-anchor="middle">tokenize</text>
+  <rect class="tile" x="88" y="125" width="108" height="20" rx="2.5"/>
+  <text class="lbls" x="142" y="139" text-anchor="middle">split into blocks</text>
+  <rect class="tile" x="88" y="151" width="108" height="20" rx="2.5"/>
+  <text class="lbls" x="142" y="165" text-anchor="middle">hash each block</text>
 
-  <!-- frontend -> index / load tracker -->
+  <!-- frontend -> indexer / load tracker -->
   <path class="arrs" d="M208,128 L228,128 L228,91 L246,91" marker-end="url(#af)"/>
   <path class="arrs" d="M208,128 L228,128 L228,165 L246,165" marker-end="url(#af)"/>
 
-  <!-- prefix index (green: shared state) -->
+  <!-- the indexer: green, because it is cache state -->
   <rect class="acc" x="250" y="62" width="190" height="58" rx="4"/>
-  <text class="lblg" x="345" y="88" text-anchor="middle">prefix index</text>
-  <text class="capg" x="345" y="104" text-anchor="middle">which worker holds which prefix</text>
+  <text class="lblg" x="345" y="88" text-anchor="middle">indexer</text>
+  <text class="capg" x="345" y="104" text-anchor="middle">how many blocks each worker has</text>
 
   <!-- load tracker -->
   <rect class="node" x="250" y="136" width="190" height="58" rx="4"/>
-  <text class="lbl" x="345" y="162" text-anchor="middle">load tracker</text>
-  <text class="cap" x="345" y="178" text-anchor="middle">active prefill + decode blocks</text>
+  <text class="lbl" x="345" y="160" text-anchor="middle">load tracker</text>
+  <text class="cap" x="345" y="174" text-anchor="middle">blocks in flight —</text>
+  <text class="cap" x="345" y="186" text-anchor="middle">queued prefill + running decode</text>
 
   <!-- into the selector -->
-  <path class="arrg" d="M440,91 L456,91 L456,116 L466,116" marker-end="url(#ag)"/>
+  <path class="arrs" d="M440,91 L456,91 L456,116 L466,116" marker-end="url(#af)"/>
   <path class="arrs" d="M440,165 L456,165 L456,140 L466,140" marker-end="url(#af)"/>
-  <text class="capg" x="456" y="80" text-anchor="middle">overlap</text>
-  <text class="cap"  x="456" y="180" text-anchor="middle">load</text>
+  <text class="cap" x="460" y="80" text-anchor="middle">overlap</text>
+  <text class="cap" x="460" y="180" text-anchor="middle">load</text>
 
-  <!-- selector -->
+  <!-- selector: the arithmetic, so the sign of "overlap" is not a guess -->
   <rect class="node" x="470" y="90" width="170" height="76" rx="4"/>
-  <text class="lbl" x="555" y="120" text-anchor="middle">selector</text>
-  <text class="cap" x="555" y="136" text-anchor="middle">one cost per worker,</text>
-  <text class="cap" x="555" y="148" text-anchor="middle">take the minimum</text>
+  <text class="lbl"  x="555" y="112" text-anchor="middle">selector</text>
+  <text class="cap"  x="555" y="128" text-anchor="middle">per worker:</text>
+  <text class="mono" x="555" y="142" text-anchor="middle">cost = load − overlap</text>
+  <text class="cap"  x="555" y="158" text-anchor="middle">lowest cost wins</text>
 
   <!-- dispatch bus: one solid drop, two dashed candidates -->
   <path class="arrs" d="M555,166 L555,214"/>
   <path class="arrs" d="M146,214 L594,214"/>
   <path class="arrs" d="M146,214 L146,246" marker-end="url(#af)"/>
-  <path class="arrs" d="M370,214 L370,246" stroke-dasharray="4 3" marker-end="url(#af)"/>
-  <path class="arrs" d="M594,214 L594,246" stroke-dasharray="4 3" marker-end="url(#af)"/>
-  <text class="ann" x="180" y="207" text-anchor="middle">dispatch — one worker</text>
+  <path class="arrd" d="M370,214 L370,238"/>
+  <path class="arrd" d="M594,214 L594,238"/>
+  <text class="ann" x="545" y="207" text-anchor="end">dispatch — one worker</text>
+  <text class="cap" x="152" y="240">chosen</text>
 
   <!-- workers -->
   <rect class="node" x="58" y="250" width="176" height="72" rx="4"/>
   <text class="lbls" x="70" y="268">worker 1</text>
   <rect class="tile" x="70" y="276" width="82" height="34" rx="2.5"/>
-  <text class="cap" x="111" y="290" text-anchor="middle">engine</text>
-  <text class="cap" x="111" y="303" text-anchor="middle">+ KV cache</text>
+  <text class="cap" x="111" y="286" text-anchor="middle">engine</text>
+  <text class="cap" x="111" y="296" text-anchor="middle">vLLM / TRT-LLM</text>
+  <text class="cap" x="111" y="306" text-anchor="middle">+ its KV cache</text>
   <rect class="chip" x="164" y="276" width="58" height="34" rx="3"/>
-  <text class="capg" x="193" y="296" text-anchor="middle">publisher</text>
+  <text class="capg" x="193" y="290" text-anchor="middle">KV event</text>
+  <text class="capg" x="193" y="303" text-anchor="middle">publisher</text>
 
   <rect class="node" x="282" y="250" width="176" height="72" rx="4"/>
   <text class="lbls" x="294" y="268">worker 2</text>
   <rect class="tile" x="294" y="276" width="82" height="34" rx="2.5"/>
-  <text class="cap" x="335" y="290" text-anchor="middle">engine</text>
-  <text class="cap" x="335" y="303" text-anchor="middle">+ KV cache</text>
+  <text class="cap" x="335" y="286" text-anchor="middle">engine</text>
+  <text class="cap" x="335" y="296" text-anchor="middle">vLLM / TRT-LLM</text>
+  <text class="cap" x="335" y="306" text-anchor="middle">+ its KV cache</text>
   <rect class="chip" x="388" y="276" width="58" height="34" rx="3"/>
-  <text class="capg" x="417" y="296" text-anchor="middle">publisher</text>
+  <text class="capg" x="417" y="290" text-anchor="middle">KV event</text>
+  <text class="capg" x="417" y="303" text-anchor="middle">publisher</text>
 
   <rect class="node" x="506" y="250" width="176" height="72" rx="4"/>
   <text class="lbls" x="518" y="268">worker 3</text>
   <rect class="tile" x="518" y="276" width="82" height="34" rx="2.5"/>
-  <text class="cap" x="559" y="290" text-anchor="middle">engine</text>
-  <text class="cap" x="559" y="303" text-anchor="middle">+ KV cache</text>
+  <text class="cap" x="559" y="286" text-anchor="middle">engine</text>
+  <text class="cap" x="559" y="296" text-anchor="middle">vLLM / TRT-LLM</text>
+  <text class="cap" x="559" y="306" text-anchor="middle">+ its KV cache</text>
   <rect class="chip" x="612" y="276" width="58" height="34" rx="3"/>
-  <text class="capg" x="641" y="296" text-anchor="middle">publisher</text>
+  <text class="capg" x="641" y="290" text-anchor="middle">KV event</text>
+  <text class="capg" x="641" y="303" text-anchor="middle">publisher</text>
 
-  <!-- KV event loop back to the index, up the right gutter -->
+  <!-- KV event loop back to the indexer, up the right gutter -->
   <path class="arrg" d="M193,310 L193,356"/>
   <path class="arrg" d="M417,310 L417,356"/>
   <path class="arrg" d="M641,310 L641,356"/>
-  <path class="arrg" d="M193,356 L711,356 L711,42 L345,42 L345,58" marker-end="url(#ag)"/>
-  <text class="capg" x="311" y="350" text-anchor="middle">KV events — store / remove</text>
+  <path class="arrg" d="M193,356 L690,356"/>
+  <path class="arrg" d="M690,356 L690,210" marker-end="url(#ag)"/>
+  <path class="arrg" d="M690,210 L690,54 L345,54" marker-end="url(#ag)"/>
+  <path class="arrg" d="M345,54 L345,58" marker-end="url(#ag)"/>
+  <text class="capg" x="313" y="350" text-anchor="middle">KV events — store / remove</text>
+  <text class="capg" x="352" y="50">KV events in</text>
 
   <!-- legend + footer -->
-  <rect class="acc" x="163" y="382" width="13" height="13" rx="2"/>
-  <text class="lgd" x="183" y="392">cache state — published by the workers</text>
-  <rect class="node" x="431" y="382" width="13" height="13" rx="2"/>
-  <text class="lgd" x="451" y="392">request path — one way</text>
+  <rect class="acc" x="157" y="382" width="13" height="13" rx="2"/>
+  <text class="lgd" x="177" y="392">KV events — what each worker has cached</text>
+  <path class="arrd" d="M429,389 L449,389"/>
+  <text class="lgd" x="457" y="392">considered, not chosen</text>
   <text class="note" x="370" y="416" text-anchor="middle">the engines cache and evict on their own schedule, so they have to say so out loud</text>
 </svg>
