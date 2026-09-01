@@ -1,4 +1,19 @@
-@import "tailwindcss";
+/* Tailwind scans for class names to decide which utilities to emit. Left to its
+ * automatic detection it walks the whole repo, which means a file that is not a
+ * template can still add CSS to the site: the word "lowercase" in a *test
+ * comment* once emitted a real `.lowercase` utility into the production bundle,
+ * caught only because that change was being byte-diffed against main.
+ *
+ * `source(none)` turns the automatic walk off; the sources below are the only
+ * places this site's markup is written. Anything outside them — tests, content,
+ * scripts, docs — can no longer influence the stylesheet. If a utility ever goes
+ * missing, the fix is to add its directory here, not to remove this.
+ *
+ * Paths are relative to THIS file. */
+@import "tailwindcss" source(none);
+@source "../components";
+@source "../layouts";
+@source "../pages";
 
 /*
  * Editorial design system (redesign #55). A typography-first, warm-paper look:
