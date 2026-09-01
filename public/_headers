@@ -18,10 +18,17 @@
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Self-hosted blog images (#6) are content-addressed by post slug and effectively
-# immutable once published — let the browser cache them aggressively.
+# Self-hosted blog images (#6) live at stable, un-hashed URLs under the post
+# slug, so a figure edited after publication ships under the SAME URL. They were
+# cached immutably for a year on the theory that a published figure never
+# changes; that theory broke the first time a live post's figure was redrawn —
+# the deploy shipped the new file, and readers (and the CDN) kept the old one
+# with no way to revalidate. Ten minutes of freshness plus background
+# revalidation keeps delivery fast while letting a redraw actually land.
+# Astro's own /_astro/* bundles stay immutable above: those ARE content-hashed,
+# so a change there ships under a new URL.
 /assets/blog/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
 
 # Self-hosted web fonts (#55): Newsreader + IBM Plex Mono woff2. Versioned by
 # content; cache aggressively.
