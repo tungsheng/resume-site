@@ -1,0 +1,57 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Without this page Cloudflare Pages has no 404 to serve, so it falls back to
+// index.html and answers every unmatched path with the home page under a 200.
+// That is a soft 404 for crawlers, and it interacts badly with the long cache
+// on /assets/blog/*: a request for an asset that has not deployed yet caches
+// the home page's HTML at the asset's URL for the asset's TTL. A real 404.html
+// in dist/ makes Pages answer with this page and a 404 status instead.
+const LEDE =
+  "That page isn't here. It may have moved, or the link may be wrong. The writing and the work are both one click away.";
+---
+
+<BaseLayout
+  title="Not found | Tony Lee"
+  description="That page isn't here."
+  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Not found" }]}
+>
+  <section class="border-b border-surface-border pb-10 md:pb-12">
+    <p class="font-mono text-sm uppercase tracking-[0.12em] text-go-green-dark">404</p>
+    <h1
+      class="mt-3 text-balance font-semibold leading-[1.02] tracking-[-0.02em] text-[clamp(2rem,5vw,3.25rem)]"
+    >
+      Not found
+    </h1>
+    <p class="mt-4 max-w-[46rem] text-[1.05rem] leading-relaxed text-muted md:text-[1.15rem]">
+      {LEDE}
+    </p>
+  </section>
+
+  <ul class="mt-2">
+    <li class="flex items-baseline gap-4 border-b border-surface-border py-4">
+      <a
+        href="/blog"
+        class="text-[1.15rem] font-semibold tracking-[-0.01em] transition-colors hover:text-go-green-dark"
+        >Blog</a
+      >
+      <span class="text-muted">Notes on inference serving, scheduling and GPU kernels</span>
+    </li>
+    <li class="flex items-baseline gap-4 border-b border-surface-border py-4">
+      <a
+        href="/work"
+        class="text-[1.15rem] font-semibold tracking-[-0.01em] transition-colors hover:text-go-green-dark"
+        >Work</a
+      >
+      <span class="text-muted">Projects, experiments and the decisions behind them</span>
+    </li>
+    <li class="flex items-baseline gap-4 border-b border-surface-border py-4">
+      <a
+        href="/"
+        class="text-[1.15rem] font-semibold tracking-[-0.01em] transition-colors hover:text-go-green-dark"
+        >Home</a
+      >
+      <span class="text-muted">Start over</span>
+    </li>
+  </ul>
+</BaseLayout>
