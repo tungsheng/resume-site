@@ -55,6 +55,19 @@ describe("toPostDetail (composition)", () => {
     expect(detail.data).toBe(frontmatter);
   });
 
+  test("resolves tags to render-ready chips, leaving the raw slugs on data", () => {
+    const detail = toPostDetail(entry({ data: data({ tags: ["moe", "kv-cache"] }) }), []);
+    expect(detail.tagChips).toEqual([
+      { slug: "moe", label: "MoE", href: "/blog/tags/moe" },
+      { slug: "kv-cache", label: "KV cache", href: "/blog/tags/kv-cache" },
+    ]);
+    expect(detail.data.tags).toEqual(["moe", "kv-cache"]);
+  });
+
+  test("chips are empty, not undefined, for an untagged Post", () => {
+    expect(toPostDetail(entry(), []).tagChips).toEqual([]);
+  });
+
   test("routes the published date to iso", () => {
     const detail = toPostDetail(entry({ data: data({ published: new Date("2026-06-18") }) }), []);
     expect(detail.iso).toBe("2026-06-18");

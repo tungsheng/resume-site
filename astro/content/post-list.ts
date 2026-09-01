@@ -1,5 +1,6 @@
 import type { PostEntry, BlogPostFrontmatter } from "./blog-schema";
 import { isoDay, readingTimeMinutes, sortByPublishedDesc } from "./blog-schema";
+import { toTagChips, type TagChip } from "./tag-registry";
 
 // The Post-list Projection (CONTEXT.md): the one mapping from a collection
 // entry to what the list surfaces render — PostList.astro, the /blog index, the
@@ -20,6 +21,9 @@ export type PostListItem = {
   data: BlogPostFrontmatter;
   minutes: number;
   iso: string;
+  // Tags resolved to render-ready chips (ADR-0009). `data.tags` keeps the raw
+  // authored slugs; `tagChips` is what a surface renders.
+  tagChips: TagChip[];
 };
 
 // Newest first, with derived reading time and the ISO day for the meta rail.
@@ -29,5 +33,6 @@ export function toPostListItems(entries: PostListEntry[]): PostListItem[] {
     data: entry.data,
     minutes: readingTimeMinutes(entry.body ?? ""),
     iso: isoDay(entry.data.published),
+    tagChips: toTagChips(entry.data.tags),
   }));
 }

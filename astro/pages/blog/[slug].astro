@@ -3,7 +3,6 @@ import { render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { toPostDetail } from "../../content/post-detail";
 import { getVisiblePosts } from "../../content/posts";
-import { isRegisteredTag, tagLabel, tagPath } from "../../content/tag-registry";
 
 // Prerender a Post at /blog/<slug>. Visibility by Status (ADR-0003 §8) comes
 // from the shared getVisiblePosts seam, exactly like the /blog index, the tag
@@ -75,15 +74,15 @@ const detail = toPostDetail(post, headings);
     </div>
 
     {
-      detail.data.tags && detail.data.tags.length > 0 && (
+      detail.tagChips.length > 0 && (
         <div class="mt-10 flex flex-wrap gap-x-4 gap-y-2" aria-label="Tags">
-          {detail.data.tags.filter(isRegisteredTag).map((tag) => (
+          {detail.tagChips.map((tag) => (
             <a
-              href={tagPath(tag)}
+              href={tag.href}
               class="eyebrow transition-colors hover:text-go-green-dark"
               data-pagefind-filter="tag"
             >
-              {tagLabel(tag)}
+              {tag.label}
             </a>
           ))}
         </div>

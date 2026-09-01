@@ -45,4 +45,19 @@ describe("toPostListItems", () => {
     expect(items[0]?.data.status).toBe("Drafting");
     expect(items[0]?.data.tags).toEqual(["kv-cache"]);
   });
+
+  test("resolves tags to render-ready chips alongside the raw slugs", () => {
+    const items = toPostListItems([
+      { id: "a", body: "x", data: data({ tags: ["moe", "kv-cache"] }) },
+    ]);
+    expect(items[0]?.tagChips).toEqual([
+      { slug: "moe", label: "MoE", href: "/blog/tags/moe" },
+      { slug: "kv-cache", label: "KV cache", href: "/blog/tags/kv-cache" },
+    ]);
+  });
+
+  test("chips are empty, not undefined, for an untagged Post", () => {
+    const items = toPostListItems([{ id: "a", body: "x", data: data({}) }]);
+    expect(items[0]?.tagChips).toEqual([]);
+  });
 });

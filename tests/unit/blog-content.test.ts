@@ -11,6 +11,7 @@ import {
 import {
   REGISTERED_TAG_SLUGS,
   isRegisteredTag,
+  toTagChips,
   selectPostsWithTag,
   selectTagCounts,
   tagLabel,
@@ -126,6 +127,29 @@ describe("tag page selection (#48)", () => {
 
   test("tagPath builds the canonical /blog/tags URL", () => {
     expect(tagPath("kv-cache")).toBe("/blog/tags/kv-cache");
+  });
+});
+
+describe("toTagChips (the one way to render a Tag)", () => {
+  test("resolves each slug to its label and canonical href, in authored order", () => {
+    expect(toTagChips(["moe", "kv-cache"])).toEqual([
+      { slug: "moe", label: "MoE", href: "/blog/tags/moe" },
+      { slug: "kv-cache", label: "KV cache", href: "/blog/tags/kv-cache" },
+    ]);
+  });
+
+  test("empty for a Post with no tags", () => {
+    expect(toTagChips(undefined)).toEqual([]);
+    expect(toTagChips([])).toEqual([]);
+  });
+
+  test("covers every registered slug — no tag can be unrenderable", () => {
+    const chips = toTagChips(REGISTERED_TAG_SLUGS);
+    expect(chips).toHaveLength(REGISTERED_TAG_SLUGS.length);
+    for (const chip of chips) {
+      expect(chip.label.length).toBeGreaterThan(0);
+      expect(chip.href).toBe(`/blog/tags/${chip.slug}`);
+    }
   });
 });
 

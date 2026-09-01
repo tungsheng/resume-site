@@ -46,6 +46,24 @@ export function tagPath(slug: TagSlug): string {
   return `/blog/tags/${slug}`;
 }
 
+// A Tag as a render surface consumes it: the slug it is keyed by, the label it
+// displays, and the page it links to. Built here rather than at each render
+// site, so "how do I render a Tag?" has one answer instead of three steps a
+// caller has to know in the right order.
+export type TagChip = {
+  slug: TagSlug;
+  label: string;
+  href: string;
+};
+
+// Resolve a Post's tags to chips, in authored order. No filtering: ADR-0009
+// makes registration a *schema* guarantee, so a loaded Post's tags are already
+// typed TagSlug[] — re-checking here (as the render sites used to) would be a
+// runtime no-op that quietly implies the opposite.
+export function toTagChips(slugs: readonly TagSlug[] | undefined): TagChip[] {
+  return (slugs ?? []).map((slug) => ({ slug, label: TAG_REGISTRY[slug], href: tagPath(slug) }));
+}
+
 // The Posts carrying a tag, for /blog/tags/[tag] (#48). Generic over the entry
 // shape so it is unit-testable without the Astro runtime (same pattern as
 // sortByPublishedDesc in blog-schema.ts).

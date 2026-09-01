@@ -1,6 +1,7 @@
 import type { BlogPostFrontmatter, PostEntry, PostHeading } from "./blog-schema";
 import { isoDay, readingTimeMinutes, selectTocHeadings, shouldShowToc } from "./blog-schema";
 import { resolveRelatedLinks, type RelatedLink } from "./related-links";
+import { toTagChips, type TagChip } from "./tag-registry";
 import { hasMathDelimiter } from "../markdown/detect-math";
 
 // The Post-detail Projection (CONTEXT.md): the one mapping from a collection
@@ -34,6 +35,9 @@ export type PostDetail = {
   updatedIso: string | null;
   modifiedTime: Date | undefined;
   hasMath: boolean;
+  // Tags resolved to render-ready chips (ADR-0009). `data.tags` keeps the raw
+  // authored slugs; `tagChips` is what the page renders.
+  tagChips: TagChip[];
   toc: PostHeading[];
   showToc: boolean;
   related: RelatedLink[];
@@ -64,6 +68,7 @@ export function toPostDetail(entry: PostDetailEntry, headings: PostHeading[]): P
     // Scan the raw source rather than trust a frontmatter flag (#33 /
     // ADR-0006) — math present ⇒ KaTeX CSS linked, by construction.
     hasMath: hasMathDelimiter(body),
+    tagChips: toTagChips(entry.data.tags),
     toc: selectTocHeadings(headings),
     showToc: shouldShowToc(headings),
     // Empty for standalone Posts; author typos in an id are skipped, not fatal.
