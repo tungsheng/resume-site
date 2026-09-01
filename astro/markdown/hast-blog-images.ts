@@ -26,18 +26,27 @@ export function withImgAttrs(img: HastNode): HastNode {
   return { ...img, properties: { ...(img.properties ?? {}), loading: "lazy", decoding: "async" } };
 }
 
-// Returns a <figure class="post-figure"> wrapping a lone-paragraph image (with
-// lazy/async attrs, plus a <figcaption> from the alt text when present), or null
-// if the paragraph is not "just an image" (whitespace-only text siblings are
-// ignored). Pure / non-mutating.
-export function figureForParagraph(p: HastNode): HastNode | null {
-  const kids = (p.children ?? []).filter(
+// Is this paragraph "just an image"? Whitespace-only text siblings are ignored,
+// so `<p>\n  <img>\n</p>` still counts. Named because two things need to agree
+// on it: the paragraph visitor, which replaces such a paragraph with a figure,
+// and the image visitor, which must NOT also transform the image inside one.
+export function isLoneImageParagraph(node: HastNode): boolean {
+  if (node.tagName !== "p") return false;
+  const kids = (node.children ?? []).filter(
     (c) => !(c.type === "text" && (c.value ?? "").trim() === ""),
   );
   const only = kids[0];
-  if (kids.length !== 1 || !only || only.type !== "element" || only.tagName !== "img") {
-    return null;
-  }
+  return kids.length === 1 && !!only && only.type === "element" && only.tagName === "img";
+}
+
+// Returns a <figure class="post-figure"> wrapping a lone-paragraph image (with
+// lazy/async attrs, plus a <figcaption> from the alt text when present), or null
+// if the paragraph is not "just an image". Pure / non-mutating.
+export function figureForParagraph(p: HastNode): HastNode | null {
+  if (!isLoneImageParagraph(p)) return null;
+  const only = (p.children ?? []).find(
+    (c) => c.type === "element" && c.tagName === "img",
+  )!;
   const img = withImgAttrs(only);
   const alt = typeof only.properties?.alt === "string" ? only.properties.alt : "";
   const children: HastNode[] = [img];
@@ -53,18 +62,29 @@ export function figureForParagraph(p: HastNode): HastNode | null {
 }
 
 // Thin Sätteri wrapper. The filter matches <p> and <img>; the visit branches on
-// tag name. A lone-image paragraph is replaced by a <figure> (which sets the
-// img attrs itself); any other image — inline among text — is left in place with
-// just the lazy/async attrs added. The two paths are independent, so visit order
-// doesn't matter: every image ends up lazy, and only lone images are wrapped.
+// tag name. A lone-image paragraph is replaced by a <figure>, which sets the
+// img attrs itself; any OTHER image — inline among text — is left in place with
+// just the lazy/async attrs added.
+//
+// The image branch skips images inside a lone-image paragraph. Without that
+// check both branches queue a transform for the same image, and since the
+// paragraph is replaced wholesale the image's transform lands on a node that no
+// longer exists — which Sätteri drops, with a warning, for EVERY image on the
+// site. The output was correct (the figure already carried the attrs) but the
+// build emitted 8 warnings covering all 30 images, which is exactly the noise
+// that hides a real dropped transform.
 export default defineHastPlugin({
   name: "blog-images",
   element: {
     filter: ["img", "p"],
-    visit(node) {
+    visit(node, ctx) {
       const n = node as unknown as HastNode;
       if (n.tagName === "p") return (figureForParagraph(n) ?? undefined) as SatteriHastNode | undefined;
-      if (n.tagName === "img") return withImgAttrs(n) as unknown as SatteriHastNode;
+      if (n.tagName === "img") {
+        const parent = ctx.parent(node) as unknown as HastNode | undefined;
+        if (parent && isLoneImageParagraph(parent)) return undefined;
+        return withImgAttrs(n) as unknown as SatteriHastNode;
+      }
       return undefined;
     },
   },

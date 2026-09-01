@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { buildAdmonition } from "../../astro/markdown/mdast-admonitions";
-import { figureForParagraph, withImgAttrs } from "../../astro/markdown/hast-blog-images";
+import { figureForParagraph,
+  isLoneImageParagraph, withImgAttrs } from "../../astro/markdown/hast-blog-images";
 import { renderMath } from "../../astro/markdown/mdast-katex-math";
 import {
   expandKatexPlaceholders,
@@ -103,6 +104,44 @@ describe("blog-images (hast)", () => {
   test("returns null for a paragraph that is not a lone image (inline image)", () => {
     const p = para({ type: "text", value: "before " }, img("inline"), { type: "text", value: " after" });
     expect(figureForParagraph(p)).toBeNull();
+  });
+
+  // Named because two visitors must agree on it: the paragraph branch replaces
+  // such a paragraph with a figure, and the image branch must NOT also
+  // transform the image inside one — otherwise both queue a transform for the
+  // same image, the paragraph is replaced first, and the image's transform is
+  // dropped with a warning for every image on the site.
+  test("isLoneImageParagraph identifies exactly the paragraphs the figure branch claims", () => {
+    const img = { type: "element", tagName: "img", properties: { src: "/a.svg" }, children: [] };
+    const text = (value: string) => ({ type: "text", value });
+
+    expect(isLoneImageParagraph({ type: "element", tagName: "p", children: [img] })).toBe(true);
+    // whitespace-only siblings are ignored
+    expect(
+      isLoneImageParagraph({
+        type: "element",
+        tagName: "p",
+        children: [text("\n  "), img, text("\n")],
+      }),
+    ).toBe(true);
+    // an image among real text is NOT a lone image
+    expect(
+      isLoneImageParagraph({ type: "element", tagName: "p", children: [text("see "), img] }),
+    ).toBe(false);
+    // not a paragraph at all
+    expect(isLoneImageParagraph({ type: "element", tagName: "figure", children: [img] })).toBe(false);
+    expect(isLoneImageParagraph({ type: "element", tagName: "p", children: [] })).toBe(false);
+  });
+
+  test("isLoneImageParagraph and figureForParagraph never disagree", () => {
+    const img = { type: "element", tagName: "img", properties: {}, children: [] };
+    for (const node of [
+      { type: "element", tagName: "p", children: [img] },
+      { type: "element", tagName: "p", children: [{ type: "text", value: "x" }, img] },
+      { type: "element", tagName: "p", children: [] },
+    ]) {
+      expect(figureForParagraph(node) !== null).toBe(isLoneImageParagraph(node));
+    }
   });
 
   test("withImgAttrs adds lazy/async to an inline image without mutating the input", () => {
