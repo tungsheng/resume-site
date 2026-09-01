@@ -1,75 +1,15 @@
 ---
-// Plain-.astro port of src/features/site/command-code-block.tsx: a GitHub-dark
-// shell block with lightly tokenized syntax coloring. No JS (the React version
-// had no copy button either — just colored tokens). Tokenizer ported verbatim.
+// A GitHub-dark shell block with lightly tokenized syntax coloring. No JS.
+// The tokenizer itself lives in command-tokens.ts so it is unit-testable —
+// this file is markup and styles (CONTEXT.md: derivation logic belongs in a
+// module, never in .astro frontmatter).
+import { tokenize } from "./command-tokens";
+
 interface Props {
   command: string;
   ariaLabel?: string;
 }
 const { command, ariaLabel = "Command" } = Astro.props;
-
-type Kind =
-  | "program"
-  | "flag"
-  | "value"
-  | "separator"
-  | "variable"
-  | "assignment"
-  | "comment"
-  | "plain";
-
-function tokenize(command: string): { kind: Kind; text: string }[] {
-  const parts =
-    command.match(/\s+|&&|\|\||[|;<>]=?|#[^\n]*|"[^"]*"|'[^']*'|[^\s|;&<>]+/g) ?? [command];
-  let expectingValue = false;
-  let expectingProgram = true;
-
-  return parts.map((part) => {
-    if (/^\s+$/.test(part)) return { kind: "plain" as Kind, text: part };
-    if (part.startsWith("#")) {
-      expectingProgram = false;
-      expectingValue = false;
-      return { kind: "comment" as Kind, text: part };
-    }
-    if (/^(?:&&|\|\||[|;<>]=?)$/.test(part)) {
-      expectingProgram = true;
-      expectingValue = false;
-      return { kind: "separator" as Kind, text: part };
-    }
-    if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(part)) {
-      expectingProgram = true;
-      expectingValue = false;
-      return { kind: "assignment" as Kind, text: part };
-    }
-    if (part.startsWith("$")) {
-      expectingProgram = false;
-      expectingValue = false;
-      return { kind: "variable" as Kind, text: part };
-    }
-    if (/^(['"]).*\1$/.test(part)) {
-      expectingProgram = false;
-      expectingValue = false;
-      return { kind: "value" as Kind, text: part };
-    }
-    if (part.startsWith("./") || part.startsWith("/") || expectingProgram) {
-      expectingProgram = false;
-      expectingValue = false;
-      return { kind: "program" as Kind, text: part };
-    }
-    if (part.startsWith("-")) {
-      expectingProgram = false;
-      expectingValue = true;
-      return { kind: "flag" as Kind, text: part };
-    }
-    if (expectingValue) {
-      expectingProgram = false;
-      expectingValue = false;
-      return { kind: "value" as Kind, text: part };
-    }
-    expectingProgram = false;
-    return { kind: "plain" as Kind, text: part };
-  });
-}
 
 const tokens = tokenize(command);
 ---
