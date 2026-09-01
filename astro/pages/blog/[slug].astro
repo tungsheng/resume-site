@@ -1,24 +1,21 @@
 ---
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import {
-  isPostVisible,
-  readingTimeMinutes,
-  selectTocHeadings,
-  shouldShowToc,
-} from "../../content/blog-schema";
+import { readingTimeMinutes, selectTocHeadings, shouldShowToc } from "../../content/blog-schema";
+import { getVisiblePosts } from "../../content/posts";
 import { isoDay, updatedIsoDay } from "../../content/post-list";
 import { resolveRelatedLinks } from "../../content/related-links";
 import { isRegisteredTag, tagLabel, tagPath } from "../../content/tag-registry";
 import { hasMathDelimiter } from "../../markdown/detect-math";
 
-// Prerender a Post at /blog/<slug>. Visibility by Status (ADR-0003 §8): in a
-// production build only Published Posts get a page; `astro dev` renders all
-// statuses for preview.
+// Prerender a Post at /blog/<slug>. Visibility by Status (ADR-0003 §8) comes
+// from the shared getVisiblePosts seam, exactly like the /blog index, the tag
+// pages, the home slice and the feed — in a production build only Published
+// Posts get a page; `astro dev` renders all statuses for preview. This page
+// used to re-implement the getCollection + Status filter inline, which is the
+// drift getVisiblePosts exists to prevent.
 export async function getStaticPaths() {
-  const posts = await getCollection("blog", (post) =>
-    isPostVisible(post.data.status, import.meta.env.PROD),
-  );
+  const posts = await getVisiblePosts();
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 
