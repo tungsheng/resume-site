@@ -3,6 +3,7 @@ import {
   POST_CATEGORIES,
   blogPostSchema,
   isPostVisible,
+  isoDay,
   readingTimeMinutes,
   selectLatest,
   sortByPublishedDesc,
@@ -137,6 +138,22 @@ describe("readingTimeMinutes (derived, not authored)", () => {
   test("computes ~220 wpm", () => {
     expect(readingTimeMinutes(Array(440).fill("word").join(" "))).toBe(2);
     expect(readingTimeMinutes(Array(1100).fill("word").join(" "))).toBe(5);
+  });
+});
+
+// Moved here from post-list.test.ts with the function itself: isoDay is shared
+// by both Projections and the home "Latest writing" slice, so it belongs with
+// the other derived-not-authored Post helpers.
+describe("isoDay (UTC calendar-day slice)", () => {
+  test("returns YYYY-MM-DD", () => {
+    expect(isoDay(new Date("2026-07-13"))).toBe("2026-07-13");
+  });
+
+  test("cannot shift the day across timezones — UTC midnight stays the authored day", () => {
+    // The off-by-one this guards: a local-time formatter west of UTC would
+    // render 2026-06-17 for this instant.
+    expect(isoDay(new Date("2026-06-18T00:00:00.000Z"))).toBe("2026-06-18");
+    expect(isoDay(new Date("2026-06-18T23:59:59.999Z"))).toBe("2026-06-18");
   });
 });
 

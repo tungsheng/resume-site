@@ -1,12 +1,9 @@
 ---
 import { render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { readingTimeMinutes, selectTocHeadings, shouldShowToc } from "../../content/blog-schema";
+import { toPostDetail } from "../../content/post-detail";
 import { getVisiblePosts } from "../../content/posts";
-import { isoDay, updatedIsoDay } from "../../content/post-list";
-import { resolveRelatedLinks } from "../../content/related-links";
 import { isRegisteredTag, tagLabel, tagPath } from "../../content/tag-registry";
-import { hasMathDelimiter } from "../../markdown/detect-math";
 
 // Prerender a Post at /blog/<slug>. Visibility by Status (ADR-0003 §8) comes
 // from the shared getVisiblePosts seam, exactly like the /blog index, the tag
@@ -21,62 +18,49 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
-const minutes = readingTimeMinutes(post.body ?? "");
 
-// Link the KaTeX stylesheet only when this Post's source carries math (#33 /
-// ADR-0006). Scanning the raw body pre-render keeps the link in lockstep with
-// what the math plugin renders — no frontmatter flag to forget.
-const mathStylesheet = hasMathDelimiter(post.body ?? "");
-
-// Dates + the "Updated" rule live in the post-list module (unit-tested there).
-const dateLabel = isoDay(post.data.published);
-const updated = post.data.updated;
-const updatedLabel = updatedIsoDay(post.data.published, updated);
-
-// Auto-TOC from H2/H3 headings; shown only past the threshold (#7).
-const toc = selectTocHeadings(headings);
-const showToc = shouldShowToc(headings);
-
-// Optional related Project/Experiment/Decision links; empty for standalone Posts.
-const relatedLinks = resolveRelatedLinks(post.data.related);
+// Everything this page derives from the Post comes from one Projection
+// (post-detail.ts), where it is unit-testable. What the SITE decides — the
+// title suffix and the breadcrumb trail — stays here.
+const detail = toPostDetail(post, headings);
 ---
 
 <BaseLayout
-  title={`${post.data.title} | Tony Lee`}
-  description={post.data.summary}
+  title={`${detail.data.title} | Tony Lee`}
+  description={detail.data.summary}
   activeNav="blog"
   ogType="article"
-  image={post.data.cover}
-  publishedTime={post.data.published}
-  modifiedTime={updatedLabel ? updated : undefined}
-  tags={post.data.tags}
-  section={post.data.category}
-  mathStylesheet={mathStylesheet}
+  image={detail.data.cover}
+  publishedTime={detail.data.published}
+  modifiedTime={detail.modifiedTime}
+  tags={detail.data.tags}
+  section={detail.data.category}
+  mathStylesheet={detail.hasMath}
   breadcrumbs={[
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog" },
-    { label: post.data.title },
+    { label: detail.data.title },
   ]}
 >
   {/* data-pagefind-body scopes the search index (#49 / ADR-0009 decision 3) to
       Post pages only — no other page carries the attribute, so Pagefind indexes
       nothing else. Facets: Category + Tag display labels ride as filters. */}
   <article class="mx-auto max-w-[44rem]" data-pagefind-body>
-    <p class="eyebrow text-go-green-dark" data-pagefind-filter="category">{post.data.category}</p>
+    <p class="eyebrow text-go-green-dark" data-pagefind-filter="category">{detail.data.category}</p>
     <h1 class="mt-3 text-balance font-semibold leading-[1.05] tracking-[-0.02em] text-[clamp(2rem,5vw,3rem)]">
-      {post.data.title}
+      {detail.data.title}
     </h1>
     <p class="mt-4 font-mono text-[0.72rem] uppercase tracking-[0.08em] tabular text-muted">
-      {dateLabel} &middot; {minutes} min read
-      {updatedLabel && <Fragment> &middot; Updated {updatedLabel}</Fragment>}
+      {detail.iso} &middot; {detail.minutes} min read
+      {detail.updatedIso && <Fragment> &middot; Updated {detail.updatedIso}</Fragment>}
     </p>
 
     {
-      showToc && (
+      detail.showToc && (
         <nav class="post-toc" aria-label="Table of contents">
           <p class="post-toc-title">On this page</p>
           <ul>
-            {toc.map((heading) => (
+            {detail.toc.map((heading) => (
               <li class={heading.depth === 3 ? "post-toc-sub" : undefined}>
                 <a href={`#${heading.slug}`}>{heading.text}</a>
               </li>
@@ -91,9 +75,9 @@ const relatedLinks = resolveRelatedLinks(post.data.related);
     </div>
 
     {
-      post.data.tags && post.data.tags.length > 0 && (
+      detail.data.tags && detail.data.tags.length > 0 && (
         <div class="mt-10 flex flex-wrap gap-x-4 gap-y-2" aria-label="Tags">
-          {post.data.tags.filter(isRegisteredTag).map((tag) => (
+          {detail.data.tags.filter(isRegisteredTag).map((tag) => (
             <a
               href={tagPath(tag)}
               class="eyebrow transition-colors hover:text-go-green-dark"
@@ -107,11 +91,11 @@ const relatedLinks = resolveRelatedLinks(post.data.related);
     }
 
     {
-      relatedLinks.length > 0 && (
+      detail.related.length > 0 && (
         <aside class="post-related" aria-label="Related work">
           <h2 class="post-related-title">Related</h2>
           <ul>
-            {relatedLinks.map((link) => (
+            {detail.related.map((link) => (
               <li>
                 <span class="post-related-kind">{link.kind}</span>
                 <a href={link.href}>{link.label}</a>
