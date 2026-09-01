@@ -18,6 +18,7 @@
     // in-flight srcDir migration; Astro/Vite, tsc, and bun test all honor these).
     "baseUrl": ".",
     "paths": {
+      "@design": ["src/design/palette.ts"],
       "@site": ["src/features/site/index.ts"],
       "@resume": ["src/features/resume/index.ts"],
       "@services/*": ["src/services/*"]

@@ -3,6 +3,8 @@
 // with a takeaway and rows of two labeled horizontal bars (sharp, hairline-
 // separated). Rendered inside the parent's hairline grid, so the root is a plain
 // bg-paper cell rather than its own bordered card. Zero JS.
+import { TONE, type ToneName } from "@design";
+
 interface Cell {
   value: number;
   label: string;
@@ -28,14 +30,9 @@ interface Props {
 }
 const { title, takeaway, sourceLabel, columns, rows } = Astro.props;
 
-const TONE: Record<string, string> = {
-  success: "#006b40",
-  info: "#276f89",
-  warning: "#8a4413",
-  error: "#b3261e",
-  neutral: "#8b939c",
-};
-const toneColor = (tone = "neutral") => TONE[tone] ?? TONE.neutral;
+// Bar colours are the shared tone scale (@design) — the same success/error/
+// warning values the unified status labels use.
+const toneColor = (tone = "neutral") => TONE[tone as ToneName] ?? TONE.neutral;
 const barWidth = (value: number, max: number) =>
   max <= 0 || value <= 0 ? "0%" : `${Math.min(100, Math.max(4, (value / max) * 100))}%`;
 ---
