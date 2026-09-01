@@ -1,5 +1,7 @@
 import { describe, expect, test, beforeAll } from "bun:test";
 import { $ } from "bun";
+import { readCorpus } from "../corpus";
+import { isoDay } from "../../astro/content/blog-schema";
 
 // Built-output assertions (PRD Seam 1) for Blog Status visibility (#5) and the
 // index ordering (#4): a production `astro build` excludes drafts from dist/
@@ -19,53 +21,49 @@ const asRss = (title: string) => title.replaceAll("&", "&amp;").replaceAll("'", 
 // Sätteri transforms (admonition callouts #16, figure/lazy images #17) plus GFM
 // tables and Shiki are exercised at the node level in the unit suite
 // (tests/unit/blog-markdown.test.ts); here we assert they survive a real build
-// and land in dist/. Keep this list newest-first — LATEST below slices it.
-const PUBLISHED = [
-  {
-    slug: "dynamo-kv-router-and-cache",
-    title: "Dynamo's KV Router: Routing on What the Fleet Already Cached",
-  },
-  { slug: "distributed-inference-the-fleet", title: "How NVIDIA Dynamo Runs an Inference Fleet" },
-  { slug: "scheduling-continuous-batching-paged-attention", title: "Scheduling: How Continuous Batching and Paged Attention Fill a GPU" },
-  { slug: "moe-routing", title: "MoE: How the Mixture of Experts Routes a Token" },
-  { slug: "why-transformers-need-the-mlp", title: "MLP: Why Transformers Need the Multilayer Perceptron" },
-  { slug: "attention-how-to-shrink-it", title: "Attention, and How to Shrink It" },
-  { slug: "attention-from-first-principles", title: "Attention, from First Principles" },
-  { slug: "transformer-inference-prefill-and-decode", title: "LLM Inference: The Life of a Request" },
-];
+// and land in dist/.
+//
+// The corpus is DERIVED from content/blog frontmatter (tests/corpus.ts), not
+// transcribed here. Publishing a Post used to mean editing this file — its
+// history reads draft X → publish X → draft Y → publish Y — and the
+// hand-maintained DRAFTS/OUTLINE arrays were empty, so the Status-visibility
+// rule (ADR-0003 §8) that this suite exists to protect was asserted over
+// nothing. Derived, the draft assertions arm themselves the moment a Drafting
+// Post exists.
+const { published: PUBLISHED, drafting: DRAFTS, outline: OUTLINE } = readCorpus();
 
 // The home "Latest writing" slice (#10) shows only the newest LATEST_COUNT (3,
 // astro/pages/index.astro) Posts; older Published Posts live on /blog/ only.
-const LATEST = PUBLISHED.slice(0, 3);
-const OLDER_PUBLISHED = PUBLISHED.slice(3);
+const LATEST_COUNT = 3;
+const LATEST = PUBLISHED.slice(0, LATEST_COUNT);
+const OLDER_PUBLISHED = PUBLISHED.slice(LATEST_COUNT);
 
-// status: Drafting — dev-only, excluded from a production build entirely.
-// The corpus currently has no Drafting Posts; these assertions are vacuous until
-// the next draft lands — add it here.
-const DRAFTS: { slug: string; title: string }[] = [];
-
-// status: Outline — also dev-only; a production build emits no page and never
-// references them anywhere public. Currently empty, same as DRAFTS.
-const OUTLINE: { slug: string; title: string }[] = [];
+// Fixture anchors. These name a *slug* deliberately — each one is the Post
+// chosen to exercise a particular behaviour — but everything else about them is
+// read from the corpus, so retitling or re-dating a Post never touches a test.
+const bySlug = (slug: string) => {
+  const post = PUBLISHED.find((p) => p.slug === slug);
+  if (!post) throw new Error(`fixture Post is no longer Published: ${slug}`);
+  return post;
+};
 
 // The launch Post exercises the rich pipeline end-to-end: an admonition callout
 // (mdast plugin, #16), self-hosted figures with lazy/async images (hast plugin,
 // #17), an auto-TOC past the heading threshold, and resolved related links. Its
 // assets live under assets/blog/<slug>/.
 const RICH = {
-  slug: "transformer-inference-prefill-and-decode",
-  title: "LLM Inference: The Life of a Request",
+  ...bySlug("transformer-inference-prefill-and-decode"),
   asset: "assets/blog/transformer-inference-prefill-and-decode/request-lifecycle.svg",
 };
 
 // The Dynamo fleet post carries an `updated` date later than `published`, so it
 // is the first Published Post to exercise the "Updated" byline surface (#7) and
-// the article:modified_time SEO tag (#8) end-to-end. The updatedIsoDay rule
-// (show only when updated > published) is unit-tested in post-list; this proves
-// the built page actually carries both.
+// the article:modified_time SEO tag (#8) end-to-end. The updatedIso/modifiedTime
+// agreement is unit-tested in post-detail; this proves the built page carries both.
+const UPDATED_POST = bySlug("distributed-inference-the-fleet");
 const UPDATED = {
-  slug: "distributed-inference-the-fleet",
-  day: "2026-08-28",
+  slug: UPDATED_POST.slug,
+  day: isoDay(UPDATED_POST.data.updated ?? UPDATED_POST.data.published),
 };
 
 describe("blog production build output", () => {
@@ -84,20 +82,20 @@ describe("blog production build output", () => {
   });
 
   itIf("lists every Published Post on the index and omits drafts/outlines", () => {
-    for (const post of PUBLISHED) expect(indexHtml).toContain(asHtml(post.title));
-    for (const post of [...DRAFTS, ...OUTLINE]) expect(indexHtml).not.toContain(asHtml(post.title));
+    for (const post of PUBLISHED) expect(indexHtml).toContain(asHtml(post.data.title));
+    for (const post of [...DRAFTS, ...OUTLINE]) expect(indexHtml).not.toContain(asHtml(post.data.title));
   });
 
   itIf("builds a detail page for each Published Post", async () => {
     for (const post of PUBLISHED) {
       const html = await Bun.file(`dist/blog/${post.slug}/index.html`).text();
-      expect(html).toContain(asHtml(post.title));
+      expect(html).toContain(asHtml(post.data.title));
     }
   });
 
   itIf("excludes every draft from the index and emits no draft page", async () => {
     for (const post of DRAFTS) {
-      expect(indexHtml).not.toContain(asHtml(post.title));
+      expect(indexHtml).not.toContain(asHtml(post.data.title));
       expect(await Bun.file(`dist/blog/${post.slug}/index.html`).exists()).toBe(false);
     }
   });
@@ -141,7 +139,7 @@ describe("blog production build output", () => {
   // article:modified_time.
   itIf("emits article SEO head tags on a Post detail page", async () => {
     const html = await Bun.file(`dist/blog/${RICH.slug}/index.html`).text();
-    expect(html).toContain(`<title>${RICH.title} | Tony Lee</title>`);
+    expect(html).toContain(`<title>${RICH.data.title} | Tony Lee</title>`);
     expect(html).toContain('name="description"');
     expect(html).toContain(`rel="canonical" href="https://tonylee.bio/blog/${RICH.slug}/"`);
     expect(html).toContain('property="og:type" content="article"');
@@ -173,7 +171,7 @@ describe("blog production build output", () => {
   itIf("emits an RSS 2.0 full-content feed, Published-only", async () => {
     const rss = await Bun.file("dist/rss.xml").text();
     expect(rss).toContain('<rss version="2.0"');
-    for (const post of PUBLISHED) expect(rss).toContain(`<title>${asRss(post.title)}</title>`);
+    for (const post of PUBLISHED) expect(rss).toContain(`<title>${asRss(post.data.title)}</title>`);
 
     // full content (not just summary): the rendered admonition callout (Sätteri
     // mdast plugin, #16) and a body phrase carry through, and the #6 self-hosted
@@ -182,7 +180,7 @@ describe("blog production build output", () => {
     expect(rss).toContain("memory bandwidth");
     expect(rss).toContain(`https://tonylee.bio/${RICH.asset}`);
 
-    for (const post of [...DRAFTS, ...OUTLINE]) expect(rss).not.toContain(asRss(post.title));
+    for (const post of [...DRAFTS, ...OUTLINE]) expect(rss).not.toContain(asRss(post.data.title));
   });
 
   // Issue #9: whole-site sitemap lists every public page + Published Post, no
@@ -296,7 +294,7 @@ describe("blog production build output", () => {
       expect(html).toContain(`href="/blog/${post.slug}"`);
     }
     for (const post of [...OLDER_PUBLISHED, ...DRAFTS, ...OUTLINE]) {
-      expect(html).not.toContain(asHtml(post.title));
+      expect(html).not.toContain(asHtml(post.data.title));
       expect(html).not.toContain(`/blog/${post.slug}`);
     }
   });
@@ -309,10 +307,10 @@ describe("blog production build output", () => {
     const rss = await Bun.file("dist/rss.xml").text();
     for (const post of OUTLINE) {
       expect(await Bun.file(`dist/blog/${post.slug}/index.html`).exists()).toBe(false);
-      expect(indexHtml).not.toContain(asHtml(post.title));
+      expect(indexHtml).not.toContain(asHtml(post.data.title));
       expect(sitemap).not.toContain(post.slug);
       expect(home).not.toContain(post.slug);
-      expect(rss).not.toContain(asRss(post.title));
+      expect(rss).not.toContain(asRss(post.data.title));
     }
   });
 });

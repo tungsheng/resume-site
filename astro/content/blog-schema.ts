@@ -41,10 +41,29 @@ export const blogPostSchema = z.object({
 
 export type BlogPostFrontmatter = z.infer<typeof blogPostSchema>;
 
+// Structural subset of Astro's CollectionEntry<"blog"> — the fields a
+// Projection reads. Declared here rather than imported so the Projections and
+// their tests never need the generated `astro:content` types, which resolve
+// only inside the Astro build (importing them puts a module in the untestable
+// bucket alongside posts.ts).
+export type PostEntry = {
+  id: string;
+  body?: string;
+  data: BlogPostFrontmatter;
+};
+
 // Derived (never authored): reading time from word count at ~220 wpm, min 1.
 export function readingTimeMinutes(body: string): number {
   const words = body.trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / 220));
+}
+
+// Derived (never authored): the UTC calendar day a Post carries in its meta
+// rail. Dates are authored as plain UTC calendar days — slice the ISO string
+// directly so no local timezone can shift the day. Shared by both Projections
+// and by the home "Latest writing" slice.
+export function isoDay(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 // Blog index ordering: newest Post first by `published`. Generic over the

@@ -3,6 +3,7 @@ import {
   POST_CATEGORIES,
   blogPostSchema,
   isPostVisible,
+  isoDay,
   readingTimeMinutes,
   selectLatest,
   sortByPublishedDesc,
@@ -10,6 +11,7 @@ import {
 import {
   REGISTERED_TAG_SLUGS,
   isRegisteredTag,
+  toTagChips,
   selectPostsWithTag,
   selectTagCounts,
   tagLabel,
@@ -128,6 +130,29 @@ describe("tag page selection (#48)", () => {
   });
 });
 
+describe("toTagChips (the one way to render a Tag)", () => {
+  test("resolves each slug to its label and canonical href, in authored order", () => {
+    expect(toTagChips(["moe", "kv-cache"])).toEqual([
+      { slug: "moe", label: "MoE", href: "/blog/tags/moe" },
+      { slug: "kv-cache", label: "KV cache", href: "/blog/tags/kv-cache" },
+    ]);
+  });
+
+  test("empty for a Post with no tags", () => {
+    expect(toTagChips(undefined)).toEqual([]);
+    expect(toTagChips([])).toEqual([]);
+  });
+
+  test("covers every registered slug — no tag can be unrenderable", () => {
+    const chips = toTagChips(REGISTERED_TAG_SLUGS);
+    expect(chips).toHaveLength(REGISTERED_TAG_SLUGS.length);
+    for (const chip of chips) {
+      expect(chip.label.length).toBeGreaterThan(0);
+      expect(chip.href).toBe(`/blog/tags/${chip.slug}`);
+    }
+  });
+});
+
 describe("readingTimeMinutes (derived, not authored)", () => {
   test("returns at least 1 minute for short bodies", () => {
     expect(readingTimeMinutes("one two three")).toBe(1);
@@ -137,6 +162,22 @@ describe("readingTimeMinutes (derived, not authored)", () => {
   test("computes ~220 wpm", () => {
     expect(readingTimeMinutes(Array(440).fill("word").join(" "))).toBe(2);
     expect(readingTimeMinutes(Array(1100).fill("word").join(" "))).toBe(5);
+  });
+});
+
+// Moved here from post-list.test.ts with the function itself: isoDay is shared
+// by both Projections and the home "Latest writing" slice, so it belongs with
+// the other derived-not-authored Post helpers.
+describe("isoDay (UTC calendar-day slice)", () => {
+  test("returns YYYY-MM-DD", () => {
+    expect(isoDay(new Date("2026-07-13"))).toBe("2026-07-13");
+  });
+
+  test("cannot shift the day across timezones — UTC midnight stays the authored day", () => {
+    // The off-by-one this guards: a local-time formatter west of UTC would
+    // render 2026-06-17 for this instant.
+    expect(isoDay(new Date("2026-06-18T00:00:00.000Z"))).toBe("2026-06-18");
+    expect(isoDay(new Date("2026-06-18T23:59:59.999Z"))).toBe("2026-06-18");
   });
 });
 

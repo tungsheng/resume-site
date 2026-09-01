@@ -10,6 +10,7 @@ import {
   type KatexStash,
 } from "../../astro/markdown/katex-protocol";
 import { hasMathDelimiter } from "../../astro/markdown/detect-math";
+import { toFeedHtml } from "../../astro/markdown/feed-html";
 import { degradeMathToTeX } from "../../astro/markdown/degrade-math-rss";
 
 // Issue #6 / ADR-0004 (#16): the two in-repo Markdown transforms are unit-tested
@@ -259,5 +260,64 @@ describe("degradeMathToTeX (RSS feed, #34)", () => {
   test("passes non-math HTML through untouched", () => {
     const html = '<p>Just prose with a <a href="/x">link</a> and <code>inline code</code>.</p>';
     expect(degradeMathToTeX(html)).toBe(html);
+  });
+});
+
+// The feed's HTML post-processing (#9 / #34). absolutizeUrls used to be a
+// private function inside the rss.xml route, so it had no tests at all while
+// its partner degradeMathToTeX (above) had six. Both now run behind one
+// interface, which is what makes these assertions possible.
+describe("toFeedHtml (rendered Post HTML → feed-ready HTML)", () => {
+  const site = new URL("https://tonylee.bio");
+
+  test("absolutizes root-relative links and assets for off-site readers", () => {
+    const out = toFeedHtml('<p><a href="/blog">b</a><img src="/assets/x.svg" /></p>', site);
+    expect(out).toContain('href="https://tonylee.bio/blog"');
+    expect(out).toContain('src="https://tonylee.bio/assets/x.svg"');
+  });
+
+  test("leaves absolute and anchor URLs alone", () => {
+    const html = '<a href="https://example.com/x">e</a><a href="#section">s</a>';
+    expect(toFeedHtml(html, site)).toBe(html);
+  });
+
+  // A Post that quotes a URL as code is talking ABOUT that URL. Rewriting it
+  // changes what the author wrote. Inline code spans are only entity-escaped,
+  // not tokenized, so `href="/` stays contiguous and the naive replaceAll used
+  // to rewrite it.
+  test("does NOT rewrite a URL quoted inside an inline code span", () => {
+    const out = toFeedHtml('<p>use <code>&lt;a href="/work"&gt;</code> here</p>', site);
+    expect(out).toContain('<code>&lt;a href="/work"&gt;</code>');
+    expect(out).not.toContain("tonylee.bio");
+  });
+
+  test("rewrites prose on both sides of a code span, but not the span itself", () => {
+    const out = toFeedHtml(
+      '<a href="/a">a</a><code>src="/keep"</code><img src="/b.svg" />',
+      site,
+    );
+    expect(out).toContain('href="https://tonylee.bio/a"');
+    expect(out).toContain('src="https://tonylee.bio/b.svg"');
+    expect(out).toContain('<code>src="/keep"</code>');
+  });
+
+  // Shiki splits `href`, `=` and `"/blog"` into separate spans, so the string
+  // was never contiguous inside a fenced block — but the <code> wrapper makes
+  // that independent of Shiki's tokenization.
+  test("leaves a Shiki-rendered fenced block untouched", () => {
+    const pre =
+      '<pre class="astro-code"><code><span class="line">' +
+      '<span> href</span><span>=</span><span>"/blog"</span></span></code></pre>';
+    expect(toFeedHtml(pre, site)).toBe(pre);
+  });
+
+  test("degrades math and absolutizes in one pass, protecting the emitted TeX", () => {
+    const katex =
+      '<a href="/blog">b</a> <span class="katex">' +
+      '<annotation encoding="application/x-tex">\\frac{a}{b}</annotation></span>';
+    const out = toFeedHtml(katex, site);
+    expect(out).toContain('href="https://tonylee.bio/blog"');
+    expect(out).toContain("<code>$\\frac{a}{b}$</code>");
+    expect(out).not.toContain('class="katex"');
   });
 });

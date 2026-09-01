@@ -22,3 +22,7 @@ _Avoid_: Keyword, Label
 
 **Status**:
 The lifecycle stage of a Post: `Outline` → `Drafting` → `Published`. The same Post moves through these stages; an Outline and a Published piece are the same kind of thing at different maturities. Only `Published` Posts are public — they alone appear in the Blog index, the feed, the sitemap, and to crawlers. `Outline` and `Drafting` Posts are visible only in local development.
+
+**Projection**:
+A pure module mapping a loaded Post to exactly what one surface renders — `toPostListItems` (`astro/content/post-list.ts`) for the Blog index, tag pages and the home "Latest writing" slice; `toPostDetail` (`astro/content/post-detail.ts`) for a Post page. A Projection owns what the **Post** decides (reading time, the Updated rule, the table of contents, related links); the page owns what the **site** decides (title suffixes, breadcrumbs, styling). Projections are Astro-runtime-free — they never import `astro:content`, which resolves only inside the build — so they are unit-testable. Derivation logic belongs in a Projection, never in `.astro` frontmatter, where no test can reach it.
+_Avoid_: View-model, Presenter, Mapper
