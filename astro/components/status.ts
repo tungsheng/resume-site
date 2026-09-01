@@ -1,3 +1,4 @@
+import { TONE } from "@design";
 import type { DecisionStatus, ExperimentReadinessTone } from "@site";
 
 // Unified 3-value status display for the work section. The data modules keep
@@ -6,10 +7,12 @@ import type { DecisionStatus, ExperimentReadinessTone } from "@site";
 // read at a glance, and the nuance stays in each record's call/evidence copy.
 export type UnifiedStatus = "Supported" | "Rejected" | "In progress";
 
+// The three status colours are the shared success/error/warning tones
+// (@design), the same ones the evidence bars use.
 const UNIFIED_COLOR: Record<UnifiedStatus, string> = {
-  Supported: "#006b40",
-  Rejected: "#b3261e",
-  "In progress": "#8a4413",
+  Supported: TONE.success,
+  Rejected: TONE.error,
+  "In progress": TONE.warning,
 };
 
 const DECISION_TO_UNIFIED: Record<DecisionStatus, UnifiedStatus> = {

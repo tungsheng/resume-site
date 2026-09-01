@@ -1,3 +1,4 @@
+import { CANVAS } from "@design";
 import { getResumePdfFontFaceCss, RESUME_PDF_FONT_FAMILY } from "./pdf-fonts";
 
 export function getResumeDocumentCss(): string {
@@ -18,19 +19,19 @@ body {
   margin: 0;
 }
 
-/* PDF palette tracks the editorial redesign tokens (ADR-0010): the new green
-   accent (#2f7d3b / #235e2c, AA on white) and warm neutral inks. It deliberately
-   KEEPS the print essentials that don't belong on paper stock — a white
-   background (ink cost / ATS) and the embedded Inter sans (scannability) — plus
-   the space-efficient two-column layout that fits one Letter page. Only the color
-   variables changed from the prior ADR-0005 theme. */
+/* PDF palette comes from the shared CANVAS tokens (@design), so it cannot drift
+   from the editorial redesign (ADR-0010) the way it did before b0acdc0 — these
+   six values used to be hardcoded here and were re-aligned by hand. The print
+   essentials that deliberately do NOT track the web stay local: a white
+   background (ink cost / ATS) and the embedded Inter sans (scannability), plus
+   the space-efficient two-column layout that fits one Letter page. */
 .resume-document {
-  --resume-accent: #2f7d3b;
-  --resume-accent-dark: #235e2c;
-  --resume-ink: #1c1b17;
-  --resume-muted: #6f6d68;
-  --resume-faint: #83817a;
-  --resume-rule: #e4e1da;
+  --resume-accent: ${CANVAS.accent};
+  --resume-accent-dark: ${CANVAS.accentDark};
+  --resume-ink: ${CANVAS.ink};
+  --resume-muted: ${CANVAS.muted};
+  --resume-faint: ${CANVAS.faint};
+  --resume-rule: ${CANVAS.rule};
   --ui-font: '${RESUME_PDF_FONT_FAMILY}', Arial, sans-serif;
   --page-x: 0.38in;
   --column-gap: 0.2in;
@@ -231,7 +232,7 @@ body {
   font-size: 8pt;
   line-height: 1.32;
   font-style: italic;
-  color: var(--resume-muted, #555);
+  color: var(--resume-muted);
 }
 
 .resume-document .project-list {
