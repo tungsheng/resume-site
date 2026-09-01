@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeAll } from "bun:test";
 import { $ } from "bun";
 import { readCorpus } from "../corpus";
-import { isoDay } from "../../astro/content/blog-schema";
+import { isoDay } from "../../astro/content/post";
 
 // Built-output assertions (PRD Seam 1) for Blog Status visibility (#5) and the
 // index ordering (#4): a production `astro build` excludes drafts from dist/

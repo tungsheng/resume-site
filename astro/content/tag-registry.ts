@@ -1,6 +1,6 @@
 // The governed Tag registry (ADR-0009 decision 1 / CONTEXT.md "Tag"): one
 // canonical kebab-case slug and one display label per topic. The frontmatter
-// schema (blog-schema.ts) validates every Post's tags against this set, so an
+// schema (post.ts) validates every Post's tags against this set, so an
 // unregistered or misspelled tag fails the build instead of silently forking
 // the vocabulary (`kv-cache` vs `KV cache`). Extend freely while writing — this
 // is an open registry, not a closed set like Category — but never register a
@@ -66,7 +66,7 @@ export function toTagChips(slugs: readonly TagSlug[] | undefined): TagChip[] {
 
 // The Posts carrying a tag, for /blog/tags/[tag] (#48). Generic over the entry
 // shape so it is unit-testable without the Astro runtime (same pattern as
-// sortByPublishedDesc in blog-schema.ts).
+// sortByPublishedDesc in post.ts).
 export function selectPostsWithTag<T extends { data: { tags?: string[] } }>(
   posts: T[],
   slug: TagSlug,

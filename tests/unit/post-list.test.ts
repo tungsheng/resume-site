@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { toPostListItems, type PostListEntry } from "../../astro/content/post-list";
-import type { BlogPostFrontmatter } from "../../astro/content/blog-schema";
+import type { BlogPostFrontmatter } from "../../astro/content/post";
 
 // The Post-list Projection — previously copy-pasted across five .astro
 // frontmatter blocks where no unit test could reach it. isoDay moved to
-// blog-schema.ts (shared with the detail Projection and the home slice) and
+// post.ts (shared with the detail Projection and the home slice) and
 // updatedIsoDay to post-detail.ts (its only consumer); both are asserted there.
 
 const data = (over: Partial<BlogPostFrontmatter>): BlogPostFrontmatter => ({

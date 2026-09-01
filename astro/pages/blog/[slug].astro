@@ -2,7 +2,7 @@
 import { render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { toPostDetail } from "../../content/post-detail";
-import { getVisiblePosts } from "../../content/posts";
+import { getVisiblePosts } from "../../content/visible-posts";
 
 // Prerender a Post at /blog/<slug>. Visibility by Status (ADR-0003 §8) comes
 // from the shared getVisiblePosts seam, exactly like the /blog index, the tag

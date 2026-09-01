@@ -6,7 +6,7 @@ import {
   projectPortfolioContent,
   type ProjectId,
 } from "@site";
-import type { BlogPostFrontmatter } from "./blog-schema";
+import type { BlogPostFrontmatter } from "./post";
 
 // Resolve a Post's optional `related` frontmatter (#7) into concrete links.
 // Resolves defensively: an author typo in an id is skipped, never a build crash

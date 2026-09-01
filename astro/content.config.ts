@@ -1,6 +1,6 @@
 import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
-import { blogPostSchema } from "./content/blog-schema";
+import { blogPostSchema } from "./content/post";
 
 // Blog Posts are Markdown files in content/blog/<slug>.md (ADR-0001). The glob
 // loader's entry id is the filename without extension — that IS the slug.

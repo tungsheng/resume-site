@@ -2,8 +2,8 @@ import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { render } from "astro:content";
-import { sortByPublishedDesc } from "../content/blog-schema";
-import { getVisiblePosts } from "../content/posts";
+import { sortByPublishedDesc } from "../content/post";
+import { getVisiblePosts } from "../content/visible-posts";
 import { toFeedHtml } from "../markdown/feed-html";
 
 // Full-content RSS 2.0 feed at /rss.xml (#9). Published Posts only, newest-first
