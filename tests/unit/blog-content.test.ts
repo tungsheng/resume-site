@@ -7,7 +7,7 @@ import {
   readingTimeMinutes,
   selectLatest,
   sortByPublishedDesc,
-} from "../../astro/content/blog-schema";
+} from "../../astro/content/post";
 import {
   REGISTERED_TAG_SLUGS,
   isRegisteredTag,

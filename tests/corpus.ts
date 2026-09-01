@@ -4,7 +4,7 @@ import {
   blogPostSchema,
   sortByPublishedDesc,
   type BlogPostFrontmatter,
-} from "../astro/content/blog-schema";
+} from "../astro/content/post";
 
 // The Blog corpus, read from the Markdown on disk and partitioned by Status.
 //

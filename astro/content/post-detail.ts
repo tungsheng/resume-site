@@ -1,5 +1,5 @@
-import type { BlogPostFrontmatter, PostEntry, PostHeading } from "./blog-schema";
-import { isoDay, readingTimeMinutes, selectTocHeadings, shouldShowToc } from "./blog-schema";
+import type { BlogPostFrontmatter, PostEntry, PostHeading } from "./post";
+import { isoDay, readingTimeMinutes, selectTocHeadings, shouldShowToc } from "./post";
 import { resolveRelatedLinks, type RelatedLink } from "./related-links";
 import { toTagChips, type TagChip } from "./tag-registry";
 import { hasMathDelimiter } from "../markdown/detect-math";
@@ -9,7 +9,7 @@ import { hasMathDelimiter } from "../markdown/detect-math";
 // surface that shows a single Post in full. Pure + Astro-runtime-free, so the
 // composition is unit-testable; `headings` is passed in rather than obtained
 // here because Astro's render() lives behind `astro:content`, which resolves
-// only inside the build (see PostEntry in blog-schema.ts).
+// only inside the build (see PostEntry in post.ts).
 //
 // This replaces eight derivations hand-wired in [slug].astro's frontmatter,
 // where no unit test could reach them. Each individual rule was already

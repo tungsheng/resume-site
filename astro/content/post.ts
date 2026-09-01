@@ -1,6 +1,20 @@
 import { z } from "zod";
 import { isRegisteredTag } from "./tag-registry";
 
+// The Post (CONTEXT.md): what one is, and everything derived from one that is
+// not a Projection. The Zod schema and the frontmatter type are bound together
+// by z.infer, and every helper below operates on that type, so this is one
+// concept rather than a schema with an attic.
+//
+// Was blog-schema.ts. The name had stopped describing the contents — the schema
+// was the minority of a file called "schema" — and "blog-" was a prefix no
+// sibling in this directory used. Renaming it to `post.ts` also meant renaming
+// posts.ts to visible-posts.ts: `post.ts` and `posts.ts` sitting side by side,
+// one letter apart, would have been a worse trap than the problem being fixed.
+//
+// The family: post.ts (what a Post is) · visible-posts.ts (which ones are
+// public) · post-list.ts and post-detail.ts (the Projections).
+
 // Authored frontmatter for a Blog Post (ADR-0001 / CONTEXT.md vocabulary).
 // Shared by the Astro content collection (astro/content.config.ts) and the unit
 // tests so the schema is asserted directly, not only through the build.

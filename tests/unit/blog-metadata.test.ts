@@ -3,7 +3,7 @@ import {
   selectTocHeadings,
   shouldShowToc,
   TOC_MIN_HEADINGS,
-} from "../../astro/content/blog-schema";
+} from "../../astro/content/post";
 import { resolveRelatedLinks } from "../../astro/content/related-links";
 
 // Issue #7: TOC threshold + related-link resolution are pure helpers, tested

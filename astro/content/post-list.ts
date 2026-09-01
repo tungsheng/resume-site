@@ -1,5 +1,5 @@
-import type { PostEntry, BlogPostFrontmatter } from "./blog-schema";
-import { isoDay, readingTimeMinutes, sortByPublishedDesc } from "./blog-schema";
+import type { PostEntry, BlogPostFrontmatter } from "./post";
+import { isoDay, readingTimeMinutes, sortByPublishedDesc } from "./post";
 import { toTagChips, type TagChip } from "./tag-registry";
 
 // The Post-list Projection (CONTEXT.md): the one mapping from a collection
@@ -10,7 +10,7 @@ import { toTagChips, type TagChip } from "./tag-registry";
 // Pure + Astro-runtime-free, like the rest of astro/content.
 //
 // Its detail-surface twin is post-detail.ts. Helpers shared by both (the entry
-// shape, isoDay) live in blog-schema.ts; helpers only one surface uses live
+// shape, isoDay) live in post.ts; helpers only one surface uses live
 // with that surface's Projection.
 
 // The entry shape is shared with the detail Projection.

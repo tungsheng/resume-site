@@ -4,7 +4,7 @@ import {
   updatedIsoDay,
   type PostDetailEntry,
 } from "../../astro/content/post-detail";
-import type { BlogPostFrontmatter, PostHeading } from "../../astro/content/blog-schema";
+import type { BlogPostFrontmatter, PostHeading } from "../../astro/content/post";
 
 // The Post-detail Projection. Every rule it composes is already asserted
 // elsewhere — readingTimeMinutes and isoDay in blog-content, hasMathDelimiter
