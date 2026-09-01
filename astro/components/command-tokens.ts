@@ -25,9 +25,22 @@ export type Kind =
 
 export type Token = { kind: Kind; text: string };
 
-// Split into whitespace runs, operators, comments, quoted strings, and bare
-// words — keeping whitespace as tokens so the rendered line preserves spacing.
-const PARTS = /\s+|&&|\|\||[|;<>]=?|#[^\n]*|"[^"]*"|'[^']*'|[^\s|;&<>]+/g;
+// Split into whitespace runs, placeholders, operators, comments, quoted
+// strings, and bare words — keeping whitespace as tokens so the rendered line
+// preserves spacing.
+//
+// PLACEHOLDER must precede the operator alternative: alternation is ordered, so
+// without it `<run-id>` is torn into `<` + `run-id` + `>` as though the angle
+// brackets were shell redirects. A real redirect (`cmd > out.txt`) has no
+// closing bracket hugging a word, so it still falls through to the operator
+// case and stays a separator.
+const PLACEHOLDER = String.raw`<[A-Za-z0-9][A-Za-z0-9._-]*>`;
+const PARTS = new RegExp(
+  String.raw`\s+|${PLACEHOLDER}|&&|\|\||[|;<>]=?|#[^\n]*|"[^"]*"|'[^']*'|[^\s|;&<>]+`,
+  "g",
+);
+
+const IS_PLACEHOLDER = new RegExp(String.raw`^${PLACEHOLDER}$`);
 
 const SEPARATOR = /^(?:&&|\|\||[|;<>]=?)$/;
 const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
@@ -67,7 +80,21 @@ export function tokenize(command: string): Token[] {
       expectingValue = false;
       return { kind: "variable", text: part };
     }
-    if (QUOTED.test(part)) {
+    // `<run-id>` stands in for a value the reader supplies, so it reads as one.
+    if (IS_PLACEHOLDER.test(part) || QUOTED.test(part)) {
+      expectingProgram = false;
+      expectingValue = false;
+      return { kind: "value", text: part };
+    }
+    if (part.startsWith("-")) {
+      expectingProgram = false;
+      expectingValue = true;
+      return { kind: "flag", text: part };
+    }
+    // Checked BEFORE the path case: in `--out /tmp/x` the path is the flag's
+    // value, not a second program. Only a token in program position is a
+    // program.
+    if (expectingValue) {
       expectingProgram = false;
       expectingValue = false;
       return { kind: "value", text: part };
@@ -76,16 +103,6 @@ export function tokenize(command: string): Token[] {
       expectingProgram = false;
       expectingValue = false;
       return { kind: "program", text: part };
-    }
-    if (part.startsWith("-")) {
-      expectingProgram = false;
-      expectingValue = true;
-      return { kind: "flag", text: part };
-    }
-    if (expectingValue) {
-      expectingProgram = false;
-      expectingValue = false;
-      return { kind: "value", text: part };
     }
 
     expectingProgram = false;

@@ -113,30 +113,58 @@ describe("tokenize: structural guarantees", () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Current behaviour, NOT endorsed. Both of these are defects the extraction
-// made visible; they are pinned here so the fix is a deliberate, reviewable
-// change rather than an accident.
-describe("tokenize: known defects (documented, not endorsed)", () => {
-  // FIRES ON THE LIVE SITE: 15 of the 54 catalog commands use <placeholder>
-  // syntax, and 14 flags are currently coloured as program names because of it.
-  test("DEFECT: <placeholder> is split as shell redirects, mis-colouring the next flag", () => {
+// Both of these were defects the extraction made visible: the tokenizer was
+// unreachable from any test for as long as it existed, so nothing caught them.
+describe("tokenize: placeholders are values, not shell redirects", () => {
+  test("<placeholder> is one token, and the following flag stays a flag", () => {
     expect(kinds("cmd --id <id> --other")).toEqual([
       "cmd:program",
       "--id:flag",
-      "<:separator",
-      "id:program",
-      ">:separator",
-      "--other:program", // should be flag
+      "<id>:value",
+      "--other:flag",
     ]);
   });
 
-  // Latent: no catalog command currently passes a path as a flag value.
-  test("DEFECT: a path after a flag is a program, because the path branch wins", () => {
+  // The exact shape used across the experiment catalog. Before the fix this
+  // split into `<` + `run-id` + `>`, and because `>` leaves a program expected,
+  // --with-profiling rendered in program green. 14 flags were mis-coloured.
+  test("the real catalog shape colours every flag correctly", () => {
+    expect(kinds("./scripts/benchmark --run-id <run-id> --with-profiling")).toEqual([
+      "./scripts/benchmark:program",
+      "--run-id:flag",
+      "<run-id>:value",
+      "--with-profiling:flag",
+    ]);
+  });
+
+  // The fix must not swallow genuine redirects: those have no closing bracket
+  // hugging a word, so they fall through to the operator case.
+  test("a real redirect is still a separator", () => {
+    expect(only("cmd > out.txt", "separator")).toEqual([">"]);
+    expect(only("cmd < in.txt", "separator")).toEqual(["<"]);
+  });
+});
+
+describe("tokenize: a path in value position is a value", () => {
+  test("a path after a flag is that flag's value, not a second program", () => {
     expect(kinds("cmd --out /tmp/x")).toEqual([
       "cmd:program",
       "--out:flag",
-      "/tmp/x:program", // should be value
+      "/tmp/x:value",
+    ]);
+    expect(kinds("cmd --file ./x.json")).toEqual([
+      "cmd:program",
+      "--file:flag",
+      "./x.json:value",
+    ]);
+  });
+
+  test("a path in program position is still a program", () => {
+    expect(kinds("./run.sh")).toEqual(["./run.sh:program"]);
+    expect(kinds("a && /usr/bin/env")).toEqual([
+      "a:program",
+      "&&:separator",
+      "/usr/bin/env:program",
     ]);
   });
 });
