@@ -12,6 +12,25 @@ ignore the "don't use vite" guidance for this repo's build pipeline. Bun is the
 package manager, script runner, and test runner here; `Bun.serve()`/HTML-imports
 guidance applies only to standalone tooling scripts, never to the site.
 
+**Tailwind sources are scoped — two ways to silently generate no CSS.**
+`astro/styles/global.css` uses `@import "tailwindcss" source(none)` plus an
+explicit `@source` list (`../components`, `../layouts`, `../pages`). Automatic
+detection is off deliberately: it walked the whole repo, so non-template files
+fed the stylesheet — the word "lowercase" in a *test comment* once emitted a
+real `.lowercase` utility, and ordinary prose in blog posts and ADRs was
+generating `.fixed .grow .outline .rounded .shadow .transition` and more, ~11%
+of the bundle. Two consequences when writing markup:
+
+1. **Class names must appear as literal text.** Tailwind emits only what it can
+   find as a string in a scanned file, so `` `md:${x}:col-span-2` `` produces no
+   CSS. Write the full class and pick it with `class:list`.
+2. **New markup outside those three directories is not scanned.** Add its
+   directory to the `@source` list rather than removing the scoping.
+
+Both fail *silently* — the page renders unstyled rather than erroring. The
+reliable check is to build and diff `dist/` (or grep the built CSS for the
+utility); `bun run check` will not catch either.
+
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
