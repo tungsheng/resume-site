@@ -183,6 +183,48 @@ export async function generatePDF(html: string): Promise<Buffer> {
   }
 }
 
+// PDF date strings are fixed-width: D:YYYYMMDDHHmmSS+HH'mm'. Chrome stamps
+// /CreationDate and /ModDate with the moment of generation, which is the only
+// thing that differs between two builds of the same commit on the same machine
+// — two bytes, in the seconds field. That is enough to make the PDF impossible
+// to verify by comparison, so the build stamps a deterministic date instead.
+//
+// The replacement is the SAME LENGTH as what it replaces, deliberately: a PDF's
+// cross-reference table stores absolute byte offsets, so changing the length of
+// any object would corrupt the file. The length check below is load-bearing,
+// not defensive.
+const PDF_DATE = /D:\d{14}([+-]\d{2}'\d{2}'|Z)?/g;
+
+export function formatPdfDate(date: Date): string {
+  const p = (n: number, w = 2) => String(n).padStart(w, "0");
+  return (
+    `D:${date.getUTCFullYear()}${p(date.getUTCMonth() + 1)}${p(date.getUTCDate())}` +
+    `${p(date.getUTCHours())}${p(date.getUTCMinutes())}${p(date.getUTCSeconds())}+00'00'`
+  );
+}
+
+// Rewrite every PDF date string to `date`. Returns the buffer unchanged when it
+// carries no dates. Throws rather than silently corrupting the file if a
+// replacement would change the byte length.
+export function normalizePdfTimestamps(pdf: Buffer, date: Date): Buffer {
+  const stamp = formatPdfDate(date);
+  const text = pdf.toString("latin1");
+  const out = text.replace(PDF_DATE, (match) => {
+    // A date without an explicit offset is shorter; pad to match so byte
+    // offsets in the xref table stay valid.
+    if (match.length === stamp.length) return stamp;
+    if (match.length < stamp.length) return match; // leave short forms alone
+    throw new Error(
+      `PDF date replacement would change length (${match.length} -> ${stamp.length})`,
+    );
+  });
+  const result = Buffer.from(out, "latin1");
+  if (result.length !== pdf.length) {
+    throw new Error(`normalizePdfTimestamps changed PDF length: ${pdf.length} -> ${result.length}`);
+  }
+  return result;
+}
+
 export async function closePDFBrowser(): Promise<void> {
   if (browser?.connected) {
     await browser.close();
