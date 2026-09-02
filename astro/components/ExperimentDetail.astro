@@ -103,7 +103,18 @@ const summaryFacts = [
 
 // Swiss idioms (ADR-0005 / #21): hairline spec-sheet grids, hairline-left accent/
 // warning blocks, tone-colored mono labels, .cta links.
+// Hairline grid: the container paints the rule colour and `gap-px` lets it show
+// through between cells, which each carry their own bg-paper. The consequence is
+// that an EMPTY track has nothing painted over it and reads as a solid grey
+// panel — so any 2-column use of this needs the last item to span both columns
+// when the count is odd (see spanLastWhenOdd below).
 const grid = "grid gap-px border border-surface-border bg-surface-border";
+
+// Class strings are written out in full rather than built from parts: Tailwind
+// only emits utilities it can find as literal text in a scanned file, so an
+// interpolated variant would silently produce no CSS.
+const spanLastAtMd = "md:[&>*:last-child]:col-span-2";
+const spanLastAtLg = "lg:[&>*:last-child]:col-span-2";
 const cell = "bg-paper p-4 grid content-start";
 const accentBlock = "border-l-2 border-l-go-green pl-4";
 const warnBlock = "border-l-2 border-l-warning-warm/70 pl-4";
@@ -252,7 +263,13 @@ const tableCols = "md:grid-cols-[minmax(7rem,0.9fr)_minmax(10rem,1fr)_repeat(3,m
           {experiment.pendingNextRuns && experiment.pendingNextRuns.length > 0 && (
             <div class="mt-4">
               <p class="eyebrow mb-2">Next runs to curate</p>
-              <div class={`${grid} lg:grid-cols-2`}>
+              <div
+                class:list={[
+                  grid,
+                  "lg:grid-cols-2",
+                  experiment.pendingNextRuns.length % 2 === 1 && spanLastAtLg,
+                ]}
+              >
                 {experiment.pendingNextRuns.map((run) => (
                   <div class={`${cell} gap-2`}>
                     <p class="text-[0.97rem] font-semibold text-ink">{run.label}</p>
@@ -281,7 +298,9 @@ const tableCols = "md:grid-cols-[minmax(7rem,0.9fr)_minmax(10rem,1fr)_repeat(3,m
         <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">
           Decision records own the project conclusions; this experiment supplies evidence for the calls below.
         </p>
-        <div class={`${grid} md:grid-cols-2`}>
+        <div
+          class:list={[grid, "md:grid-cols-2", relatedDecisions.length % 2 === 1 && spanLastAtMd]}
+        >
           {relatedDecisions.map((decision) => (
             <section class={`${cell} gap-2`}>
               <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
