@@ -1362,3 +1362,125 @@ two-column layout — print/ATS essentials that shouldn't track the warm-paper w
 Rebuilt + eyeballed the PDF: kicker/company names/bullets now the brand green.
 public/resume.pdf is gitignored (regenerated at build), so only the source
 changed. Validation: typecheck ✓ · 80 unit ✓ · full build ✓ · 29 integration ✓.
+
+
+#############################################################################
+ARCHITECTURE REVIEWS + CLEANUP (2026-09-01/02) — ten PRs, #69 and #71-#79
+#############################################################################
+Two architecture-review passes over the Blog and work sections, scoped by
+churn each time (the second pass EXCLUDED the first pass's commits, so the
+analysis wouldn't just point back at its own work). Everything below is
+behaviour-preserving unless marked otherwise, verified by byte-diffing dist/
+against a build of main.
+
+PASS 1 — the Blog pipeline (#69, issue #70)
+  * SEAM CLOSED: blog/[slug].astro re-implemented the getCollection + Status
+    filter inline while five other surfaces used getVisiblePosts. The two were
+    byte-identical, so the fix is a no-op; the point is they can no longer stop
+    being identical.
+  * PROJECTION extracted: [slug].astro hand-wired eight derivations in
+    frontmatter, one of which (modifiedTime={updatedLabel ? updated :
+    undefined}) restated the "updated is meaningfully later" rule updatedIsoDay
+    already owned. post-detail.ts now derives updatedIso and modifiedTime from
+    ONE predicate. Helpers followed their consumers: PostEntry + isoDay ->
+    blog-schema (shared), updatedIsoDay -> post-detail (its only consumer).
+  * TAG CHIPS: the schema validates tags with a type predicate, so data.tags is
+    ALREADY TagSlug[] — the .filter(isRegisteredTag) at both render sites was a
+    runtime no-op AND type-redundant. toTagChips() now owns slug->label->href;
+    render sites import nothing from tag-registry.
+  * TEST CORPUS DERIVED: blog-build.test.ts carried a hand-typed list of every
+    Published Post, so WRITING A POST EDITED A TEST (its history reads draft X
+    -> publish X -> draft Y...). Worse, DRAFTS/OUTLINE were maintained by hand
+    and therefore EMPTY — the Status rule the suite exists to protect was
+    asserted over nothing. tests/corpus.ts reads frontmatter through the real
+    schema. Proved it arms: planting a Drafting post took expect() calls 148 ->
+    155, seven assertions that had never once run.
+  * FEED SEAM + A REAL BUG: absolutizeUrls was private inside the rss route and
+    untested while its partner degradeMathToTeX had six tests. feed-html.ts owns
+    both — and the first tests found that a URL quoted in an INLINE CODE SPAN
+    was being rewritten (`<a href="/work">` shipped as tonylee.bio/work in the
+    feed). Fenced blocks were never affected: Shiki tokenises, so the string is
+    never contiguous. Absolutization now skips every <code> region.
+  * CONTEXT.md gained **Projection**, naming the pattern and the rule that keeps
+    it from eroding: derivations belong in a Projection, never in .astro
+    frontmatter where no test can reach them.
+
+PASS 2 — site chrome, work section, design tokens (#71-#79, issue #73)
+  * SHELL TOKENIZER (#71): CommandCodeBlock.astro carried a real lexer in
+    frontmatter — 8 token kinds, 2 flags carried across tokens, colouring 54
+    catalog commands, ZERO tests (a function in .astro frontmatter cannot be
+    imported). Extracted verbatim (proved: 54 commands, 0 token-stream diffs).
+    Its first tests found TWO defects, one LIVE: <run-id> was torn apart as
+    shell redirects and, because `>` leaves a program expected, the FOLLOWING
+    flag rendered in program green — 14 flags mis-coloured across 15 commands.
+    Also fixed: a path after a flag (--out /tmp/x) coloured as a program.
+  * ONE PALETTE (#72): nine hex values defined twice under different names.
+    NOT hypothetical — b0acdc0 (the entry above this one) exists because the
+    PDF silently kept the old palette after ADR-0010. Turned out to be TWO
+    problems: CANVAS mirrors global.css's @theme (which must stay literal CSS
+    for Tailwind) and is held honest by a test that parses it; TONE is inline-
+    style only, never in CSS, so @design is its sole source. New @design alias.
+  * HEAD TAGS (#74): BaseLayout was the hottest file left and untestable — 241
+    lines, 13 Props, and four separately-written `isArticle &&` guards. One gate
+    now, in head-tags.ts. Tests pin the failure mode those guards risked: a
+    website page handed article data emits no article:* tag at all.
+  * POST MODULE NAMING (#75): blog-schema.ts had stopped describing itself (the
+    schema was the minority of a file called "schema"). Renamed to post.ts —
+    which FORCED a second rename, since post.ts beside posts.ts, one letter
+    apart, is a worse trap. posts.ts -> visible-posts.ts, which is what it was
+    always about. Family now reads one idea per file.
+  * DROPPED HAST TRANSFORMS (#76): 8 Sätteri warnings every build. Investigated
+    BEFORE changing anything — output was never wrong (all 30 images carry
+    lazy/async), and the per-post dropped counts matched the per-post image
+    counts exactly, which identified the cause: the filter matches both <p> and
+    <img>, so a lone-image paragraph queues two transforms for the same image
+    and the paragraph replacement invalidates one. Correct output, but 8
+    warnings of noise is how a REAL dropped transform gets ignored.
+  * TAILWIND SOURCES SCOPED (#77): automatic content detection walked the whole
+    repo, so non-template files fed the stylesheet — the word "lowercase" in a
+    TEST COMMENT emitted a real .lowercase utility. Scoping removed 34 rules /
+    3,130 bytes (~11%): .fixed .grow .outline .rounded .shadow .transition and
+    friends, all generated from ordinary prose in posts and ADRs. Verified
+    nothing real was lost by extracting every class used across all 63 pages vs
+    every class defined (58 unstyled before, 58 after, zero newly unmatched).
+  * GREY PANEL (#78): found by actually LOOKING at the deployed site. The
+    hairline grid paints bg-surface-border on the container, so an EMPTY track
+    reads as a solid grey panel — 13 of 16 experiment pages had one. Last item
+    now spans both columns when the count is odd.
+  * CLAUDE.md (#79): recorded the Tailwind gotcha, incl. the trap #78 hit — a
+    class built by interpolation is never emitted, because Tailwind only sees
+    literal text. Both failure modes are SILENT and bun run check passes either
+    way, so the note names build-and-diff-dist as the real check.
+
+DECLINED TWICE, on churn (recorded in #73 "Out of scope", not oversights)
+  * @site's export * barrel — sharper asymmetry with @resume now, but the
+    deletion test says it MOVES complexity rather than concentrating it, and the
+    work section changed twice in 120 commits.
+  * experiment-catalog-content.ts (2,740 lines) — largest module, coldest by
+    churn, untested. If it warms up the first move is a referential-integrity
+    test, not a restructure.
+
+CLEANUP / AUDIT (2026-09-02)
+  * Audit found no stray files, no stale references from the renames, and no
+    dead exports (the only unimported one is `collections`, which Astro itself
+    consumes).
+  * ORPHANED WORKTREE deleted: .claude/worktrees/feat+distributed-inference-
+    fleet, 49MB / 4,696 files, gitignored, with a .git pointing at a gitdir that
+    no longer existed (so `git worktree list` didn't know it and prune couldn't
+    help). Verified safe first: all 84 of its source/content files resolve in
+    the git object db, and its one differing blog post is byte-identical to
+    ce6e01b. Nothing unique.
+  * RESUME PDF MADE REPRODUCIBLE (per platform): Chrome stamps /CreationDate and
+    /ModDate with generation time, so two builds of the SAME commit differed by
+    two bytes — leaving the one artifact a recruiter downloads the only one that
+    couldn't be verified by comparison. Now stamped with the commit date
+    (SOURCE_DATE_EPOCH honoured), replaced at identical byte length because the
+    xref table stores absolute offsets.
+    NOT fixable: cross-platform. CI (Linux) and local (macOS) run the SAME
+    Chrome (Skia/PDF m152) but /Creator embeds the user agent and Skia
+    instantiates the Inter variable font differently — locally the subsets carry
+    axis names (InterVariable_opsz200000_wght2580000, -Medium, -SemiBold), on CI
+    they are all plain InterVariable. 76KB apart, RENDERING IDENTICALLY:
+    rasterised both, ink coverage 60,652 vs 60,648 dark px (0.01%), differences
+    spread evenly across every text band = sub-pixel positioning, not missing
+    weights.
