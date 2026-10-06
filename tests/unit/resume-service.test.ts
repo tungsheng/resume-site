@@ -19,10 +19,10 @@ describe("Resume Service", () => {
     expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("CI/CD Automation");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("AWS (VPC, IAM, EC2, ALB)");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("DCGM Exporter");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM / LLM Serving");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("CUDA / Triton Benchmarking");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Inference Load Testing (k6)");
-    // Deep-mechanism specialties dropped from Skills (too scrutiny-heavy to assert as skills).
+    // Keep broad expertise claims out of Skills; named lab tools have portfolio evidence.
     const allSkills = Object.values(publicResumeData.skills).flat();
     expect(allSkills).not.toContain("Kernel Fusion");
     expect(allSkills).not.toContain("GPU Profiling");
@@ -30,9 +30,9 @@ describe("Resume Service", () => {
     expect(publicResumeData.projects?.title).toBe("ML Inference — Self-Directed (2025–Present)");
     expect(publicResumeData.projects?.note).toContain("negative results");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
-    expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(2);
+    expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(3);
     expect(publicResumeData.projects?.items[1]?.title).toBe("CUDA/Triton GPU Kernel Lab (PyTorch baselines + A10G/H200)");
-    expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(2);
+    expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(3);
   });
 
   test("renderResumeHtmlDocument creates valid HTML", () => {

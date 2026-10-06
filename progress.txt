@@ -1484,3 +1484,44 @@ CLEANUP / AUDIT (2026-09-02)
     rasterised both, ink coverage 60,652 vs 60,648 dark px (0.01%), differences
     spread evenly across every text band = sub-pixel positioning, not missing
     weights.
+
+--------------------------------------------------------------------------------
+2026-10-06 — Tailor resume for Microsoft AI inference performance
+--------------------------------------------------------------------------------
+Created codex/microsoft-performance-resume from main at 369e035.
+Target: Senior and/or Principal Software Engineer - Performance, Microsoft's
+Artificial Intelligence Performance team, job number 200045617 (posted Oct 2).
+Source reviewed Oct 6, 2026:
+  https://apply.careers.microsoft.com/careers/job/1970393556945456
+The posting emphasizes end-to-end LLM inference performance, GPU benchmarking,
+performance tooling, deployment efficiency, and internal/external collaboration.
+
+Updated the shared resume data (web + downloadable PDF):
+  * Rewrote the summary around production delivery and the self-directed
+    transition into inference performance; surfaced the A10G RMSNorm result.
+  * Prioritized Python, performance, architecture, and collaboration in the
+    professional skills. Added PyTorch and Nsight Compute to the lab skills,
+    with CUDA/Triton, vLLM, and latency/throughput analysis near the top.
+  * Expanded each lab to three bullets: tooling, measured bottlenecks/results,
+    and decisions. Kept workload/hardware qualifiers and negative results.
+  * Consolidated DTEX and Cisco to three bullets each, retaining delivery,
+    collaboration, automation, and the existing quantified outcomes.
+  * Updated existing resume-content assertions for the combined vLLM skill
+    label and three project bullets; retained the production/lab distinction.
+
+Evidence for added specificity is already in the portfolio:
+  * experiment-catalog-content.ts / kv-cache: 8,192 prompt / 300 output tokens
+    at 1.20 req/s, p95 queue 36.93s and p95 decode 29.43s.
+  * decision-content.ts / fp8-kv-g4dn: 47.58-69.12% delivery vs 100% baseline.
+  * experiment-catalog-content.ts / kernel-normalization-fusion: 5.901x over
+    PyTorch for fused Triton RMSNorm on A10G, fp16, 4096x8192.
+  * kernel-profiler-validation: Nsight Compute memory/occupancy analysis.
+  * kernel-h200-matmul-autotune: ~88-90% of PyTorch/cuBLAS throughput, with
+    slower persistent-wave variants preserved as measured non-wins.
+No new employment, production ML, Azure/AMD, or large-fleet ownership claims.
+
+Validation: bun run check (typecheck + 159 unit tests), bun run build, and
+bun run test:integration (30 tests) all passed. PDF integration confirms one
+Letter page at natural scale; rendered PNG inspected for clipping, overlap,
+and legibility, and extracted text checked for all revised content.
+public/resume.pdf was regenerated and remains gitignored by design.
