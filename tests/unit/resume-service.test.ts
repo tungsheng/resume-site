@@ -9,6 +9,11 @@ describe("Resume Service", () => {
     expect(publicResumeData.header.badges).toContain("Staff Full-Stack Engineer → ML Inference");
     expect(publicResumeData.header.badges).not.toContain("ML Inference Performance Engineering");
     expect(publicResumeData.header.contacts.website).toBe("tonylee.bio");
+    // The lab evidence is public on GitHub; reviewers should be one click away.
+    expect(publicResumeData.header.contacts.github).toBe("tungsheng");
+    // The web /resume page renders this exact closing clause as an italic accent
+    // and silently drops the accent if the phrase changes.
+    expect(publicResumeData.header.summary.endsWith("measured honestly, negative results included.")).toBe(true);
     // Skills split into two buckets: Professional (paid) vs Self-Directed / Lab (unpaid).
     expect(Object.keys(publicResumeData.skills)).toEqual([
       "Professional (Production Experience)",
@@ -20,19 +25,24 @@ describe("Resume Service", () => {
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("AWS (VPC, IAM, EC2, ALB)");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("DCGM Exporter");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM / LLM Serving");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("CUDA / Triton Benchmarking");
+    // The kernels are Triton; "CUDA" is claimed only where it is literally true.
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Triton Kernel Benchmarking");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("CUDA Graphs");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Inference Load Testing (k6)");
     // Keep broad expertise claims out of Skills; named lab tools have portfolio evidence.
     const allSkills = Object.values(publicResumeData.skills).flat();
     expect(allSkills).not.toContain("Kernel Fusion");
     expect(allSkills).not.toContain("GPU Profiling");
+    // Nsight Compute counters exist for A10G only, so it lives in a bullet beside
+    // the counters measured, not as a standalone (profiling-proficiency) skill.
+    expect(allSkills).not.toContain("Nsight Compute");
     // Labs are a clearly-labeled self-directed section, with an honesty note.
     expect(publicResumeData.projects?.title).toBe("ML Inference — Self-Directed (2025–Present)");
     expect(publicResumeData.projects?.note).toContain("negative results");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
-    expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(3);
-    expect(publicResumeData.projects?.items[1]?.title).toBe("CUDA/Triton GPU Kernel Lab (PyTorch baselines + A10G/H200)");
-    expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(3);
+    expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(4);
+    expect(publicResumeData.projects?.items[1]?.title).toBe("Triton GPU Kernel Lab (NVIDIA A10G + H200, PyTorch/cuBLAS baselines)");
+    expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(4);
   });
 
   test("renderResumeHtmlDocument creates valid HTML", () => {

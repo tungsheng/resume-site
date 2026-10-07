@@ -219,6 +219,10 @@ body {
   color: var(--resume-ink);
 }
 
+.resume-document .skill-item {
+  white-space: nowrap;
+}
+
 .resume-document .summary {
   margin: 0;
   font-size: 8.75pt;
@@ -281,18 +285,17 @@ body {
   min-width: 0;
 }
 
-.resume-document .experience-list {
-  position: relative;
-}
-
-/* Swiss: drop the decorative timeline rail + dots; entries stand on spacing. */
+/* Swiss: drop the decorative timeline rail + dots; entries stand on spacing.
+   No position: relative on the list or items — that only anchored the rail and
+   dots, and positioned boxes paint after in-flow content, so Chrome wrote the
+   self-directed labs into the PDF text stream ahead of every job. Parsers that
+   read stream order then filed the labs under "Work Experience". */
 .resume-document .experience-rail {
   display: none;
 }
 
 .resume-document .experience-item {
   margin-bottom: var(--experience-gap);
-  position: relative;
   padding-left: 0;
 }
 

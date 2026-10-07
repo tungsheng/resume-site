@@ -72,6 +72,39 @@ describe("ResumeView", () => {
     expect(html).toContain("linkedin.com/in/tony lee/dev");
   });
 
+  test("links a GitHub handle the same way, and omits the row without one", () => {
+    const withGithub = renderToStaticMarkup(
+      <ResumeDocument
+        data={{
+          ...sampleResume,
+          header: {
+            ...sampleResume.header,
+            contacts: { ...sampleResume.header.contacts, github: "tony lee" },
+          },
+        }}
+      />
+    );
+
+    expect(withGithub).toContain("href=\"https://github.com/tony%20lee\"");
+    expect(withGithub).toContain("github.com/tony lee");
+
+    const withoutGithub = renderToStaticMarkup(<ResumeDocument data={sampleResume} />);
+    expect(withoutGithub).not.toContain("github.com");
+  });
+
+  test("renders each skill as its own unit, separator trailing, so the sidebar never splits a skill", () => {
+    const html = renderToStaticMarkup(
+      <ResumeDocument
+        data={{ ...sampleResume, skills: { Lab: ["CUDA Graphs", "AWS (VPC, IAM)", "Go"] } }}
+      />
+    );
+
+    expect(html).toContain('<span class="skill-item">CUDA Graphs •</span>');
+    expect(html).toContain('<span class="skill-item">AWS (VPC, IAM) •</span>');
+    // The last item carries no dangling separator.
+    expect(html).toContain('<span class="skill-item">Go</span>');
+  });
+
   test("renders project sections with escaped titles", () => {
     const html = renderToStaticMarkup(
       <ResumeDocument data={sampleResume} />
