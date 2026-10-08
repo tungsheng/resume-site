@@ -1,5 +1,9 @@
 import { CANVAS } from "@design";
-import { getResumePdfFontFaceCss, RESUME_PDF_FONT_FAMILY } from "./pdf-fonts";
+import {
+  getResumePdfFontFaceCss,
+  RESUME_PDF_DISPLAY_FONT_FAMILY,
+  RESUME_PDF_FONT_FAMILY,
+} from "./pdf-fonts";
 
 export function getResumeDocumentCss(): string {
   return `${getResumePdfFontFaceCss()}
@@ -33,6 +37,7 @@ body {
   --resume-faint: ${CANVAS.faint};
   --resume-rule: ${CANVAS.rule};
   --ui-font: '${RESUME_PDF_FONT_FAMILY}', Arial, sans-serif;
+  --display-font: '${RESUME_PDF_DISPLAY_FONT_FAMILY}', var(--ui-font);
   --page-x: 0.38in;
   --column-gap: 0.2in;
   --sidebar-width: 2.05in;
@@ -96,7 +101,7 @@ body {
   letter-spacing: -0.3px;
   text-transform: none;
   color: var(--resume-ink);
-  font-family: var(--ui-font);
+  font-family: var(--display-font);
   line-height: 1;
 }
 

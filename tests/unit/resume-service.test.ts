@@ -95,8 +95,26 @@ describe("Resume Service", () => {
 
     expect(html).toContain("@font-face");
     expect(html).toContain("font-family: 'ResumePDFSans'");
-    expect(embeddedFontCount).toBe(2);
+    // Static Inter instances (Regular, Medium, SemiBold, Italic, Display
+    // SemiBold), not the variable font, which Chrome writes as Type 3.
+    expect(embeddedFontCount).toBe(5);
     expect(html).not.toContain("'Avenir Next'");
+  });
+
+  test("every font-weight the PDF CSS uses has an embedded face", () => {
+    // With static faces Chrome never fails on a missing weight: it synthesizes
+    // bolder weights and maps lighter ones to the nearest face. This catches the
+    // common slip (a new font-weight in the PDF CSS); it does not check
+    // family/style combinations such as a 600 italic.
+    const html = renderResumeHtmlDocument(publicResumeData);
+    const faceBlocks = /@font-face \{[^}]*\}/g;
+    const weights = (css: string) =>
+      new Set([...css.matchAll(/font-weight: (\d+);/g)].map((match) => match[1]));
+    const embedded = weights((html.match(faceBlocks) ?? []).join("\n"));
+    const used = weights(html.replace(faceBlocks, ""));
+
+    expect(used.size).toBeGreaterThan(0);
+    expect([...used].filter((weight) => !embedded.has(weight))).toEqual([]);
   });
 
   test("renderResumeHtmlDocument escapes XSS", () => {
