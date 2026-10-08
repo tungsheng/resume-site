@@ -60,19 +60,19 @@ export const decisionProjectSummaries: DecisionProjectSummary[] = [
 
 export const decisionRecords: DecisionRecord[] = [
   {
-    id: "bounded-admission",
+    id: "client-concurrency-cap",
     projectId: "gpu-inference-lab",
-    domain: "Admission + readiness",
-    title: "Bounded admission",
+    domain: "Concurrency + readiness",
+    title: "Client concurrency cap",
     status: "Supported",
-    call: "Use bounded admission when requests can arrive before model readiness.",
-    evidence: "Closed-loop queued clients (k6 ramping-vus) cannot drop work by construction and completed fewer requests (1,656 vs 2,632 in the burst); open-loop direct clients dropped 237-787 iterations.",
-    experimentSlugs: ["request-patterns", "autoscaling"],
+    call: "Cap client concurrency near the serving sequence limit when overload should surface as unserved demand instead of unbounded tail latency.",
+    evidence: "Open-loop A/B at 1.25 req/s (8,192/300 on one T4 replica): capping k6 concurrency at max_num_seqs=32 cut p95 latency 77.51s to 27.98s and p95 TTFT to under 1s, leaving 59 of 749 requests unserved and 7% fewer tok/s. The earlier closed-loop burst runs cannot drop work by construction (1,656 vs 2,632 completed), so they do not test the cap.",
+    experimentSlugs: ["kv-cache", "request-patterns", "autoscaling"],
   },
   {
     id: "cold-start-readiness",
     projectId: "gpu-inference-lab",
-    domain: "Admission + readiness",
+    domain: "Concurrency + readiness",
     title: "Cold-start readiness",
     status: "Partial",
     call: "Optimize readiness before treating node launch as the cold-start bottleneck.",

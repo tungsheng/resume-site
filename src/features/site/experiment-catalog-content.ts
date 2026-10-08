@@ -1105,9 +1105,9 @@ export const experimentCatalogContent = {
       status: experimentStatus("Measured with run", "Measured queueing behavior"),
       readiness: {
         primary: {
-          label: "Supported",
-          detail: "Client queue policy",
-          tone: "supported",
+          label: "Selected report",
+          detail: "Cold-start readiness",
+          tone: "selected",
         },
       },
       question:
