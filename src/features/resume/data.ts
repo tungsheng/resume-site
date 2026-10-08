@@ -49,7 +49,7 @@ export const publicResumeData: ResumeData = {
   },
   projects: {
     title: "ML Inference — Self-Directed (2025–Present)",
-    note: "Unpaid, self-funded labs with repeat-run benchmarks, correctness checks, and negative results; numbers hold only for the stated hardware and workloads.",
+    note: "Unpaid, self-funded labs with repeat-run benchmarks, correctness checks, and negative results; numbers hold only for the stated hardware and workloads. Write-ups: tonylee.bio/work.",
     items: [
       {
         title: "GPU Inference Decision Lab (Qwen2.5-0.5B, vLLM 0.9.0, 1×T4 replicas on AWS EKS)",
