@@ -1709,3 +1709,15 @@ that execs itself. Every uv Python 3.13 now loops at 100% CPU (two orphaned
 loops ran ~35 min before being killed). Not repaired: needs
 `uv python install --reinstall 3.13.12` (network). uv 3.12.12 is intact.
 cuda-kernel-lab's own .venv was already broken (links a missing Homebrew 3.13).
+  RESOLVED SAME DAY (Tony's calls): uv CPython 3.13.12 reinstalled
+  (`uv python install --reinstall 3.13.12`; python3.13 runs, no stray probes);
+  the fonts README block re-run with real fontTools 4.64.0 + brotli 1.2.0
+  reproduced all five committed woff2 files byte-for-byte. "Bounded admission"
+  retitled "Client concurrency cap" (id client-concurrency-cap, domain
+  "Concurrency + readiness"), still Supported, now citing the open-loop 1.25
+  req/s A/B and listing kv-cache; the autoscaling badge reads "Selected report:
+  Cold-start readiness" (not Supported — that decision is Partial). The
+  resume's labs note again ends "Write-ups: tonylee.bio/work." (same two
+  lines, slack unchanged). Still open: the "Set a concurrency or admission
+  boundary" call on the long-context decision, the "Profile first"/"Re-profile"
+  step titles, and a Linux CI check that the PDF no longer differs by ~76KB.

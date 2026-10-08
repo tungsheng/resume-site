@@ -34,11 +34,10 @@ instances replaced them and read back from git history (unchanged since
 directory with a Python that has fontTools 4.64.0 and brotli 1.2.0; other
 versions can produce different (but equivalent) bytes.
 
-Provenance note: the committed files were generated on 2026-10-08 by this exact
-block, but run under Python 3.12 with fontTools 4.64.0 and a brotli shim backed
-by Bun's `node:zlib`, because the machine's Python 3.13 (which had the real
-brotli 1.2.0) broke mid-task. An earlier trial with the real toolchain produced
-byte-identical instances. Re-run the block with real brotli and `cmp` to confirm.
+Provenance: the committed files were first generated on 2026-10-08 with a
+brotli shim (Bun's `node:zlib`) while the machine's Python 3.13 was broken; the
+same day, this block run verbatim with real fontTools 4.64.0 + brotli 1.2.0 on
+Python 3.13.12 reproduced all five files byte-for-byte (`cmp`).
 
 ```sh
 src=$(mktemp -d)
