@@ -54,7 +54,7 @@ export const decisionProjectSummaries: DecisionProjectSummary[] = [
     title: "CUDA Kernel Lab Decisions",
     sectionTitle: "Kernel Optimization Decisions",
     lead:
-      "Kernel optimization calls derived from CUDA/Triton benchmark and profiler evidence across A10G and H200, with caveats kept beside the experiment that produced them.",
+      "Kernel optimization calls derived from Triton benchmark evidence across A10G and H200 plus Nsight Compute counters on A10G (H200 runs are timing-only), with caveats kept beside the experiment that produced them.",
   },
 ];
 
@@ -66,7 +66,7 @@ export const decisionRecords: DecisionRecord[] = [
     title: "Bounded admission",
     status: "Supported",
     call: "Use bounded admission when requests can arrive before model readiness.",
-    evidence: "100% queued delivery; direct clients dropped 237-787 iterations.",
+    evidence: "Closed-loop queued clients (k6 ramping-vus) cannot drop work by construction and completed fewer requests (1,656 vs 2,632 in the burst); open-loop direct clients dropped 237-787 iterations.",
     experimentSlugs: ["request-patterns", "autoscaling"],
   },
   {
@@ -159,7 +159,7 @@ export const decisionRecords: DecisionRecord[] = [
     title: "Fused RMSNorm",
     status: "Supported",
     call: "Use fusion for RMSNorm because it removes enough framework and intermediate-tensor overhead to beat PyTorch across the measured shape sweep.",
-    evidence: "fp16 reached 5.901x at 4096x8192; the 4096x4096 rerun reached 5.599x.",
+    evidence: "fp16 reached 5.901x over an unfused eager PyTorch reference at 4096x8192 on A10G; the 4096x4096 rerun reached 5.599x.",
     experimentSlugs: ["kernel-normalization-fusion", "kernel-profiler-validation"],
   },
   {
@@ -169,7 +169,7 @@ export const decisionRecords: DecisionRecord[] = [
     title: "Fused SwiGLU",
     status: "Supported",
     call: "Treat elementwise fusion as a strong path before deeper matmul work.",
-    evidence: "fp32 0.4547 ms Triton vs 1.418 ms PyTorch; 3.119x speedup.",
+    evidence: "fp32 0.4547 ms Triton vs 1.418 ms unfused eager PyTorch; 3.119x speedup.",
     experimentSlugs: ["kernel-swiglu-fusion"],
   },
   {
@@ -233,7 +233,7 @@ export const decisionRecords: DecisionRecord[] = [
     title: "Decode graph replay",
     status: "Caveated",
     call: "Use resident-KV same-stream piecewise CUDA Graph replay as a measured synthetic upper bound, not an end-to-end serving claim.",
-    evidence: "Round 12 reached 0.1375 ms fixed-shape p50 and about 0.156 ms dynamic p50 / 0.230 ms p95.",
+    evidence: "Round 12 fixed-shape CUDA Graph replay cut p50 from 0.3395 ms naive eager to 0.1594 ms naive graph and 0.1482 ms fused graph; dynamic same-stream replay held about 0.156 ms p50 / 0.230 ms p95.",
     experimentSlugs: ["kernel-decode-step-graph-replay"],
     nextEvidence: "Turn timing probes back on to explain the remaining p95 tail.",
   },
@@ -244,7 +244,7 @@ export const decisionRecords: DecisionRecord[] = [
     title: "Profiler-backed proof",
     status: "Measured",
     call: "Use counters to explain benchmark results instead of treating latency alone as the answer.",
-    evidence: "RMSNorm profile shows 90.91% DRAM throughput and 93.12% occupancy; profiled matmul shows 45.19% Tensor Core utilization.",
+    evidence: "On A10G, the RMSNorm profile shows 90.91% DRAM throughput and 93.12% occupancy; profiled matmul shows 45.19% Tensor Core utilization.",
     experimentSlugs: ["kernel-profiler-validation", "kernel-normalization-fusion", "kernel-matmul-tiling"],
   },
 ];

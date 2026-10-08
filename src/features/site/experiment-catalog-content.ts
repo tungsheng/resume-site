@@ -259,14 +259,14 @@ export const experimentCatalogContent = {
         statusLabel: "Measured queue boundary",
         reportDate: "2026-05-18 UTC",
         summary:
-          "With 8192-token prompts and 300 generated tokens, the profile is usable through 1.10 req/s, queues repeatably at 1.15 req/s, and is queue-dominated by 1.20 req/s. Server timing shows admission removes queue and TTFT inflation while decode stays roughly unchanged.",
+          "With 8192-token prompts and 300 generated tokens, the profile is usable through 1.10 req/s, queues repeatably at 1.15 req/s, and is queue-dominated by 1.20 req/s. Server timing shows a client-side concurrency cap (k6 maxVUs 32) removes queue and TTFT inflation while decode stays roughly unchanged.",
         boundary:
-          "Treat this as an operating band for one model, GPU class, vLLM image, and 8192/300 workload. Use admission/backpressure before deeper scheduler-cap tuning on the current g4dn/vLLM path, and compare queue delay, TTFT, dropped demand, and p95 request latency together.",
+          "Treat this as an operating band for one model, GPU class, vLLM image, and 8192/300 workload. Use a client-side concurrency cap (backpressure) before deeper scheduler-cap tuning on the current g4dn/vLLM path, and compare queue delay, TTFT, dropped demand, and p95 request latency together.",
         boundaryPoints: [
           "At 1.20 req/s, the latest repeats delivered 100% of offered work with zero failures, drops, or interruptions, but p95 request latency reached 62.66-63.40s.",
           "The 1.20 req/s r3 report shows p95 server queue delay at 36.93s and p95 TTFT at 37.61s while p95 decode stays near 29.43s.",
           "At the same rate, seqs-16 hit 76.24s p95, seqs-24 hit 61.36s, and batched-16384 hit 55.58s.",
-          "The latest 1.25 req/s admission-capped run exposed 59 unserved iterations, reduced p95 to 27.98s, and kept p95 server queue delay at 0.285s.",
+          "The latest 1.25 req/s run with a client-side concurrency cap (k6 maxVUs 32, not a server admission controller) left 59 of 749 requests unserved, reduced p95 to 27.98s, and kept p95 server queue delay at 0.285s.",
         ],
         stats: [
           {
@@ -290,7 +290,7 @@ export const experimentCatalogContent = {
             context: "seqs-16, seqs-24, and batched-16384 did not beat baseline",
           },
           {
-            label: "Admission result",
+            label: "Concurrency-cap result",
             value: "27.98s p95",
             context: "59 unserved; p95 queue 0.285s; 32 active",
           },
@@ -396,7 +396,7 @@ export const experimentCatalogContent = {
           {
             title: "Server timing attribution",
             summary:
-              "Queue delay and TTFT inflate together as load crosses the boundary; decode remains around 29.4s, and admission removes queue inflation.",
+              "Queue delay and TTFT inflate together as load crosses the boundary; decode remains around 29.4s, and the client-side concurrency cap removes queue inflation.",
             columns: {
               target: "Run",
               outcome: "Outcome",
@@ -435,7 +435,7 @@ export const experimentCatalogContent = {
               },
               {
                 target: "1.25 admission-032",
-                outcome: "bounded admission",
+                outcome: "client cap; 59 unserved",
                 p95Latency: "27.98s",
                 peakWaiting: "0.285s / 0.718s",
                 gpuMax: "29.39s",
@@ -445,7 +445,7 @@ export const experimentCatalogContent = {
           {
             title: "Long-context fix attempts",
             summary:
-              "The 1.20 req/s scheduler variants did not beat the baseline; bounded admission at 1.25 req/s made overload explicit and lowered p95.",
+              "The 1.20 req/s scheduler variants did not beat the baseline; a client-side concurrency cap at 1.25 req/s made overload explicit as unserved requests and lowered p95.",
             columns: {
               target: "Profile / run",
               outcome: "Outcome",
@@ -484,7 +484,7 @@ export const experimentCatalogContent = {
               },
               {
                 target: "admission-032 @ 1.25",
-                outcome: "bounded admission",
+                outcome: "client cap; 59 unserved",
                 p95Latency: "27.98s",
                 peakWaiting: "0 waiting / 32 active",
                 gpuMax: "100%",
@@ -1010,7 +1010,7 @@ export const experimentCatalogContent = {
         summary:
           "The default profile stayed clean under steady traffic, but burst and spike-to-zero traffic pushed active concurrency to the edge and dropped client-side work.",
         boundary:
-          "These reports use direct clients with no admission buffer. Dropped iterations are unserved client work, not successful backpressure handling.",
+          "These reports use open-loop direct clients with no client-side queue. Dropped iterations are unserved client work, not successful backpressure handling.",
         boundaryPoints: [
           "Steady 512/128 traffic delivered 100% of work with p95 near 1.3s.",
           "Burst and spike-to-zero traffic reached 127-128 active requests and dropped work.",
@@ -1106,7 +1106,7 @@ export const experimentCatalogContent = {
       readiness: {
         primary: {
           label: "Supported",
-          detail: "Admission behavior",
+          detail: "Client queue policy",
           tone: "supported",
         },
       },
@@ -1143,7 +1143,7 @@ export const experimentCatalogContent = {
           id: "spike-queued",
           promptTokens: 512,
           outputTokens: 128,
-          description: "closed-loop spike to zero with bounded queued admission",
+          description: "closed-loop spike to zero that approximates bounded client backpressure",
         },
       ],
       servingProfiles: [
@@ -1178,7 +1178,7 @@ export const experimentCatalogContent = {
         statusLabel: "Measured queueing behavior",
         reportDate: "2026-05-07",
         summary:
-          "Autoscaling reports compare direct and bounded-queue clients across burst and spike-to-zero cases. Bounded queues delivered all work at about 2s p95; direct clients ran hotter but dropped 237-787 iterations.",
+          "Autoscaling reports compare open-loop direct and closed-loop bounded-queue k6 clients across burst and spike-to-zero cases. Closed-loop clients cannot drop work by construction; they held p95 near 2s but completed fewer requests (1,656 vs 2,632 burst; 1,063 vs 1,762 spike), while direct clients pushed 254-255 active requests, hit 14.2-14.6s p95, and dropped 237-787 iterations.",
         boundary:
           "Burst cases predate timeline capture, and first-successful-completion timing is missing. Use spike runs for cold-start timing and all cases for queue policy.",
         boundaryPoints: [
@@ -1198,9 +1198,9 @@ export const experimentCatalogContent = {
             context: "container start at 354-357s dominated the cold path",
           },
           {
-            label: "Queued delivery",
-            value: "100%",
-            context: "burst-queued and spike-queued dropped 0 client iterations",
+            label: "Queued volume",
+            value: "1,656 vs 2,632",
+            context: "burst completions, closed-loop vs open-loop; 0 drops by construction",
           },
         ],
         sourceReports: [
@@ -1225,10 +1225,10 @@ export const experimentCatalogContent = {
           {
             title: "Queue policy outcome",
             summary:
-              "Direct clients maximize attempted throughput but shed work; bounded queues protect delivery and tail latency by limiting concurrency.",
+              "Open-loop direct clients maximize attempted throughput but shed work; closed-loop queued clients cannot drop by construction and hold tail latency down by limiting concurrency, at the cost of completed volume.",
             columns: {
               target: "Case",
-              outcome: "Delivery",
+              outcome: "Completed / delivery",
               p95Latency: "p95 latency",
               peakWaiting: "Dropped / active",
               gpuMax: "GPU max",
@@ -1236,28 +1236,28 @@ export const experimentCatalogContent = {
             rows: [
               {
                 target: "burst-direct",
-                outcome: "76.98% delivered",
+                outcome: "2,632 / 76.98%",
                 p95Latency: "14.62s",
                 peakWaiting: "787 dropped / 255 active",
                 gpuMax: "80%",
               },
               {
                 target: "burst-queued",
-                outcome: "100% delivered",
+                outcome: "1,656 / 100% (closed loop)",
                 p95Latency: "2.19s",
                 peakWaiting: "0 dropped / 24 active",
                 gpuMax: "86%",
               },
               {
                 target: "spike-direct",
-                outcome: "88.14% delivered",
+                outcome: "1,762 / 88.14%",
                 p95Latency: "14.23s",
                 peakWaiting: "237 dropped / 254 active",
                 gpuMax: "80%",
               },
               {
                 target: "spike-queued",
-                outcome: "100% delivered",
+                outcome: "1,063 / 100% (closed loop)",
                 p95Latency: "1.98s",
                 peakWaiting: "0 dropped / 20 active",
                 gpuMax: "84%",
@@ -1374,7 +1374,7 @@ export const experimentCatalogContent = {
         boundaryPoints: [
           "The steady optimized profile completed 2670 successful requests with no dropped work and p95 1.61s.",
           "The burst optimized profile was cheapest per useful request but still missed latency with p95 10.91s.",
-          "Burst SLO compliance still needs admission, autoscaling, or a different capacity shape.",
+          "Burst SLO compliance still needs backpressure such as a client-side concurrency cap, autoscaling, or a different capacity shape.",
         ],
         stats: [
           {
@@ -1567,7 +1567,7 @@ export const experimentCatalogContent = {
         "Compares PyTorch and Triton memory primitives across copy, scale, vector_add, and reduction_sum rows.",
       whyItMatters:
         "Simple memory-bound kernels are the control group. If a custom kernel does not beat the framework path, the next step should be profiler explanation rather than a broad parameter sweep.",
-      runner: "CUDA benchmark matrix",
+      runner: "GPU benchmark matrix",
       endpoint: "benchmark-memory",
       sourcePath: "src/cuda_kernel_lab/benchmarks/memory_bandwidth.py",
       resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
@@ -1712,7 +1712,7 @@ export const experimentCatalogContent = {
         "Keeps shape, dtype, device, and block size fixed while comparing iterative and two-pass reduction strategies.",
       whyItMatters:
         "Reduction work introduces synchronization and partial writes, making it the first useful step beyond one-element-per-thread memory traffic.",
-      runner: "CUDA benchmark matrix",
+      runner: "GPU benchmark matrix",
       endpoint: "benchmark-memory --op reduction_sum",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/memory.py",
       resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
@@ -1801,12 +1801,12 @@ export const experimentCatalogContent = {
         },
       },
       question:
-        "How much does a fused Triton RMSNorm or LayerNorm kernel move latency versus the PyTorch baseline?",
+        "How much does a fused Triton RMSNorm or LayerNorm kernel move latency versus the PyTorch baselines (an unfused eager RMSNorm chain and F.layer_norm)?",
       summary:
         "Compares PyTorch and Triton fused normalization kernels, then checks whether the RMSNorm fp16 win holds across hidden-size shapes.",
       whyItMatters:
         "Normalization is a realistic LLM primitive where fusion can remove expensive intermediate work; the shape sweep makes the win harder to dismiss as one lucky point.",
-      runner: "CUDA benchmark matrix",
+      runner: "GPU benchmark matrix",
       endpoint: "benchmark-norms",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/norms.py",
       resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
@@ -1841,7 +1841,7 @@ export const experimentCatalogContent = {
       servingProfiles: [
         {
           id: "torch-baseline",
-          description: "PyTorch normalization baseline",
+          description: "PyTorch references: unfused eager RMSNorm chain; F.layer_norm for LayerNorm",
         },
         {
           id: "triton-fused-rmsnorm",
@@ -1877,14 +1877,14 @@ export const experimentCatalogContent = {
         statusLabel: "Supported",
         reportDate: "2026-05-21",
         summary:
-          "Triton fused RMSNorm produced the largest speedups in the A10G strategy run and stayed ahead across the measured fp16 shape sweep.",
+          "Triton fused RMSNorm produced the largest speedups over an unfused eager PyTorch reference in the A10G strategy run and stayed ahead across the measured fp16 shape sweep.",
         boundary:
           "The two smallest shape-sweep rows were noisy enough to rerun before precise claims, but the larger rows and profiler counters support the fusion direction.",
         stats: [
           {
             label: "RMSNorm fp16 max",
             value: "5.901x",
-            context: "4096x8192, 0.3103 ms Triton vs 1.831 ms PyTorch",
+            context: "4096x8192, 0.3103 ms Triton vs 1.831 ms unfused eager PyTorch",
           },
           {
             label: "RMSNorm profile",
@@ -1894,7 +1894,7 @@ export const experimentCatalogContent = {
           {
             label: "LayerNorm fp32",
             value: "1.379x",
-            context: "0.3133 ms Triton vs 0.4321 ms PyTorch",
+            context: "0.3133 ms Triton vs 0.4321 ms F.layer_norm",
           },
         ],
         tables: [
@@ -1948,12 +1948,12 @@ export const experimentCatalogContent = {
         },
       },
       question:
-        "Does fusing SwiGLU elementwise activation remove enough intermediate traffic to beat PyTorch?",
+        "Does fusing SwiGLU elementwise activation remove enough intermediate traffic to beat eager PyTorch?",
       summary:
         "Compares PyTorch and fused Triton SwiGLU at 4096x4096 across float16 and float32.",
       whyItMatters:
         "SwiGLU is a clean elementwise fusion track: no reduction complexity, but enough intermediate activation traffic for fusion to matter.",
-      runner: "CUDA benchmark matrix",
+      runner: "GPU benchmark matrix",
       endpoint: "benchmark-swiglu",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/swiglu.py",
       resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
@@ -1970,7 +1970,7 @@ export const experimentCatalogContent = {
       servingProfiles: [
         {
           id: "torch-baseline",
-          description: "PyTorch SwiGLU baseline",
+          description: "unfused eager PyTorch SwiGLU: gate * sigmoid(gate) * up",
         },
         {
           id: "triton-fused-swiglu",
@@ -2002,19 +2002,19 @@ export const experimentCatalogContent = {
         statusLabel: "Supported",
         reportDate: "2026-05-21",
         summary:
-          "Fused Triton SwiGLU beat PyTorch in both float16 and float32 on the A10G strategy run.",
+          "Fused Triton SwiGLU beat the unfused eager PyTorch reference in both float16 and float32 on the A10G strategy run.",
         boundary:
-          "The result is a strong fusion proof for this shape; keep it behind the same re-profile gate before expanding to adjacent activation shapes.",
+          "The result is strong timing evidence for this one shape, but SwiGLU has no Nsight Compute profile yet; capture counters before expanding to adjacent activation shapes.",
         stats: [
           {
             label: "SwiGLU fp16",
             value: "2.937x",
-            context: "0.2437 ms Triton vs 0.7158 ms PyTorch",
+            context: "0.2437 ms Triton vs 0.7158 ms eager PyTorch",
           },
           {
             label: "SwiGLU fp32",
             value: "3.119x",
-            context: "0.4547 ms Triton vs 1.418 ms PyTorch",
+            context: "0.4547 ms Triton vs 1.418 ms eager PyTorch",
           },
           {
             label: "Correctness",
@@ -2043,7 +2043,7 @@ export const experimentCatalogContent = {
         "Compares PyTorch and Triton row-softmax at 4096x1024 for float16 and float32.",
       whyItMatters:
         "Negative evidence is useful: it prevents the site from claiming every custom kernel is a win and points the next optimization question at row-shape and launch behavior.",
-      runner: "CUDA benchmark matrix",
+      runner: "GPU benchmark matrix",
       endpoint: "benchmark-softmax",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/softmax.py",
       resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
@@ -2133,7 +2133,7 @@ export const experimentCatalogContent = {
         "Compares focused float16 tile shapes, warp counts, pipeline stages, and Tensor Core profiler counters for 1024x1024x1024 matmul.",
       whyItMatters:
         "Matmul is the bridge from memory traffic and fusion into the compute path that dominates transformer inference; the current evidence is useful because it shows where Triton is not yet enough.",
-      runner: "CUDA benchmark matrix",
+      runner: "GPU benchmark matrix",
       endpoint: "benchmark-matmul",
       sourcePath: "src/cuda_kernel_lab/kernels/triton/matmul.py",
       resultsPath: "experiments/reports/aws-ec2/2026-05-21-strategy-next.md",
@@ -2244,23 +2244,23 @@ export const experimentCatalogContent = {
       sourcePath: "src/cuda_kernel_lab/kernels/triton/matmul.py",
       resultsPath: "experiments/reports/runpod/20260526-h200-persistent-waves-073234.md",
       runShapeSummary:
-        "H200 512x11008x4096 focused sweep plus broader 512x4096x11008, 512x11008x4096, and 4096x4096x4096 winner profiling shapes across float16 and bfloat16.",
+        "H200 512x11008x4096 focused sweep plus broader 512x4096x11008, 512x11008x4096, and 4096x4096x4096 winner-rerun shapes across float16 and bfloat16. Timing only: every H200 Nsight Compute capture failed.",
       cases: [
         {
-          id: "h200-llm-down-512x11008x4096",
-          description: "focused LLM down-projection GEMM used for standard and persistent-wave comparison",
+          id: "h200-llm-up-512x11008x4096",
+          description: "focused LLM gate/up-projection GEMM (4096 to 11008; the lab's profile target names this shape llm-down) used for standard and persistent-wave comparison",
           primaryMeasure: "512x11008x4096",
           secondaryMeasure: "float16 and bfloat16",
         },
         {
-          id: "h200-llm-up-512x4096x11008",
-          description: "asymmetric LLM up-projection GEMM from the clean winner profile sweep",
+          id: "h200-llm-down-512x4096x11008",
+          description: "asymmetric LLM down-projection GEMM (11008 to 4096) from the clean winner rerun (timing only)",
           primaryMeasure: "512x4096x11008",
           secondaryMeasure: "float16 and bfloat16",
         },
         {
           id: "h200-square-4096x4096x4096",
-          description: "square Tensor Core GEMM from the clean winner profile sweep",
+          description: "square Tensor Core GEMM from the clean winner rerun (timing only)",
           primaryMeasure: "4096x4096x4096",
           secondaryMeasure: "float16 and bfloat16",
         },
@@ -2408,7 +2408,7 @@ export const experimentCatalogContent = {
             path: "experiments/reports/runpod/20260525-h200-timing-only-235601.md",
           },
           {
-            label: "H200 winner profile report",
+            label: "H200 winner rerun (Nsight capture failed)",
             path: "experiments/reports/runpod/20260525-h200-winner-profile-055211.md",
           },
           {
@@ -2437,7 +2437,7 @@ export const experimentCatalogContent = {
         "Tracks a synthetic decode step where fused pre/post regions replay as CUDA Graphs around SDPA attention with head-major resident KV views.",
       whyItMatters:
         "Decode replay connects kernel optimization to serving mechanics: the question shifts from one custom kernel to launch overhead, dynamic buckets, resident cache layout, and tail latency.",
-      runner: "CUDA benchmark matrix",
+      runner: "GPU benchmark matrix",
       endpoint: "benchmark-decode-step",
       sourcePath: "src/cuda_kernel_lab/benchmarks/decode_step.py",
       resultsPath: "experiments/reports/aws-ec2/2026-05-22-round12-kv-active-views.md",
@@ -2447,8 +2447,8 @@ export const experimentCatalogContent = {
         {
           id: "decode-step-fixed-same-stream",
           description: "fixed-shape same-stream piecewise CUDA Graph replay",
-          primaryMeasure: "0.1375 ms p50",
-          secondaryMeasure: "batch=1, seq_len=2048, float16",
+          primaryMeasure: "0.1375 ms p50 (noisy)",
+          secondaryMeasure: "batch=1, seq_len=2048, float16; p95/p50 1.222",
         },
         {
           id: "decode-step-dynamic-dense-buckets",
@@ -2524,8 +2524,8 @@ export const experimentCatalogContent = {
         stats: [
           {
             label: "Fixed-shape replay",
-            value: "0.1375 ms",
-            context: "same-stream piecewise graph p50 at batch=1, seq_len=2048",
+            value: "0.1482 ms",
+            context: "fused CUDA Graph p50 at batch=1, seq_len=2048; naive eager 0.3395 ms, naive graph 0.1594 ms",
           },
           {
             label: "Dynamic replay",
@@ -2573,7 +2573,7 @@ export const experimentCatalogContent = {
                 outcome: "measured",
                 p95Latency: "0.1375 ms",
                 peakWaiting: "0.1681 ms",
-                gpuMax: "fixed shape",
+                gpuMax: "fixed shape; noisy (p95/p50 1.222)",
               },
               {
                 target: "dynamic dense buckets",
@@ -2629,7 +2629,7 @@ export const experimentCatalogContent = {
       sourcePath: "src/cuda_kernel_lab/nsight_summary.py",
       resultsPath: "profiling/reports/2026-05-21-strategy-next/",
       runShapeSummary:
-        "Focused profiler targets cover vector_add, reduction_sum, RMSNorm, and tiled matmul captures.",
+        "Focused A10G profiler targets cover vector_add, reduction_sum, RMSNorm, and tiled matmul captures. No H200 counters exist: every RunPod H200 Nsight Compute capture failed.",
       cases: [
         {
           id: "vector-add-float32-profile",
@@ -2645,7 +2645,7 @@ export const experimentCatalogContent = {
         },
         {
           id: "rmsnorm-float16-profile",
-          description: "largest fusion win profiler target",
+          description: "RMSNorm fusion profiler target (fp16 4096x4096)",
           primaryMeasure: "RMSNorm",
           secondaryMeasure: "float16",
         },

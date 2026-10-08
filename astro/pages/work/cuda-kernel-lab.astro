@@ -78,12 +78,15 @@ const cell = "bg-paper p-4 grid content-start";
     </dl>
   </section>
 
-  <!-- Method: the loop every claim moves through. -->
+  <!-- Method: the loop kernel claims are meant to move through. -->
   <section class="mt-12 md:mt-16">
     <p class="eyebrow mb-2">Method</p>
     <h2 class="h-section-title">Optimization loop</h2>
     <p class="mt-2.5 max-w-[46rem] text-[0.97rem] leading-relaxed text-muted">
-      Every kernel claim moves through the same loop before it becomes a decision.
+      Each kernel claim is meant to move through this loop before it becomes a decision, and not
+      every row has closed it yet: Nsight Compute captures cover one A10G configuration each of
+      vector_add, both reductions, RMSNorm (fp16 4096×4096), and tiled matmul (fp16 1024³); every
+      other row, including SwiGLU, softmax, LayerNorm, decode, and all of H200, is timing-only so far.
     </p>
     <div class={`${grid} md:grid-cols-2 min-[1536px]:grid-cols-4`}>
       {

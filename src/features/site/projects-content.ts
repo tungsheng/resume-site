@@ -22,7 +22,7 @@ export const projectPortfolioContent = {
   lede:
     "Evidence-backed GPU systems work across serving infrastructure and kernel optimization.",
   summary:
-    "Serving infrastructure decisions and CUDA kernel optimization are separated by project, with experiments attached to the evidence they support.",
+    "Serving infrastructure decisions and Triton kernel optimization are separated by project, with experiments attached to the evidence they support.",
   projects: [
     {
       id: "gpu-inference-lab",
@@ -34,9 +34,9 @@ export const projectPortfolioContent = {
       statusTone: "supported",
       summary: projectContent.lede,
       result:
-        "EKS/vLLM measurements support admission, long-context boundaries, scheduler defaults, useful-work cost, and FP8 KV rejection.",
+        "EKS/vLLM measurements (Qwen2.5-0.5B on single-T4 g4dn.xlarge replicas) support concurrency caps, long-context boundaries, scheduler defaults, useful-work cost, and FP8 KV rejection.",
       evidence: [
-        "100% queued delivery across burst and spike-to-zero admission runs",
+        "Closed-loop burst clients dropped nothing by construction but completed 1,656 requests vs 2,632 open-loop",
         "1.20 req/s long-context knee repeats with 36.8s p95 queue delay",
         "FP8 KV rejected on the current g4dn/vLLM path",
       ],
@@ -51,13 +51,13 @@ export const projectPortfolioContent = {
       status: "A10G/H200 benchmark evidence",
       statusTone: "measured",
       summary:
-        "A CUDA/Triton optimization lab organized around profile-driven kernel work for LLM-shaped primitives across A10G and H200.",
+        "A Triton kernel lab for LLM-shaped primitives on A10G and H200: correctness-checked benchmarks against PyTorch/cuBLAS, Nsight Compute counters for selected A10G kernels, timing only on H200.",
       result:
-        "RMSNorm fusion remains the strongest supported win, while H200 matmul autotune now bounds the Tensor Core gap against PyTorch/cuBLAS.",
+        "RMSNorm fusion remains the strongest supported win over an unfused eager PyTorch reference, while timing-only H200 matmul autotune bounds the Tensor Core gap against PyTorch/cuBLAS.",
       evidence: [
         "115 operator rows plus 27 decode replay rows on A10G",
         "H200 matmul rows keep best standard Triton around 88-90% of PyTorch/cuBLAS",
-        "RMSNorm fp16 reached 5.901x over the PyTorch baseline",
+        "RMSNorm fp16 reached 5.901x over an unfused eager PyTorch reference (A10G, 4096x8192)",
       ],
       experimentCount: 9,
     },
@@ -67,7 +67,7 @@ export const projectPortfolioContent = {
 export const cudaKernelProjectContent = {
   title: "CUDA Kernel Lab",
   lede:
-    "A CUDA/Triton optimization lab organized around a measured loop: profile first, identify the bottleneck, optimize that bottleneck, then re-profile before claiming a win.",
+    "A Triton kernel optimization lab built on a measured loop: benchmark against a matched PyTorch control, find the bottleneck, change one thing, re-measure.",
   repositoryUrl: "https://github.com/tungsheng/cuda-kernel-lab",
   overviewFacts: [
     {
