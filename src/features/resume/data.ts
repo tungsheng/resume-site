@@ -52,7 +52,7 @@ export const publicResumeData: ResumeData = {
     note: "Unpaid, self-funded labs with repeat-run benchmarks, correctness checks, and negative results; numbers hold only for the stated hardware and workloads.",
     items: [
       {
-        title: "GPU Inference Decision Lab (Qwen2.5-0.5B, vLLM 0.9.0, one T4 on AWS g4dn/EKS)",
+        title: "GPU Inference Decision Lab (Qwen2.5-0.5B, vLLM 0.9.0, 1×T4 replicas on AWS EKS)",
         highlights: [
           "Split per-run latency into client, queue, prefill, and decode by joining k6 phases, vLLM histograms, and DCGM metrics in schema-validated, offline-replayable reports.",
           "Diagnosed the long-context knee (8,192 prompt / 300 output tokens) as queueing: stepping 1.10 → 1.15 → 1.20 req/s raised p95 queue wait <0.3s → ~14s → ~37s across repeat runs while p95 prefill and decode held flat.",
