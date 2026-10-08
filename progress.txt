@@ -1648,3 +1648,64 @@ bun run test:integration (30 tests) all pass. PDF is one Letter page at
 natural scale (true content slack 76px sidebar / 39px main); pdftotext -raw
 confirms jobs precede labs; /resume checked in the dev server (GitHub link,
 italic summary clause, lab title tags, no console errors).
+
+--------------------------------------------------------------------------------
+2026-10-08 — Follow-ups from the 10-07 audit: PDF fonts, lab models, /work copy
+--------------------------------------------------------------------------------
+All three follow-ups filed on 10-07 are done, each through implement ->
+adversarial verify -> fix -> re-verify.
+
+1. PDF FONTS (resume-site). Chrome/Skia cannot embed a variable font as a font
+   program, so the PDF carried 52 Type 3 fonts and stream-order extraction lost
+   word spaces in every non-regular weight ("TonyLee", "StaffSoftwareEngineer").
+   Now 5 static Inter 4.001 instances (400/500/600 + 400 italic at opsz 14, and
+   600 at opsz 32 for the 32px name via a second family, ResumePDFDisplay —
+   @font-face has no optical-size descriptor). pdffonts: 5 CID TrueType, 0 Type
+   3; pdftotext -raw restores spaces on exactly the 9 affected lines; Chrome's
+   135 line boxes unchanged (max 0.05px); PDF 330KB -> 60KB; still byte-
+   reproducible per platform. The "opsz200000_wght2580000" subset name was
+   CoreText hex 16.16 (opsz 32, wght 600). Variable fonts removed from the tree;
+   fonts/README.md regenerates the instances from git history (7f5e897).
+   A unit test now fails if the PDF CSS uses a font-weight with no face.
+2. cuda-kernel-lab (branch fix/derived-measurement-models, 3 commits, NOT
+   pushed): dense H200 SXM peaks (the code used NVIDIA's with-sparsity figures,
+   so Math Peak % read ~half: cuBLAS bf16 512x11008x4096 26.95% -> 53.91%), NVL
+   spec, GH200 excluded; norms byte model counts weight/bias once (A10G RMSNorm
+   648.9 -> 432.6 GB/s, now under the ~600 GB/s peak; Nsight bytes are 1.12x the
+   model). 21 reports regenerated (timings/speedups/%-of-cuBLAS byte-identical,
+   checked cell by cell), 7 dated errata. 123 tests pass (Python 3.12).
+   The 10-07 "don't quote the lab's Peak % column" rule is now obsolete.
+3. /work + home copy aligned with the audit: closed-loop burst runs described as
+   closed-loop (0 drops by construction; 1,656 vs 2,632 completed), the client
+   k6 cap never called admission control, Triton-not-CUDA wording, eager
+   baselines named, H200 timing-only, Nsight coverage stated per capture,
+   Qwen2.5-0.5B on single-T4 g4dn.xlarge REPLICAS (the HPA runs used 2-3
+   nodes, so "one T4" was wrong lab-wide — the resume title now says "1×T4
+   replicas" too), noisy 0.1375 ms decode headline replaced by the stable
+   0.1482 ms, GEMM up/down labels corrected (the lab's own target names are
+   reversed — noted on the page). Text-only: CSS bundles byte-identical.
+
+LEFT FOR TONY:
+  * The "Bounded admission" decision still reads Supported with the call "Use
+    bounded admission when requests can arrive before model readiness", but its
+    corrected evidence says the queued arm cannot drop by construction —
+    retitle around client backpressure, or downgrade to Caveated/Partial. Same
+    for the autoscaling "Supported: Client queue policy" badge (the real finding
+    is cold-start readiness). Status/call/title/domain changes were held back.
+  * Loop step titles "Profile first" / "Re-profile" on /work/cuda-kernel-lab
+    (the paragraph now carries the caveat).
+  * Re-add "Write-ups: tonylee.bio/work" to the resume's labs note once the
+    decision card is settled (fits: the page has ~39px right-column slack).
+  * Run fonts/README.md with real brotli 1.2.0 and cmp (the committed bytes came
+    from an equivalent shim — see the README's provenance note), and confirm a
+    Linux CI build no longer differs by ~76KB.
+
+INCIDENT — uv Python 3.13 broken on this machine (2026-10-08 13:41): a subagent
+made a scratch symlink to a uv venv's bin/python, "removed" it with `rm`
+(aliased to `rm -i`: a silent no-op in a non-interactive shell), then wrote
+through the symlink chain into ~/.local/share/uv/python/cpython-3.13.12-macos-
+aarch64-none/bin/python3.13, replacing the interpreter with an 89-byte script
+that execs itself. Every uv Python 3.13 now loops at 100% CPU (two orphaned
+loops ran ~35 min before being killed). Not repaired: needs
+`uv python install --reinstall 3.13.12` (network). uv 3.12.12 is intact.
+cuda-kernel-lab's own .venv was already broken (links a missing Homebrew 3.13).
