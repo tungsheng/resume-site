@@ -15,19 +15,22 @@ describe("Resume Service", () => {
     expect(publicResumeData.header.summary.endsWith("repeated benchmarks, correctness checks, and documented trade-offs.")).toBe(true);
     // Skills distinguish production experience from self-directed labs.
     expect(Object.keys(publicResumeData.skills)).toEqual([
-      "Production",
-      "Self-Directed / Lab",
+      "Production: Languages / Web",
+      "Production: Delivery / Leadership",
+      "Lab: GPU / Serving",
+      "Lab: Testing / Monitoring",
+      "Lab: Cloud / Deployment",
     ]);
-    expect(publicResumeData.skills.Production).toContain("TypeScript");
-    expect(publicResumeData.skills.Production).toContain("React");
-    expect(publicResumeData.skills.Production).toContain("Build / Release Automation");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("AWS Compute / Networking");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("GPU Monitoring (DCGM)");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM Model Serving");
+    expect(publicResumeData.skills["Production: Languages / Web"]).toContain("TypeScript");
+    expect(publicResumeData.skills["Production: Languages / Web"]).toContain("React");
+    expect(publicResumeData.skills["Production: Delivery / Leadership"]).toContain("Build / Release Automation");
+    expect(publicResumeData.skills["Lab: Cloud / Deployment"]).toContain("AWS Compute / Networking");
+    expect(publicResumeData.skills["Lab: Testing / Monitoring"]).toContain("GPU Monitoring (DCGM)");
+    expect(publicResumeData.skills["Lab: GPU / Serving"]).toContain("vLLM Serving");
     // The kernels are Triton; "CUDA" is claimed only where it is literally true.
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Triton GPU Code Tuning");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("CUDA Graph Replay");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("k6 Load Testing");
+    expect(publicResumeData.skills["Lab: GPU / Serving"]).toContain("Triton GPU Tuning");
+    expect(publicResumeData.skills["Lab: GPU / Serving"]).toContain("CUDA Graph Replay");
+    expect(publicResumeData.skills["Lab: Testing / Monitoring"]).toContain("k6 Load Tests");
     // Keep broad expertise claims out of Skills; named lab tools have portfolio evidence.
     const allSkills = Object.values(publicResumeData.skills).flat();
     expect(allSkills).not.toContain("Kernel Fusion");

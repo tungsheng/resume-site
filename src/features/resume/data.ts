@@ -13,7 +13,7 @@ export const publicResumeData: ResumeData = {
       "Staff-level full-stack engineer with 10+ years of building production applications and APIs and leading cross-team architecture. Self-directed GPU labs cover vLLM serving on AWS, Triton kernels, and CUDA Graph replay, with repeated benchmarks, correctness checks, and documented trade-offs.",
   },
   skills: {
-    Production: [
+    "Production: Languages / Web": [
       "TypeScript",
       "JavaScript",
       "Python",
@@ -22,25 +22,30 @@ export const publicResumeData: ResumeData = {
       "React",
       "Node.js",
       "GraphQL / REST",
+    ],
+    "Production: Delivery / Leadership": [
       "Build / Release Automation",
       "Cypress End-to-End Tests",
       "Performance Optimization",
       "Architecture Design",
-      "Cross-Team Collaboration",
-      "Technical Leadership",
+      "Cross-Team Leadership",
     ],
-    "Self-Directed / Lab": [
+    "Lab: GPU / Serving": [
       "PyTorch",
-      "Triton GPU Code Tuning",
+      "Triton GPU Tuning",
       "CUDA Graph Replay",
-      "vLLM Model Serving",
-      "Prompt Length / Cache Testing",
+      "vLLM Serving",
+    ],
+    "Lab: Testing / Monitoring": [
+      "Prompt / Cache Tests",
       "Response Time (Latency)",
       "Processing Rate (Throughput)",
-      "k6 Load Testing",
-      "Benchmark Automation",
+      "k6 Load Tests",
+      "Benchmarks",
       "Prometheus / Grafana",
       "GPU Monitoring (DCGM)",
+    ],
+    "Lab: Cloud / Deployment": [
       "Kubernetes on AWS (EKS)",
       "Terraform",
       "AWS Compute / Networking",
@@ -48,22 +53,22 @@ export const publicResumeData: ResumeData = {
   },
   projects: {
     title: "ML Inference — Self-Directed (2025–Present)",
-    note: "Repeated performance tests with correctness checks, including changes that did not improve speed. Results apply to tested hardware and workloads. Reports: tonylee.bio/work.",
+    note: "Repeated benchmarks and correctness checks, including changes that did not improve speed. Results apply to tested hardware and workloads. Reports: tonylee.bio/work.",
     items: [
       {
         title: "GPU Model Serving Lab (vLLM + AWS EKS)",
         highlights: [
-          "Automated vLLM deployment and load tests on AWS Kubernetes (EKS). Tested the small Qwen2.5-0.5B model on one NVIDIA T4 per server, with monitoring.",
-          "Identified longer request wait times with long prompts; model processing time stayed steady. Load tests showed when demand exceeded capacity.",
-          "Limited simultaneous requests in the test client: 95% of measured responses arrived within 28 seconds, down from 78. This left 8% of incoming requests unserved and reduced text output per second by 7% (in tokens).",
+          "Deployment: Automated vLLM deployment and load tests on AWS Kubernetes (EKS), using Qwen2.5-0.5B on one NVIDIA T4 per server with monitoring.",
+          "Capacity: Long prompts increased request waits while model processing time stayed steady. Load tests identified capacity limits.",
+          "Response time: 95% of measured responses arrived within 28 seconds, down from 78, by limiting simultaneous requests in the test client. Trade-offs: 8% unserved requests and 7% less text output per second (in tokens).",
         ],
       },
       {
         title: "Triton GPU Performance Lab (NVIDIA A10G + H200)",
         highlights: [
-          "Cut median runtime by 53% in a simulated A10G text-generation step by replaying recorded GPU operations (CUDA Graphs). Combining operations alone did not help.",
-          "Sped up RMSNorm (rescaling model values) 5.9x with Triton versus PyTorch running operations separately on A10G. Confirmed gains on H200; Nsight Compute found A10G was limited by GPU memory transfer speed.",
-          "Raised H200 matrix multiplication speed from 74% to 89% of NVIDIA cuBLAS (GPU math library) in 16-bit (FP16) tests. Discarded slower configurations.",
+          "53% lower median runtime: Replayed recorded GPU operations (CUDA Graphs) in a simulated A10G text-generation step. Combining operations alone did not help.",
+          "5.9x faster RMSNorm: Used Triton to rescale model values versus separate PyTorch operations on A10G. Confirmed gains on H200; Nsight Compute found A10G limited by GPU memory transfer speed.",
+          "74% to 89% of cuBLAS speed: Tuned H200 matrix multiplication in 16-bit (FP16) tests, using NVIDIA's GPU math library as the baseline. Discarded slower configurations.",
         ],
       },
     ],

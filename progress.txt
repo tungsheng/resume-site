@@ -1869,3 +1869,21 @@ checks passed. Confirmed the tagline green has 4.74:1 contrast against white.
 Visually inspected the rendered PDF: one Letter page, readable accents, and
 no clipping or overlap. The generated PDF remains gitignored and is rebuilt
 from the committed source during the site build.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Make skills and GPU labs easier to scan
+--------------------------------------------------------------------------------
+Split skills into five labeled groups: production languages/web, production
+delivery/leadership, lab GPU/serving, lab testing/monitoring, and lab cloud/
+deployment. Shortened skill labels and combined overlapping leadership terms.
+Led serving-lab bullets with deployment, capacity, and response-time topics.
+Led GPU tuning bullets with the measured runtime and speed results, retaining
+the simulation scope, hardware, comparison baselines, and trade-offs.
+Rendered lab leads in the embedded Inter semibold face and set skill group
+spacing to 6 px. Preserved the summary, paid-work bullets, header, font sizes,
+and brighter green accents.
+Validation: full PDF/site build, typecheck, all 162 unit tests, and both PDF
+rendering checks passed. Visually inspected the final PDF at normal and enlarged
+viewing sizes: one Letter page at natural scale, balanced column endings, clear
+grouping, and no clipping or overlap. Confirmed all five font faces remain
+embedded and paid work precedes the self-directed labs in extracted text.

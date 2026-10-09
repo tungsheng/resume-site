@@ -62,21 +62,33 @@ function GithubMiniIcon() {
 
 function ResumeBulletList({
   items,
+  emphasizeLead = false,
 }: {
   items: string[];
+  emphasizeLead?: boolean;
 }) {
   if (items.length === 0) return null;
 
   return (
     <ul className="resume-highlights">
-      {items.map((item, index) => (
-        <li key={`${item}-${index}`}>
-          <span className="resume-list-bullet" aria-hidden="true">
-            •
-          </span>
-          <span className="resume-list-text">{item}</span>
-        </li>
-      ))}
+      {items.map((item, index) => {
+        const leadEnd = emphasizeLead ? item.indexOf(":") + 1 : 0;
+        return (
+          <li key={`${item}-${index}`}>
+            <span className="resume-list-bullet" aria-hidden="true">
+              •
+            </span>
+            <span className="resume-list-text">
+              {leadEnd > 0 ? (
+                <>
+                  <strong>{item.slice(0, leadEnd)}</strong>
+                  {item.slice(leadEnd)}
+                </>
+              ) : item}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -129,7 +141,7 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
         {view.projects.map((project, index) => (
           <div key={`${project.title}-${index}`} className="project-item">
             <div className="project-title">{project.title}</div>
-            <ResumeBulletList items={project.highlights} />
+            <ResumeBulletList items={project.highlights} emphasizeLead />
           </div>
         ))}
       </div>

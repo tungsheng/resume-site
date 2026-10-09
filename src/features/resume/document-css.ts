@@ -207,7 +207,7 @@ body {
 }
 
 .resume-document .skill-category {
-  margin-bottom: 9px;
+  margin-bottom: 6px;
 }
 
 .resume-document .skill-category-title {
@@ -284,6 +284,10 @@ body {
 
 .resume-document .resume-list-text {
   min-width: 0;
+}
+
+.resume-document .resume-list-text strong {
+  font-weight: 600;
 }
 
 /* Swiss: drop the decorative timeline rail + dots; entries stand on spacing.
