@@ -1,7 +1,7 @@
 export const projectContent = {
   title: "GPU Inference Decision Lab",
   lede:
-    "An EKS/vLLM lab that turns serving measurements into architecture decisions for admission, autoscaling, context limits, scheduling, and quantization.",
+    "An EKS/vLLM lab that turns serving measurements (Qwen2.5-0.5B on single-T4 g4dn.xlarge replicas) into architecture decisions for concurrency limits, autoscaling, context limits, scheduling, and quantization.",
   overviewFacts: [
     {
       label: "Platform",
@@ -24,8 +24,8 @@ export const projectContent = {
       {
         title: "Queue attribution",
         takeaway:
-          "vLLM timing separates queue, TTFT, and decode; admission removes queue inflation while decode stays roughly unchanged.",
-        sourceLabel: "Server timing from May 17-18 direct and admission-capped long-context reports",
+          "vLLM timing separates queue, TTFT, and decode; a client-side concurrency cap removes queue inflation while decode stays roughly unchanged.",
+        sourceLabel: "Server timing from May 17-18 direct and concurrency-capped long-context reports",
         columns: [
           {
             key: "queue",
@@ -86,7 +86,7 @@ export const projectContent = {
             },
           },
           {
-            label: "1.25 admission",
+            label: "1.25 capped",
             context: "59 unserved; p95 decode 29.39s",
             values: {
               queue: {

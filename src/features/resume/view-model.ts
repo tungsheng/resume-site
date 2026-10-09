@@ -15,6 +15,7 @@ export function buildResumeViewModel(data: ResumeData) {
   const skills = Object.entries(data.skills).map(([category, items]) => ({
     category,
     categoryLabel: capitalize(category),
+    items,
     itemsText: items.join(" • "),
   }));
 

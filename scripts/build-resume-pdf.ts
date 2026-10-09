@@ -23,10 +23,10 @@ import { generatePDF, normalizePdfTimestamps } from "@services/pdf";
 // reproducible-builds convention, so SOURCE_DATE_EPOCH wins when set.
 //
 // Note this only buys reproducibility PER PLATFORM. Chrome bakes its user agent
-// into /Creator and Skia instantiates the embedded variable font differently on
-// macOS and Linux, so a local build and a CI build of the same commit still
-// differ (~76KB) while rendering identically — verified by rasterising both and
-// comparing ink coverage (0.01% delta, all sub-pixel positioning).
+// into /Creator, so a local (macOS) build and a CI (Linux) build of the same
+// commit still differ. With the old variable Inter they also differed by ~76KB
+// (Skia named and drew its instances differently per platform) while rendering
+// identically; the static instances now embed under their own PostScript names.
 async function resolveBuildDate(): Promise<Date> {
   const epoch = process.env.SOURCE_DATE_EPOCH;
   if (epoch && /^\d+$/.test(epoch)) return new Date(Number(epoch) * 1000);

@@ -43,23 +43,52 @@ function LinkedinMiniIcon() {
   );
 }
 
+function GithubMiniIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <polyline points="8,7 3,12 8,17" />
+      <polyline points="16,7 21,12 16,17" />
+    </svg>
+  );
+}
+
 function ResumeBulletList({
   items,
+  emphasizeLead = false,
 }: {
   items: string[];
+  emphasizeLead?: boolean;
 }) {
   if (items.length === 0) return null;
 
   return (
     <ul className="resume-highlights">
-      {items.map((item, index) => (
-        <li key={`${item}-${index}`}>
-          <span className="resume-list-bullet" aria-hidden="true">
-            •
-          </span>
-          <span className="resume-list-text">{item}</span>
-        </li>
-      ))}
+      {items.map((item, index) => {
+        const leadEnd = emphasizeLead ? item.indexOf(":") + 1 : 0;
+        return (
+          <li key={`${item}-${index}`}>
+            <span className="resume-list-bullet" aria-hidden="true">
+              •
+            </span>
+            <span className="resume-list-text">
+              {leadEnd > 0 ? (
+                <>
+                  <strong>{item.slice(0, leadEnd)}</strong>
+                  {item.slice(leadEnd)}
+                </>
+              ) : item}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -81,7 +110,21 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
         {view.skills.map((skill) => (
           <div key={skill.category} className="skill-category">
             <span className="skill-category-title">{skill.categoryLabel}</span>
-            <span className="skill-items">{skill.itemsText}</span>
+            {/* One unbreakable span per skill so the narrow sidebar never splits
+                "AWS (VPC, IAM, EC2, ALB)" across lines; the separator rides on
+                the preceding item so no line starts with "•". Extracted text is
+                unchanged: "A • B • C". */}
+            <span className="skill-items">
+              {skill.items.map((item, index) => {
+                const last = index === skill.items.length - 1;
+                return (
+                  <React.Fragment key={`${item}-${index}`}>
+                    <span className="skill-item">{last ? item : `${item} •`}</span>
+                    {last ? null : " "}
+                  </React.Fragment>
+                );
+              })}
+            </span>
           </div>
         ))}
       </div>
@@ -98,7 +141,7 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
         {view.projects.map((project, index) => (
           <div key={`${project.title}-${index}`} className="project-item">
             <div className="project-title">{project.title}</div>
-            <ResumeBulletList items={project.highlights} />
+            <ResumeBulletList items={project.highlights} emphasizeLead />
           </div>
         ))}
       </div>
@@ -164,6 +207,7 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
 
           {view.header.contacts.email ||
           view.header.contacts.linkedin ||
+          view.header.contacts.github ||
           view.header.contacts.website ? (
             <div className="contact-info">
               {view.header.contacts.website ? (
@@ -201,6 +245,20 @@ export function ResumeDocument({ data }: ResumeDocumentProps) {
                   </a>
                   <span className="contact-icon">
                     <LinkedinMiniIcon />
+                  </span>
+                </div>
+              ) : null}
+
+              {view.header.contacts.github ? (
+                <div className="contact-row">
+                  <a
+                    className="contact-link"
+                    href={`https://github.com/${encodeURIComponent(view.header.contacts.github)}`}
+                  >
+                    {`github.com/${view.header.contacts.github}`}
+                  </a>
+                  <span className="contact-icon">
+                    <GithubMiniIcon />
                   </span>
                 </div>
               ) : null}

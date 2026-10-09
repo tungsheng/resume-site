@@ -10,59 +10,65 @@ export const publicResumeData: ResumeData = {
       website: "tonylee.bio",
     },
     summary:
-      "Staff-level full-stack software engineer with 10+ years shipping production frontend, backend, and APIs and leading architecture across cross-regional teams — Angular-to-React modernization, CI/CD and test automation, and measurable performance work. Now transitioning into ML inference engineering through self-directed, reproducible labs: vLLM GPU serving on AWS/EKS, autoscaling and admission control, KV-cache and quantization tradeoffs, and CUDA/Triton kernel benchmarking — measured honestly, negative results included.",
+      "Staff-level full-stack engineer with 10+ years of building production applications and APIs and leading cross-team architecture. Self-directed GPU labs cover vLLM serving on AWS, Triton kernels, and CUDA Graph replay, with repeated benchmarks, correctness checks, and documented trade-offs.",
   },
   skills: {
-    "Professional (Production Experience)": [
+    "Production: Languages / Web": [
       "TypeScript",
-      "Go",
+      "JavaScript",
       "Python",
+      "Go",
       "SQL",
       "React",
-      "AngularJS → React Migration",
       "Node.js",
       "GraphQL / REST",
-      "Cypress E2E Testing",
-      "CI/CD Automation",
+    ],
+    "Production: Delivery / Leadership": [
+      "Build / Release Automation",
+      "Cypress End-to-End Tests",
       "Performance Optimization",
       "Architecture Design",
-      "Cross-Functional Leadership",
+      "Cross-Team Leadership",
     ],
-    "Self-Directed / Lab": [
-      "AWS (VPC, IAM, EC2, ALB)",
-      "Terraform",
-      "Kubernetes (EKS)",
-      "Karpenter",
+    "Lab: GPU / Serving": [
+      "PyTorch",
+      "Triton GPU Tuning",
+      "CUDA Graph Replay",
+      "vLLM Serving",
+    ],
+    "Lab: Testing / Monitoring": [
+      "Prompt / Cache Tests",
+      "Response Time (Latency)",
+      "Processing Rate (Throughput)",
+      "k6 Load Tests",
+      "Benchmarks",
       "Prometheus / Grafana",
-      "DCGM Exporter",
-      "GPU Capacity Planning",
-      "vLLM",
-      "LLM Serving",
-      "OpenAI-Compatible APIs",
-      "Autoscaling",
-      "Admission Control",
-      "KV Cache / Context Length",
-      "Quantization Evaluation",
-      "CUDA / Triton Benchmarking",
-      "Inference Load Testing (k6)",
+      "GPU Monitoring (DCGM)",
+    ],
+    "Lab: Cloud / Deployment": [
+      "Kubernetes on AWS (EKS)",
+      "Terraform",
+      "AWS Compute / Networking",
     ],
   },
   projects: {
     title: "ML Inference — Self-Directed (2025–Present)",
-    note: "Self-funded, reproducible labs built to learn ML inference in the open — GPU serving and kernel work documented with methodology and negative results, not just wins.",
+    note: "Repeated benchmarks and correctness checks, including changes that did not improve speed. Results apply to tested hardware and workloads. Reports: tonylee.bio/work.",
     items: [
       {
-        title: "GPU Inference Decision Lab (AWS EKS + Karpenter + vLLM)",
+        title: "GPU Model Serving Lab (vLLM + AWS EKS)",
         highlights: [
-          "Provisioned a GPU serving stack on AWS EKS with Terraform and Karpenter, running vLLM behind an OpenAI-compatible API and instrumented with Prometheus/Grafana — turning autoscaling, admission control, and capacity choices into reproducible evidence.",
-          "Load-tested burst and long-context traffic: bounded queues held 100% delivery near 2s p95 under burst, and FP8 KV-cache was rejected after delivery dropped below ~70% — keeping the negative result as the decision.",
+          "Deployment: Automated vLLM deployment and load tests on AWS Kubernetes (EKS), using Qwen2.5-0.5B on one NVIDIA T4 per server with monitoring.",
+          "Capacity: Long prompts increased request waits while model processing time stayed steady. Load tests identified capacity limits.",
+          "Response time: 95% of measured responses arrived within 28 seconds, down from 78, by limiting simultaneous requests in the test client. Trade-offs: 8% unserved requests and 7% less text output per second (in tokens).",
         ],
       },
       {
-        title: "CUDA/Triton GPU Kernel Lab (PyTorch baselines + A10G/H200)",
+        title: "Triton GPU Performance Lab (NVIDIA A10G + H200)",
         highlights: [
-          "Built a reproducible CUDA/Triton benchmarking harness for LLM-shaped GPU kernels, validating correctness and measuring latency, bandwidth, and TFLOP/s against PyTorch/cuBLAS baselines.",
-          "Reached ~90% of cuBLAS matmul throughput on H200 with a tuned Triton schedule, and recorded where a persistent-wave variant stayed below the baseline rather than reporting only the win.",
+          "53% lower median runtime: Replayed recorded GPU operations (CUDA Graphs) in a simulated A10G text-generation step. Combining operations alone did not help.",
+          "5.9x faster RMSNorm: Used Triton to rescale model values versus separate PyTorch operations on A10G. Confirmed gains on H200; Nsight Compute found A10G limited by GPU memory transfer speed.",
+          "74% to 89% of cuBLAS speed: Tuned H200 matrix multiplication in 16-bit (FP16) tests, using NVIDIA's GPU math library as the baseline. Discarded slower configurations.",
         ],
       },
     ],
@@ -74,10 +80,9 @@ export const publicResumeData: ResumeData = {
       startDate: "Sep 2024",
       endDate: "Present",
       highlights: [
-        "Designed distributed platform services across UI, API, data, and infrastructure boundaries, with emphasis on reliability, deployment safety, and cross-service coordination.",
-        "Improved release stability by containerizing UI services, decoupling shared dependencies, and isolating high-risk deployment surfaces.",
-        "Led a launch-critical OpenSearch Dashboards migration, resolving deployment and environment issues with AWS/OpenSearch engineers.",
-        "Built local development and validation automation that cut dev/test iteration latency by 20% and improved onboarding.",
+        "Designed services across user interfaces, APIs, data, and infrastructure. Packaged frontend services in containers to improve release stability.",
+        "Led an OpenSearch Dashboards migration for the product launch, working with AWS/OpenSearch engineers to resolve deployment and environment issues.",
+        "Automated local development and tests, cutting cycle time by 20%.",
       ],
     },
     {
@@ -86,10 +91,9 @@ export const publicResumeData: ResumeData = {
       startDate: "Aug 2019",
       endDate: "Apr 2024",
       highlights: [
-        "Led architecture for the Onboarding Experience platform, helping enterprise customers complete onboarding in under 30 minutes.",
-        "Drove system design across frontend, backend, APIs, and integrations, resolving tradeoffs across US, Europe, and India engineering groups.",
-        "Led AngularJS-to-React modernization to remove security risk and improve maintainability; introduced Cypress end-to-end testing that cut test creation time by 50%.",
-        "Built CI/CD and test automation improvements that reduced regression risk in high-visibility customer onboarding flows.",
+        "Led frontend, backend, API, and integration architecture for Onboarding Experience. Enterprise customers completed onboarding in under 30 minutes.",
+        "Made architecture decisions with teams in the US, Europe, and India. Improved build, release, and test automation to reduce new onboarding bugs.",
+        "Led AngularJS-to-React migration to address security and maintenance issues. Added Cypress end-to-end tests, cutting test creation time by 50%.",
       ],
     },
     {
@@ -98,7 +102,7 @@ export const publicResumeData: ResumeData = {
       startDate: "Jan 2019",
       endDate: "Aug 2019",
       highlights: [
-        "Improved message loading performance by 60% through frontend and API optimization and reduced codebase size by 30% through modular refactoring.",
+        "Cut message loading time by 60% through frontend and API optimization. Reduced codebase size by 30% by reorganizing code into reusable modules.",
       ],
     },
     {
@@ -114,13 +118,13 @@ export const publicResumeData: ResumeData = {
   education: [
     {
       school: "University of California, San Diego",
-      degree: "M. E. Electrical Engineering",
+      degree: "M.E. Electrical Engineering",
       startDate: "Sep 2006",
       endDate: "Jun 2008",
     },
     {
       school: "University of Illinois at Urbana-Champaign",
-      degree: "B. S. Electrical Engineering",
+      degree: "B.S. Electrical Engineering",
       startDate: "Sep 2003",
       endDate: "Dec 2005",
     },

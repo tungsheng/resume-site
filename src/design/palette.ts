@@ -7,8 +7,9 @@
 // Tailwind v4 reads that literal CSS to generate utilities and cannot read
 // TypeScript. So this is a mirror, kept honest by a test that parses global.css
 // and asserts the two agree (tests/unit/palette.test.ts). It exists because the
-// resume PDF is not a Tailwind surface: document-css.ts is a template string
-// that used to hardcode these six values under --resume-* names, and when
+// resume PDF is not a Tailwind surface: document-css.ts shares the neutral
+// tokens and deliberately uses brighter print accents. It used to hardcode
+// these six values under --resume-* names, and when
 // ADR-0010 re-skinned the site the PDF silently kept the old palette until it
 // was re-aligned by hand in b0acdc0.
 //

@@ -19,7 +19,7 @@ const linkedinHref = contacts.linkedin
 // The summary closes on an accent-italic clause (design). Split it off the tail
 // so the lede reads plain and the clause carries the emphasis; falls back to the
 // whole string if the phrase ever changes.
-const SUMMARY_CLAUSE = "measured honestly, negative results included.";
+const SUMMARY_CLAUSE = "repeated benchmarks, correctness checks, and documented trade-offs.";
 const clauseAt = view.summary.lastIndexOf(SUMMARY_CLAUSE);
 const summaryHead = clauseAt >= 0 ? view.summary.slice(0, clauseAt) : view.summary;
 const summaryClause = clauseAt >= 0 ? view.summary.slice(clauseAt) : "";
@@ -74,6 +74,18 @@ const contactLink =
         linkedinHref && (
           <a href={linkedinHref} target="_blank" rel="noreferrer" class={contactLink}>
             LinkedIn <span aria-hidden="true">&rarr;</span>
+          </a>
+        )
+      }
+      {
+        contacts.github && (
+          <a
+            href={`https://github.com/${encodeURIComponent(contacts.github)}`}
+            target="_blank"
+            rel="noreferrer"
+            class={contactLink}
+          >
+            GitHub <span aria-hidden="true">&rarr;</span>
           </a>
         )
       }

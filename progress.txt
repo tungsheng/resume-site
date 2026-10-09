@@ -1484,3 +1484,406 @@ CLEANUP / AUDIT (2026-09-02)
     rasterised both, ink coverage 60,652 vs 60,648 dark px (0.01%), differences
     spread evenly across every text band = sub-pixel positioning, not missing
     weights.
+
+--------------------------------------------------------------------------------
+2026-10-06 — Tailor resume for Microsoft AI inference performance
+--------------------------------------------------------------------------------
+Created codex/microsoft-performance-resume from main at 369e035.
+Target: Senior and/or Principal Software Engineer - Performance, Microsoft's
+Artificial Intelligence Performance team, job number 200045617 (posted Oct 2).
+Source reviewed Oct 6, 2026:
+  https://apply.careers.microsoft.com/careers/job/1970393556945456
+The posting emphasizes end-to-end LLM inference performance, GPU benchmarking,
+performance tooling, deployment efficiency, and internal/external collaboration.
+
+Updated the shared resume data (web + downloadable PDF):
+  * Rewrote the summary around production delivery and the self-directed
+    transition into inference performance; surfaced the A10G RMSNorm result.
+  * Prioritized Python, performance, architecture, and collaboration in the
+    professional skills. Added PyTorch and Nsight Compute to the lab skills,
+    with CUDA/Triton, vLLM, and latency/throughput analysis near the top.
+  * Expanded each lab to three bullets: tooling, measured bottlenecks/results,
+    and decisions. Kept workload/hardware qualifiers and negative results.
+  * Consolidated DTEX and Cisco to three bullets each, retaining delivery,
+    collaboration, automation, and the existing quantified outcomes.
+  * Updated existing resume-content assertions for the combined vLLM skill
+    label and three project bullets; retained the production/lab distinction.
+
+Evidence for added specificity is already in the portfolio:
+  * experiment-catalog-content.ts / kv-cache: 8,192 prompt / 300 output tokens
+    at 1.20 req/s, p95 queue 36.93s and p95 decode 29.43s.
+  * decision-content.ts / fp8-kv-g4dn: 47.58-69.12% delivery vs 100% baseline.
+  * experiment-catalog-content.ts / kernel-normalization-fusion: 5.901x over
+    PyTorch for fused Triton RMSNorm on A10G, fp16, 4096x8192.
+  * kernel-profiler-validation: Nsight Compute memory/occupancy analysis.
+  * kernel-h200-matmul-autotune: ~88-90% of PyTorch/cuBLAS throughput, with
+    slower persistent-wave variants preserved as measured non-wins.
+No new employment, production ML, Azure/AMD, or large-fleet ownership claims.
+
+Validation: bun run check (typecheck + 159 unit tests), bun run build, and
+bun run test:integration (30 tests) all passed. PDF integration confirms one
+Letter page at natural scale; rendered PNG inspected for clipping, overlap,
+and legibility, and extracted text checked for all revised content.
+public/resume.pdf was regenerated and remains gitignored by design.
+
+--------------------------------------------------------------------------------
+2026-10-07 — Review + evidence audit of the Microsoft-tailored resume
+--------------------------------------------------------------------------------
+Same branch (codex/microsoft-performance-resume), same target: Microsoft AI
+Performance, Senior/Principal SWE - Performance, job 200045617 (re-read Oct 7;
+remote, IC4/IC5; preferred quals: GPU architecture, end-to-end LLM perf
+analysis with GPU profiling tools, PyTorch/ONNX Runtime, CUDA/ROCm/Triton).
+
+METHOD: 5 evidence miners read every lab repo (cuda-kernel-lab, gpu-inference-
+lab, inference-fleet-lab, dynamo-lab, stratus, vllm fork, small repos) and the
+portfolio; 4 critics scored the 10-06 resume (recruiter/ATS 5, hiring manager
+5, scrutiny auditor 6, editor 6.5 of 10). Three independent drafts (depth /
+ATS-scan / minimal-diff) were judged per section by three lenses; the
+synthesis then went through a 4-lens adversarial fact-check (21 flags, all
+resolved). Only numbers re-opened in primary source files were kept.
+
+WHAT THE AUDIT FOUND IN THE 10-06 VERSION (all fixed):
+  * "CUDA/Triton" (title, summary, harness bullet): the lab has ZERO CUDA C/C++
+    files; all kernels are Triton. CUDA is only CUDA Graphs, CUDA events and
+    cuBLAS baselines. Kernel lab retitled "Triton GPU Kernel Lab (NVIDIA A10G +
+    H200, PyTorch/cuBLAS baselines)"; skill "CUDA / Triton Benchmarking" ->
+    "Triton Kernel Benchmarking"; "CUDA Graphs" added.
+  * 5.9x in the summary with no baseline: the reference is an UNFUSED EAGER
+    PyTorch chain (torch_baselines/norms.py:12-14). Bullet now names it and
+    leads with the Nsight Compute counters (90.91% of peak DRAM, 93.12%
+    occupancy) at the shape actually profiled (4096x4096, not 4096x8192).
+  * Serving lab never named model/GPU: every serving number is Qwen2.5-0.5B on
+    vLLM 0.9.0 on ONE T4 (g4dn). Now in the lab title.
+  * "Validated bounded admission with 100% delivery near 2s p95": closed-loop
+    k6, so offered == completed by construction (coordinated omission), on a
+    different 512/128 workload. DROPPED. Replaced by the real 1.25 req/s A/B,
+    framed as load shedding via a CLIENT-side cap (not an admission controller)
+    with its cost stated (59 of 749 unserved, 7% fewer tok/s).
+  * Server-side p95s are Prometheus histogram_quantile interpolations inside
+    vLLM buckets -> bucket-honest values: queue ~37s (30-40s bucket), TTFT
+    >40s -> <1s. k6 client numbers stay exact.
+  * FP8 clause gained its cause (T4 has no native FP8) and output tok/s. The
+    draft "~0.07 GiB of KV memory" was WRONG and never shipped: 0.07 GiB is the
+    DCGM total-memory delta; vLLM pre-reserves the KV pool, so FP8 grew KV
+    capacity. Lesson: "saved X GiB" on vLLM needs the reservation context.
+  * Skills that overstated the evidence: "Nsight Compute" (counters exist on
+    A10G only; every H200 ncu run hit ERR_NVGPUCTRPERM) moved into a bullet;
+    "Quantization Evaluation" (no accuracy eval; FP4 never ran), "Admission
+    Control" (client cap), "GPU Capacity Planning" (one-GPU sweep), Karpenter,
+    Autoscaling removed. "Triton Tuning" not "Autotuning": @triton.autotune is
+    unused (custom sweep + stability-gated selector).
+  * Summary had lost "measured honestly, negative results included." —
+    resume.astro splits on that exact phrase for its italic accent, so the 10-06
+    commit silently broke the web page. Restored + now pinned by a unit test.
+  * H200 GEMM uses ranges, not one run: ~74% -> ~89% of cuBLAS (repeats span
+    73.74-74.74% and 88.78-89.9%; the 89.22% run was git-dirty), timing only.
+    RMSNorm on H200 is "4-7x" (one pod measured 4.15x; quoting only 7.421x
+    would be a visible cherry-pick in the public repo).
+
+NEW EVIDENCE SURFACED (all public, all re-verified):
+  * Decode step (synthetic, batch 1, A10G FP16) is launch-bound: CUDA Graph
+    replay of the same kernels 0.3395 -> 0.1594 ms p50; Triton fusion alone did
+    not help (slower in 19 of 22 runs). No nsys trace — attribution is by
+    construction (same kernels, eager vs graph).
+  * Long-context knee across 1.10/1.15/1.20 req/s with r2/r3 repeats: p95 queue
+    <0.3s -> ~14s -> ~37s while p95 prefill/decode stay flat.
+  * Tooling (the JD's "build SW tooling"): kernel lab = 14 Python CLIs, 123
+    tests, stability-gated autotune selection, 5% regression gate, Nsight
+    summarizer; serving lab = k6 + vLLM histograms + DCGM joined per run in
+    schema-validated reports that replay offline.
+  NOT used (audited): vLLM PR #44503 (docs, closed unmerged), dynamo-lab (GPU-
+  free mocker), inference-fleet-lab + stratus (private), C/C++/ROCm/ONNX
+  Runtime/Azure/torch.compile/Nsight Systems (no evidence anywhere).
+
+STRUCTURAL FIXES:
+  * PDF TEXT ORDER BUG: .experience-list/.experience-item had position:
+    relative (left over from the hidden timeline rail). Positioned boxes paint
+    after in-flow content, so Chrome wrote the LABS into the PDF content stream
+    directly under "WORK EXPERIENCE", ahead of DTEX. Stream-order parsers would
+    file unpaid labs as the newest job. Removed; pdftotext -raw now reads Work
+    Experience -> DTEX ... -> labs.
+  * GitHub contact (github.com/tungsheng) in the PDF header + "GitHub ->" on
+    /resume; new optional contacts.github.
+  * Skills render as one nowrap span per item with the "•" trailing, so the
+    2.05in sidebar never splits "AWS (VPC, IAM, EC2, ALB)" or starts a line
+    with a bullet. Extracted text unchanged.
+  * Wording-only experience edits (no new claims/numbers): fewer "Led"
+    openers, "dev/test cycle time", 3-line widow removed; "M.E."/"B.S." spacing.
+    A draft "Modernized the frontend from AngularJS to React" was reverted to
+    Tony's "Led AngularJS-to-React modernization" (meaning drift).
+
+OPEN QUESTIONS FOR TONY (deliberately not guessed):
+  * "(2025–Present)" in the labs title: no ML/GPU work on disk predates March
+    2026 (gpu-inference-lab first commit 2026-03-09). Confirm the year.
+  * 2008-2016 gap between the M.E. and Popup is unexplained on the page.
+  * Exact master's name (M.E. vs M.Eng. vs M.S.) — matters for the JD's
+    "Master's + 8 years" preferred path.
+  * Production Python/Go: long-standing Professional skills, but no paid-work
+    bullet shows them; Microsoft screens will ask.
+  * Any paid perf metric at DTEX/Cisco (latency, p95) would strengthen the
+    professional side for a perf team.
+
+INTERVIEW PREP (questions the audit says will come):
+  * "FP8 halves KV bytes — why no memory saving?" vLLM pre-reserves the pool
+    (gpu_memory_utilization 0.90); FP8 doubled capacity the run never needed;
+    the cost was T4's non-native FP8 path (250 -> 114-166 tok/s).
+  * "Isn't 77.51s -> 27.98s survivorship?" Yes — deliberate shedding past the
+    knee; 3 capped runs 27.83-28.53s with 52-67 unserved; uncapped 76.8-93.8s.
+  * "Prove launch-bound without nsys?" Same-kernels eager vs graph A/B; ~0.18
+    ms of host time; fusion only paid (~7%) under graphs.
+  * "Why 8 warps/5 stages/group-M on Hopper; % of peak?" Timing-only, so the
+    mechanism is hypothesis; cuBLAS ~521 TFLOP/s ≈ 53% of 989 dense FP16 peak.
+    Do NOT quote the lab's "Peak %" column (it divides by the 1,979 sparse
+    figure). 512x11008x4096 is the gate/up projection, not "down".
+
+FOLLOW-UPS FILED (separate tasks): embed static Inter so the PDF stops using
+Type 3 fonts (raw extraction drops spaces in semibold: "StaffSoftwareEngineer");
+fix cuda-kernel-lab's sparse-peak roofline + RMSNorm byte model (648.9 GB/s on
+a ~600 GB/s A10G); align /work copy (still says "100% queued delivery",
+"CUDA/Triton optimization lab", unqualified 5.901x) — the resume's
+"Write-ups: tonylee.bio/work" pointer was held back until that lands.
+
+Validation: bun run check (typecheck + 161 unit tests), bun run build, and
+bun run test:integration (30 tests) all pass. PDF is one Letter page at
+natural scale (true content slack 76px sidebar / 39px main); pdftotext -raw
+confirms jobs precede labs; /resume checked in the dev server (GitHub link,
+italic summary clause, lab title tags, no console errors).
+
+--------------------------------------------------------------------------------
+2026-10-08 — Follow-ups from the 10-07 audit: PDF fonts, lab models, /work copy
+--------------------------------------------------------------------------------
+All three follow-ups filed on 10-07 are done, each through implement ->
+adversarial verify -> fix -> re-verify.
+
+1. PDF FONTS (resume-site). Chrome/Skia cannot embed a variable font as a font
+   program, so the PDF carried 52 Type 3 fonts and stream-order extraction lost
+   word spaces in every non-regular weight ("TonyLee", "StaffSoftwareEngineer").
+   Now 5 static Inter 4.001 instances (400/500/600 + 400 italic at opsz 14, and
+   600 at opsz 32 for the 32px name via a second family, ResumePDFDisplay —
+   @font-face has no optical-size descriptor). pdffonts: 5 CID TrueType, 0 Type
+   3; pdftotext -raw restores spaces on exactly the 9 affected lines; Chrome's
+   135 line boxes unchanged (max 0.05px); PDF 330KB -> 60KB; still byte-
+   reproducible per platform. The "opsz200000_wght2580000" subset name was
+   CoreText hex 16.16 (opsz 32, wght 600). Variable fonts removed from the tree;
+   fonts/README.md regenerates the instances from git history (7f5e897).
+   A unit test now fails if the PDF CSS uses a font-weight with no face.
+2. cuda-kernel-lab (branch fix/derived-measurement-models, 3 commits, NOT
+   pushed): dense H200 SXM peaks (the code used NVIDIA's with-sparsity figures,
+   so Math Peak % read ~half: cuBLAS bf16 512x11008x4096 26.95% -> 53.91%), NVL
+   spec, GH200 excluded; norms byte model counts weight/bias once (A10G RMSNorm
+   648.9 -> 432.6 GB/s, now under the ~600 GB/s peak; Nsight bytes are 1.12x the
+   model). 21 reports regenerated (timings/speedups/%-of-cuBLAS byte-identical,
+   checked cell by cell), 7 dated errata. 123 tests pass (Python 3.12).
+   The 10-07 "don't quote the lab's Peak % column" rule is now obsolete.
+3. /work + home copy aligned with the audit: closed-loop burst runs described as
+   closed-loop (0 drops by construction; 1,656 vs 2,632 completed), the client
+   k6 cap never called admission control, Triton-not-CUDA wording, eager
+   baselines named, H200 timing-only, Nsight coverage stated per capture,
+   Qwen2.5-0.5B on single-T4 g4dn.xlarge REPLICAS (the HPA runs used 2-3
+   nodes, so "one T4" was wrong lab-wide — the resume title now says "1×T4
+   replicas" too), noisy 0.1375 ms decode headline replaced by the stable
+   0.1482 ms, GEMM up/down labels corrected (the lab's own target names are
+   reversed — noted on the page). Text-only: CSS bundles byte-identical.
+
+LEFT FOR TONY:
+  * The "Bounded admission" decision still reads Supported with the call "Use
+    bounded admission when requests can arrive before model readiness", but its
+    corrected evidence says the queued arm cannot drop by construction —
+    retitle around client backpressure, or downgrade to Caveated/Partial. Same
+    for the autoscaling "Supported: Client queue policy" badge (the real finding
+    is cold-start readiness). Status/call/title/domain changes were held back.
+  * Loop step titles "Profile first" / "Re-profile" on /work/cuda-kernel-lab
+    (the paragraph now carries the caveat).
+  * Re-add "Write-ups: tonylee.bio/work" to the resume's labs note once the
+    decision card is settled (fits: the page has ~39px right-column slack).
+  * Run fonts/README.md with real brotli 1.2.0 and cmp (the committed bytes came
+    from an equivalent shim — see the README's provenance note), and confirm a
+    Linux CI build no longer differs by ~76KB.
+
+INCIDENT — uv Python 3.13 broken on this machine (2026-10-08 13:41): a subagent
+made a scratch symlink to a uv venv's bin/python, "removed" it with `rm`
+(aliased to `rm -i`: a silent no-op in a non-interactive shell), then wrote
+through the symlink chain into ~/.local/share/uv/python/cpython-3.13.12-macos-
+aarch64-none/bin/python3.13, replacing the interpreter with an 89-byte script
+that execs itself. Every uv Python 3.13 now loops at 100% CPU (two orphaned
+loops ran ~35 min before being killed). Not repaired: needs
+`uv python install --reinstall 3.13.12` (network). uv 3.12.12 is intact.
+cuda-kernel-lab's own .venv was already broken (links a missing Homebrew 3.13).
+  RESOLVED SAME DAY (Tony's calls): uv CPython 3.13.12 reinstalled
+  (`uv python install --reinstall 3.13.12`; python3.13 runs, no stray probes);
+  the fonts README block re-run with real fontTools 4.64.0 + brotli 1.2.0
+  reproduced all five committed woff2 files byte-for-byte. "Bounded admission"
+  retitled "Client concurrency cap" (id client-concurrency-cap, domain
+  "Concurrency + readiness"), still Supported, now citing the open-loop 1.25
+  req/s A/B and listing kv-cache; the autoscaling badge reads "Selected report:
+  Cold-start readiness" (not Supported — that decision is Partial). The
+  resume's labs note again ends "Write-ups: tonylee.bio/work." (same two
+  lines, slack unchanged). Still open: the "Set a concurrency or admission
+  boundary" call on the long-context decision, the "Profile first"/"Re-profile"
+  step titles, and a Linux CI check that the PDF no longer differs by ~76KB.
+
+--------------------------------------------------------------------------------
+2026-10-08 — Simplify the resume for recruiters and hiring managers
+--------------------------------------------------------------------------------
+Rewrote the ML inference bullets around the work, result, and tradeoff instead
+of benchmark settings and metric chains. Shortened project titles; kept the
+small-model/T4 context, synthetic-kernel scope, eager PyTorch baseline, H200
+timing-only qualification, and the cost of client-side load shedding.
+Rounded the measured results for readability: 78 -> 28 seconds at p95,
+8% unserved / 7% less token throughput, 53% less median synthetic-step runtime,
+and 5.9x RMSNorm speedup. Full conditions remain in the linked project reports.
+Removed the summary's self-praise ("measured honestly") and tightened DTEX/Cisco
+prose. Updated the web summary accent and existing content assertions to match.
+Validation: typecheck + 162 unit tests, full build, and 30 integration tests
+passed. Rebuilt PDF inspected visually and via text extraction: one Letter
+page at natural scale, with no clipping or overlap.
+
+--------------------------------------------------------------------------------
+2026-10-08 — Balance the PDF header
+--------------------------------------------------------------------------------
+Grouped the four contact links into two rows and centered them beside the name
+and tagline. Reduced the space around the header divider so the main sections
+start closer to the header. Kept all contact URLs and resume wording intact.
+Validation: full build, 18 resume/PDF unit tests, and both PDF rendering
+integration checks passed. Inspected the rebuilt PDF: one Letter page at
+natural scale, with aligned contacts and no clipping or overlap.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Remove the resume GitHub contact and increase header spacing
+--------------------------------------------------------------------------------
+Removed GitHub from the shared resume contacts, which updates both the web
+resume and PDF. Stacked the remaining three contacts to balance the name and
+tagline, and added about 8 CSS pixels of space before the main sections.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed. Visually inspected the rebuilt PDF: one Letter page at natural scale,
+with clear header spacing and no clipping or overlap.
+
+2026-10-09 — Removed the entire "123 tests" bullet from the Triton lab in the
+shared resume data. Updated the existing bullet-count assertion. Full build
+and 13 resume unit tests passed; the rebuilt PDF was visually checked and
+remains one Letter page.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Review resume readability and balance the full-page layout
+--------------------------------------------------------------------------------
+Shortened long work and lab bullets while preserving the results, hardware
+scope, and tradeoffs. Clarified that the H200 RMSNorm speedup compares with the
+unfused PyTorch reference and that matmul measures throughput against cuBLAS.
+Merged overlapping Triton skill labels and simplified the k6 label. Kept the
+user-provided summary exactly as written.
+Raised PDF summary and bullet text from 8.75 to 9.5 pt, skills to 9.2 pt,
+titles to 10.2 pt, and dates to 8.1 pt with stronger contrast. Widened the
+sidebar and column gap; increased line, bullet, entry, and section spacing.
+Removed unnecessary final-section margins. The columns now end closer together.
+Validation: full build, typecheck, 162 unit tests, and both PDF rendering
+checks passed. Visually inspected the final one-page Letter PDF at natural
+scale, confirmed no title clipping, and checked the embedded fonts and text
+order. GitHub and the test-count bullet remain absent.
+
+2026-10-09 — Finalized the resume readability changes for commit on
+codex/microsoft-performance-resume. The shared content, web summary accent,
+PDF typography and spacing, content assertions, and progress notes form one
+cohesive change. Build, typecheck, 162 unit tests, and both PDF rendering checks
+passed; the PDF remains one Letter page at natural scale with embedded fonts.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Simplify RMSNorm wording and skills labels
+--------------------------------------------------------------------------------
+Led the RMSNorm bullet with the 5.9x speedup against unfused eager PyTorch on
+A10G. Removed the second numeric range while retaining H200 validation and
+the A10G-only Nsight Compute profiling finding. Shortened the skills category
+to "Production" and the lab skill label to "Performance Tools". Updated the
+existing skills assertions. Kept the current layout and user-provided summary.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed. Visually inspected the rebuilt PDF: one Letter page at natural scale,
+with no clipping or overlap. No layout or typography styles changed.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Clarify resume terminology for recruiters and hiring managers
+--------------------------------------------------------------------------------
+Replaced vague skills labels and shortened project titles. Explained RMSNorm
+as rescaling model values, CUDA Graphs as replaying recorded GPU operations,
+FP8 as 8-bit model-cache storage, and cuBLAS as a GPU math library. Described
+the PyTorch comparison, memory transfer limit, response-time percentile, and
+text-generation rate in plain language while retaining their benchmark scope
+and tradeoffs. Clarified the unsuccessful optimizations note and work bullets.
+Tony confirmed the Tico metric measures a 60% reduction in message loading
+time; updated that claim accordingly. Preserved the user-provided summary.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed after tightening the explanations. Visually inspected the final PDF:
+one Letter page at natural scale, with no clipping or overlap. The layout,
+font sizes, and spacing settings remain unchanged.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Recheck recruiter readability and Microsoft role alignment
+--------------------------------------------------------------------------------
+Reviewed the live Microsoft posting for Senior and/or Principal Software
+Engineer - Performance, job 200045617:
+  https://apply.careers.microsoft.com/careers/job/1970393556945456
+Confirmed its emphasis on GPU benchmarking and profiling, inference
+performance, software tooling, deployment efficiency, PyTorch/CUDA/Triton,
+and collaboration across teams and partners.
+Paired latency and throughput with their plain-language meanings in Skills.
+Made deployment and load-test automation explicit in the vLLM lab, supported
+by the lab's lifecycle and experiment scripts. Led the CUDA Graph and RMSNorm
+bullets with the measured 53% and 5.9x results while retaining explanations,
+hardware scope, the PyTorch baseline, and the A10G-only profiling finding.
+The paid-work section continues to show architecture, automation, delivery,
+and cross-team leadership. Production-scale LLM performance ownership remains
+a gap in the evidence; the GPU work stays clearly labeled self-directed.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed. Visually inspected the final one-page Letter PDF at natural scale,
+with no clipping or overlap. Preserved the summary, layout, font sizes, and
+spacing settings.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Remove the FP8 bullet and rebalance resume typography
+--------------------------------------------------------------------------------
+Removed the entire FP8 rejection bullet from the shared resume data and
+updated the existing serving-lab bullet-count assertion from four to three.
+Split the deployment and test scope into shorter sentences, clarified request
+wait times, and described the response-time result directly: 95% of measured
+responses arrived within 28 seconds, down from 78, with the client limit and
+8% unserved / 7% less text-output tradeoffs retained. Made the DTEX container
+work more concrete and removed the vague shared-dependencies clause.
+Raised PDF body and bullet text to 9.75 pt, skills to 9.5 pt, entry titles to
+10.5 pt, category/company/school labels to 9.1 pt, dates to 8.3 pt, and section
+headings to 9 pt. Increased section, entry, and bullet spacing. Kept the summary
+at 9.5 pt to match sidebar text and added paragraph wrapping that avoids the
+short final line. The two columns now finish at nearly the same height.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed. Visually inspected the final one-page Letter PDF at natural scale:
+no clipping or overlap, clear paragraph wrapping, and balanced column endings.
+Confirmed FP8 and the removed test-count item are absent from extracted text.
+Preserved the user-provided summary and the Microsoft-relevant skills.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Brighten the PDF resume's green accents
+--------------------------------------------------------------------------------
+Changed PDF bullet markers to #00a651 and the header tagline to #008542 for a
+more vibrant green. Kept the neutral colors shared with the site's palette
+and documented the deliberate print accent override in the CSS and palette
+comments. Preserved the resume wording, fonts, spacing, and one-page layout.
+Validation: PDF build, 22 palette/resume unit tests, and both PDF rendering
+checks passed. Confirmed the tagline green has 4.74:1 contrast against white.
+Visually inspected the rendered PDF: one Letter page, readable accents, and
+no clipping or overlap. The generated PDF remains gitignored and is rebuilt
+from the committed source during the site build.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Make skills and GPU labs easier to scan
+--------------------------------------------------------------------------------
+Split skills into five labeled groups: production languages/web, production
+delivery/leadership, lab GPU/serving, lab testing/monitoring, and lab cloud/
+deployment. Shortened skill labels and combined overlapping leadership terms.
+Led serving-lab bullets with deployment, capacity, and response-time topics.
+Led GPU tuning bullets with the measured runtime and speed results, retaining
+the simulation scope, hardware, comparison baselines, and trade-offs.
+Rendered lab leads in the embedded Inter semibold face and set skill group
+spacing to 6 px. Preserved the summary, paid-work bullets, header, font sizes,
+and brighter green accents.
+Validation: full PDF/site build, typecheck, all 162 unit tests, and both PDF
+rendering checks passed. Visually inspected the final PDF at normal and enlarged
+viewing sizes: one Letter page at natural scale, balanced column endings, clear
+grouping, and no clipping or overlap. Confirmed all five font faces remain
+embedded and paid work precedes the self-directed labs in extracted text.

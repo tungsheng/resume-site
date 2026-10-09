@@ -9,30 +9,42 @@ describe("Resume Service", () => {
     expect(publicResumeData.header.badges).toContain("Staff Full-Stack Engineer → ML Inference");
     expect(publicResumeData.header.badges).not.toContain("ML Inference Performance Engineering");
     expect(publicResumeData.header.contacts.website).toBe("tonylee.bio");
-    // Skills split into two buckets: Professional (paid) vs Self-Directed / Lab (unpaid).
+    expect(publicResumeData.header.contacts.github).toBeUndefined();
+    // The web /resume page renders this exact closing clause as an italic accent
+    // and silently drops the accent if the phrase changes.
+    expect(publicResumeData.header.summary.endsWith("repeated benchmarks, correctness checks, and documented trade-offs.")).toBe(true);
+    // Skills distinguish production experience from self-directed labs.
     expect(Object.keys(publicResumeData.skills)).toEqual([
-      "Professional (Production Experience)",
-      "Self-Directed / Lab",
+      "Production: Languages / Web",
+      "Production: Delivery / Leadership",
+      "Lab: GPU / Serving",
+      "Lab: Testing / Monitoring",
+      "Lab: Cloud / Deployment",
     ]);
-    expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("TypeScript");
-    expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("React");
-    expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("CI/CD Automation");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("AWS (VPC, IAM, EC2, ALB)");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("DCGM Exporter");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("CUDA / Triton Benchmarking");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Inference Load Testing (k6)");
-    // Deep-mechanism specialties dropped from Skills (too scrutiny-heavy to assert as skills).
+    expect(publicResumeData.skills["Production: Languages / Web"]).toContain("TypeScript");
+    expect(publicResumeData.skills["Production: Languages / Web"]).toContain("React");
+    expect(publicResumeData.skills["Production: Delivery / Leadership"]).toContain("Build / Release Automation");
+    expect(publicResumeData.skills["Lab: Cloud / Deployment"]).toContain("AWS Compute / Networking");
+    expect(publicResumeData.skills["Lab: Testing / Monitoring"]).toContain("GPU Monitoring (DCGM)");
+    expect(publicResumeData.skills["Lab: GPU / Serving"]).toContain("vLLM Serving");
+    // The kernels are Triton; "CUDA" is claimed only where it is literally true.
+    expect(publicResumeData.skills["Lab: GPU / Serving"]).toContain("Triton GPU Tuning");
+    expect(publicResumeData.skills["Lab: GPU / Serving"]).toContain("CUDA Graph Replay");
+    expect(publicResumeData.skills["Lab: Testing / Monitoring"]).toContain("k6 Load Tests");
+    // Keep broad expertise claims out of Skills; named lab tools have portfolio evidence.
     const allSkills = Object.values(publicResumeData.skills).flat();
     expect(allSkills).not.toContain("Kernel Fusion");
     expect(allSkills).not.toContain("GPU Profiling");
+    // Nsight Compute counters exist for A10G only, so it lives in a bullet beside
+    // the counters measured, not as a standalone (profiling-proficiency) skill.
+    expect(allSkills).not.toContain("Nsight Compute");
     // Labs are a clearly-labeled self-directed section, with an honesty note.
     expect(publicResumeData.projects?.title).toBe("ML Inference — Self-Directed (2025–Present)");
-    expect(publicResumeData.projects?.note).toContain("negative results");
-    expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
-    expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(2);
-    expect(publicResumeData.projects?.items[1]?.title).toBe("CUDA/Triton GPU Kernel Lab (PyTorch baselines + A10G/H200)");
-    expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(2);
+    expect(publicResumeData.projects?.note).toContain("did not improve speed");
+    expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Model Serving Lab");
+    expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(3);
+    expect(publicResumeData.projects?.items[1]?.title).toBe("Triton GPU Performance Lab (NVIDIA A10G + H200)");
+    expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(3);
   });
 
   test("renderResumeHtmlDocument creates valid HTML", () => {
@@ -85,8 +97,26 @@ describe("Resume Service", () => {
 
     expect(html).toContain("@font-face");
     expect(html).toContain("font-family: 'ResumePDFSans'");
-    expect(embeddedFontCount).toBe(2);
+    // Static Inter instances (Regular, Medium, SemiBold, Italic, Display
+    // SemiBold), not the variable font, which Chrome writes as Type 3.
+    expect(embeddedFontCount).toBe(5);
     expect(html).not.toContain("'Avenir Next'");
+  });
+
+  test("every font-weight the PDF CSS uses has an embedded face", () => {
+    // With static faces Chrome never fails on a missing weight: it synthesizes
+    // bolder weights and maps lighter ones to the nearest face. This catches the
+    // common slip (a new font-weight in the PDF CSS); it does not check
+    // family/style combinations such as a 600 italic.
+    const html = renderResumeHtmlDocument(publicResumeData);
+    const faceBlocks = /@font-face \{[^}]*\}/g;
+    const weights = (css: string) =>
+      new Set([...css.matchAll(/font-weight: (\d+);/g)].map((match) => match[1]));
+    const embedded = weights((html.match(faceBlocks) ?? []).join("\n"));
+    const used = weights(html.replace(faceBlocks, ""));
+
+    expect(used.size).toBeGreaterThan(0);
+    expect([...used].filter((weight) => !embedded.has(weight))).toEqual([]);
   });
 
   test("renderResumeHtmlDocument escapes XSS", () => {
