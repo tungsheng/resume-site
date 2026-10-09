@@ -1797,3 +1797,19 @@ existing skills assertions. Kept the current layout and user-provided summary.
 Validation: full build, 13 resume unit tests, and both PDF rendering checks
 passed. Visually inspected the rebuilt PDF: one Letter page at natural scale,
 with no clipping or overlap. No layout or typography styles changed.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Clarify resume terminology for recruiters and hiring managers
+--------------------------------------------------------------------------------
+Replaced vague skills labels and shortened project titles. Explained RMSNorm
+as rescaling model values, CUDA Graphs as replaying recorded GPU operations,
+FP8 as 8-bit model-cache storage, and cuBLAS as a GPU math library. Described
+the PyTorch comparison, memory transfer limit, response-time percentile, and
+text-generation rate in plain language while retaining their benchmark scope
+and tradeoffs. Clarified the unsuccessful optimizations note and work bullets.
+Tony confirmed the Tico metric measures a 60% reduction in message loading
+time; updated that claim accordingly. Preserved the user-provided summary.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed after tightening the explanations. Visually inspected the final PDF:
+one Letter page at natural scale, with no clipping or overlap. The layout,
+font sizes, and spacing settings remain unchanged.

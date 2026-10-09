@@ -20,13 +20,13 @@ describe("Resume Service", () => {
     ]);
     expect(publicResumeData.skills.Production).toContain("TypeScript");
     expect(publicResumeData.skills.Production).toContain("React");
-    expect(publicResumeData.skills.Production).toContain("CI/CD Automation");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("AWS (VPC, IAM, EC2, ALB)");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("DCGM Exporter");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM / LLM Serving");
+    expect(publicResumeData.skills.Production).toContain("Build / Release Automation");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("AWS Compute / Networking");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("GPU Monitoring (DCGM)");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM Model Serving");
     // The kernels are Triton; "CUDA" is claimed only where it is literally true.
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Triton Benchmarking / Tuning");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("CUDA Graphs");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Triton GPU Code Tuning");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("CUDA Graph Replay");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("k6 Load Testing");
     // Keep broad expertise claims out of Skills; named lab tools have portfolio evidence.
     const allSkills = Object.values(publicResumeData.skills).flat();
@@ -37,10 +37,10 @@ describe("Resume Service", () => {
     expect(allSkills).not.toContain("Nsight Compute");
     // Labs are a clearly-labeled self-directed section, with an honesty note.
     expect(publicResumeData.projects?.title).toBe("ML Inference — Self-Directed (2025–Present)");
-    expect(publicResumeData.projects?.note).toContain("negative results");
-    expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
+    expect(publicResumeData.projects?.note).toContain("did not improve speed");
+    expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Model Serving Lab");
     expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(4);
-    expect(publicResumeData.projects?.items[1]?.title).toBe("Triton GPU Kernel Lab (NVIDIA A10G + H200)");
+    expect(publicResumeData.projects?.items[1]?.title).toBe("Triton GPU Performance Lab (NVIDIA A10G + H200)");
     expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(3);
   });
 
