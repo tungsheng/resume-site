@@ -13,14 +13,14 @@ describe("Resume Service", () => {
     // The web /resume page renders this exact closing clause as an italic accent
     // and silently drops the accent if the phrase changes.
     expect(publicResumeData.header.summary.endsWith("repeated benchmarks, correctness checks, and documented trade-offs.")).toBe(true);
-    // Skills split into two buckets: Professional (paid) vs Self-Directed / Lab (unpaid).
+    // Skills distinguish production experience from self-directed labs.
     expect(Object.keys(publicResumeData.skills)).toEqual([
-      "Professional (Production Experience)",
+      "Production",
       "Self-Directed / Lab",
     ]);
-    expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("TypeScript");
-    expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("React");
-    expect(publicResumeData.skills["Professional (Production Experience)"]).toContain("CI/CD Automation");
+    expect(publicResumeData.skills.Production).toContain("TypeScript");
+    expect(publicResumeData.skills.Production).toContain("React");
+    expect(publicResumeData.skills.Production).toContain("CI/CD Automation");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("AWS (VPC, IAM, EC2, ALB)");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("DCGM Exporter");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM / LLM Serving");

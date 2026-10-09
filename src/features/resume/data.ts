@@ -13,7 +13,7 @@ export const publicResumeData: ResumeData = {
       "Staff-level full-stack engineer with 10+ years of building production applications and APIs and leading cross-team architecture. Self-directed GPU labs cover vLLM serving on AWS, Triton kernels, and CUDA Graph replay, with repeated benchmarks, correctness checks, and documented trade-offs.",
   },
   skills: {
-    "Professional (Production Experience)": [
+    Production: [
       "TypeScript",
       "JavaScript",
       "Python",
@@ -37,7 +37,7 @@ export const publicResumeData: ResumeData = {
       "KV Cache / Context Length",
       "Latency / Throughput Analysis",
       "k6 Load Testing",
-      "Performance / Regression Tooling",
+      "Performance Tools",
       "Prometheus / Grafana",
       "DCGM Exporter",
       "Kubernetes (EKS)",
@@ -62,7 +62,7 @@ export const publicResumeData: ResumeData = {
         title: "Triton GPU Kernel Lab (NVIDIA A10G + H200)",
         highlights: [
           "Cut median runtime by 53% in an A10G synthetic token-generation step with CUDA Graph replay. Combining the operations without replay did not help.",
-          "Combined normalization operations in a Triton RMSNorm kernel: 5.9x faster than unfused eager PyTorch on A10G, and 4-7x in larger H200 benchmarks. Nsight Compute profiling on A10G identified memory bandwidth as the limit.",
+          "Sped up RMSNorm by 5.9x over unfused eager PyTorch on A10G using a fused Triton kernel. Confirmed gains on H200; Nsight Compute profiling on A10G identified memory bandwidth as the limit.",
           "Tuned an H200 matrix multiplication kernel from about 74% to 89% of NVIDIA cuBLAS throughput in FP16 benchmarks. Discarded slower configurations.",
         ],
       },

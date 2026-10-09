@@ -1785,3 +1785,15 @@ codex/microsoft-performance-resume. The shared content, web summary accent,
 PDF typography and spacing, content assertions, and progress notes form one
 cohesive change. Build, typecheck, 162 unit tests, and both PDF rendering checks
 passed; the PDF remains one Letter page at natural scale with embedded fonts.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Simplify RMSNorm wording and skills labels
+--------------------------------------------------------------------------------
+Led the RMSNorm bullet with the 5.9x speedup against unfused eager PyTorch on
+A10G. Removed the second numeric range while retaining H200 validation and
+the A10G-only Nsight Compute profiling finding. Shortened the skills category
+to "Production" and the lab skill label to "Performance Tools". Updated the
+existing skills assertions. Kept the current layout and user-provided summary.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed. Visually inspected the rebuilt PDF: one Letter page at natural scale,
+with no clipping or overlap. No layout or typography styles changed.
