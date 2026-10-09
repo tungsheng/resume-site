@@ -1856,3 +1856,16 @@ passed. Visually inspected the final one-page Letter PDF at natural scale:
 no clipping or overlap, clear paragraph wrapping, and balanced column endings.
 Confirmed FP8 and the removed test-count item are absent from extracted text.
 Preserved the user-provided summary and the Microsoft-relevant skills.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Brighten the PDF resume's green accents
+--------------------------------------------------------------------------------
+Changed PDF bullet markers to #00a651 and the header tagline to #008542 for a
+more vibrant green. Kept the neutral colors shared with the site's palette
+and documented the deliberate print accent override in the CSS and palette
+comments. Preserved the resume wording, fonts, spacing, and one-page layout.
+Validation: PDF build, 22 palette/resume unit tests, and both PDF rendering
+checks passed. Confirmed the tagline green has 4.74:1 contrast against white.
+Visually inspected the rendered PDF: one Letter page, readable accents, and
+no clipping or overlap. The generated PDF remains gitignored and is rebuilt
+from the committed source during the site build.

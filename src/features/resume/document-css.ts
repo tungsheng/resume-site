@@ -23,15 +23,12 @@ body {
   margin: 0;
 }
 
-/* PDF palette comes from the shared CANVAS tokens (@design), so it cannot drift
-   from the editorial redesign (ADR-0010) the way it did before b0acdc0 — these
-   six values used to be hardcoded here and were re-aligned by hand. The print
-   essentials that deliberately do NOT track the web stay local: a white
-   background (ink cost / ATS) and the embedded Inter sans (scannability), plus
-   the space-efficient two-column layout that fits one Letter page. */
+/* Share neutral colors with the site's CANVAS palette. Print accents use a
+   more saturated green, with a darker shade for small text on white. The white
+   background, embedded Inter fonts, and one-page layout also stay local. */
 .resume-document {
-  --resume-accent: ${CANVAS.accent};
-  --resume-accent-dark: ${CANVAS.accentDark};
+  --resume-accent: #00a651;
+  --resume-accent-dark: #008542;
   --resume-ink: ${CANVAS.ink};
   --resume-muted: ${CANVAS.muted};
   --resume-faint: ${CANVAS.faint};
