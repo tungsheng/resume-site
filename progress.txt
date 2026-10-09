@@ -1813,3 +1813,25 @@ Validation: full build, 13 resume unit tests, and both PDF rendering checks
 passed after tightening the explanations. Visually inspected the final PDF:
 one Letter page at natural scale, with no clipping or overlap. The layout,
 font sizes, and spacing settings remain unchanged.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Recheck recruiter readability and Microsoft role alignment
+--------------------------------------------------------------------------------
+Reviewed the live Microsoft posting for Senior and/or Principal Software
+Engineer - Performance, job 200045617:
+  https://apply.careers.microsoft.com/careers/job/1970393556945456
+Confirmed its emphasis on GPU benchmarking and profiling, inference
+performance, software tooling, deployment efficiency, PyTorch/CUDA/Triton,
+and collaboration across teams and partners.
+Paired latency and throughput with their plain-language meanings in Skills.
+Made deployment and load-test automation explicit in the vLLM lab, supported
+by the lab's lifecycle and experiment scripts. Led the CUDA Graph and RMSNorm
+bullets with the measured 53% and 5.9x results while retaining explanations,
+hardware scope, the PyTorch baseline, and the A10G-only profiling finding.
+The paid-work section continues to show architecture, automation, delivery,
+and cross-team leadership. Production-scale LLM performance ownership remains
+a gap in the evidence; the GPU work stays clearly labeled self-directed.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed. Visually inspected the final one-page Letter PDF at natural scale,
+with no clipping or overlap. Preserved the summary, layout, font sizes, and
+spacing settings.

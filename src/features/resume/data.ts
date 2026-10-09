@@ -35,7 +35,8 @@ export const publicResumeData: ResumeData = {
       "CUDA Graph Replay",
       "vLLM Model Serving",
       "Prompt Length / Cache Testing",
-      "Response Time / Processing Rate",
+      "Response Time (Latency)",
+      "Processing Rate (Throughput)",
       "k6 Load Testing",
       "Benchmark Automation",
       "Prometheus / Grafana",
@@ -52,7 +53,7 @@ export const publicResumeData: ResumeData = {
       {
         title: "GPU Model Serving Lab (vLLM + AWS EKS)",
         highlights: [
-          "Built a vLLM server for the small Qwen2.5-0.5B language model on AWS Kubernetes (EKS), with one NVIDIA T4 per server, load tests, and monitoring.",
+          "Automated vLLM deployment and load tests on AWS Kubernetes (EKS) for the small Qwen2.5-0.5B language model, with one NVIDIA T4 per server and monitoring.",
           "Found that long prompts increased time waiting in line, while model processing time stayed steady. Load tests showed when demand exceeded capacity.",
           "Cut the response-time cutoff for 95% of completed requests from 78 to 28 seconds by capping simultaneous requests in the test client. Left 8% of incoming requests unserved and produced 7% less text per second (in tokens).",
           "Rejected 8-bit model-cache storage (FP8) on T4 after request completion fell from 100% to 48-69%. T4 lacks hardware support for FP8 calculations.",
@@ -61,8 +62,8 @@ export const publicResumeData: ResumeData = {
       {
         title: "Triton GPU Performance Lab (NVIDIA A10G + H200)",
         highlights: [
-          "Replayed recorded GPU operations (CUDA Graphs), cutting median runtime by 53% in an A10G simulated text-generation step. Combining operations alone did not help.",
-          "Built Triton code for RMSNorm (rescaling model values): 5.9x faster than PyTorch running operations separately on A10G. Confirmed gains on H200; Nsight Compute found A10G was limited by GPU memory transfer speed.",
+          "Cut median runtime by 53% in a simulated A10G text-generation step by replaying recorded GPU operations (CUDA Graphs). Combining operations alone did not help.",
+          "Sped up RMSNorm (rescaling model values) 5.9x with Triton versus PyTorch running operations separately on A10G. Confirmed gains on H200; Nsight Compute found A10G was limited by GPU memory transfer speed.",
           "Raised H200 matrix multiplication speed from 74% to 89% of NVIDIA cuBLAS (GPU math library) in 16-bit (FP16) tests. Discarded slower configurations.",
         ],
       },
