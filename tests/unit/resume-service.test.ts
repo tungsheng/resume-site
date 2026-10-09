@@ -9,11 +9,10 @@ describe("Resume Service", () => {
     expect(publicResumeData.header.badges).toContain("Staff Full-Stack Engineer → ML Inference");
     expect(publicResumeData.header.badges).not.toContain("ML Inference Performance Engineering");
     expect(publicResumeData.header.contacts.website).toBe("tonylee.bio");
-    // The lab evidence is public on GitHub; reviewers should be one click away.
-    expect(publicResumeData.header.contacts.github).toBe("tungsheng");
+    expect(publicResumeData.header.contacts.github).toBeUndefined();
     // The web /resume page renders this exact closing clause as an italic accent
     // and silently drops the accent if the phrase changes.
-    expect(publicResumeData.header.summary.endsWith("measured honestly, negative results included.")).toBe(true);
+    expect(publicResumeData.header.summary.endsWith("repeated benchmarks, correctness checks, and documented trade-offs.")).toBe(true);
     // Skills split into two buckets: Professional (paid) vs Self-Directed / Lab (unpaid).
     expect(Object.keys(publicResumeData.skills)).toEqual([
       "Professional (Production Experience)",
@@ -26,9 +25,9 @@ describe("Resume Service", () => {
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("DCGM Exporter");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("vLLM / LLM Serving");
     // The kernels are Triton; "CUDA" is claimed only where it is literally true.
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Triton Kernel Benchmarking");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Triton Benchmarking / Tuning");
     expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("CUDA Graphs");
-    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("Inference Load Testing (k6)");
+    expect(publicResumeData.skills["Self-Directed / Lab"]).toContain("k6 Load Testing");
     // Keep broad expertise claims out of Skills; named lab tools have portfolio evidence.
     const allSkills = Object.values(publicResumeData.skills).flat();
     expect(allSkills).not.toContain("Kernel Fusion");
@@ -41,8 +40,8 @@ describe("Resume Service", () => {
     expect(publicResumeData.projects?.note).toContain("negative results");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Inference Decision Lab");
     expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(4);
-    expect(publicResumeData.projects?.items[1]?.title).toBe("Triton GPU Kernel Lab (NVIDIA A10G + H200, PyTorch/cuBLAS baselines)");
-    expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(4);
+    expect(publicResumeData.projects?.items[1]?.title).toBe("Triton GPU Kernel Lab (NVIDIA A10G + H200)");
+    expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(3);
   });
 
   test("renderResumeHtmlDocument creates valid HTML", () => {

@@ -1721,3 +1721,67 @@ cuda-kernel-lab's own .venv was already broken (links a missing Homebrew 3.13).
   lines, slack unchanged). Still open: the "Set a concurrency or admission
   boundary" call on the long-context decision, the "Profile first"/"Re-profile"
   step titles, and a Linux CI check that the PDF no longer differs by ~76KB.
+
+--------------------------------------------------------------------------------
+2026-10-08 — Simplify the resume for recruiters and hiring managers
+--------------------------------------------------------------------------------
+Rewrote the ML inference bullets around the work, result, and tradeoff instead
+of benchmark settings and metric chains. Shortened project titles; kept the
+small-model/T4 context, synthetic-kernel scope, eager PyTorch baseline, H200
+timing-only qualification, and the cost of client-side load shedding.
+Rounded the measured results for readability: 78 -> 28 seconds at p95,
+8% unserved / 7% less token throughput, 53% less median synthetic-step runtime,
+and 5.9x RMSNorm speedup. Full conditions remain in the linked project reports.
+Removed the summary's self-praise ("measured honestly") and tightened DTEX/Cisco
+prose. Updated the web summary accent and existing content assertions to match.
+Validation: typecheck + 162 unit tests, full build, and 30 integration tests
+passed. Rebuilt PDF inspected visually and via text extraction: one Letter
+page at natural scale, with no clipping or overlap.
+
+--------------------------------------------------------------------------------
+2026-10-08 — Balance the PDF header
+--------------------------------------------------------------------------------
+Grouped the four contact links into two rows and centered them beside the name
+and tagline. Reduced the space around the header divider so the main sections
+start closer to the header. Kept all contact URLs and resume wording intact.
+Validation: full build, 18 resume/PDF unit tests, and both PDF rendering
+integration checks passed. Inspected the rebuilt PDF: one Letter page at
+natural scale, with aligned contacts and no clipping or overlap.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Remove the resume GitHub contact and increase header spacing
+--------------------------------------------------------------------------------
+Removed GitHub from the shared resume contacts, which updates both the web
+resume and PDF. Stacked the remaining three contacts to balance the name and
+tagline, and added about 8 CSS pixels of space before the main sections.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed. Visually inspected the rebuilt PDF: one Letter page at natural scale,
+with clear header spacing and no clipping or overlap.
+
+2026-10-09 — Removed the entire "123 tests" bullet from the Triton lab in the
+shared resume data. Updated the existing bullet-count assertion. Full build
+and 13 resume unit tests passed; the rebuilt PDF was visually checked and
+remains one Letter page.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Review resume readability and balance the full-page layout
+--------------------------------------------------------------------------------
+Shortened long work and lab bullets while preserving the results, hardware
+scope, and tradeoffs. Clarified that the H200 RMSNorm speedup compares with the
+unfused PyTorch reference and that matmul measures throughput against cuBLAS.
+Merged overlapping Triton skill labels and simplified the k6 label. Kept the
+user-provided summary exactly as written.
+Raised PDF summary and bullet text from 8.75 to 9.5 pt, skills to 9.2 pt,
+titles to 10.2 pt, and dates to 8.1 pt with stronger contrast. Widened the
+sidebar and column gap; increased line, bullet, entry, and section spacing.
+Removed unnecessary final-section margins. The columns now end closer together.
+Validation: full build, typecheck, 162 unit tests, and both PDF rendering
+checks passed. Visually inspected the final one-page Letter PDF at natural
+scale, confirmed no title clipping, and checked the embedded fonts and text
+order. GitHub and the test-count bullet remain absent.
+
+2026-10-09 — Finalized the resume readability changes for commit on
+codex/microsoft-performance-resume. The shared content, web summary accent,
+PDF typography and spacing, content assertions, and progress notes form one
+cohesive change. Build, typecheck, 162 unit tests, and both PDF rendering checks
+passed; the PDF remains one Letter page at natural scale with embedded fonts.

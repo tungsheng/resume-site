@@ -39,10 +39,10 @@ body {
   --ui-font: '${RESUME_PDF_FONT_FAMILY}', Arial, sans-serif;
   --display-font: '${RESUME_PDF_DISPLAY_FONT_FAMILY}', var(--ui-font);
   --page-x: 0.38in;
-  --column-gap: 0.2in;
-  --sidebar-width: 2.05in;
-  --section-gap: 0.18in;
-  --experience-gap: 0.13in;
+  --column-gap: 0.24in;
+  --sidebar-width: 2.12in;
+  --section-gap: 0.21in;
+  --experience-gap: 0.16in;
 
   width: 8.5in;
   min-height: 11in;
@@ -50,18 +50,18 @@ body {
   background: white;
   color: var(--resume-ink);
   font-family: var(--ui-font);
-  font-size: 9.2pt;
-  line-height: 1.34;
+  font-size: 9.5pt;
+  line-height: 1.38;
 }
 
 .resume-document .header {
-  padding: 0.24in var(--page-x) 0.12in;
+  padding: 0.24in var(--page-x) 0.08in;
 }
 
 .resume-document .header-content {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.21in;
 }
 
@@ -72,9 +72,7 @@ body {
   row-gap: 8px;
 }
 
-/* Tagline sits directly under the name as a single accent line, so the name and
-   its positioning statement read as one block on the left while the contact rows
-   balance it on the right (rather than the tagline drifting down to the rule). */
+/* Keep the name and tagline together, opposite the compact contact block. */
 .resume-document .header-subtitle {
   margin: 0;
   display: grid;
@@ -88,8 +86,7 @@ body {
   font-family: var(--ui-font);
 }
 
-/* Each role statement on its own clean line — no dangling separator, and the
-   stacked pair balances the height of the three contact rows opposite. */
+/* Keep each role statement on its own line when multiple badges are supplied. */
 .resume-document .header-subtitle-line {
   display: block;
 }
@@ -106,11 +103,9 @@ body {
 }
 
 .resume-document .contact-info {
-  min-width: 2.12in;
-  max-width: 2.28in;
-  padding-top: 3px;
   display: grid;
-  row-gap: 6px;
+  grid-template-columns: max-content;
+  row-gap: 5px;
   text-align: right;
   font-family: var(--ui-font);
 }
@@ -125,10 +120,9 @@ body {
 .resume-document .contact-link {
   font-size: 8.5pt;
   color: var(--resume-muted);
-  max-width: 2.1in;
   line-height: 1.3;
   text-align: right;
-  word-break: break-word;
+  white-space: nowrap;
   text-decoration: none;
 }
 
@@ -146,7 +140,7 @@ body {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   align-items: start;
-  padding: 0.13in var(--page-x) 0.1in;
+  padding: 0.18in var(--page-x) 0.1in;
   column-gap: var(--column-gap);
 }
 
@@ -163,11 +157,15 @@ body {
   break-inside: avoid;
 }
 
+.resume-document .section:last-child {
+  margin-bottom: 0;
+}
+
 .resume-document .section-title {
   margin: 0 0 7px;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--resume-rule);
-  font-size: 8.4pt;
+  font-size: 8.8pt;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.3px;
@@ -183,14 +181,14 @@ body {
 .resume-document .project-title,
 .resume-document .experience-title {
   font-weight: 600;
-  font-size: 9.7pt;
+  font-size: 10.2pt;
   color: var(--resume-ink);
 }
 
 .resume-document .education-school,
 .resume-document .experience-company,
 .resume-document .skill-category-title {
-  font-size: 8.25pt;
+  font-size: 8.9pt;
   color: var(--resume-muted);
   font-weight: 600;
   letter-spacing: 0.22px;
@@ -198,21 +196,21 @@ body {
 
 .resume-document .education-date,
 .resume-document .experience-date {
-  font-size: 7.6pt;
-  color: var(--resume-faint);
+  font-size: 8.1pt;
+  color: var(--resume-muted);
   font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   font-variant-numeric: tabular-nums;
 }
 
 .resume-document .skills-list {
-  font-size: 8.8pt;
-  line-height: 1.34;
+  font-size: 9.2pt;
+  line-height: 1.38;
 }
 
 .resume-document .skill-category {
-  margin-bottom: 6px;
+  margin-bottom: 9px;
 }
 
 .resume-document .skill-category-title {
@@ -230,16 +228,16 @@ body {
 
 .resume-document .summary {
   margin: 0;
-  font-size: 8.75pt;
-  line-height: 1.32;
+  font-size: 9.5pt;
+  line-height: 1.38;
   text-align: left;
   color: var(--resume-ink);
 }
 
 .resume-document .project-note {
-  margin: 2px 0 6px;
-  font-size: 8pt;
-  line-height: 1.32;
+  margin: 2px 0 8px;
+  font-size: 8.8pt;
+  line-height: 1.38;
   font-style: italic;
   color: var(--resume-muted);
 }
@@ -257,9 +255,9 @@ body {
   list-style: none;
   padding: 0;
   display: grid;
-  row-gap: 2px;
-  font-size: 8.75pt;
-  line-height: 1.35;
+  row-gap: 4px;
+  font-size: 9.5pt;
+  line-height: 1.38;
   color: var(--resume-ink);
 }
 
