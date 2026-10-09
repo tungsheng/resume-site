@@ -41,8 +41,8 @@ body {
   --page-x: 0.38in;
   --column-gap: 0.24in;
   --sidebar-width: 2.12in;
-  --section-gap: 0.21in;
-  --experience-gap: 0.16in;
+  --section-gap: 0.23in;
+  --experience-gap: 0.17in;
 
   width: 8.5in;
   min-height: 11in;
@@ -50,7 +50,7 @@ body {
   background: white;
   color: var(--resume-ink);
   font-family: var(--ui-font);
-  font-size: 9.5pt;
+  font-size: 9.75pt;
   line-height: 1.38;
 }
 
@@ -165,7 +165,7 @@ body {
   margin: 0 0 7px;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--resume-rule);
-  font-size: 8.8pt;
+  font-size: 9pt;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.3px;
@@ -181,14 +181,14 @@ body {
 .resume-document .project-title,
 .resume-document .experience-title {
   font-weight: 600;
-  font-size: 10.2pt;
+  font-size: 10.5pt;
   color: var(--resume-ink);
 }
 
 .resume-document .education-school,
 .resume-document .experience-company,
 .resume-document .skill-category-title {
-  font-size: 8.9pt;
+  font-size: 9.1pt;
   color: var(--resume-muted);
   font-weight: 600;
   letter-spacing: 0.22px;
@@ -196,7 +196,7 @@ body {
 
 .resume-document .education-date,
 .resume-document .experience-date {
-  font-size: 8.1pt;
+  font-size: 8.3pt;
   color: var(--resume-muted);
   font-style: normal;
   text-transform: uppercase;
@@ -205,7 +205,7 @@ body {
 }
 
 .resume-document .skills-list {
-  font-size: 9.2pt;
+  font-size: 9.5pt;
   line-height: 1.38;
 }
 
@@ -231,6 +231,7 @@ body {
   font-size: 9.5pt;
   line-height: 1.38;
   text-align: left;
+  text-wrap: pretty;
   color: var(--resume-ink);
 }
 
@@ -255,8 +256,8 @@ body {
   list-style: none;
   padding: 0;
   display: grid;
-  row-gap: 4px;
-  font-size: 9.5pt;
+  row-gap: 5px;
+  font-size: 9.75pt;
   line-height: 1.38;
   color: var(--resume-ink);
 }

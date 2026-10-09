@@ -1835,3 +1835,24 @@ Validation: full build, 13 resume unit tests, and both PDF rendering checks
 passed. Visually inspected the final one-page Letter PDF at natural scale,
 with no clipping or overlap. Preserved the summary, layout, font sizes, and
 spacing settings.
+
+--------------------------------------------------------------------------------
+2026-10-09 — Remove the FP8 bullet and rebalance resume typography
+--------------------------------------------------------------------------------
+Removed the entire FP8 rejection bullet from the shared resume data and
+updated the existing serving-lab bullet-count assertion from four to three.
+Split the deployment and test scope into shorter sentences, clarified request
+wait times, and described the response-time result directly: 95% of measured
+responses arrived within 28 seconds, down from 78, with the client limit and
+8% unserved / 7% less text-output tradeoffs retained. Made the DTEX container
+work more concrete and removed the vague shared-dependencies clause.
+Raised PDF body and bullet text to 9.75 pt, skills to 9.5 pt, entry titles to
+10.5 pt, category/company/school labels to 9.1 pt, dates to 8.3 pt, and section
+headings to 9 pt. Increased section, entry, and bullet spacing. Kept the summary
+at 9.5 pt to match sidebar text and added paragraph wrapping that avoids the
+short final line. The two columns now finish at nearly the same height.
+Validation: full build, 13 resume unit tests, and both PDF rendering checks
+passed. Visually inspected the final one-page Letter PDF at natural scale:
+no clipping or overlap, clear paragraph wrapping, and balanced column endings.
+Confirmed FP8 and the removed test-count item are absent from extracted text.
+Preserved the user-provided summary and the Microsoft-relevant skills.

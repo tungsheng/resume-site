@@ -39,7 +39,7 @@ describe("Resume Service", () => {
     expect(publicResumeData.projects?.title).toBe("ML Inference — Self-Directed (2025–Present)");
     expect(publicResumeData.projects?.note).toContain("did not improve speed");
     expect(publicResumeData.projects?.items[0]?.title).toContain("GPU Model Serving Lab");
-    expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(4);
+    expect(publicResumeData.projects?.items[0]?.highlights.length).toBe(3);
     expect(publicResumeData.projects?.items[1]?.title).toBe("Triton GPU Performance Lab (NVIDIA A10G + H200)");
     expect(publicResumeData.projects?.items[1]?.highlights.length).toBe(3);
   });

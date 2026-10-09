@@ -53,10 +53,9 @@ export const publicResumeData: ResumeData = {
       {
         title: "GPU Model Serving Lab (vLLM + AWS EKS)",
         highlights: [
-          "Automated vLLM deployment and load tests on AWS Kubernetes (EKS) for the small Qwen2.5-0.5B language model, with one NVIDIA T4 per server and monitoring.",
-          "Found that long prompts increased time waiting in line, while model processing time stayed steady. Load tests showed when demand exceeded capacity.",
-          "Cut the response-time cutoff for 95% of completed requests from 78 to 28 seconds by capping simultaneous requests in the test client. Left 8% of incoming requests unserved and produced 7% less text per second (in tokens).",
-          "Rejected 8-bit model-cache storage (FP8) on T4 after request completion fell from 100% to 48-69%. T4 lacks hardware support for FP8 calculations.",
+          "Automated vLLM deployment and load tests on AWS Kubernetes (EKS). Tested the small Qwen2.5-0.5B model on one NVIDIA T4 per server, with monitoring.",
+          "Identified longer request wait times with long prompts; model processing time stayed steady. Load tests showed when demand exceeded capacity.",
+          "Limited simultaneous requests in the test client: 95% of measured responses arrived within 28 seconds, down from 78. This left 8% of incoming requests unserved and reduced text output per second by 7% (in tokens).",
         ],
       },
       {
@@ -76,7 +75,7 @@ export const publicResumeData: ResumeData = {
       startDate: "Sep 2024",
       endDate: "Present",
       highlights: [
-        "Designed services across user interfaces, APIs, data, and infrastructure. Used containers and separated shared dependencies to improve release stability.",
+        "Designed services across user interfaces, APIs, data, and infrastructure. Packaged frontend services in containers to improve release stability.",
         "Led an OpenSearch Dashboards migration for the product launch, working with AWS/OpenSearch engineers to resolve deployment and environment issues.",
         "Automated local development and tests, cutting cycle time by 20%.",
       ],
